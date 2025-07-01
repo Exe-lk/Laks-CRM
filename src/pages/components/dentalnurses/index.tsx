@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
-import imageAbout from "../../../../public/assests/aboutusimage1.jpg"
+import imageAbout from "../../../../public/assests/process.jpg"
 
 const DentalNurses = () => {
   return (
@@ -18,6 +18,9 @@ const DentalNurses = () => {
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
                 Use LocumLux Network to find Dental Practices.
               </p>
+               <div className="max-w-7xl mx-auto px-4">
+            <Image src={imageAbout} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
+          </div>
               <h2 className="text-xl lg:text-2xl font-bold text-black mb-4 mt-6">
               Great things in business are never done by one person. 
               They're done by a team of people. Let's work together and build up your profile for better Pay ((£))

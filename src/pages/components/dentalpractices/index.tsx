@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
-import imageAbout from "../../../../public/assests/aboutusimage1.jpg"
+import imageAbout from "../../../../public/assests/process.jpg"
 
 const DentalPractices = () => {
   return (
@@ -18,9 +18,13 @@ const DentalPractices = () => {
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
                 Dental Practices - Use LocumLux Search Engine to find your appropriate Locum Nurse in the vicinity.
               </p>
+               <div className="max-w-7xl mx-auto px-4">
+            <Image src={imageAbout} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
+          </div>
               <h2 className="text-2xl lg:text-3xl font-bold text-black mb-4 mt-6">
                 !! Do you want to be suprised register and find out more !! 
               </h2>
+              
             </div>
           </div>
         </section>
