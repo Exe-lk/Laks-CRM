@@ -37,10 +37,10 @@ const NavBar = () => {
         </div>
 
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-          <button className="bg-blue-500 text-white px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition text-sm lg:text-base">
+          <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/login')}>
             Login
           </button>
-          <button className="bg-blue-500 text-white px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition text-sm lg:text-base">
+          <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/register')}>
             Register
           </button>
         </div>

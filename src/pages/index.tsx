@@ -5,18 +5,22 @@ import image2 from "../../public/assests/867184619ad618a8c654853279eb113657284e7
 import image3 from "../../public/assests/b274c82439ece60c86526c9adf4ed6912e98f6ed.jpg";
 import image4 from "../../public/assests/ba6dc03ed4c4ed9261da138a6a60eb3f64f798e3.jpg";
 import Footer from "./components/footer";
+import { useRouter } from 'next/navigation';
+
 
 const Home = () => {
+  const router = useRouter();
+
   return (
     <>
       <NavBar />
-      
+
       <main className="min-h-screen bg-white">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[#C3EAE7]/5"></div>
           <div className="absolute top-20 left-10 w-72 h-72 bg-[#C3EAE7]/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#C3EAE7]/15 rounded-full blur-3xl"></div>
-          
+
           <div className="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
@@ -35,18 +39,18 @@ const Home = () => {
                     Grow your skills, discover new job opportunities, and connect with peers — all through a trusted platform built just for nurses. Welcome to your next step.
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="group relative px-6 lg:px-8 py-3 lg:py-4 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <button className="group relative px-6 lg:px-8 py-3 lg:py-4 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                    onClick={() => router.push('/register')}>
                     <span className="relative z-10">Register Now</span>
                     <div className="absolute inset-0 bg-[#C3EAE7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <span className="relative z-10 group-hover:text-black transition-colors duration-300">Register Now</span>
                   </button>
                   <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300">
                     User Guide
                   </button>
                 </div>
-                
+
                 <div className="flex items-center space-x-4 lg:space-x-6 text-sm text-gray-600">
                   <div className="flex items-center">
                     <div className="flex -space-x-2">
@@ -164,7 +168,7 @@ const Home = () => {
                 Comprehensive tools and resources designed specifically for nursing professionals
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
               {[
                 {
@@ -229,7 +233,7 @@ const Home = () => {
           </div>
         </section>
         <Footer />
-         
+
       </main>
     </>
   );
