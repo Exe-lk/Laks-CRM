@@ -70,16 +70,16 @@ const NavBar = () => {
           <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/aboutus')}>
             About Us
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors">
+          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/dentalpractices')}>
             Dental Practices
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors">
+          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/dentalnurses')}>
             Dental Nurses
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors">
+          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/hygienist')}>
             Hygienist
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors">
+          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/accounting')}>
             Accounting
           </li>
           <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/contactus')}>
