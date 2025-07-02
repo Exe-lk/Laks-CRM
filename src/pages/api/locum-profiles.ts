@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,56 +19,58 @@ export default async function handler(
         // Create a new locum profile
         const {
           fullName,
-          name,
-          address,
-          dateOfBirth,
           emailAddress,
           contactNumber,
+          address,
           password,
           gdcNumber,
-          location,
           employeeType,
-          software,
-          referenceNumber,
-          gdcImage,
-          indemnityInsuranceImage,
-          hepatitisBImage,
-          dbsImage,
-          cv,
-          idImage
+          software
         } = req.body
 
         // Basic validation
-        if (!fullName || !emailAddress || !contactNumber) {
+        if (!fullName || !emailAddress || !contactNumber || !address || !password || !gdcNumber || !employeeType) {
           return res.status(400).json({ 
-            error: 'Missing required fields: fullName, emailAddress, contactNumber' 
+            error: 'Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType' 
           })
         }
 
-        const newProfile = await prisma.locumProfile.create({
-          data: {
-            fullName,
-            name,
-            address,
-            dateOfBirth: new Date(dateOfBirth),
-            emailAddress,
-            contactNumber,
-            password, // Remember to hash this in production!
-            gdcNumber,
-            location,
-            employeeType,
-            software,
-            referenceNumber,
-            gdcImage,
-            indemnityInsuranceImage,
-            hepatitisBImage,
-            dbsImage,
-            cv,
-            idImage
+        // Create user in Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: emailAddress,
+          password: password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: fullName
           }
         })
 
-        return res.status(201).json(newProfile)
+        if (authError) {
+          return res.status(400).json({ 
+            error: `Authentication error: ${authError.message}` 
+          })
+        }
+
+        // Create locum profile in database
+        const newProfile = await prisma.locumProfile.create({
+          data: {
+            fullName,
+            emailAddress,
+            contactNumber,
+            address,
+            gdcNumber,
+            employeeType,
+            dateOfBirth: new Date('1990-01-01'), // Default date, you may want to handle this differently
+            location: '', // Default empty string
+            software: software || '',
+            referenceNumber: `REF-${Date.now()}` // Auto-generate reference number
+          }
+        })
+
+        return res.status(201).json({ 
+          profile: newProfile, 
+          authUser: authData.user 
+        })
 
       case 'PUT':
         // Update a locum profile
