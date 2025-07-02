@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useFormik } from 'formik';
 
 const jobTypes = ["Nurse", "Hygienist", "Receptionist"];
 
@@ -20,16 +21,89 @@ const therapistFields = [
     "x-rays"
 ];
 
+const initialValues = {
+    fullName: '',
+    email: '',
+    contactNumber: '',
+    address: '',
+    password: '',
+    confirmPassword: '',
+    gdcRegistration: '',
+    gdcNumber: '',
+    jobType: '',
+    selectedDentistFields: [] as string[],
+    dentistExperience: {} as Record<string, string>,
+    therapistExperience: {} as Record<string, string>,
+    receptionistYearsExperience: '',
+    receptionistSoftwareExperience: '',
+    hygienistYearsExperience: '',
+};
+
 const SignUpForm = () => {
-    const [jobType, setJobType] = useState("");
-    const [selectedDentistFields, setSelectedDentistFields] = useState<string[]>([]);
-    const [dentistExperience, setDentistExperience] = useState<Record<string, string>>({});
-    const [therapistExperience, setTherapistExperience] = useState<Record<string, string>>({});
-    const [gdcRegistration, setGdcRegistration] = useState("");
-    const [gdcNumber, setGdcNumber] = useState("");
-    const [address, setAddress] = useState("");
     const [showMap, setShowMap] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number} | null>(null);
+
+    const formik = useFormik({
+        initialValues,
+        validate: (values) => {
+            const errors: any = {};
+            
+            if (!values.fullName) {
+                errors.fullName = 'Full name is required';
+            }
+            
+            if (!values.email) {
+                errors.email = 'Email is required';
+            } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+                errors.email = 'Invalid email address';
+            }
+            
+            if (!values.contactNumber) {
+                errors.contactNumber = 'Contact number is required';
+            }
+            
+            if (!values.address) {
+                errors.address = 'Address is required';
+            }
+            
+            if (!values.password) {
+                errors.password = 'Password is required';
+            } else if (values.password.length < 6) {
+                errors.password = 'Password must be at least 6 characters';
+            }
+            
+            if (!values.confirmPassword) {
+                errors.confirmPassword = 'Please confirm your password';
+            } else if (values.password !== values.confirmPassword) {
+                errors.confirmPassword = 'Passwords do not match';
+            }
+            
+            if (!values.gdcRegistration) {
+                errors.gdcRegistration = 'Please select GDC registration status';
+            }
+            
+            if (values.gdcRegistration === 'yes' && !values.gdcNumber) {
+                errors.gdcNumber = 'GDC registration number is required';
+            }
+            
+            if (!values.jobType) {
+                errors.jobType = 'Please select a job type';
+            }
+            
+            return errors;
+        },
+        onSubmit: async (values) => {
+            console.log('Registration form values:', values);
+            
+            setTimeout(() => {
+                console.log('Registration submitted:', {
+                    ...values,
+                    selectedLocation
+                });
+                alert('Registration completed successfully!');
+            }, 2000);
+        },
+    });
 
     const handleCheckbox = (field: string, setter: any, selected: string[]) => {
         if (selected.includes(field)) {
@@ -42,11 +116,51 @@ const SignUpForm = () => {
     const handleMapClick = (lat: number, lng: number) => {
         setSelectedLocation({ lat, lng });
         const simulatedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)} - Sample Street, Sample City, Sample Country`;
-        setAddress(simulatedAddress);
+        formik.setFieldValue('address', simulatedAddress);
     };
 
     const confirmLocation = () => {
         setShowMap(false);
+    };
+
+    const handleDentistFieldChange = (field: string) => {
+        const currentSelected = formik.values.selectedDentistFields;
+        let newSelected;
+        
+        if (currentSelected.includes(field)) {
+            newSelected = currentSelected.filter((item) => item !== field);
+            const newExperience = { ...formik.values.dentistExperience };
+            delete newExperience[field];
+            formik.setFieldValue('dentistExperience', newExperience);
+        } else {
+            newSelected = [...currentSelected, field];
+        }
+        
+        formik.setFieldValue('selectedDentistFields', newSelected);
+    };
+
+    const handleDentistExperienceChange = (field: string, value: string) => {
+        formik.setFieldValue('dentistExperience', {
+            ...formik.values.dentistExperience,
+            [field]: value
+        });
+    };
+
+    const handleTherapistFieldChange = (field: string, checked: boolean) => {
+        const newExperience = { ...formik.values.therapistExperience };
+        if (checked) {
+            newExperience[field] = '';
+        } else {
+            delete newExperience[field];
+        }
+        formik.setFieldValue('therapistExperience', newExperience);
+    };
+
+    const handleTherapistExperienceChange = (field: string, value: string) => {
+        formik.setFieldValue('therapistExperience', {
+            ...formik.values.therapistExperience,
+            [field]: value
+        });
     };
 
     return (
@@ -74,9 +188,9 @@ const SignUpForm = () => {
                         <p className="text-gray-700 mt-1">Please fill in all required information</p>
                     </div>
 
-                    <form className="px-8 py-8 space-y-6">
+                    <form onSubmit={formik.handleSubmit} className="px-8 py-8 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                        <div className="space-y-2 group">
+                            <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                     <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -84,11 +198,20 @@ const SignUpForm = () => {
                                     Full Name *
                                 </label>
                                 <input 
-                                    type="text" 
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                    type="text"
+                                    name="fullName"
+                                    value={formik.values.fullName}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${
+                                        formik.errors.fullName && formik.touched.fullName ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your full name"
                                     required 
                                 />
+                                {formik.errors.fullName && formik.touched.fullName && (
+                                    <div className="text-red-500 text-sm mt-1">{formik.errors.fullName}</div>
+                                )}
                             </div>
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -98,15 +221,24 @@ const SignUpForm = () => {
                                     Email Address *
                                 </label>
                                 <input 
-                                    type="email" 
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                    type="email"
+                                    name="email"
+                                    value={formik.values.email}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${
+                                        formik.errors.email && formik.touched.email ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your email"
                                     required 
                                 />
+                                {formik.errors.email && formik.touched.email && (
+                                    <div className="text-red-500 text-sm mt-1">{formik.errors.email}</div>
+                                )}
                             </div>
                         </div>
 
-                                                                        <div className="space-y-2 group">
+                        <div className="space-y-2 group">
                             <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                 <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -114,11 +246,20 @@ const SignUpForm = () => {
                                 Contact Number *
                             </label>
                             <input 
-                                type="text" 
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                type="text"
+                                name="contactNumber"
+                                value={formik.values.contactNumber}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                className={`w-full px-4 py-3 border-2 ${
+                                    formik.errors.contactNumber && formik.touched.contactNumber ? 'border-red-500' : 'border-gray-200'
+                                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                 placeholder="Enter your phone number"
                                 required 
                             />
+                            {formik.errors.contactNumber && formik.touched.contactNumber && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.contactNumber}</div>
+                            )}
                         </div>
 
                         <div className="space-y-2 group">
@@ -131,10 +272,14 @@ const SignUpForm = () => {
                             </label>
                             <div className="relative">
                                 <textarea 
-                                    className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                    name="address"
+                                    value={formik.values.address}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 pr-12 border-2 ${
+                                        formik.errors.address && formik.touched.address ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your complete address or click the map icon to select location"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
                                     required 
                                 />
                                 <button
@@ -148,6 +293,9 @@ const SignUpForm = () => {
                                     </svg>
                                 </button>
                             </div>
+                            {formik.errors.address && formik.touched.address && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.address}</div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -159,11 +307,20 @@ const SignUpForm = () => {
                                     Password *
                                 </label>
                                 <input 
-                                    type="password" 
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                    type="password"
+                                    name="password"
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${
+                                        formik.errors.password && formik.touched.password ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Create a strong password"
                                     required 
                                 />
+                                {formik.errors.password && formik.touched.password && (
+                                    <div className="text-red-500 text-sm mt-1">{formik.errors.password}</div>
+                                )}
                             </div>
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -173,11 +330,20 @@ const SignUpForm = () => {
                                     Confirm Password *
                                 </label>
                                 <input 
-                                    type="password" 
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md" 
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={formik.values.confirmPassword}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${
+                                        formik.errors.confirmPassword && formik.touched.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Confirm your password"
                                     required 
                                 />
+                                {formik.errors.confirmPassword && formik.touched.confirmPassword && (
+                                    <div className="text-red-500 text-sm mt-1">{formik.errors.confirmPassword}</div>
+                                )}
                             </div>
                         </div>
 
@@ -186,34 +352,50 @@ const SignUpForm = () => {
                                 GDC Registration *
                             </label>
                             <select
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white"
-                                value={gdcRegistration}
+                                name="gdcRegistration"
+                                value={formik.values.gdcRegistration}
                                 onChange={(e) => {
-                                    setGdcRegistration(e.target.value);
-                                    if (e.target.value !== "yes") setGdcNumber("");
+                                    formik.handleChange(e);
+                                    if (e.target.value !== "yes") {
+                                        formik.setFieldValue('gdcNumber', '');
+                                    }
                                 }}
+                                onBlur={formik.handleBlur}
+                                className={`w-full px-4 py-3 border-2 ${
+                                    formik.errors.gdcRegistration && formik.touched.gdcRegistration ? 'border-red-500' : 'border-gray-200'
+                                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
                                 required
                             >
                                 <option value="">Select an option</option>
                                 <option value="yes">Yes</option>
                                 <option value="no">No</option>
                             </select>
+                            {formik.errors.gdcRegistration && formik.touched.gdcRegistration && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.gdcRegistration}</div>
+                            )}
 
-                            {gdcRegistration === "yes" && (
+                            {formik.values.gdcRegistration === "yes" && (
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-black">GDC Registration Number *</label>
                                     <input
                                         type="text"
+                                        name="gdcNumber"
                                         placeholder="Enter your GDC Registration Number"
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
-                                        value={gdcNumber}
-                                        onChange={(e) => setGdcNumber(e.target.value)}
+                                        value={formik.values.gdcNumber}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        className={`w-full px-4 py-3 border-2 ${
+                                            formik.errors.gdcNumber && formik.touched.gdcNumber ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none`}
                                         required
                                     />
+                                    {formik.errors.gdcNumber && formik.touched.gdcNumber && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.gdcNumber}</div>
+                                    )}
                                 </div>
                             )}
 
-                            {gdcRegistration === "no" && (
+                            {formik.values.gdcRegistration === "no" && (
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
                                     <p className="text-sm text-gray-600">No name required - we understand you're not yet registered.</p>
                                 </div>
@@ -229,14 +411,18 @@ const SignUpForm = () => {
                             <div className="space-y-2 mb-6">
                                 <label className="block text-sm font-semibold text-black">Job Type *</label>
                                 <select
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white"
-                                    value={jobType}
+                                    name="jobType"
+                                    value={formik.values.jobType}
                                     onChange={(e) => {
-                                        setJobType(e.target.value);
-                                        setSelectedDentistFields([]);
-                                        setDentistExperience({});
-                                        setTherapistExperience({});
+                                        formik.handleChange(e);
+                                        formik.setFieldValue('selectedDentistFields', []);
+                                        formik.setFieldValue('dentistExperience', {});
+                                        formik.setFieldValue('therapistExperience', {});
                                     }}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${
+                                        formik.errors.jobType && formik.touched.jobType ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
                                     required
                                 >
                                     <option value="">Select your job type</option>
@@ -246,12 +432,13 @@ const SignUpForm = () => {
                                         </option>
                                     ))}
                                 </select>
+                                {formik.errors.jobType && formik.touched.jobType && (
+                                    <div className="text-red-500 text-sm mt-1">{formik.errors.jobType}</div>
+                                )}
                             </div>
-
-
                         </div>
 
-                        {jobType === "Nurse" && (
+                        {formik.values.jobType === "Nurse" && (
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
                                 <h4 className="font-bold text-lg text-black flex items-center">
                                     <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
@@ -263,26 +450,19 @@ const SignUpForm = () => {
                                             <label className="flex items-center gap-3 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedDentistFields.includes(field)}
-                                                    onChange={() =>
-                                                        handleCheckbox(field, setSelectedDentistFields, selectedDentistFields)
-                                                    }
+                                                    checked={formik.values.selectedDentistFields.includes(field)}
+                                                    onChange={() => handleDentistFieldChange(field)}
                                                     className="w-5 h-5 text-black border-2 border-gray-300 rounded focus:ring-[#C3EAE7]"
                                                 />
                                                 <span className="font-medium text-black">{field}</span>
                                             </label>
-                                            {selectedDentistFields.includes(field) && (
+                                            {formik.values.selectedDentistFields.includes(field) && (
                                                 <input
                                                     type="text"
                                                     placeholder="Enter experience (e.g., 2 years, 6 months)"
                                                     className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
-                                                    onChange={(e) =>
-                                                        setDentistExperience((prev) => ({
-                                                            ...prev,
-                                                            [field]: e.target.value
-                                                        }))
-                                                    }
-                                                    value={dentistExperience[field] || ""}
+                                                    onChange={(e) => handleDentistExperienceChange(field, e.target.value)}
+                                                    value={formik.values.dentistExperience[field] || ""}
                                                 />
                                             )}
                                         </div>
@@ -291,7 +471,7 @@ const SignUpForm = () => {
                             </div>
                         )}
 
-                        {jobType === "Receptionist" && (
+                        {formik.values.jobType === "Receptionist" && (
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
                                 <h4 className="font-bold text-lg text-black flex items-center">
                                     <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
@@ -302,7 +482,10 @@ const SignUpForm = () => {
                                         <label className="block text-sm font-semibold text-black">Years of Experience</label>
                                         <input
                                             type="text"
+                                            name="receptionistYearsExperience"
                                             placeholder="e.g., 3 years"
+                                            value={formik.values.receptionistYearsExperience}
+                                            onChange={formik.handleChange}
                                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                         />
                                     </div>
@@ -310,7 +493,10 @@ const SignUpForm = () => {
                                         <label className="block text-sm font-semibold text-black">Software Experience</label>
                                         <input
                                             type="text"
+                                            name="receptionistSoftwareExperience"
                                             placeholder="e.g., SOE, R4, Dentally"
+                                            value={formik.values.receptionistSoftwareExperience}
+                                            onChange={formik.handleChange}
                                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                         />
                                     </div>
@@ -318,22 +504,25 @@ const SignUpForm = () => {
                             </div>
                         )}
 
-                        {(jobType === "Hygienist" || jobType === "Therapist") && (
+                        {(formik.values.jobType === "Hygienist" || formik.values.jobType === "Therapist") && (
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
                                 <h4 className="font-bold text-lg text-black flex items-center">
                                     <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
-                                    {jobType} Experience
+                                    {formik.values.jobType} Experience
                                 </h4>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-black">Years of Experience</label>
                                     <input
                                         type="text"
+                                        name="hygienistYearsExperience"
                                         placeholder="Enter years of experience"
+                                        value={formik.values.hygienistYearsExperience}
+                                        onChange={formik.handleChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                     />
                                 </div>
 
-                                {jobType === "Therapist" && (
+                                {formik.values.jobType === "Therapist" && (
                                     <div className="space-y-4">
                                         <h5 className="font-semibold text-black">Therapist Experience Areas in UK:</h5>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -342,31 +531,19 @@ const SignUpForm = () => {
                                                     <label className="flex items-center gap-3 cursor-pointer">
                                                         <input
                                                             type="checkbox"
-                                                            checked={therapistExperience[field] !== undefined}
-                                                            onChange={(e) =>
-                                                                setTherapistExperience((prev) => {
-                                                                    const updated = { ...prev };
-                                                                    if (e.target.checked) updated[field] = "";
-                                                                    else delete updated[field];
-                                                                    return updated;
-                                                                })
-                                                            }
+                                                            checked={formik.values.therapistExperience[field] !== undefined}
+                                                            onChange={(e) => handleTherapistFieldChange(field, e.target.checked)}
                                                             className="w-5 h-5 text-black border-2 border-gray-300 rounded focus:ring-[#C3EAE7]"
                                                         />
                                                         <span className="font-medium text-black">{field}</span>
                                                     </label>
-                                                    {therapistExperience[field] !== undefined && (
+                                                    {formik.values.therapistExperience[field] !== undefined && (
                                                         <input
                                                             type="text"
                                                             placeholder={`Experience in ${field}`}
                                                             className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
-                                                            value={therapistExperience[field]}
-                                                            onChange={(e) =>
-                                                                setTherapistExperience((prev) => ({
-                                                                    ...prev,
-                                                                    [field]: e.target.value
-                                                                }))
-                                                            }
+                                                            value={formik.values.therapistExperience[field]}
+                                                            onChange={(e) => handleTherapistExperienceChange(field, e.target.value)}
                                                         />
                                                     )}
                                                 </div>
@@ -382,13 +559,26 @@ const SignUpForm = () => {
                                 <div className="absolute -inset-1 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     type="submit"
-                                    className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30"
+                                    disabled={formik.isSubmitting}
+                                    className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     <span className="flex items-center justify-center gap-2">
-                                        <svg className="w-5 h-5 group-hover:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Complete Registration
+                                        {formik.isSubmitting ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-black" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Registering...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-5 h-5 group-hover:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Complete Registration
+                                            </>
+                                        )}
                                     </span>
                                 </button>
                             </div>
@@ -501,7 +691,7 @@ const SignUpForm = () => {
                                             </p>
                                             <div className="mt-3">
                                                 <label className="block text-sm font-semibold text-black mb-1">Address Preview:</label>
-                                                <p className="text-sm text-gray-600 bg-white p-2 rounded border">{address}</p>
+                                                <p className="text-sm text-gray-600 bg-white p-2 rounded border">{formik.values.address}</p>
                                             </div>
                                         </div>
                                     )}
