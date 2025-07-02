@@ -14,12 +14,10 @@ datasource db {
 model LocumProfile {
   id                        String   @id @default(cuid())
   fullName                 String
-  name                     String
   address                  String
   dateOfBirth              DateTime @map("dob")
   emailAddress             String   @unique @map("email_address")
   contactNumber            String   @map("contact_number")
-  password                 String
   gdcNumber                String   @map("gdc_number")
   location                 String
   employeeType             String   @map("employee_type")
@@ -35,5 +33,23 @@ model LocumProfile {
   createdAt                DateTime @default(now()) @map("created_at")
   updatedAt                DateTime @updatedAt @map("updated_at")
 
+  // Relation to specialties
+  specialties              Specialty[]
+
   @@map("locum_profiles")
+}
+
+model Specialty {
+  id            String       @id @default(cuid())
+  locumId       String       @map("locum_id")
+  numberOfYears Int          @map("number_of_years")
+  speciality    String
+  
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  
+  // Foreign key relationship
+  locumProfile  LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  
+  @@map("specialties")
 } 
