@@ -25,15 +25,10 @@ const DentalPractices = () => {
               <h2 className="text-2xl lg:text-3xl font-bold text-black mb-4 mt-6">
                 !! Do you want to be suprised register and find out more !! 
               </h2>
-              <div className="max-w-7xl mx-auto px-4">
+              <div className="max-w-7xl mx-auto px-4 mb-8">
             <Image src={dentalPractices} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
           </div>
-            </div>
-          </div>
-        </section>
-        <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4">
-                <div className="grid">
+          <div className="grid">
                     <div className="bg-white p-6 rounded-lg shadow-md w-full border border-gray-200"> 
                         <p className="text-base lg:text-xl text-gray-700">
                         !! Let's not compare with other Locum agencies, different agencies have different facilities and advantages. 
@@ -43,6 +38,7 @@ const DentalPractices = () => {
                     </div>
                 </div>
             </div>
+          </div>
         </section>
         <Footer />
       </main>

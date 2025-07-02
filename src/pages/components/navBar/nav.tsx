@@ -85,6 +85,9 @@ const NavBar = () => {
           <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/contactus')}>
             Contact Us
           </li>
+          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/myDocumnet')}>
+            Document Upload
+          </li>
         </ul>
       </div>
 
@@ -127,9 +130,11 @@ const NavBar = () => {
                 <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}>
                   Contact Us
                 </li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}>
+                  Document Upload
+                </li>
               </ul>
 
-              {/* Mobile Action Buttons */}
               <div className="mt-8 space-y-3">
                 <button className="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-600 transition">
                   Login
