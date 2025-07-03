@@ -787,9 +787,9 @@ postcss@^8.4.41:
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
-prisma@^6.10.1:
+prisma@^6.11.0:
   version "6.11.0"
-  resolved "https://registry.npmjs.org/prisma/-/prisma-6.11.0.tgz"
+  resolved "https://registry.yarnpkg.com/prisma/-/prisma-6.11.0.tgz#2fb6246e926e4a32b67ac8b459cd5facd29c24c5"
   integrity sha512-gI69E7fusgk32XALpXzdgR10xUx2aFnHiu/JaUo4O07G4JvFT0xNtD0Iy81p37iBLTYFEhWa9VrHKXaiyZ5fLQ==
   dependencies:
     "@prisma/config" "6.11.0"
