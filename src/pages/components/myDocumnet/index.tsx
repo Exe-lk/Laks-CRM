@@ -123,7 +123,6 @@ const MyDocument = () => {
     return (
         <>
             <NavBar />
-
             <main className="min-h-screen bg-white">
                 <section className="py-16 lg:py-20 bg-white">
                     <div className="max-w-7xl mx-auto px-4">

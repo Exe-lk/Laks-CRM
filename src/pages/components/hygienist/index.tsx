@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
-import imageAbout from "../../../../public/assests/dental nurses.jpg"
+import imageAbout from "../../../../public/assests/dental_nurses.jpg"
 import imagechart from "../../../../public/assests/nurses3.jpg"
 
 
@@ -9,7 +9,6 @@ const Hygienist = () => {
   return (
     <>
       <NavBar />
-
       <main className="min-h-screen bg-white">
         <section className="py-16 lg:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">

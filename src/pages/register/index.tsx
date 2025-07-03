@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useFormik } from 'formik';
+import { addLocumProfile, LocumProfile, Specialty } from "../service/locumProfileService";
+import { useRouter } from "next/router";
+import Swal from 'sweetalert2';
 
 const jobTypes = ["Nurse", "Hygienist", "Receptionist"];
 
@@ -39,69 +42,143 @@ const initialValues = {
     hygienistYearsExperience: '',
 };
 
+const transformFormDataToAPI = (values: typeof initialValues): LocumProfile => {
+    const specialties: Specialty[] = [];
+
+    switch (values.jobType) {
+        case 'Receptionist':
+            if (values.receptionistYearsExperience) {
+                const years = parseInt(values.receptionistYearsExperience.replace(/\D/g, '')) || 0;
+                specialties.push({
+                    speciality: "Receptionist",
+                    numberOfYears: years
+                });
+            }
+            break;
+
+        case 'Hygienist':
+            if (values.hygienistYearsExperience) {
+                const years = parseInt(values.hygienistYearsExperience.replace(/\D/g, '')) || 0;
+                specialties.push({
+                    speciality: "Hygienist",
+                    numberOfYears: years
+                });
+            }
+            break;
+
+        case 'Nurse':
+            values.selectedDentistFields.forEach(field => {
+                const experienceStr = values.dentistExperience[field];
+                if (experienceStr) {
+                    const years = parseInt(experienceStr.replace(/\D/g, '')) || 0;
+                    specialties.push({
+                        speciality: field,
+                        numberOfYears: years
+                    });
+                }
+            });
+            break;
+    }
+
+    return {
+        fullName: values.fullName,
+        emailAddress: values.email,
+        contactNumber: values.contactNumber,
+        address: values.address,
+        password: values.password,
+        gdcNumber: values.gdcNumber,
+        employeeType: values.jobType,
+        software: values.jobType === 'Receptionist' ? values.receptionistSoftwareExperience : '',
+        specialties: specialties.length > 0 ? specialties : undefined
+    };
+};
+
 const SignUpForm = () => {
     const [showMap, setShowMap] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number} | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const formik = useFormik({
         initialValues,
         validate: (values) => {
             const errors: any = {};
-            
+
             if (!values.fullName) {
                 errors.fullName = 'Full name is required';
             }
-            
+
             if (!values.email) {
                 errors.email = 'Email is required';
             } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
                 errors.email = 'Invalid email address';
             }
-            
+
             if (!values.contactNumber) {
                 errors.contactNumber = 'Contact number is required';
             }
-            
+
             if (!values.address) {
                 errors.address = 'Address is required';
             }
-            
+
             if (!values.password) {
                 errors.password = 'Password is required';
             } else if (values.password.length < 6) {
                 errors.password = 'Password must be at least 6 characters';
             }
-            
+
             if (!values.confirmPassword) {
                 errors.confirmPassword = 'Please confirm your password';
             } else if (values.password !== values.confirmPassword) {
                 errors.confirmPassword = 'Passwords do not match';
             }
-            
+
             if (!values.gdcRegistration) {
                 errors.gdcRegistration = 'Please select GDC registration status';
             }
-            
+
             if (values.gdcRegistration === 'yes' && !values.gdcNumber) {
                 errors.gdcNumber = 'GDC registration number is required';
             }
-            
+
             if (!values.jobType) {
                 errors.jobType = 'Please select a job type';
             }
-            
+
             return errors;
         },
         onSubmit: async (values) => {
-            console.log('Registration form values:', values);
-            
-            setTimeout(() => {
-                console.log('Registration submitted:', {
-                    ...values,
-                    selectedLocation
+            setIsSubmitting(true);
+            try {
+                console.log('Registration form values:', values);
+
+                const apiData = transformFormDataToAPI(values);
+                console.log('API payload:', apiData);
+
+                const response = await addLocumProfile(apiData);
+                console.log('Registration response:', response);
+
+                Swal.fire({
+                    title: 'Registration completed successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#C3EAE7'
                 });
-                alert('Registration completed successfully!');
-            }, 2000);
+
+                formik.resetForm();
+
+            } catch (error: any) {
+                console.error('Registration failed:', error);
+                Swal.fire({
+                    title: 'Registration failed!',
+                    text: `Registration failed: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#C3EAE7'
+                });
+            } finally {
+                setIsSubmitting(false);
+            }
         },
     });
 
@@ -126,7 +203,7 @@ const SignUpForm = () => {
     const handleDentistFieldChange = (field: string) => {
         const currentSelected = formik.values.selectedDentistFields;
         let newSelected;
-        
+
         if (currentSelected.includes(field)) {
             newSelected = currentSelected.filter((item) => item !== field);
             const newExperience = { ...formik.values.dentistExperience };
@@ -135,7 +212,7 @@ const SignUpForm = () => {
         } else {
             newSelected = [...currentSelected, field];
         }
-        
+
         formik.setFieldValue('selectedDentistFields', newSelected);
     };
 
@@ -174,11 +251,11 @@ const SignUpForm = () => {
                     </div>
                     <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">Join Our Team</h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">Create your professional profile and become part of our dental community</p>
-                    
+
                     <div className="flex justify-center gap-2 mt-4">
                         <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
-                        <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                        <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                        <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                     </div>
                 </div>
 
@@ -197,17 +274,16 @@ const SignUpForm = () => {
                                     </svg>
                                     Full Name *
                                 </label>
-                                <input 
+                                <input
                                     type="text"
                                     name="fullName"
                                     value={formik.values.fullName}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${
-                                        formik.errors.fullName && formik.touched.fullName ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.fullName && formik.touched.fullName ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your full name"
-                                    required 
+                                    required
                                 />
                                 {formik.errors.fullName && formik.touched.fullName && (
                                     <div className="text-red-500 text-sm mt-1">{formik.errors.fullName}</div>
@@ -220,17 +296,16 @@ const SignUpForm = () => {
                                     </svg>
                                     Email Address *
                                 </label>
-                                <input 
+                                <input
                                     type="email"
                                     name="email"
                                     value={formik.values.email}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${
-                                        formik.errors.email && formik.touched.email ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.email && formik.touched.email ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your email"
-                                    required 
+                                    required
                                 />
                                 {formik.errors.email && formik.touched.email && (
                                     <div className="text-red-500 text-sm mt-1">{formik.errors.email}</div>
@@ -245,17 +320,16 @@ const SignUpForm = () => {
                                 </svg>
                                 Contact Number *
                             </label>
-                            <input 
+                            <input
                                 type="text"
                                 name="contactNumber"
                                 value={formik.values.contactNumber}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${
-                                    formik.errors.contactNumber && formik.touched.contactNumber ? 'border-red-500' : 'border-gray-200'
-                                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                className={`w-full px-4 py-3 border-2 ${formik.errors.contactNumber && formik.touched.contactNumber ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                 placeholder="Enter your phone number"
-                                required 
+                                required
                             />
                             {formik.errors.contactNumber && formik.touched.contactNumber && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.contactNumber}</div>
@@ -271,16 +345,15 @@ const SignUpForm = () => {
                                 Address *
                             </label>
                             <div className="relative">
-                                <textarea 
+                                <textarea
                                     name="address"
                                     value={formik.values.address}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 pr-12 border-2 ${
-                                        formik.errors.address && formik.touched.address ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    className={`w-full px-4 py-3 pr-12 border-2 ${formik.errors.address && formik.touched.address ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your complete address or click the map icon to select location"
-                                    required 
+                                    required
                                 />
                                 <button
                                     type="button"
@@ -306,17 +379,16 @@ const SignUpForm = () => {
                                     </svg>
                                     Password *
                                 </label>
-                                <input 
+                                <input
                                     type="password"
                                     name="password"
                                     value={formik.values.password}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${
-                                        formik.errors.password && formik.touched.password ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.password && formik.touched.password ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Create a strong password"
-                                    required 
+                                    required
                                 />
                                 {formik.errors.password && formik.touched.password && (
                                     <div className="text-red-500 text-sm mt-1">{formik.errors.password}</div>
@@ -329,17 +401,16 @@ const SignUpForm = () => {
                                     </svg>
                                     Confirm Password *
                                 </label>
-                                <input 
+                                <input
                                     type="password"
                                     name="confirmPassword"
                                     value={formik.values.confirmPassword}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${
-                                        formik.errors.confirmPassword && formik.touched.confirmPassword ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.confirmPassword && formik.touched.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Confirm your password"
-                                    required 
+                                    required
                                 />
                                 {formik.errors.confirmPassword && formik.touched.confirmPassword && (
                                     <div className="text-red-500 text-sm mt-1">{formik.errors.confirmPassword}</div>
@@ -361,9 +432,8 @@ const SignUpForm = () => {
                                     }
                                 }}
                                 onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${
-                                    formik.errors.gdcRegistration && formik.touched.gdcRegistration ? 'border-red-500' : 'border-gray-200'
-                                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                className={`w-full px-4 py-3 border-2 ${formik.errors.gdcRegistration && formik.touched.gdcRegistration ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
                                 required
                             >
                                 <option value="">Select an option</option>
@@ -384,9 +454,8 @@ const SignUpForm = () => {
                                         value={formik.values.gdcNumber}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={`w-full px-4 py-3 border-2 ${
-                                            formik.errors.gdcNumber && formik.touched.gdcNumber ? 'border-red-500' : 'border-gray-200'
-                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none`}
+                                        className={`w-full px-4 py-3 border-2 ${formik.errors.gdcNumber && formik.touched.gdcNumber ? 'border-red-500' : 'border-gray-200'
+                                            } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none`}
                                         required
                                     />
                                     {formik.errors.gdcNumber && formik.touched.gdcNumber && (
@@ -420,9 +489,8 @@ const SignUpForm = () => {
                                         formik.setFieldValue('therapistExperience', {});
                                     }}
                                     onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${
-                                        formik.errors.jobType && formik.touched.jobType ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.jobType && formik.touched.jobType ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
                                     required
                                 >
                                     <option value="">Select your job type</option>
@@ -442,7 +510,7 @@ const SignUpForm = () => {
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
                                 <h4 className="font-bold text-lg text-black flex items-center">
                                     <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
-                                    Dentist Experience in UK
+                                    Nurse Experience in UK
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {dentistFields.map((field) => (
@@ -559,11 +627,11 @@ const SignUpForm = () => {
                                 <div className="absolute -inset-1 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     type="submit"
-                                    disabled={formik.isSubmitting}
+                                    disabled={isSubmitting}
                                     className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     <span className="flex items-center justify-center gap-2">
-                                        {formik.isSubmitting ? (
+                                        {isSubmitting ? (
                                             <>
                                                 <svg className="animate-spin h-5 w-5 text-black" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -616,23 +684,23 @@ const SignUpForm = () => {
                                     </svg>
                                 </button>
                             </div>
-                            
+
                             <div className="p-6">
                                 <div className="relative">
-                                    <div 
+                                    <div
                                         className="w-full h-96 bg-gradient-to-br from-green-100 to-blue-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center cursor-crosshair relative overflow-hidden"
                                         onClick={(e) => {
                                             const rect = e.currentTarget.getBoundingClientRect();
                                             const x = e.clientX - rect.left;
                                             const y = e.clientY - rect.top;
-                                            const lat = 51.5074 + (y / rect.height - 0.5) * 0.1; 
+                                            const lat = 51.5074 + (y / rect.height - 0.5) * 0.1;
                                             const lng = -0.1278 + (x / rect.width - 0.5) * 0.1;
                                             handleMapClick(lat, lng);
                                         }}
                                     >
                                         <div className="absolute inset-0 opacity-20">
                                             {Array.from({ length: 10 }).map((_, i) => (
-                                                <div key={i} style={{ 
+                                                <div key={i} style={{
                                                     position: 'absolute',
                                                     left: `${i * 10}%`,
                                                     top: 0,
@@ -642,7 +710,7 @@ const SignUpForm = () => {
                                                 }} />
                                             ))}
                                             {Array.from({ length: 8 }).map((_, i) => (
-                                                <div key={i} style={{ 
+                                                <div key={i} style={{
                                                     position: 'absolute',
                                                     top: `${i * 12.5}%`,
                                                     left: 0,
@@ -654,7 +722,7 @@ const SignUpForm = () => {
                                         </div>
 
                                         {selectedLocation && (
-                                            <div 
+                                            <div
                                                 className="absolute transform -translate-x-1/2 -translate-y-full"
                                                 style={{
                                                     left: `${((selectedLocation.lng + 0.1778) / 0.1) * 100}%`,

@@ -39,7 +39,6 @@ export default async function handler(
           !contactNumber ||
           !address ||
           !password ||
-          !gdcNumber ||
           !employeeType
         ) {
           return res.status(400).json({
