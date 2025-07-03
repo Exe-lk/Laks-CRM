@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,29 +9,27 @@ datasource db {
 }
 
 model LocumProfile {
-  id                        String   @id @default(cuid())
-  fullName                 String
-  address                  String
-  dateOfBirth              DateTime @map("dob")
-  emailAddress             String   @unique @map("email_address")
-  contactNumber            String   @map("contact_number")
-  gdcNumber                String   @map("gdc_number")
-  location                 String
-  employeeType             String   @map("employee_type")
-  software                 String
-  gdcImage                 String?  @map("gdc_image")
-  indemnityInsuranceImage  String?  @map("indemnity_insurance_image")
-  hepatitisBImage          String?  @map("hepatitis_b_image")
-  dbsImage                 String?  @map("dbs_image")
-  referenceNumber          String   @map("reference_number")
-  cv                       String?
-  idImage                  String?  @map("id_image")
-  
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @updatedAt @map("updated_at")
-
-  // Relation to specialties
-  specialties              Specialty[]
+  id                      String      @id @default(cuid())
+  fullName                String
+  address                 String
+  dateOfBirth             DateTime    @map("dob")
+  emailAddress            String      @unique @map("email_address")
+  contactNumber           String      @map("contact_number")
+  gdcNumber               String      @map("gdc_number")
+  location                String
+  employeeType            String      @map("employee_type")
+  software                String
+  gdcImage                String?     @map("gdc_image")
+  indemnityInsuranceImage String?     @map("indemnity_insurance_image")
+  hepatitisBImage         String?     @map("hepatitis_b_image")
+  dbsImage                String?     @map("dbs_image")
+  referenceNumber         String      @map("reference_number")
+  cv                      String?
+  status                  String?
+  idImage                 String?     @map("id_image")
+  createdAt               DateTime    @default(now()) @map("created_at")
+  updatedAt               DateTime    @updatedAt @map("updated_at")
+  specialties             Specialty[]
 
   @@map("locum_profiles")
 }
@@ -44,12 +39,9 @@ model Specialty {
   locumId       String       @map("locum_id")
   numberOfYears Int          @map("number_of_years")
   speciality    String
-  
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
-  
-  // Foreign key relationship
   locumProfile  LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
-  
+
   @@map("specialties")
-} 
+}
