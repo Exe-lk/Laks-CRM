@@ -1,5 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
+import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,116 +8,194 @@ export default async function handler(
 ) {
   try {
     switch (req.method) {
-      case 'GET':
+      case "GET":
         // Get all locum profiles
         const profiles = await prisma.locumProfile.findMany({
-          orderBy: { createdAt: 'desc' }
-        })
-        return res.status(200).json(profiles)
+          include: {
+            specialties: true,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+        return res.status(200).json(profiles);
 
-      case 'POST':
+      case "POST":
         // Create a new locum profile
         const {
           fullName,
-          name,
-          address,
-          dateOfBirth,
           emailAddress,
           contactNumber,
+          address,
           password,
           gdcNumber,
-          location,
           employeeType,
           software,
-          referenceNumber,
-          gdcImage,
-          indemnityInsuranceImage,
-          hepatitisBImage,
-          dbsImage,
-          cv,
-          idImage
-        } = req.body
+          specialties, // Array of specialty objects
+        } = req.body;
 
         // Basic validation
-        if (!fullName || !emailAddress || !contactNumber) {
-          return res.status(400).json({ 
-            error: 'Missing required fields: fullName, emailAddress, contactNumber' 
-          })
+        if (
+          !fullName ||
+          !emailAddress ||
+          !contactNumber ||
+          !address ||
+          !password ||
+          !gdcNumber ||
+          !employeeType
+        ) {
+          return res.status(400).json({
+            error:
+              "Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType",
+          });
+        }
+        // Validate each specialty object
+        if (specialties) {
+          for (const specialty of specialties) {
+            if (!specialty.speciality || !specialty.numberOfYears) {
+              return res.status(400).json({
+                error:
+                  "Each specialty must have speciality and numberOfYears fields",
+              });
+            }
+            if (
+              typeof specialty.numberOfYears !== "number" ||
+              specialty.numberOfYears < 0
+            ) {
+              return res.status(400).json({
+                error: "numberOfYears must be a positive number",
+              });
+            }
+          }
+        }
+        // Create user in Supabase Auth
+        const { data: authData, error: authError } =
+          await supabase.auth.admin.createUser({
+            email: emailAddress,
+            password: password,
+            email_confirm: true,
+            user_metadata: {
+              full_name: fullName,
+            },
+          });
+
+        if (authError) {
+          return res.status(400).json({
+            error: `Authentication error: ${authError.message}`,
+          });
         }
 
-        const newProfile = await prisma.locumProfile.create({
-          data: {
-            fullName,
-            name,
-            address,
-            dateOfBirth: new Date(dateOfBirth),
-            emailAddress,
-            contactNumber,
-            password, // Remember to hash this in production!
-            gdcNumber,
-            location,
-            employeeType,
-            software,
-            referenceNumber,
-            gdcImage,
-            indemnityInsuranceImage,
-            hepatitisBImage,
-            dbsImage,
-            cv,
-            idImage
+        // Create locum profile and specialties in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+          // Create locum profile
+          const newProfile = await tx.locumProfile.create({
+            data: {
+              fullName,
+              emailAddress,
+              contactNumber,
+              address,
+              gdcNumber,
+              employeeType,
+              dateOfBirth: new Date("1990-01-01"), // Default date, you may want to handle this differently
+              location: "", // Default empty string
+              software: software || "",
+              status: "pending",
+              referenceNumber: `REF-${Date.now()}`,
+            },
+          });
+
+          // Create specialties if provided
+          let createdSpecialties = [];
+          if (specialties && specialties.length > 0) {
+            for (const specialty of specialties) {
+              const createdSpecialty = await tx.specialty.create({
+                data: {
+                  locumId: newProfile.id,
+                  speciality: specialty.speciality,
+                  numberOfYears: specialty.numberOfYears,
+                },
+              });
+              createdSpecialties.push(createdSpecialty);
+            }
           }
-        })
 
-        return res.status(201).json(newProfile)
+          return { profile: newProfile, specialties: createdSpecialties };
+        });
 
-      case 'PUT':
+        return res.status(201).json({
+          profile: result.profile,
+          specialties: result.specialties,
+          authUser: authData.user,
+        });
+
+      case "PUT":
         // Update a locum profile
-        const { id, ...updateData } = req.body
-        
+        const { id, ...updateData } = req.body;
+
         if (!id) {
-          return res.status(400).json({ error: 'Profile ID is required' })
+          return res.status(400).json({ error: "Profile ID is required" });
         }
 
         const updatedProfile = await prisma.locumProfile.update({
           where: { id },
           data: {
             ...updateData,
-            dateOfBirth: updateData.dateOfBirth ? new Date(updateData.dateOfBirth) : undefined
-          }
-        })
+            dateOfBirth: updateData.dateOfBirth
+              ? new Date(updateData.dateOfBirth)
+              : undefined,
+          },
+        });
 
-        return res.status(200).json(updatedProfile)
+        return res.status(200).json(updatedProfile);
 
-      case 'DELETE':
+      case "DELETE":
         // Delete a locum profile
-        const profileId = req.query.id as string
-        
+        const profileId = req.query.id as string;
+
         if (!profileId) {
-          return res.status(400).json({ error: 'Profile ID is required' })
+          return res.status(400).json({ error: "Profile ID is required" });
         }
 
         await prisma.locumProfile.delete({
-          where: { id: profileId }
-        })
+          where: { id: profileId },
+        });
 
-        return res.status(200).json({ message: 'Profile deleted successfully' })
+        return res
+          .status(200)
+          .json({ message: "Profile deleted successfully" });
 
       default:
-        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE'])
-        return res.status(405).end(`Method ${req.method} Not Allowed`)
+        res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
+        return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
-  } catch (error:any) {
-    console.error('API Error:', error)
-    
+  } catch (error: any) {
+    console.error("API Error:", error);
+
     // Handle Prisma-specific errors
-    if (error.code === 'P2002') {
-      return res.status(400).json({ 
-        error: 'Email address already exists' 
-      })
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        error: "Email address already exists",
+      });
     }
-    
-    return res.status(500).json({ 
-      error: 'Internal server error' 
-    })
+
+    // Handle database connection errors
+    if (error.code === "P1001") {
+      return res.status(500).json({
+        error: `Database connection error: ${
+          error.message || "Unable to connect to database"
+        }`,
+      });
+    }
+
+    // Handle Supabase auth errors
+    if (error.message && error.message.includes("supabase")) {
+      return res.status(500).json({
+        error: `Supabase error: ${error.message}`,
+      });
+    }
+
+    return res.status(500).json({
+      error: "Internal server error",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
-} 
+}
