@@ -1,20 +1,47 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import { useFormik } from 'formik';
+
+const initialValues = {
+  email: '',
+  password: '',
+  rememberMe: false,
+};
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log({ email, password });
-    }, 2000);
-  };
+  const formik = useFormik({
+    initialValues,
+    validate: (values) => {
+      const errors: {
+        email?: string;
+        password?: string;
+      } = {};
+      
+      if (!values.email) {
+        errors.email = 'Email is required';
+      } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+        errors.email = 'Invalid email address';
+      }
+      
+      if (!values.password) {
+        errors.password = 'Password is required';
+      } else if (values.password.length < 6) {
+        errors.password = 'Password must be at least 6 characters';
+      }
+      
+      return errors;
+    },
+    onSubmit: async (values) => {
+      console.log('Form values:', values);
+      
+      setTimeout(() => {
+        console.log({ email: values.email, password: values.password, rememberMe: values.rememberMe });
+      }, 2000);
+    },
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-gray-50/30 to-white px-4 relative overflow-hidden">
@@ -74,7 +101,7 @@ const LoginForm = () => {
             <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#C3EAE7]/30 rounded-tr-lg"></div>
             <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#C3EAE7]/30 rounded-bl-lg"></div>
             
-            <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+            <form onSubmit={formik.handleSubmit} className="space-y-8 relative z-10">
               <div className="space-y-3">
                 <label className="block text-sm font-black text-black uppercase tracking-widest">
                   Email Address
@@ -88,15 +115,22 @@ const LoginForm = () => {
                   </div>
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="relative w-full pl-14 pr-4 py-5 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#C3EAE7] focus:ring-4 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-white/90 text-black font-semibold placeholder-gray-400 text-lg group-focus-within:shadow-lg"
+                    name="email"
+                    id="email"
+                    onChange={formik.handleChange}
+                    value={formik.values.email}
+                    onBlur={formik.handleBlur}
+                    className={`relative w-full pl-14 pr-4 py-5 border-2 ${
+                      formik.errors.email && formik.touched.email ? 'border-red-500' : 'border-gray-200'
+                    } rounded-2xl focus:outline-none focus:border-[#C3EAE7] focus:ring-4 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-white/90 text-black font-semibold placeholder-gray-400 text-lg group-focus-within:shadow-lg`}
                     placeholder="Enter your email address"
                   />
                   <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-[#C3EAE7] via-black to-[#C3EAE7] transition-all duration-500 group-focus-within:w-full rounded-full"></div>
                   <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#C3EAE7]/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 rounded-l-2xl"></div>
                 </div>
+                {formik.errors.email && formik.touched.email && (
+                  <div className="text-red-500 text-sm mt-1 font-medium">{formik.errors.email}</div>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -112,10 +146,14 @@ const LoginForm = () => {
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="relative w-full pl-14 pr-14 py-5 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-[#C3EAE7] focus:ring-4 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-white/90 text-black font-semibold placeholder-gray-400 text-lg group-focus-within:shadow-lg"
+                    name="password"
+                    id="password"
+                    onChange={formik.handleChange}
+                    value={formik.values.password}
+                    onBlur={formik.handleBlur}
+                    className={`relative w-full pl-14 pr-14 py-5 border-2 ${
+                      formik.errors.password && formik.touched.password ? 'border-red-500' : 'border-gray-200'
+                    } rounded-2xl focus:outline-none focus:border-[#C3EAE7] focus:ring-4 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-white/90 text-black font-semibold placeholder-gray-400 text-lg group-focus-within:shadow-lg`}
                     placeholder="Enter your password"
                   />
                   <button
@@ -137,16 +175,29 @@ const LoginForm = () => {
                   <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-[#C3EAE7] via-black to-[#C3EAE7] transition-all duration-500 group-focus-within:w-full rounded-full"></div>
                   <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#C3EAE7]/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 rounded-l-2xl"></div>
                 </div>
+                {formik.errors.password && formik.touched.password && (
+                  <div className="text-red-500 text-sm mt-1 font-medium">{formik.errors.password}</div>
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-2">
                 <label className="flex items-center group cursor-pointer">
                   <div className="relative">
-                    <input type="checkbox" className="sr-only" />
-                    <div className="w-5 h-5 border-2 border-gray-300 rounded group-hover:border-[#C3EAE7] transition-colors duration-300 bg-white"></div>
-                    <svg className="w-3 h-3 text-[#C3EAE7] absolute top-0.5 left-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    <input
+                      type="checkbox"
+                      name="rememberMe"
+                      id="rememberMe"
+                      checked={formik.values.rememberMe}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 border-2 ${formik.values.rememberMe ? 'border-[#C3EAE7] bg-[#C3EAE7]' : 'border-gray-300 bg-white'} rounded group-hover:border-[#C3EAE7] transition-colors duration-300`}></div>
+                    {formik.values.rememberMe && (
+                      <svg className="w-3 h-3 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
                   </div>
                   <span className="ml-3 text-sm text-gray-700 group-hover:text-black transition-colors font-semibold">Remember me</span>
                 </label>
@@ -159,7 +210,7 @@ const LoginForm = () => {
               <div className="pt-6">
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={formik.isSubmitting}
                   className="relative w-full bg-gradient-to-r from-black via-gray-900 to-black hover:from-gray-800 hover:via-black hover:to-gray-800 text-white font-black py-5 px-6 rounded-2xl transition-all duration-500 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/40 overflow-hidden group disabled:opacity-70"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-[#C3EAE7]/30 via-transparent to-[#C3EAE7]/30 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-center duration-500"></div>
@@ -167,7 +218,7 @@ const LoginForm = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                   
                   <span className="relative z-10 text-xl flex items-center justify-center space-x-2">
-                    {isLoading ? (
+                    {formik.isSubmitting ? (
                       <>
                         <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -184,10 +235,9 @@ const LoginForm = () => {
                       </>
                     )}
                   </span>
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C3EAE7] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C3EAE7] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
               </div>            
-
             </form>
 
             <div className="mt-10 text-center relative">
