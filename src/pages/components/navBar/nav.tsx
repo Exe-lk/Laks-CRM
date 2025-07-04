@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import Logo from "../../../../public/assests/Laks Dent Logo.png"
+import Image from 'next/image';
 
 const NavBar = () => {
   const router = useRouter();
@@ -16,24 +18,10 @@ const NavBar = () => {
   return (
     <nav className="w-full border-b border-gray-300 bg-white">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start ml-4">
           <div className="flex items-center space-x-1 sm:space-x-2">
-            <svg
-              width="32"
-              height="32"
-              className="sm:w-10 sm:h-10 lg:w-12 lg:h-12"
-              viewBox="0 0 48 48"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M8 24C8 15.1634 15.1634 8 24 8C32.8366 8 40 15.1634 40 24C40 32.8366 32.8366 40 24 40C15.1634 40 8 32.8366 8 24Z" stroke="#222" strokeWidth="2" />
-              <path d="M14 25L20 25L23 19L27 29L29 25L34 25" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="text-xl sm:text-2xl lg:text-3xl font-script font-semibold ml-1 sm:ml-2">Locum Lux</span>
+            <Image src={Logo} alt="Logo" width={160} height={100} />
           </div>
-          <span className="text-xs text-gray-600 mt-1 ml-1 hidden sm:block">
-            A PLATFORM TO CONNECT<br />DENTAL PRACTICES WITH LOCUM<br />NURSES & HYGIENIST
-          </span>
         </div>
 
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
