@@ -1,23 +1,9 @@
 import axios from 'axios';
+import { LocumProfile, Specialty } from '../redux/slices/locumProfileSlice';
 
-export interface Specialty {
-    speciality: string;
-    numberOfYears: number;
-}
+export type { LocumProfile, Specialty };
 
-export interface LocumProfile {
-    fullName: string;
-    emailAddress: string;
-    contactNumber: string;
-    address: string;
-    password: string;
-    gdcNumber: string;
-    employeeType: string;
-    software?: string;
-    specialties?: Specialty[];
-}
-
-export const addLocumProfile = async (locumProfile: LocumProfile) => {
+export const addLocumProfile = async (locumProfile: Omit<LocumProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
         const response = await axios.post('/api/locum-profiles', locumProfile);
         return response.data;
@@ -26,7 +12,7 @@ export const addLocumProfile = async (locumProfile: LocumProfile) => {
     }
 };
 
-export const getLocumProfiles = async () => {
+export const getLocumProfiles = async (): Promise<LocumProfile[]> => {
     try {
         const response = await axios.get('/api/locum-profiles');
         return response.data;
