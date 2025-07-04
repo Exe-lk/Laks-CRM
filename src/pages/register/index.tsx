@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
-import { useAddLocumProfileMutation } from '../redux/slices/locumProfileSlice';
+import { useAddLocumProfileMutation } from '../../../redux/slices/locumProfileSlice';
 
 
 export interface Specialty {
