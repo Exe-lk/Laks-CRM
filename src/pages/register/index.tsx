@@ -1,9 +1,26 @@
 import { useState } from "react";
 import { useFormik } from 'formik';
-import { addLocumProfile, LocumProfile, Specialty } from "../service/locumProfileService";
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
+import { useAddLocumProfileMutation } from '../redux/slices/locumProfileSlice';
 
+
+export interface Specialty {
+    speciality: string;
+    numberOfYears: number;
+}
+
+export interface LocumProfile {
+    fullName: string;
+    emailAddress: string;
+    contactNumber: string;
+    address: string;
+    password: string;
+    gdcNumber: string;
+    employeeType: string;
+    software?: string;
+    specialties?: Specialty[];
+}
 const jobTypes = ["Nurse", "Hygienist", "Receptionist"];
 
 const dentistFields = [
@@ -97,6 +114,7 @@ const SignUpForm = () => {
     const [showMap, setShowMap] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [addLocumProfile, { isLoading: isAdding }] = useAddLocumProfileMutation();
 
     const formik = useFormik({
         initialValues,
