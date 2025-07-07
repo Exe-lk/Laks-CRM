@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
-import { useAddLocumProfileMutation } from '../../redux/slices/locumProfileSlice';
+import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../redux/slices/locumProfileSlice';
 
 
 export interface Specialty {
@@ -176,13 +176,35 @@ const SignUpForm = () => {
                 const response = await addLocumProfile(apiData);
                 console.log('Registration response:', response);
 
-                Swal.fire({
-                    title: 'Registration completed successfully!',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#C3EAE7'
-                });
-
+                if (response.data && response.data.status === 200) {
+                    Swal.fire({
+                        title: 'Registration completed successfully!', 
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                } else if (response.error) {
+                    // Handle RTK Query error response
+                    const errorMessage = 'data' in response.error 
+                        ? (response.error.data as ErrorResponse).error 
+                        : 'An unexpected error occurred';
+                    
+                    Swal.fire({
+                        title: 'Registration failed!',
+                        text: `Registration failed: ${errorMessage}`,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Registration failed!',
+                        text: 'An unexpected error occurred',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                }
                 formik.resetForm();
 
             } catch (error: any) {

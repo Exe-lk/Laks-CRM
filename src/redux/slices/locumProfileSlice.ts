@@ -26,6 +26,33 @@ export interface LocumProfile {
   updatedAt?: Date;
 }
 
+export interface RegistrationResponse {
+  profile: LocumProfile;
+  specialties: Specialty[];
+  authUser: any;
+  status: number;
+}
+
+export interface LoginResponse {
+  message: string;
+  profile: LocumProfile;
+  accessToken?: string;
+  refreshToken?: string;
+  session?: {
+    access_token: string;
+    refresh_token: string;
+    expires_at: number;
+    token_type: string;
+    user: any;
+  };
+}
+
+export interface ErrorResponse {
+  error: string;
+  details?: string;
+  status?: string;
+}
+
 export const locumProfileApiSlice = createApi({
   reducerPath: 'locumProfileApi',
   baseQuery: fetchBaseQuery({ 
@@ -38,16 +65,16 @@ export const locumProfileApiSlice = createApi({
   tagTypes: ['LocumProfile'],
   endpoints: (builder) => ({
     getLocumProfiles: builder.query<LocumProfile[], void>({
-      query: () => 'locum-profiles',
+      query: () => 'locum-profile/register',
       providesTags: ['LocumProfile'],
     }),
     getLocumProfileById: builder.query<LocumProfile, string>({
-      query: (id) => `locum-profiles?id=${id}`,
+      query: (id) => `locum-profile/register?id=${id}`,
       providesTags: ['LocumProfile'],
     }),
-    addLocumProfile: builder.mutation<LocumProfile, Omit<LocumProfile, 'id' | 'createdAt' | 'updatedAt'>>({
+    addLocumProfile: builder.mutation<RegistrationResponse, Omit<LocumProfile, 'id' | 'createdAt' | 'updatedAt'>>({
       query: (newProfile) => ({
-        url: 'locum-profiles',
+        url: 'locum-profile/register',
         method: 'POST',
         body: newProfile,
       }),
@@ -55,7 +82,7 @@ export const locumProfileApiSlice = createApi({
     }),
     updateLocumProfile: builder.mutation<LocumProfile, Partial<LocumProfile> & { id: string }>({
       query: (updatedProfile) => ({
-        url: 'locum-profiles',
+        url: 'locum-profile/register',
         method: 'PUT',
         body: updatedProfile,
       }),
@@ -63,10 +90,17 @@ export const locumProfileApiSlice = createApi({
     }),
     deleteLocumProfile: builder.mutation<{ message: string }, string>({
       query: (id) => ({
-        url: `locum-profiles?id=${id}`,
+        url: `locum-profile/register?id=${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['LocumProfile'],
+    }),
+    login: builder.mutation<LoginResponse, { email: string; password: string }>({
+      query: (credentials) => ({
+        url: 'locum-profile/login',
+        method: 'POST',
+        body: credentials,
+      }),
     }),
   }),
 });
@@ -77,4 +111,5 @@ export const {
   useAddLocumProfileMutation,
   useUpdateLocumProfileMutation,
   useDeleteLocumProfileMutation,
+  useLoginMutation,
 } = locumProfileApiSlice; 

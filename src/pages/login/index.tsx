@@ -1,16 +1,26 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
+import { useLoginMutation } from '../../redux/slices/locumProfileSlice';
+import Swal from 'sweetalert2';
 
-const initialValues = {
-  email: '',
-  password: '',
-  rememberMe: false,
-};
+interface LoginFormValues {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
 
 const LoginForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
   const router = useRouter();
+
+  const initialValues = {
+    email: '',
+    password: '',
+    rememberMe: false,
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues,
@@ -35,11 +45,73 @@ const LoginForm = () => {
       return errors;
     },
     onSubmit: async (values) => {
-      console.log('Form values:', values);
+      try {
+        console.log('Login values:', values);
+        
+        const result = await login({ 
+          email: values.email, 
+          password: values.password 
+        });
+        
+        console.log('Login result:', result);
 
-      setTimeout(() => {
-        console.log({ email: values.email, password: values.password, rememberMe: values.rememberMe });
-      }, 2000);
+        if ('data' in result && result.data) {
+          const { accessToken, session } = result.data;
+          
+          if (accessToken) {
+            localStorage.setItem('token', accessToken);
+          } else if (session?.access_token) {
+            localStorage.setItem('token', session.access_token);
+          }
+          
+          await Swal.fire({
+            title: 'Login Successful!',
+            text: 'Welcome back!',
+            icon: 'success',
+            confirmButtonText: 'Continue',
+            confirmButtonColor: '#C3EAE7',
+            timer: 2000,
+            timerProgressBar: true
+          });
+          
+          router.push('/');
+        } else if ('error' in result && result.error) {
+          let errorMessage = 'Login failed';
+          
+          console.log('Login error details:', result.error);
+          
+          if ('data' in result.error && typeof result.error.data === 'object' && result.error.data !== null) {
+            const errorData = result.error.data as any;
+            console.log('Error data:', errorData);
+            errorMessage = errorData.error || errorMessage;
+            
+            if (errorData.status === 'pending') {
+              errorMessage = 'Your account is still pending approval. Please wait for admin approval.';
+            } else if (errorData.status === 'deleted') {
+              errorMessage = 'Your account has been deleted by the administrator.';
+            }
+          } else if ('message' in result.error) {
+            errorMessage = result.error.message || errorMessage;
+          }
+          
+          Swal.fire({
+            title: 'Login Failed!',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonText: 'Try Again',
+            confirmButtonColor: '#C3EAE7'
+          });
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        Swal.fire({
+          title: 'Login Failed!',
+          text: 'An unexpected error occurred. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#C3EAE7'
+        });
+      }
     },
   });
 
@@ -174,11 +246,11 @@ const LoginForm = () => {
 
             <button
               type="submit"
-              disabled={formik.isSubmitting}
+              disabled={isLoading}
               className="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span className="flex items-center justify-center space-x-2">
-                {formik.isSubmitting ? (
+                {isLoading ? (
                   <>
                     <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
