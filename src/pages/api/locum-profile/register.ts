@@ -39,7 +39,6 @@ export default async function handler(
           !contactNumber ||
           !address ||
           !password ||
-          !gdcNumber ||
           !employeeType
         ) {
           return res.status(400).json({
@@ -124,6 +123,7 @@ export default async function handler(
           profile: result.profile,
           specialties: result.specialties,
           authUser: authData.user,
+          status: 200,
         });
 
       case "PUT":

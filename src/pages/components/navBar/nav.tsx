@@ -1,11 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Logo from "../../../../public/assests/Laks Dent Logo.png"
 import Image from 'next/image';
+import Swal from 'sweetalert2';
 
 const NavBar = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const isActivePage = (path: string) => {
+    return router.pathname === path;
+  };
+
+  const handleLogout = () => {
+    Swal.fire({
+     title: 'Are you sure you want to logout?',
+     text: 'You will be logged out of your account.',
+     icon: 'warning',
+     confirmButtonText: 'OK',
+     showCancelButton: true,
+     cancelButtonText: 'Cancel',
+     cancelButtonColor: '#3085d6',
+     confirmButtonColor: '#d33',
+     reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        router.push('/');
+      }
+    });
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -25,12 +56,20 @@ const NavBar = () => {
         </div>
 
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-          <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/login')}>
-            Login
-          </button>
-          <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/register')}>
-            Register
-          </button>
+          {!isLoggedIn ? (
+            <>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/login')}>
+                Login
+              </button>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/register')}>
+                Register
+              </button>
+            </>
+          ) : (
+            <button className="bg-red-500 text-white px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-red-600 transition text-sm lg:text-base" onClick={handleLogout}>
+              Logout
+            </button>
+          )}
         </div>
 
         <div className="md:hidden">
@@ -52,30 +91,72 @@ const NavBar = () => {
 
       <div className="hidden md:block border-t border-gray-300">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/')}
+          >
             Home
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/aboutus')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/aboutus')}
+          >
             About Us
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/dentalpractices')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/dentalpractices')}
+          >
             Dental Practices
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/dentalnurses')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/dentalnurses')}
+          >
             Dental Nurses
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/hygienist')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/hygienist')}
+          >
             Hygienist
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/accounting')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/accounting')}
+          >
             Accounting
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/contactus')}>
+          <li 
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+              isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+            }`} 
+            onClick={() => router.push('/components/contactus')}
+          >
             Contact Us
           </li>
-          <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => router.push('/components/myDocumnet')}>
-            Document Upload
-          </li>
+          {isLoggedIn && (
+            <li 
+              className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
+                isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+              }`} 
+              onClick={() => router.push('/components/myDocumnet')}
+            >
+              Document Upload
+            </li>
+          )}
         </ul>
       </div>
 
@@ -97,39 +178,89 @@ const NavBar = () => {
 
             <div className="px-4 py-6">
               <ul className="space-y-4 text-lg font-medium text-gray-800">
-                <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/'); closeMobileMenu(); }}>
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/'); closeMobileMenu(); }}
+                >
                   Home
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}>
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}
+                >
                   About Us
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/dentalpractices'); closeMobileMenu(); }}
+                >
                   Dental Practices
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/dentalnurses'); closeMobileMenu(); }}
+                >
                   Dental Nurses
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/hygienist'); closeMobileMenu(); }}
+                >
                   Hygienist
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/accounting'); closeMobileMenu(); }}
+                >
                   Accounting
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}>
+                <li 
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                    isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`} 
+                  onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}
+                >
                   Contact Us
                 </li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}>
-                  Document Upload
-                </li>
+                {isLoggedIn && (
+                  <li 
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
+                      isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`} 
+                    onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
+                  >
+                    Document Upload
+                  </li>
+                )}
               </ul>
 
               <div className="mt-8 space-y-3">
-                <button className="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-600 transition">
-                  Login
-                </button>
-                <button className="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-600 transition">
-                  Register
-                </button>
+                {!isLoggedIn ? (
+                  <>
+                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={() => { router.push('/login'); closeMobileMenu(); }}>
+                      Login
+                    </button>
+                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={() => { router.push('/register'); closeMobileMenu(); }}>
+                      Register
+                    </button>
+                  </>
+                ) : (
+                  <button className="w-full bg-red-500 text-white px-6 py-3 rounded-full font-medium hover:bg-red-600 transition" onClick={() => { handleLogout(); closeMobileMenu(); }}>
+                    Logout
+                  </button>
+                )}
               </div>
             </div>
           </div>

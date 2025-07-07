@@ -5,7 +5,7 @@ export type { LocumProfile, Specialty };
 
 export const addLocumProfile = async (locumProfile: Omit<LocumProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-        const response = await axios.post('/api/locum-profiles', locumProfile);
+        const response = await axios.post('/api/locum-profile/register', locumProfile);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.error || 'Failed to add locum profile');
@@ -14,9 +14,18 @@ export const addLocumProfile = async (locumProfile: Omit<LocumProfile, 'id' | 'c
 
 export const getLocumProfiles = async (): Promise<LocumProfile[]> => {
     try {
-        const response = await axios.get('/api/locum-profiles');
+        const response = await axios.get('/api/locum-profile/register');
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.error || 'Failed to fetch locum profiles');
+    }
+};
+
+export const login = async (email: string, password: string) => {
+    try {
+        const response = await axios.post('/api/locum-profile/login', { email, password });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.error || 'Failed to login');
     }
 };
