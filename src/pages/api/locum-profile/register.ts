@@ -97,6 +97,7 @@ export default async function handler(
               location: "", // Default empty string
               software: software || "",
               status: "pending",
+              role: "user",
               referenceNumber: `REF-${Date.now()}`,
             },
           });
