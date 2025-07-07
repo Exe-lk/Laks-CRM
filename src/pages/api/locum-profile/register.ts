@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { Speciality, SPECIALITY_VALUES, getSpecialityValue } from "@/lib/enums";
 
 export default async function handler(
   req: NextApiRequest,
@@ -63,6 +64,15 @@ export default async function handler(
                 error: "numberOfYears must be a positive number",
               });
             }
+            // Validate speciality value and convert to numeric enum
+            const specialityValue = getSpecialityValue(specialty.speciality);
+            if (specialityValue === null) {
+              return res.status(400).json({
+                error: `Invalid speciality. Must be one of: Surgical xla, Endodontics, Orthodontic, Periodontic, Cosmetic/bonding & Invisalign`,
+              });
+            }
+            // Replace the display name with numeric value
+            specialty.speciality = specialityValue;
           }
         }
         // Create user in Supabase Auth
@@ -97,6 +107,7 @@ export default async function handler(
               location: "", // Default empty string
               software: software || "",
               status: "pending",
+              role: "user",
               referenceNumber: `REF-${Date.now()}`,
             },
           });
