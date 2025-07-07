@@ -39,6 +39,7 @@ export default async function handler(
           !contactNumber ||
           !address ||
           !password ||
+          !gdcNumber ||
           !employeeType
         ) {
           return res.status(400).json({
@@ -96,7 +97,7 @@ export default async function handler(
               dateOfBirth: new Date("1990-01-01"), // Default date, you may want to handle this differently
               location: "", // Default empty string
               software: software || "",
-              status:"accept",
+              status: "pending",
               referenceNumber: `REF-${Date.now()}`,
             },
           });
