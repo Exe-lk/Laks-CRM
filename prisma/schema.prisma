@@ -39,7 +39,7 @@ model Specialty {
   id            String       @id @default(cuid())
   locumId       String       @map("locum_id")
   numberOfYears Int          @map("number_of_years")
-  speciality    String
+  speciality    Int
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   locumProfile  LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
