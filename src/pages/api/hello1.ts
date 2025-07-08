@@ -8,6 +8,6 @@ type Data = {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case "GET":
-      res.status(200).json({ name: "John Doe" });
+      return res.status(200).json({ name: "John Doe" });
   }
 }
