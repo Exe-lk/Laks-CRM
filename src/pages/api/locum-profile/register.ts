@@ -68,7 +68,7 @@ export default async function handler(
             const specialityValue = getSpecialityValue(specialty.speciality);
             if (specialityValue === null) {
               return res.status(400).json({
-                error: `Invalid speciality. Must be one of: Surgical xla, Endodontics, Orthodontic, Periodontic, Cosmetic/bonding & Invisalign`,
+                error: `ff`,
               });
             }
             // Replace the display name with numeric value
