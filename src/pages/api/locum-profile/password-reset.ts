@@ -28,7 +28,7 @@ export default async function handler(
 
         // Send password reset email using Supabase
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `https://laks-crm.netlify.app/reset-password`,
+          redirectTo: `https://laks-crm.netlify.app/resetPassword`,
         });
 
         if (error) {
