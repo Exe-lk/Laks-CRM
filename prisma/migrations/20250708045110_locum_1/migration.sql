@@ -17,6 +17,7 @@ CREATE TABLE "locum_profiles" (
     "reference_number" TEXT NOT NULL,
     "cv" TEXT,
     "status" TEXT,
+    "role" TEXT,
     "id_image" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -29,7 +30,7 @@ CREATE TABLE "specialties" (
     "id" TEXT NOT NULL,
     "locum_id" TEXT NOT NULL,
     "number_of_years" INTEGER NOT NULL,
-    "speciality" TEXT NOT NULL,
+    "speciality" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
