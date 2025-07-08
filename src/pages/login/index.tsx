@@ -240,7 +240,7 @@ const LoginForm = () => {
                   </div>
                   <span className="ml-3 text-sm text-gray-700 group-hover:text-black transition-colors font-semibold">Remember me</span>
                 </label>
-                <a href="#" className="text-sm text-[#C3EAE7] hover:text-black transition-colors font-semibold hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>
+                <a href="/forgot-password" className="text-sm text-[#C3EAE7] hover:text-black transition-colors font-semibold hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>
                   Forgot password?
                 </a>
               </div>
