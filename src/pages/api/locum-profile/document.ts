@@ -72,11 +72,13 @@ export default async function handler(
     if (!locumId) {
       return res.status(400).json({ error: 'Locum ID is required' });
     }
+    console.log(locumId);
 
     // Check if locum profile exists
     const existingProfile = await prisma.locumProfile.findUnique({
       where: { id: locumId },
     });
+    console.log(existingProfile);
 
     if (!existingProfile) {
       return res.status(404).json({ error: 'Locum profile not found' });
@@ -93,13 +95,11 @@ export default async function handler(
       'idImage'
     ];
 
-    // Process each document field
     for (const fieldName of documentFields) {
       const file = files[fieldName]?.[0] as UploadedFile;
       
       if (file) {
         try {
-          // Convert file to buffer and immediately clean up temporary file
           const fileBuffer = await fileToBuffer(file);
           
           // Generate unique filename
@@ -145,6 +145,7 @@ export default async function handler(
         message: 'Documents uploaded successfully',
         profile: updatedProfile,
         uploadedDocuments: Object.keys(updateData),
+        status: 200,
       });
     } else {
       return res.status(400).json({ error: 'No valid documents were uploaded' });

@@ -102,6 +102,13 @@ export const locumProfileApiSlice = createApi({
         body: credentials,
       }),
     }),
+    documentUpload: builder.mutation<any, { locumId: string; documents: any }>({
+      query: (credentials) => ({
+        url: 'locum-profile/document',
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
   }),
 });
 
@@ -112,4 +119,5 @@ export const {
   useUpdateLocumProfileMutation,
   useDeleteLocumProfileMutation,
   useLoginMutation,
+  useDocumentUploadMutation,
 } = locumProfileApiSlice; 

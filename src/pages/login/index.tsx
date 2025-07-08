@@ -63,6 +63,8 @@ const LoginForm = () => {
           } else if (session?.access_token) {
             localStorage.setItem('token', session.access_token);
           }
+
+          localStorage.setItem('locumId', JSON.stringify(result.data.profile.id));
           
           await Swal.fire({
             title: 'Login Successful!',

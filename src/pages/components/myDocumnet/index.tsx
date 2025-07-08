@@ -1,10 +1,13 @@
 "use client";
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import SignatureCanvas from "react-signature-canvas";
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
+import { useRouter } from 'next/navigation';
+import { useDocumentUploadMutation } from '@/redux/slices/locumProfileSlice';
+import Swal from 'sweetalert2';
 
 interface DocumentType {
     id: string;
@@ -26,17 +29,17 @@ interface FormValues {
 }
 
 const documentTypes: DocumentType[] = [
-    { id: 'gdcNumber', label: 'GDC Number', required: true },
-    { id: 'hepatitisB', label: 'Hepatitis B', required: true },
-    { id: 'dbs', label: 'DBS', required: true },
-    { id: 'indemnityInsurance', label: 'Indemnity Insurance', required: true },
-    { id: 'referenceLetters1', label: 'Reference Letter 1', required: true },
-    { id: 'referenceLetters2', label: 'Reference Letter 2', required: true },
-    { id: 'cv', label: 'CV', required: true },
-    { id: 'id', label: 'ID', required: true },
-    { id: 'shareCode', label: 'Share Code (Visa Status check)', required: true },
-    { id: 'bankDetails', label: 'Bank Details', required: true },
-    { id: 'niUtr', label: 'NI/UTR number', required: true },
+    { id: 'gdcNumber', label: 'GDC Number', required: false },
+    { id: 'hepatitisB', label: 'Hepatitis B', required: false },
+    { id: 'dbs', label: 'DBS', required: false },
+    { id: 'indemnityInsurance', label: 'Indemnity Insurance', required: false },
+    { id: 'referenceLetters1', label: 'Reference Letter 1', required: false },
+    { id: 'referenceLetters2', label: 'Reference Letter 2', required: false },
+    { id: 'cv', label: 'CV', required: false },
+    { id: 'id', label: 'ID', required: false },
+    { id: 'shareCode', label: 'Share Code (Visa Status check)', required: false },
+    { id: 'bankDetails', label: 'Bank Details', required: false },
+    { id: 'niUtr', label: 'NI/UTR number', required: false },
 ];
 
 const validationSchema = Yup.object({
@@ -62,6 +65,11 @@ const MyDocument = () => {
     const privacySignatureRef = useRef<SignatureCanvas>(null);
     const [termsSignatureURL, setTermsSignatureURL] = useState<string>('');
     const [privacySignatureURL, setPrivacySignatureURL] = useState<string>('');
+    const router = useRouter();
+    const [documentUpload, { isLoading }] = useDocumentUploadMutation();
+    const [locumId, setLocumId] = useState<string>('');
+    const [canvasWidth, setCanvasWidth] = useState(500);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const initialValues: FormValues = {
         documents: documentTypes.reduce((acc, doc) => {
@@ -115,10 +123,88 @@ const MyDocument = () => {
         setFieldValue(fieldName, '');
     };
 
-    const onSubmit = (values: FormValues) => {
-        console.log('Form submitted:', values);
-        alert('Documents uploaded successfully!');
+    const onSubmit = async (values: FormValues, { resetForm }: { resetForm: () => void }) => {
+        Swal.fire({
+            title: 'Uploading documents...',
+            icon: 'info',
+            confirmButtonText: 'OK',
+        });
+        console.log(values);
+        const documents = values.documents;
+        const formData = new FormData();
+        formData.append('locumId', locumId);
+        console.log(formData);
+
+        const fieldMap: Record<string, string> = {
+            gdcNumber: 'gdcImage',
+            indemnityInsurance: 'indemnityInsuranceImage',
+            hepatitisB: 'hepatitisBImage',
+            dbs: 'dbsImage',
+            referenceLetters1: 'referenceNumber',
+            referenceLetters2: 'referenceNumber',
+            cv: 'cv',
+            id: 'idImage',
+        };
+
+        Object.entries(documents).forEach(([key, value]) => {
+            if (value.file && fieldMap[key]) {
+                formData.append(fieldMap[key], value.file);
+            }
+        });
+
+        try {
+            const response = await fetch('/api/locum-profile/document', {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+            console.log(result);
+            if (result.status === 200) {
+            Swal.fire({
+                title: 'Documents uploaded successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK',
+            });
+            resetForm();
+            } else {
+                Swal.fire({
+                    title: 'Upload failed!',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Upload failed!',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
     };
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('locumId');
+        if (storedId) {
+            const cleanId = storedId.replace(/"/g, '');
+            console.log("Clean Locum ID:", cleanId);
+    
+            const parts = cleanId.match(/.{1,4}/g); 
+            console.log("Split Parts:", parts);
+    
+            setLocumId(cleanId);
+        }
+    }, []);
+    
+    useEffect(() => {
+        const handleResize = () => {
+            if (containerRef.current) {
+                setCanvasWidth(containerRef.current.offsetWidth);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <>
@@ -140,7 +226,7 @@ const MyDocument = () => {
                             validationSchema={validationSchema}
                             onSubmit={onSubmit}
                         >
-                            {({ values, setFieldValue, errors, touched }) => (
+                            {({ values, setFieldValue, errors, touched, resetForm }) => (
                                 <Form className="max-w-4xl mx-auto">
                                     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 mb-8">
                                         <h3 className="text-2xl font-bold text-black mb-6">Required Documents</h3>
@@ -234,15 +320,18 @@ const MyDocument = () => {
                                                 </h4>
 
                                                 <div className="bg-white p-4 rounded-lg items-center justify-center">
-                                                    <SignatureCanvas
-                                                        ref={termsSignatureRef}
-                                                        penColor="black"
-                                                        canvasProps={{
-                                                            width: 500,
-                                                            height: 200,
-                                                            className: "border border-gray-400 rounded-lg bg-white items-center justify-center",
-                                                        }}
-                                                    />
+                                                    <div ref={containerRef} className="w-full max-w-md mx-auto">
+                                                        <SignatureCanvas
+                                                            ref={termsSignatureRef}
+                                                            penColor="black"
+                                                            canvasProps={{
+                                                                width: canvasWidth,
+                                                                height: 200,
+                                                                className: "border border-gray-400 rounded-lg bg-white w-full h-48",
+                                                                style: { width: "100%", height: "200px" }
+                                                            }}
+                                                        />
+                                                    </div>
 
                                                     <div className="flex gap-4 mt-4">
                                                         <button
@@ -306,15 +395,18 @@ const MyDocument = () => {
                                                 </h4>
 
                                                 <div className="bg-white p-4 rounded-lg">
-                                                    <SignatureCanvas
-                                                        ref={privacySignatureRef}
-                                                        penColor="black"
-                                                        canvasProps={{
-                                                            width: 500,
-                                                            height: 200,
-                                                            className: "border border-gray-400 rounded-lg bg-white",
-                                                        }}
-                                                    />
+                                                    <div className="w-full max-w-md mx-auto">
+                                                        <SignatureCanvas
+                                                            ref={privacySignatureRef}
+                                                            penColor="black"
+                                                            canvasProps={{
+                                                                width: canvasWidth,
+                                                                height: 200,
+                                                                className: "border border-gray-400 rounded-lg bg-white w-full h-48",
+                                                                style: { width: "100%", height: "200px" }
+                                                            }}
+                                                        />
+                                                    </div>
 
                                                     <div className="flex gap-4 mt-4">
                                                         <button

@@ -29,3 +29,12 @@ export const login = async (email: string, password: string) => {
         throw new Error(error.response?.data?.error || 'Failed to login');
     }
 };
+
+export const documentUpload = async (locumId: string, documents: any) => {
+    try {
+        const response = await axios.post(`/api/locum-profile/document`, { locumId, documents });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.error || 'Failed to upload document');
+    }
+};
