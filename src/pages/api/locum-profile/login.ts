@@ -39,7 +39,7 @@ export default async function handler(
     switch (locumProfile.status) {
       case "delete":
         return res.status(403).json({
-          error: "Profile has been deleted by admin",
+          error: "Profile has been rejected by admin",
           status: "deleted",
         });
 
