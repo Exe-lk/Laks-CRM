@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
-import { Speciality, SPECIALITY_VALUES, getSpecialityValue } from "@/lib/enums";
+import { getSpecialityValue } from "@/lib/enums";
 
 export default async function handler(
   req: NextApiRequest,
@@ -178,35 +178,34 @@ export default async function handler(
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error: any) {
-    console.error("API Error:", error);
+   
 
     // Handle Prisma-specific errors
-    if (error.code === "P2002") {
-      return res.status(400).json({
-        error: "Email address already exists",
-      });
-    }
+    // if (error.code === "P2002") {
+    //   return res.status(400).json({
+    //     error: "Email address already exists",
+    //   });
+    // }
 
-    // Handle database connection errors
-    if (error.code === "P1001") {
-      return res.status(500).json({
-        error: `Database connection error: ${
-          error.message || "Unable to connect to database"
-        }`,
-      });
-    }
+    // // Handle database connection errors
+    // if (error.code === "P1001") {
+    //   return res.status(500).json({
+    //     error: `Database connection error: ${
+    //       error.message || "Unable to connect to database"
+    //     }`,
+    //   });
+    // }
 
-    // Handle Supabase auth errors
-    if (error.message && error.message.includes("supabase")) {
-      return res.status(500).json({
-        error: `Supabase error: ${error.message}`,
-      });
-    }
+    // // Handle Supabase auth errors
+    // if (error.message && error.message.includes("supabase")) {
+    //   return res.status(500).json({
+    //     error: `Supabase error: ${error.message}`,
+    //   });
+    // }
 
     return res.status(500).json({
-      error: "Internal server error",
-      details:
-        process.env.NODE_ENV === "development" ? error.message : error.message,
+      error: error,
+      
     });
   }
 }
