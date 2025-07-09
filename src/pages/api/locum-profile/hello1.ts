@@ -7,13 +7,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case "GET":
-        const profiles = await prisma.locumProfile.findMany({
-          include: {
-            specialties: true,
-          },
-          orderBy: { createdAt: "desc" },
-        });
-        return res.status(200).json("hjhkh");
+        try {
+          const profiles = await prisma.locumProfile.findMany({
+            include: {
+              specialties: true,
+            },
+            orderBy: { createdAt: "desc" },
+          });
+          return res.status(200).json({name:"guhgu"});
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
+          return res.status(500).json({ error: "Failed to fetch profiles" });
+        }
     }
   } catch (error: any) {
     return res.status(400).json({
