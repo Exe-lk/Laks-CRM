@@ -21,7 +21,6 @@ export const GoogleMapModal: FC<GoogleMapModalProps> = ({ open, onClose, onSelec
   const [address, setAddress] = useState<string>('');
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  // Reverse geocode when marker changes
   useEffect(() => {
     if (!isLoaded) return;
     const geocoder = new window.google.maps.Geocoder();

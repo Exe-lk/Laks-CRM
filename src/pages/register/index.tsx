@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
 import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../redux/slices/locumProfileSlice';
-import { GoogleMapModal } from '../components/GoogleMapModal';
+import { GoogleMapModal } from '../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
 export interface Specialty {
