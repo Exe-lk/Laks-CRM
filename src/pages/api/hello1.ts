@@ -6,8 +6,14 @@ type Data = {
 };
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  switch (req.method) {
-    case "GET":
-      return res.status(200).json({ name: "John Doe" });
+  try {
+    switch (req.method) {
+      case "GET":
+        return res.status(200).json({ name: "John Doee " });
+    }
+  } catch (error: any) {
+    return res.status(400).json({
+      error: "Email address already exists",
+    });
   }
 }
