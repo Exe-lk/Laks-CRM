@@ -12,13 +12,13 @@ export default async function handler(
     switch (req.method) {
       case "GET":
         // Get all locum profiles
-        // const profiles = await prisma.locumProfile.findMany({
-        //   include: {
-        //     specialties: true,
-        //   },
-        //   orderBy: { createdAt: "desc" },
-        // });
-        return res.status(200).json({ name: "John Doe" });
+        const profiles = await prisma.locumProfile.findMany({
+          include: {
+            specialties: true,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+        return res.status(200).json(profiles);
 
       case "POST":
         // Create a new locum profile
