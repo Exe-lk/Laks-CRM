@@ -78,13 +78,12 @@ export default async function handler(
         }
         // Create user in Supabase Auth
         const { data: authData, error: authError } =
-          await supabase.auth.admin.createUser({
+          await supabase.auth.signUp({
             email: emailAddress,
             password: password,
-            email_confirm: true,
-            user_metadata: {
-              full_name: fullName,
-            },
+            options: {
+              emailRedirectTo: `https://laks-crm.netlify.app/`
+            }
           });
 
         if (authError) {
@@ -182,27 +181,27 @@ export default async function handler(
    
 
     // Handle Prisma-specific errors
-    // if (error.code === "P2002") {
-    //   return res.status(400).json({
-    //     error: "Email address already exists",
-    //   });
-    // }
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        error: "Email address or mobile number already exists",
+      });
+    }
 
-    // // Handle database connection errors
-    // if (error.code === "P1001") {
-    //   return res.status(500).json({
-    //     error: `Database connection error: ${
-    //       error.message || "Unable to connect to database"
-    //     }`,
-    //   });
-    // }
+    // Handle database connection errors
+    if (error.code === "P1001") {
+      return res.status(500).json({
+        error: `Database connection error: ${
+          error.message || "Unable to connect to database"
+        }`,
+      });
+    }
 
-    // // Handle Supabase auth errors
-    // if (error.message && error.message.includes("supabase")) {
-    //   return res.status(500).json({
-    //     error: `Supabase error: ${error.message}`,
-    //   });
-    // }
+    // Handle Supabase auth errors
+    if (error.message && error.message.includes("supabase")) {
+      return res.status(500).json({
+        error: `Supabase error: ${error.message}`,
+      });
+    }
 
     return res.status(500).json({
       error: error,

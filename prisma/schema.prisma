@@ -14,7 +14,7 @@ model LocumProfile {
   address                 String
   dateOfBirth             DateTime    @map("dob")
   emailAddress            String      @unique @map("email_address")
-  contactNumber           String      @map("contact_number")
+  contactNumber           String      @unique @map("contact_number")
   gdcNumber               String      @map("gdc_number")
   location                String
   employeeType            String      @map("employee_type")

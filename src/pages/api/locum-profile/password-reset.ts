@@ -26,6 +26,16 @@ export default async function handler(
           });
         }
 
+        // Check if the email is registered in Supabase
+        const { data: users, error: listError } = await supabase.auth.admin.listUsers();
+        if (listError) {
+          return res.status(500).json({ error: "Failed to check user existence" });
+        }
+        const userExists = users.users.some((user) => user.email === email);
+        if (!userExists) {
+          return res.status(404).json({ error: "Email is not registered" });
+        }
+
         // Send password reset email using Supabase
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `https://laks-crm.netlify.app/resetPassword`,
