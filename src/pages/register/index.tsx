@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
 import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../redux/slices/locumProfileSlice';
-
+import { GoogleMapModal } from '../components/GoogleMapModal';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 
 export interface Specialty {
     speciality: string;
@@ -115,6 +116,8 @@ const SignUpForm = () => {
     const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [addLocumProfile, { isLoading: isAdding }] = useAddLocumProfileMutation();
+    const [open, setOpen] = useState(false);
+    const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
     const formik = useFormik({
         initialValues,
@@ -397,13 +400,11 @@ const SignUpForm = () => {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowMap(true)}
+                                    onClick={() => setOpen(true)}
                                     className="absolute right-3 top-3 p-2 bg-[#C3EAE7] hover:bg-[#A9DBD9] rounded-lg transition-all duration-200 transform hover:scale-110 shadow-lg hover:shadow-xl"
                                     title="Select location on map"
                                 >
-                                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                                    </svg>
+                                    <FaMapMarkerAlt style={{ color: 'black' }} />
                                 </button>
                             </div>
                             {formik.errors.address && formik.touched.address && (
@@ -824,6 +825,16 @@ const SignUpForm = () => {
                         </div>
                     </div>
                 )}
+
+                <GoogleMapModal
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    onSelect={(loc) => {
+                        setLocation(loc);
+                        setOpen(false);
+                        formik.setFieldValue('address', loc.address);
+                    }}
+                />
             </div>
         </div>
     );
