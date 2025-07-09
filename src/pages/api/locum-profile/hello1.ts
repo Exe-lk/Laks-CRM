@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
           orderBy: { createdAt: "desc" },
         });
-        return res.status(200).json(profiles);
+        return res.status(200).json("hjhkh");
     }
   } catch (error: any) {
     return res.status(400).json({
