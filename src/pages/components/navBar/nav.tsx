@@ -20,25 +20,33 @@ const NavBar = () => {
 
   const handleLogout = () => {
     Swal.fire({
-     title: 'Are you sure you want to logout?',
-     text: 'You will be logged out of your account.',
-     icon: 'warning',
-     confirmButtonText: 'OK',
-     showCancelButton: true,
-     cancelButtonText: 'Cancel',
-     cancelButtonColor: '#3085d6',
-     confirmButtonColor: '#d33',
-     reverseButtons: true
+      title: 'Are you sure you want to logout?',
+      text: 'You will be logged out of your account.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+      showCancelButton: true,
+      cancelButtonText: 'Cancel',
+      cancelButtonColor: '#3085d6',
+      confirmButtonColor: '#d33',
+      reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
         setIsLoggedIn(false);
-        router.push('/');
+  
+        Swal.fire({
+          title: 'Logged out',
+          text: 'You have been successfully logged out.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then(() => {
+          router.push('/');
+        });
       }
     });
   };
-
+  
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };

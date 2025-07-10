@@ -33,14 +33,21 @@ export default function Footer() {
               ABOUT
             </h3>
             <ul className="space-y-3 text-sm lg:text-base">
-              {['About Us', 'Dental Practices', 'Dental Nurses', 'Hygienist', 'Accounting', 'Contact Us'].map((item, index) => (
+              {[
+                { label: 'About Us', href: '/components/aboutus' },
+                { label: 'Dental Practices', href: '/components/dentalpractices' },
+                { label: 'Dental Nurses', href: '/components/dentalnurses' },
+                { label: 'Hygienist', href: '/components/hygienist' },
+                { label: 'Accounting', href: '/components/accounting' },
+                { label: 'Contact Us', href: '/components/contactus' }
+              ].map((item, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={item.href}
                     className="text-gray-700 hover:text-teal-600 hover:translate-x-1 transition-all duration-200 flex items-center group"
                   >
                     <span className="w-2 h-2 bg-teal-400 rounded-full mr-3 group-hover:bg-teal-600 transition-colors"></span>
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
@@ -52,14 +59,18 @@ export default function Footer() {
               USEFUL LINKS
             </h3>
             <ul className="space-y-3 text-sm lg:text-base">
-              {['Login', 'Join as a Nurse', 'Join as a Doctor', 'Download App'].map((item, index) => (
+              {[
+                { label: 'Login', href: '/login' },
+                { label: 'Join as a Nurse', href: '/register' },
+                { label: 'Download App', href: '#' }
+              ].map((item, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={item.href}
                     className="text-gray-700 hover:text-pink-600 hover:translate-x-1 transition-all duration-200 flex items-center group"
                   >
                     <span className="w-2 h-2 bg-pink-400 rounded-full mr-3 group-hover:bg-pink-600 transition-colors"></span>
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
