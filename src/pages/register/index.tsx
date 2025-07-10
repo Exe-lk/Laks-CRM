@@ -134,13 +134,13 @@ const SignUpForm = () => {
                 errors.email = 'Invalid email address';
             }
 
-            if (!values.contactNumber) {
-                errors.contactNumber = 'Contact number is required';
-            } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
-                errors.contactNumber = 'Contact number must be 10 or 11 digits';
-            } else if (!/^(07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)) {
-                errors.contactNumber = 'Enter a valid UK contact number';
-            }
+            // if (!values.contactNumber) {
+            //     errors.contactNumber = 'Contact number is required';
+            // } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
+            //     errors.contactNumber = 'Contact number must be 10 or 11 digits';
+            // } else if (!/^(07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)) {
+            //     errors.contactNumber = 'Enter a valid UK contact number';
+            // }
 
             if (!values.address) {
                 errors.address = 'Address is required';
@@ -509,11 +509,11 @@ const SignUpForm = () => {
                                 </div>
                             )}
 
-                            {formik.values.gdcRegistration === "no" && (
+                            {/* {formik.values.gdcRegistration === "no" && (
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
                                     <p className="text-sm text-gray-600">No name required - we understand you're not yet registered.</p>
                                 </div>
-                            )}
+                            )} */}
                         </div>
 
                         <div className="border-t pt-6 mt-8">
@@ -711,7 +711,7 @@ const SignUpForm = () => {
                         <a href="/login" className="text-black font-semibold hover:underline">Login here</a>
                     </span>
                     <span className="mx-2">|</span>
-                    <a href="/" className="text-sm text-[#C3EAE7] hover:text-[#C3EAE7] transition-colors font-semibold hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>Back to Home</a>
+                    <a href="/" className="text-sm text-black font-bold">Back to Home</a>
                 </div>
 
                 <div className="mt-8 text-center">
