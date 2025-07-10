@@ -136,6 +136,10 @@ const SignUpForm = () => {
 
             if (!values.contactNumber) {
                 errors.contactNumber = 'Contact number is required';
+            } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
+                errors.contactNumber = 'Contact number must be 10 or 11 digits';
+            } else if (!/^(07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)) {
+                errors.contactNumber = 'Enter a valid UK contact number';
             }
 
             if (!values.address) {
@@ -181,17 +185,17 @@ const SignUpForm = () => {
 
                 if (response.data && response.data.status === 200) {
                     Swal.fire({
-                        title: 'Registration completed successfully!', 
+                        title: 'Registration completed successfully!',
                         icon: 'success',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#C3EAE7'
                     });
                 } else if (response.error) {
                     // Handle RTK Query error response
-                    const errorMessage = 'data' in response.error 
-                        ? (response.error.data as ErrorResponse).error 
+                    const errorMessage = 'data' in response.error
+                        ? (response.error.data as ErrorResponse).error
                         : 'An unexpected error occurred';
-                    
+
                     Swal.fire({
                         title: 'Registration failed!',
                         text: `Registration failed: ${errorMessage}`,
@@ -700,6 +704,14 @@ const SignUpForm = () => {
                             <a href="#" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
                         </div>
                     </form>
+                </div>
+
+                <div className="mt-6 text-center">
+                    <span className="text-gray-700 text-base">Already registered?{' '}
+                        <a href="/login" className="text-black font-semibold hover:underline">Login here</a>
+                    </span>
+                    <span className="mx-2">|</span>
+                    <a href="/" className="text-sm text-[#C3EAE7] hover:text-[#C3EAE7] transition-colors font-semibold hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>Back to Home</a>
                 </div>
 
                 <div className="mt-8 text-center">

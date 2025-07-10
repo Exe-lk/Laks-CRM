@@ -276,7 +276,7 @@ const LoginForm = () => {
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
               <a href="/register" className="text-[#C3EAE7] hover:text-black font-semibold transition-colors hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>
-                Create one here
+                Register
               </a>
             </p>
           </div>
