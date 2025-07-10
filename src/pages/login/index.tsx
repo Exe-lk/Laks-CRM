@@ -47,17 +47,17 @@ const LoginForm = () => {
     onSubmit: async (values) => {
       try {
         console.log('Login values:', values);
-        
-        const result = await login({ 
-          email: values.email, 
-          password: values.password 
+
+        const result = await login({
+          email: values.email,
+          password: values.password
         });
-        
+
         console.log('Login result:', result);
 
         if ('data' in result && result.data) {
           const { accessToken, session } = result.data;
-          
+
           if (accessToken) {
             localStorage.setItem('token', accessToken);
           } else if (session?.access_token) {
@@ -65,7 +65,7 @@ const LoginForm = () => {
           }
 
           localStorage.setItem('locumId', JSON.stringify(result.data.profile.id));
-          
+
           await Swal.fire({
             title: 'Login Successful!',
             text: 'Welcome back!',
@@ -75,18 +75,18 @@ const LoginForm = () => {
             timer: 2000,
             timerProgressBar: true
           });
-          
+
           router.push('/');
         } else if ('error' in result && result.error) {
           let errorMessage = 'Login failed';
-          
+
           console.log('Login error details:', result.error);
-          
+
           if ('data' in result.error && typeof result.error.data === 'object' && result.error.data !== null) {
             const errorData = result.error.data as any;
             console.log('Error data:', errorData);
             errorMessage = errorData.error || errorMessage;
-            
+
             if (errorData.status === 'pending') {
               errorMessage = 'Your account is still pending approval. Please wait for admin approval.';
             } else if (errorData.status === 'deleted') {
@@ -95,7 +95,7 @@ const LoginForm = () => {
           } else if ('message' in result.error) {
             errorMessage = result.error.message || errorMessage;
           }
-          
+
           Swal.fire({
             title: 'Login Failed!',
             text: errorMessage,
@@ -157,11 +157,10 @@ const LoginForm = () => {
                 onChange={formik.handleChange}
                 value={formik.values.email}
                 onBlur={formik.handleBlur}
-                className={`w-full px-4 py-3 border-2 ${
-                  formik.errors.email && formik.touched.email 
-                    ? 'border-red-500' 
+                className={`w-full px-4 py-3 border-2 ${formik.errors.email && formik.touched.email
+                    ? 'border-red-500'
                     : 'border-gray-200'
-                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                  } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                 placeholder="Enter your email"
               />
               {formik.errors.email && formik.touched.email && (
@@ -184,11 +183,10 @@ const LoginForm = () => {
                   onChange={formik.handleChange}
                   value={formik.values.password}
                   onBlur={formik.handleBlur}
-                  className={`w-full px-4 py-3 pr-12 border-2 ${
-                    formik.errors.password && formik.touched.password 
-                      ? 'border-red-500' 
+                  className={`w-full px-4 py-3 pr-12 border-2 ${formik.errors.password && formik.touched.password
+                      ? 'border-red-500'
                       : 'border-gray-200'
-                  } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -226,11 +224,10 @@ const LoginForm = () => {
                       onBlur={formik.handleBlur}
                       className="sr-only"
                     />
-                    <div className={`w-5 h-5 border-2 ${
-                      formik.values.rememberMe 
-                        ? 'border-[#C3EAE7] bg-[#C3EAE7]' 
+                    <div className={`w-5 h-5 border-2 ${formik.values.rememberMe
+                        ? 'border-[#C3EAE7] bg-[#C3EAE7]'
                         : 'border-gray-300 bg-white'
-                    } rounded group-hover:border-[#C3EAE7] transition-colors duration-300 flex items-center justify-center`}>
+                      } rounded group-hover:border-[#C3EAE7] transition-colors duration-300 flex items-center justify-center`}>
                       {formik.values.rememberMe && (
                         <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -240,9 +237,10 @@ const LoginForm = () => {
                   </div>
                   <span className="ml-3 text-sm text-gray-700 group-hover:text-black transition-colors font-semibold">Remember me</span>
                 </label>
-                <a href="/forgetPassword" className="text-sm text-[#C3EAE7] hover:text-black transition-colors font-semibold hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>
+                <a href="/forgetPassword" className="text-sm text-black font-bold">
                   Forgot password?
                 </a>
+
               </div>
             </div>
 
@@ -275,8 +273,8 @@ const LoginForm = () => {
           <div className="px-8 pb-8 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="/register" className="text-[#C3EAE7] hover:text-black font-semibold transition-colors hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}>
-                Register
+              <a href="/register" className="text-black font-bold">
+                Register here
               </a>
             </p>
           </div>
