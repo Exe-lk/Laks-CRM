@@ -366,22 +366,30 @@ const NavBar = () => {
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 4-6 8-6s8 2 8 6'/></svg></span>
                             <span className="font-bold text-black">Full Name:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.fullName || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line max-w-[180px]">
+                            {profile?.fullName || '-'}
+                          </div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M4 4h16v16H4z'/><path d='M22 6l-10 7L2 6'/></svg></span>
                             <span className="font-bold text-black">Email:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.emailAddress || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line max-w-[180px]">
+                            {profile?.emailAddress || '-'}
+                          </div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M22 16.92V19a2 2 0 0 1-2.18 2A19.72 19.72 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.13.81.37 1.6.7 2.34a2 2 0 0 1-.45 2.11l-.27.27a16 16 0 0 0 6.29 6.29l.27-.27a2 2 0 0 1 2.11-.45c.74.33 1.53.57 2.34.7A2 2 0 0 1 21 16.91z'/></svg></span>
                             <span className="font-bold text-black">Contact Number:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.contactNumber || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line max-w-[180px]">
+                            {profile?.contactNumber || '-'}
+                          </div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M21 10.5a8.38 8.38 0 0 1-1.9.5 4.48 4.48 0 0 0-7.6 0 8.38 8.38 0 0 1-1.9-.5'/></svg></span>
                             <span className="font-bold text-black">Address:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.address || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line max-w-[180px]">
+                            {profile?.address || '-'}
+                          </div>
                         </div>
                         <div className="hidden md:block border-l border-[#C3EAE7] h-full absolute left-1/2 top-0"></div>
                         <div className="space-y-5 md:pl-10">
@@ -389,22 +397,22 @@ const NavBar = () => {
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M16 3v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V3'/></svg></span>
                             <span className="font-bold text-black">GDC Number:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.gdcNumber || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.gdcNumber || '-'}</div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z'/><path d='M6.5 20h11'/></svg></span>
                             <span className="font-bold text-black">Employee Type:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.employeeType || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.employeeType || '-'}</div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='3' y='4' width='18' height='18' rx='2'/><path d='M16 2v4'/><path d='M8 2v4'/></svg></span>
                             <span className="font-bold text-black">Date of Birth:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</div>
                           <div className="flex items-center space-x-2 mt-4">
                             <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='2' y='7' width='20' height='14' rx='2'/><path d='M16 3v4'/></svg></span>
                             <span className="font-bold text-black">Reference Number:</span>
                           </div>
-                          <div className="text-black text-lg ml-7">{profile?.referenceNumber || '-'}</div>
+                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.referenceNumber || '-'}</div>
                         </div>
                       </div>
                     </div>
