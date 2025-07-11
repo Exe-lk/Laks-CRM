@@ -134,13 +134,16 @@ const SignUpForm = () => {
                 errors.email = 'Invalid email address';
             }
 
-            // if (!values.contactNumber) {
-            //     errors.contactNumber = 'Contact number is required';
-            // } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
-            //     errors.contactNumber = 'Contact number must be 10 or 11 digits';
-            // } else if (!/^(07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)) {
-            //     errors.contactNumber = 'Enter a valid UK contact number';
-            // }
+            if (!values.contactNumber) {
+                errors.contactNumber = 'Contact number is required';
+            } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
+                errors.contactNumber = 'Contact number must be 10 or 11 digits';
+            } else if (
+                !/^(?:07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)
+            ) {
+                errors.contactNumber = 'Enter a valid UK contact number';
+            }
+
 
             if (!values.address) {
                 errors.address = 'Address is required';

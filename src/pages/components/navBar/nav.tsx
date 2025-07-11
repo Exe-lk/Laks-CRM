@@ -1,17 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Logo from "../../../../public/assests/Laks Dent Logo.png"
+import Logo from "../../../../public/assests/logolaksCRM.jpg"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
+
 
 const NavBar = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profile, setProfile] = useState<{
+    fullName?: string;
+    emailAddress?: string;
+    contactNumber?: string;
+    address?: string;
+    gdcNumber?: string;
+    employeeType?: string;
+    dateOfBirth?: string;
+    referenceNumber?: string;
+    status?: string;
+  } | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
+    if (token) {
+      const profileStr = localStorage.getItem('profile');
+      if (profileStr) {
+        try {
+          setProfile(JSON.parse(profileStr));
+        } catch {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
+    } else {
+      setProfile(null);
+    }
   }, []);
 
   const isActivePage = (path: string) => {
@@ -33,8 +60,9 @@ const NavBar = () => {
       if (result.isConfirmed) {
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
+        localStorage.removeItem('profile');
         setIsLoggedIn(false);
-  
+
         Swal.fire({
           title: 'Logged out',
           text: 'You have been successfully logged out.',
@@ -46,7 +74,7 @@ const NavBar = () => {
       }
     });
   };
-  
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -75,9 +103,18 @@ const NavBar = () => {
               </button>
             </>
           ) : (
-            <button className="bg-red-500 text-white px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-red-600 transition text-sm lg:text-base" onClick={handleLogout}>
-              Logout
-            </button>
+            <>
+              <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition mr-2"
+                title="View Profile"
+                onClick={() => setIsProfileModalOpen(true)}
+              >
+                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
+              </button>
+            </>
           )}
         </div>
 
@@ -100,71 +137,65 @@ const NavBar = () => {
 
       <div className="hidden md:block border-t border-gray-300">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/')}
           >
             Home
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/aboutus')}
           >
             About Us
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/dentalpractices')}
           >
             Dental Practices
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/dentalnurses')}
           >
             Dental Nurses
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/hygienist')}
           >
             Hygienist
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/accounting')}
           >
             Accounting
           </li>
-          <li 
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-              isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
-            }`} 
+          <li
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+              }`}
             onClick={() => router.push('/components/contactus')}
           >
             Contact Us
           </li>
           {isLoggedIn && (
-            <li 
-              className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${
-                isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-              }`} 
-              onClick={() => router.push('/components/myDocumnet')}
-            >
-              Document Upload
-            </li>
+            <>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/components/myDocumnet')}
+              >
+                Document Upload
+              </li>
+            </>
           )}
         </ul>
       </div>
@@ -187,71 +218,77 @@ const NavBar = () => {
 
             <div className="px-4 py-6">
               <ul className="space-y-4 text-lg font-medium text-gray-800">
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/'); closeMobileMenu(); }}
                 >
                   Home
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}
                 >
                   About Us
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/dentalpractices'); closeMobileMenu(); }}
                 >
                   Dental Practices
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/dentalnurses'); closeMobileMenu(); }}
                 >
                   Dental Nurses
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/hygienist'); closeMobileMenu(); }}
                 >
                   Hygienist
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/accounting'); closeMobileMenu(); }}
                 >
                   Accounting
                 </li>
-                <li 
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                    isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`} 
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
                   onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}
                 >
                   Contact Us
                 </li>
                 {isLoggedIn && (
-                  <li 
-                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${
-                      isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-                    }`} 
-                    onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
-                  >
-                    Document Upload
-                  </li>
+                  <>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
+                    >
+                      Document Upload
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                        title="View Profile"
+                        onClick={() => { setIsProfileModalOpen(true); closeMobileMenu(); }}
+                      >
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                        </svg>
+                      </button>
+                    </li>
+                  </>
                 )}
               </ul>
 
@@ -274,6 +311,93 @@ const NavBar = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {isProfileModalOpen && (
+        <>
+          <div className="fixed inset-0 z-40 backdrop-blur-md transition-all duration-300"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-2 py-4 overflow-y-auto">
+            <div className="relative w-full max-w-xl flex flex-col" style={{ maxHeight: '90vh' }}>
+              <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-[#C3EAE7] p-0 flex flex-col animate-fadeIn">
+                <div className="rounded-t-3xl w-full bg-[#C3EAE7] flex flex-col items-center justify-center py-8 px-4 shadow-md relative">
+                  <div className="absolute top-3 right-3 flex space-x-2 z-10">
+                    <button
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 hover:bg-red-500 transition text-red-600 hover:text-white shadow-md border border-red-200"
+                      title="Logout"
+                      onClick={handleLogout}
+                    >
+                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <path d="M16 17l1.5 1.5a2 2 0 0 1-2.83 2.83l-1.5-1.5" />
+                        <path d="M7.5 16.5l-1.5 1.5a2 2 0 0 0 2.83 2.83l1.5-1.5" />
+                        <path d="M12 2v10" />
+                        <path d="M5 12a7 7 0 0 1 14 0" />
+                      </svg>
+                    </button>
+                    <button
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-white hover:bg-[#C3EAE7] transition text-black text-2xl font-bold focus:outline-none shadow-md border border-[#C3EAE7]"
+                      onClick={() => setIsProfileModalOpen(false)}
+                      aria-label="Close"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <div className="relative mb-2 mt-2">
+                    <div className="w-24 h-24 rounded-full bg-white p-1 flex items-center justify-center shadow-xl border-4 border-[#C3EAE7]">
+                      <div className="w-22 h-22 rounded-full bg-[#C3EAE7] flex items-center justify-center">
+                        <svg width="60" height="60" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-black mb-1 mt-2 drop-shadow-lg tracking-tight font-sans">{profile?.fullName || 'User'}</h2>
+                  <p className="text-black font-medium mb-2 text-base">Welcome to your profile!</p>
+                </div>
+                <div className="flex-1 overflow-y-auto px-8 py-8 bg-white rounded-b-3xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Full Name</span>
+                        <span className="text-black text-lg font-semibold">{profile?.fullName || '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Email</span>
+                        <span className="text-black text-lg font-semibold">{profile?.emailAddress || '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Contact Number</span>
+                        <span className="text-black text-lg font-semibold">{profile?.contactNumber || '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Address</span>
+                        <span className="text-black text-lg font-semibold">{profile?.address || '-'}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-6 md:border-l md:border-[#C3EAE7] md:pl-8">
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">GDC Number</span>
+                        <span className="text-black text-lg font-semibold">{profile?.gdcNumber || '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Employee Type</span>
+                        <span className="text-black text-lg font-semibold">{profile?.employeeType || '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Date of Birth</span>
+                        <span className="text-black text-lg font-semibold">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</span>
+                      </div>
+                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
+                        <span className="font-bold text-black text-base mb-1">Reference Number</span>
+                        <span className="text-black text-lg font-semibold">{profile?.referenceNumber || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </nav>
   );
