@@ -45,7 +45,7 @@ const therapistFields = [
 const initialValues = {
     fullName: '',
     email: '',
-    contactNumber: '',
+    contactNumberDigits: '', // Only the 10 digits after +44
     address: '',
     password: '',
     confirmPassword: '',
@@ -101,7 +101,7 @@ const transformFormDataToAPI = (values: typeof initialValues): LocumProfile => {
     return {
         fullName: values.fullName,
         emailAddress: values.email,
-        contactNumber: values.contactNumber,
+        contactNumber: '+44' + values.contactNumberDigits, // Concatenate +44 with digits
         address: values.address,
         password: values.password,
         gdcNumber: values.gdcNumber,
@@ -134,14 +134,10 @@ const SignUpForm = () => {
                 errors.email = 'Invalid email address';
             }
 
-            if (!values.contactNumber) {
-                errors.contactNumber = 'Contact number is required';
-            } else if (!/^\d{10,11}$/.test(values.contactNumber)) {
-                errors.contactNumber = 'Contact number must be 10 or 11 digits';
-            } else if (
-                !/^(?:07\d{9}|01\d{8,9}|02\d{8,9}|03\d{8,9})$/.test(values.contactNumber)
-            ) {
-                errors.contactNumber = 'Enter a valid UK contact number';
+            if (!values.contactNumberDigits) {
+                errors.contactNumberDigits = 'Contact number is required';
+            } else if (!/^\d{10}$/.test(values.contactNumberDigits)) {
+                errors.contactNumberDigits = 'Contact number must be exactly 10 digits';
             }
 
 
@@ -370,19 +366,27 @@ const SignUpForm = () => {
                                 </svg>
                                 Contact Number *
                             </label>
-                            <input
-                                type="text"
-                                name="contactNumber"
-                                value={formik.values.contactNumber}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${formik.errors.contactNumber && formik.touched.contactNumber ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
-                                placeholder="Enter your phone number"
-                                required
-                            />
-                            {formik.errors.contactNumber && formik.touched.contactNumber && (
-                                <div className="text-red-500 text-sm mt-1">{formik.errors.contactNumber}</div>
+                            <div className="flex items-center">
+                                <span className="px-3 py-3 border-2 border-r-0 border-gray-200 bg-gray-100 rounded-l-xl text-black font-semibold select-none">+44</span>
+                                <input
+                                    type="text"
+                                    name="contactNumberDigits"
+                                    value={formik.values.contactNumberDigits}
+                                    onChange={(e) => {
+                                        // Only allow digits, max 10
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        formik.setFieldValue('contactNumberDigits', val);
+                                    }}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.contactNumberDigits && formik.touched.contactNumberDigits ? 'border-red-500' : 'border-gray-200'} rounded-r-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    placeholder="Enter 10 digit number"
+                                    required
+                                    maxLength={10}
+                                    inputMode="numeric"
+                                />
+                            </div>
+                            {formik.errors.contactNumberDigits && formik.touched.contactNumberDigits && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.contactNumberDigits}</div>
                             )}
                         </div>
 
