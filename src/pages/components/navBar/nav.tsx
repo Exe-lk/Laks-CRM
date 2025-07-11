@@ -324,7 +324,10 @@ const NavBar = () => {
                     <button
                       className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 hover:bg-red-500 transition text-red-600 hover:text-white shadow-md border border-red-200"
                       title="Logout"
-                      onClick={handleLogout}
+                      onClick={() => {
+                        setIsProfileModalOpen(false);
+                        setTimeout(() => { handleLogout(); }, 200);
+                      }}
                     >
                       <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                         <path d="M16 17l1.5 1.5a2 2 0 0 1-2.83 2.83l-1.5-1.5" />
@@ -355,43 +358,57 @@ const NavBar = () => {
                   <p className="text-black font-medium mb-2 text-base">Welcome to your profile!</p>
                 </div>
                 <div className="flex-1 overflow-y-auto px-8 py-8 bg-white rounded-b-3xl">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Full Name</span>
-                        <span className="text-black text-lg font-semibold">{profile?.fullName || '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Email</span>
-                        <span className="text-black text-lg font-semibold">{profile?.emailAddress || '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Contact Number</span>
-                        <span className="text-black text-lg font-semibold">{profile?.contactNumber || '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Address</span>
-                        <span className="text-black text-lg font-semibold">{profile?.address || '-'}</span>
+                  <div className="max-w-xl mx-auto w-full">
+                    <div className="relative bg-gradient-to-b from-white to-[#C3EAE7]/40 rounded-2xl shadow-md border-l-4 border-[#C3EAE7] px-8 py-10">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                        <div className="space-y-5">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 4-6 8-6s8 2 8 6'/></svg></span>
+                            <span className="font-bold text-black">Full Name:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.fullName || '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M4 4h16v16H4z'/><path d='M22 6l-10 7L2 6'/></svg></span>
+                            <span className="font-bold text-black">Email:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.emailAddress || '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M22 16.92V19a2 2 0 0 1-2.18 2A19.72 19.72 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.13.81.37 1.6.7 2.34a2 2 0 0 1-.45 2.11l-.27.27a16 16 0 0 0 6.29 6.29l.27-.27a2 2 0 0 1 2.11-.45c.74.33 1.53.57 2.34.7A2 2 0 0 1 21 16.91z'/></svg></span>
+                            <span className="font-bold text-black">Contact Number:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.contactNumber || '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M21 10.5a8.38 8.38 0 0 1-1.9.5 4.48 4.48 0 0 0-7.6 0 8.38 8.38 0 0 1-1.9-.5'/></svg></span>
+                            <span className="font-bold text-black">Address:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.address || '-'}</div>
+                        </div>
+                        <div className="hidden md:block border-l border-[#C3EAE7] h-full absolute left-1/2 top-0"></div>
+                        <div className="space-y-5 md:pl-10">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='3' y='3' width='18' height='18' rx='2'/><path d='M16 3v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V3'/></svg></span>
+                            <span className="font-bold text-black">GDC Number:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.gdcNumber || '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z'/><path d='M6.5 20h11'/></svg></span>
+                            <span className="font-bold text-black">Employee Type:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.employeeType || '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='3' y='4' width='18' height='18' rx='2'/><path d='M16 2v4'/><path d='M8 2v4'/></svg></span>
+                            <span className="font-bold text-black">Date of Birth:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</div>
+                          <div className="flex items-center space-x-2 mt-4">
+                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='2' y='7' width='20' height='14' rx='2'/><path d='M16 3v4'/></svg></span>
+                            <span className="font-bold text-black">Reference Number:</span>
+                          </div>
+                          <div className="text-black text-lg ml-7">{profile?.referenceNumber || '-'}</div>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-6 md:border-l md:border-[#C3EAE7] md:pl-8">
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">GDC Number</span>
-                        <span className="text-black text-lg font-semibold">{profile?.gdcNumber || '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Employee Type</span>
-                        <span className="text-black text-lg font-semibold">{profile?.employeeType || '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Date of Birth</span>
-                        <span className="text-black text-lg font-semibold">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</span>
-                      </div>
-                      <div className="bg-[#C3EAE7] rounded-xl shadow-md p-5 flex flex-col items-start">
-                        <span className="font-bold text-black text-base mb-1">Reference Number</span>
-                        <span className="text-black text-lg font-semibold">{profile?.referenceNumber || '-'}</span>
-                      </div>
-                    </div>
+                    <div className="my-6 border-t border-[#C3EAE7] w-full"></div>
                   </div>
                 </div>
               </div>
