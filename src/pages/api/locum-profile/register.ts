@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
-import { getSpecialityValue } from "@/lib/enums";
+import { getSpecialityValue,getSpecialityDisplayName } from "@/lib/enums";
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,7 +18,15 @@ export default async function handler(
           },
           orderBy: { createdAt: "desc" },
         });
-        return res.status(200).json(profiles);
+        // Map specialties to use display names
+        const profilesWithDisplayNames = profiles.map(profile => ({
+          ...profile,
+          specialties: profile.specialties.map(specialty => ({
+            ...specialty,
+            speciality: getSpecialityDisplayName(specialty.speciality)
+          }))
+        }));
+        return res.status(200).json(profilesWithDisplayNames);
 
       case "POST":
         // Create a new locum profile
