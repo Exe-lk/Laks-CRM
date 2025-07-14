@@ -75,6 +75,25 @@ const NavBar = () => {
     });
   };
 
+  const handleRegisterClick = () => {
+    Swal.fire({
+      title: 'Do you want to register as a',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Locum Staff',
+      denyButtonText: `Dental Practice`,
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push('/register');
+      } else if (result.isDenied) {
+        router.push('/practiceRegister');
+      }
+    });
+
+    closeMobileMenu?.();
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -98,7 +117,7 @@ const NavBar = () => {
               <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/login')}>
                 Login
               </button>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/register')}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleRegisterClick}>
                 Register
               </button>
             </>
@@ -144,7 +163,43 @@ const NavBar = () => {
           >
             Home
           </li>
-          <li
+         
+          {isLoggedIn && (
+            <>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/components/myDocumnet')}
+              >
+                Document Upload
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/pastAppointments')}
+              >
+                Past Appointments 
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/ongoingandfutureappointments')}
+              >
+               Ongoing and Future Appointments
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/pastandcurrentpayments')}
+              >
+                Past and Current Payments
+              </li>
+            </>
+          )}
+          {
+            !isLoggedIn && (
+              <>
+                 <li
             className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
               }`}
             onClick={() => router.push('/components/aboutus')}
@@ -186,17 +241,8 @@ const NavBar = () => {
           >
             Contact Us
           </li>
-          {isLoggedIn && (
-            <>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/components/myDocumnet')}
-              >
-                Document Upload
-              </li>
-            </>
-          )}
+              </>
+            )}
         </ul>
       </div>
 
@@ -225,7 +271,54 @@ const NavBar = () => {
                 >
                   Home
                 </li>
-                <li
+                {isLoggedIn && (
+                  <>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
+                    >
+                      Document Upload
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/pastAppointments'); closeMobileMenu(); }}
+                    >
+                      Past Appointments 
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/ongoingandfutureappointments'); closeMobileMenu(); }}
+                    >
+                       Ongoing and Future Appointments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/pastandcurrentpayments'); closeMobileMenu(); }}
+                    >
+                      Past and Current Payments
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                        title="View Profile"
+                        onClick={() => { setIsProfileModalOpen(true); closeMobileMenu(); }}
+                      >
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                        </svg>
+                      </button>
+                    </li>
+                  </>
+                )}
+                {
+                  !isLoggedIn && (
+                    <>
+                     <li
                   className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}
@@ -267,29 +360,9 @@ const NavBar = () => {
                 >
                   Contact Us
                 </li>
-                {isLoggedIn && (
-                  <>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
-                    >
-                      Document Upload
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <button
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"
-                        title="View Profile"
-                        onClick={() => { setIsProfileModalOpen(true); closeMobileMenu(); }}
-                      >
-                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                          <circle cx="12" cy="8" r="4" />
-                          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-                        </svg>
-                      </button>
-                    </li>
-                  </>
-                )}
+                    </>
+                  )
+                }
               </ul>
 
               <div className="mt-8 space-y-3">
@@ -298,15 +371,11 @@ const NavBar = () => {
                     <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={() => { router.push('/login'); closeMobileMenu(); }}>
                       Login
                     </button>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={() => { router.push('/register'); closeMobileMenu(); }}>
+                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={ handleRegisterClick } >
                       Register
                     </button>
                   </>
-                ) : (
-                  <button className="w-full bg-red-500 text-white px-6 py-3 rounded-full font-medium hover:bg-red-600 transition" onClick={() => { handleLogout(); closeMobileMenu(); }}>
-                    Logout
-                  </button>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -408,11 +477,6 @@ const NavBar = () => {
                             <span className="font-bold text-black">Date of Birth:</span>
                           </div>
                           <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-'}</div>
-                          <div className="flex items-center space-x-2 mt-4">
-                            <span className="text-black"><svg width='20' height='20' fill='none' stroke='#C3EAE7' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'><rect x='2' y='7' width='20' height='14' rx='2'/><path d='M16 3v4'/></svg></span>
-                            <span className="font-bold text-black">Reference Number:</span>
-                          </div>
-                          <div className="text-black text-lg ml-7 break-words whitespace-pre-line">{profile?.referenceNumber || '-'}</div>
                         </div>
                       </div>
                     </div>
