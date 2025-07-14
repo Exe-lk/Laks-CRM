@@ -161,8 +161,12 @@ const SignUpForm = () => {
                 errors.gdcRegistration = 'Please select GDC registration status';
             }
 
-            if (values.gdcRegistration === 'yes' && !values.gdcNumber) {
-                errors.gdcNumber = 'GDC registration number is required';
+            if (values.gdcRegistration === 'yes') {
+                if (!values.gdcNumber) {
+                    errors.gdcNumber = 'GDC registration number is required';
+                } else if (!/^\d{4,7}$/.test(values.gdcNumber)) {
+                    errors.gdcNumber = 'GDC number must be 4 to 7 digits long and contain only numbers';
+                }
             }
 
             if (!values.jobType) {
