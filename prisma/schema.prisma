@@ -46,3 +46,17 @@ model Specialty {
 
   @@map("specialties")
 }
+
+model Practice {
+  id         String   @id @default(cuid())
+  name       String
+  telephone  String   @unique
+  email      String   @unique
+  dob        DateTime
+  GDCnumber  String
+  address    String?
+  location   String?
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
