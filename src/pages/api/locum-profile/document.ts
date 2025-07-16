@@ -105,11 +105,13 @@ export default async function handler(
           // Generate unique filename
           const fileExtension = file.originalFilename?.split('.').pop() || 'pdf';
           const fileName = `${locumId}_${fieldName}_${Date.now()}.${fileExtension}`;
+          // Save in a folder named after locumId
+          const filePath = `${locumId}/${fileName}`;
           
           // Upload to Supabase storage
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('document')
-            .upload(fileName, fileBuffer, {
+            .upload(filePath, fileBuffer, {
               contentType: file.mimetype,
               cacheControl: '3600',
             });
@@ -122,7 +124,7 @@ export default async function handler(
           // Get public URL
           const { data: urlData } = supabase.storage
             .from('document')
-            .getPublicUrl(fileName);
+            .getPublicUrl(filePath);
 
           // Add to update data
           updateData[fieldName] = urlData.publicUrl;

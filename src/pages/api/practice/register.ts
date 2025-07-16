@@ -55,7 +55,7 @@ export default async function handler(
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `https://laks-crm.netlify.app/`,
+              emailRedirectTo: `http://localhost:3000/veryfyemail/`,
             },
           }
         );
@@ -99,12 +99,12 @@ export default async function handler(
           return res.status(400).json({ error: "Profile ID is required" });
         }
 
-        const updatedProfile = await prisma.locumProfile.update({
+        const updatedProfile = await prisma.practice.update({
           where: { id },
           data: {
             ...updateData,
-            dateOfBirth: updateData.dateOfBirth
-              ? new Date(updateData.dateOfBirth)
+            dob : updateData.dob 
+              ? new Date(updateData.dob)
               : undefined,
           },
         });
