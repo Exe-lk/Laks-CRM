@@ -77,12 +77,25 @@ const NavBar = () => {
 
   const handleRegisterClick = () => {
     Swal.fire({
-      title: 'Do you want to register as a',
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Locum Staff',
-      denyButtonText: `Dental Practice`,
-      cancelButtonText: 'Cancel',
+       title: 'Do you want to login as a...',
+    icon: 'question',
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: '👩‍⚕️ Locum Staff',
+    denyButtonText: '🏥 Dental Practice',
+    cancelButtonText: '❌ Cancel',
+    background: '#f0f9ff',
+    confirmButtonColor: '#3b82f6',
+    denyButtonColor: '#10b981',
+    cancelButtonColor: '#ef4444',
+    customClass: {
+      popup: 'rounded-xl shadow-lg',
+      title: 'text-lg font-semibold text-gray-800',
+      actions: 'gap-4',
+      confirmButton: 'px-4 py-2',
+      denyButton: 'px-4 py-2',
+      cancelButton: 'px-4 py-2',
+    },
     }).then((result) => {
       if (result.isConfirmed) {
         router.push('/locumStaff/register');
@@ -95,23 +108,37 @@ const NavBar = () => {
   };
 
    const handleLoginClick = () => {
-    Swal.fire({
-      title: 'Do you want to login as a',
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Locum Staff',
-      denyButtonText: `Dental Practice`,
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        router.push('/locumStaff/login');
-      } else if (result.isDenied) {
-        router.push('/practiceUser/practiceLogin');
-      }
-    });
+  Swal.fire({
+    title: 'Do you want to login as a...',
+    icon: 'question',
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: '👩‍⚕️ Locum Staff',
+    denyButtonText: '🏥 Dental Practice',
+    cancelButtonText: '❌ Cancel',
+    background: '#f0f9ff',
+    confirmButtonColor: '#3b82f6',
+    denyButtonColor: '#10b981',
+    cancelButtonColor: '#ef4444',
+    customClass: {
+      popup: 'rounded-xl shadow-lg',
+      title: 'text-lg font-semibold text-gray-800',
+      actions: 'gap-4',
+      confirmButton: 'px-4 py-2',
+      denyButton: 'px-4 py-2',
+      cancelButton: 'px-4 py-2',
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.push('/locumStaff/login');
+    } else if (result.isDenied) {
+      router.push('/practiceUser/practiceLogin');
+    }
+  });
 
-    closeMobileMenu?.();
-  };
+  closeMobileMenu?.();
+};
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
