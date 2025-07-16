@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../lib/supabaseclient';
+import { supabase } from '../../../lib/supabaseclient';
+import { useVerifyStatusMutation } from '../../../redux/slices/practiceProfileSlice';
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('Verifying your email...');
   const router = useRouter();
+  const [updatestatus] = useVerifyStatusMutation();
+  
 
   useEffect(() => {
     const handleEmailVerification = async () => {
       try {
-        // Get the current session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -20,19 +22,49 @@ export default function VerifyEmail() {
         }
 
         if (session) {
-          // User is authenticated, check if email is verified
           const { data: user } = await supabase.auth.getUser();
+          console.log(user)
           
           if (user?.user?.email_confirmed_at) {
-
-            
-            setStatus('success');
-            setMessage('Email verified successfully!');
-            
-            // Redirect to dashboard after 2 seconds
-            setTimeout(() => {
-              router.push('/');
-            }, 2000);
+            if (user?.user?.email) {
+              try {
+                const response = await updatestatus({ email: user.user.email, status: 'verify' });
+                console.log(response)
+                if (response && !response.error) {
+                  setStatus('success');
+                  setMessage('Email verified successfully!');
+                  setTimeout(() => {
+                    router.push('/');
+                  }, 2000);
+                } else if (response && response.error) {
+                  setStatus('error');
+                  let errorMsg = 'Status update failed: Unknown error';
+                  const err = response.error as any;
+                  if (err && typeof err === 'object') {
+                    if ('data' in err && err.data && typeof err.data === 'object' && 'error' in err.data) {
+                      errorMsg = 'Status update failed: ' + err.data.error;
+                    } else if ('message' in err) {
+                      errorMsg = 'Status update failed: ' + err.message;
+                    }
+                  }
+                  setMessage(errorMsg);
+                  return;
+                } else {
+                  setStatus('error');
+                  setMessage('Status update failed: Unknown error');
+                  return;
+                }
+              } catch (updateError) {
+                console.error('Status update error:', updateError);
+                setStatus('error');
+                let errorMsg = 'Status update failed: Unknown error';
+                if (updateError && typeof updateError === 'object' && 'message' in updateError) {
+                  errorMsg = 'Status update failed: ' + (updateError as any).message;
+                }
+                setMessage(errorMsg);
+                return;
+              }
+            }
           } else {
             setStatus('error');
             setMessage('Email verification is still pending.');

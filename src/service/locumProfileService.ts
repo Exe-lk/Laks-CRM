@@ -38,3 +38,12 @@ export const documentUpload = async (locumId: string, documents: any) => {
         throw new Error(error.response?.data?.error || 'Failed to upload document');
     }
 };
+
+export const verifyEmail = async (email: string, status: string) =>{
+     try {
+        const response = await axios.put('/api/locum-profile/confirm-email', {email, status });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.error || 'Failed to update status');
+    }
+}

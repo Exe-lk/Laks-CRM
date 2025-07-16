@@ -55,7 +55,7 @@ export default async function handler(
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `http://localhost:3000/veryfyemail/`,
+              emailRedirectTo: `http://localhost:3000/practiceUser/verifyEmail`,
             },
           }
         );

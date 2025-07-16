@@ -90,7 +90,7 @@ export default async function handler(
             email: emailAddress,
             password: password,
             options: {
-              emailRedirectTo: `http://localhost:3000/veryfyemail/`
+              emailRedirectTo: `http://localhost:3000/locumStaff/verifyEmail`
             }
           });
 
