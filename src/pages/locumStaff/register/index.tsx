@@ -2,8 +2,8 @@ import { SetStateAction, useState } from "react";
 import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
-import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../redux/slices/locumProfileSlice';
-import { GoogleMapModal } from '../../components/GoogleMapModal';
+import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/locumProfileSlice';
+import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
 export interface Specialty {
@@ -45,7 +45,7 @@ const therapistFields = [
 const initialValues = {
     fullName: '',
     email: '',
-    contactNumberDigits: '', // Only the 10 digits after +44
+    contactNumberDigits: '',
     address: '',
     password: '',
     confirmPassword: '',
@@ -719,7 +719,7 @@ const SignUpForm = () => {
 
                 <div className="mt-6 text-center">
                     <span className="text-gray-700 text-base">Already registered?{' '}
-                        <a href="/login" className="text-black font-semibold hover:underline">Login here</a>
+                        <a href="/locumStaff/login" className="text-black font-semibold hover:underline">Login here</a>
                     </span>
                     <span className="mx-2">|</span>
                     <a href="/" className="text-sm text-black font-bold">Back to Home</a>

@@ -85,33 +85,15 @@ const NavBar = () => {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        router.push('/locumStaff/register');
+        router.push('/register');
       } else if (result.isDenied) {
-        router.push('/practiceUser/practiceRegister');
+        router.push('/practiceRegister');
       }
     });
 
     closeMobileMenu?.();
   };
 
-   const handleLoginClick = () => {
-    Swal.fire({
-      title: 'Do you want to login as a',
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Locum Staff',
-      denyButtonText: `Dental Practice`,
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        router.push('/locumStaff/login');
-      } else if (result.isDenied) {
-        router.push('/practiceUser/practiceLogin');
-      }
-    });
-
-    closeMobileMenu?.();
-  };
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -132,7 +114,7 @@ const NavBar = () => {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
           {!isLoggedIn ? (
             <>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleLoginClick}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={() => router.push('/login')}>
                 Login
               </button>
               <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleRegisterClick}>
@@ -194,21 +176,21 @@ const NavBar = () => {
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
-                onClick={() => router.push('/locumStaff/pastAppointments')}
+                onClick={() => router.push('/pastAppointments')}
               >
                 Past Appointments 
               </li>
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
-                onClick={() => router.push('/locumStaff/ongoingandfutureappointments')}
+                onClick={() => router.push('/ongoingandfutureappointments')}
               >
                Ongoing and Future Appointments
               </li>
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
-                onClick={() => router.push('/locumStaff/pastandcurrentpayments')}
+                onClick={() => router.push('/pastandcurrentpayments')}
               >
                 Past and Current Payments
               </li>
@@ -301,21 +283,21 @@ const NavBar = () => {
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
-                      onClick={() => { router.push('/locumStaff/pastAppointments'); closeMobileMenu(); }}
+                      onClick={() => { router.push('/pastAppointments'); closeMobileMenu(); }}
                     >
                       Past Appointments 
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
-                      onClick={() => { router.push('/locumStaff/ongoingandfutureappointments'); closeMobileMenu(); }}
+                      onClick={() => { router.push('/ongoingandfutureappointments'); closeMobileMenu(); }}
                     >
                        Ongoing and Future Appointments
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
-                      onClick={() => { router.push('/locumStaff/pastandcurrentpayments'); closeMobileMenu(); }}
+                      onClick={() => { router.push('/pastandcurrentpayments'); closeMobileMenu(); }}
                     >
                       Past and Current Payments
                     </li>
@@ -386,7 +368,7 @@ const NavBar = () => {
               <div className="mt-8 space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={ handleLoginClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={() => { router.push('/login'); closeMobileMenu(); }}>
                       Login
                     </button>
                     <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={ handleRegisterClick } >
