@@ -56,7 +56,7 @@ export interface ErrorResponse {
 export const locumProfileApiSlice = createApi({
   reducerPath: 'locumProfileApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: '/api/',
+    baseUrl: 'https://laks-crm.netlify.app/api/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;
@@ -109,6 +109,13 @@ export const locumProfileApiSlice = createApi({
         body: credentials,
       }),
     }),
+     VerifyStatus: builder.mutation<LocumProfile, { email: string; status: string }>({
+      query: (updatedProfile) => ({
+        url: 'locum-profile/confirm-email',
+        method: 'PUT',
+        body: updatedProfile,
+      }),
+    }),
   }),
 });
 
@@ -120,4 +127,5 @@ export const {
   useDeleteLocumProfileMutation,
   useLoginMutation,
   useDocumentUploadMutation,
+  useVerifyStatusMutation,
 } = locumProfileApiSlice; 

@@ -29,3 +29,12 @@ export const login = async (email: string, password: string) => {
         throw new Error(error.response?.data?.error || 'Failed to login');
     }
 };
+
+export const verifyEmail = async (email: string, status: string) =>{
+     try {
+        const response = await axios.put('/api/practice/confirm-email', { email, status });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.error || 'Failed to update status');
+    }
+}

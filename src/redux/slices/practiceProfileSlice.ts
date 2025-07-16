@@ -91,6 +91,13 @@ export const PracticeProfileApiSlice = createApi({
         body: credentials,
       }),
     }),
+     VerifyStatus: builder.mutation<PracticeProfile, { email: string; status: string }>({
+      query: (updatedProfile) => ({
+        url: 'practice/confirm-email',
+        method: 'PUT',
+        body: updatedProfile,
+      }),
+    }),
   }),
 });
 
@@ -101,4 +108,5 @@ export const {
   useUpdatePracticeProfileMutation,
   useDeletePracticeProfileMutation,
   useLoginMutation,
+  useVerifyStatusMutation
 } = PracticeProfileApiSlice; 
