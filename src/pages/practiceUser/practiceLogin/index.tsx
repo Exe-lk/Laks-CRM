@@ -279,6 +279,11 @@ const LoginForm = () => {
                 Register here
               </a>
             </p>
+              <p className="text-sm text-gray-600 mt-2">
+              <a href="/" className="text-black font-bold">
+               🏠 Back to Home
+              </a>
+            </p>
           </div>
         </div>
       </div>
