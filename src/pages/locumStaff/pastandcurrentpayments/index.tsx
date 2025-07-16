@@ -1,6 +1,6 @@
 import React from "react";
-import NavBar from "../components/navBar/nav";
-import Footer from "../components/footer/index";
+import NavBar from "../../components/navBar/nav";
+import Footer from "../../components/footer/index";
 
 const samplePayments = [
   {

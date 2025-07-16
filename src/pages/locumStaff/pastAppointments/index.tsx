@@ -1,6 +1,6 @@
 import React from "react";
-import NavBar from "../components/navBar/nav";
-import Footer from "../components/footer/index";
+import NavBar from "../../components/navBar/nav";
+import Footer from "../../components/footer/index";
 
 const sampleAppointments = [
   {
@@ -10,7 +10,7 @@ const sampleAppointments = [
     time: "09:00 - 10:00",
     dentist: "Dr. Smith",
     type: "Checkup",
-    status: "Pending",
+    status: "Completed",
   },
   {
     number: "APT-00124",
@@ -19,7 +19,7 @@ const sampleAppointments = [
     time: "11:30 - 12:30",
     dentist: "Dr. Patel",
     type: "Cleaning",
-    status: "In progress",
+    status: "Completed",
   },
   {
     number: "APT-00125",
@@ -32,7 +32,7 @@ const sampleAppointments = [
   },
 ];
 
-const OngoingAndFuturePage = () => {
+const PastAppointmentsPage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <NavBar />
@@ -40,15 +40,14 @@ const OngoingAndFuturePage = () => {
         <div className="text-center mb-8 pt-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2" stroke="currentColor" fill="none"/>
-              <path d="M16 2v4M8 2v4M3 10h18" strokeWidth="2" stroke="currentColor" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
-            Ongoing and Future Appointments
+            Past Appointments
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            View your ongoing and futire dental appointments and their details
+            View your previous dental appointments and their details
           </p>
           <div className="flex justify-center gap-2 mt-4">
             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
@@ -59,8 +58,8 @@ const OngoingAndFuturePage = () => {
 
         <div className="bg-white rounded-none shadow-xl  border-b-2 border-gray-200 w-full mx-auto px-2 sm:px-4 md:px-8">
           <div className="bg-[#C3EAE7] px-2 sm:px-4 py-6 w-full rounded-none">
-            <h2 className="text-2xl font-bold text-black">Ongoing and Future Appointments</h2>
-            <p className="text-gray-700 mt-1">All your ongoing and future appointments in one place</p>
+            <h2 className="text-2xl font-bold text-black">Appointment History</h2>
+            <p className="text-gray-700 mt-1">All your past appointments in one place</p>
           </div>
 
           <div className="py-8 w-full overflow-x-auto">
@@ -95,7 +94,7 @@ const OngoingAndFuturePage = () => {
               </tbody>
             </table>
             {sampleAppointments.length === 0 && (
-              <div className="text-center text-gray-500 py-8">No ongoing and future appointments found.</div>
+              <div className="text-center text-gray-500 py-8">No past appointments found.</div>
             )}
           </div>
         </div>
@@ -105,4 +104,4 @@ const OngoingAndFuturePage = () => {
   );
 };
 
-export default OngoingAndFuturePage;
+export default PastAppointmentsPage;

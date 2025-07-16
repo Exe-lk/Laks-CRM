@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
-import { useLoginMutation } from '../../redux/slices/locumProfileSlice';
+import { useLoginMutation } from '../../../redux/slices/locumProfileSlice';
 import Swal from 'sweetalert2';
 
 interface LoginFormValues {
@@ -275,7 +275,7 @@ const LoginForm = () => {
           <div className="px-8 pb-8 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="/register" className="text-black font-bold">
+              <a href="/locumStaff/register" className="text-black font-bold">
                 Register here
               </a>
             </p>
