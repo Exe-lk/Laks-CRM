@@ -90,7 +90,7 @@ export default async function handler(
             email: emailAddress,
             password: password,
             options: {
-              emailRedirectTo: `https://laks-crm.netlify.app/`
+              emailRedirectTo: `http://localhost:3000/veryfyemail/`
             }
           });
 
