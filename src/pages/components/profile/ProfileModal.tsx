@@ -9,7 +9,6 @@ interface Profile {
   fullName?: string;
   emailAddress?: string;
   contactNumber?: string;
-  address?: string;
   location?: string;
   gdcNumber?: string;
   employeeType?: string;
@@ -92,13 +91,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const handleSave = async () => {
     if (!editProfile) return;
     try {
-      await addLocumProfile(editProfile as any).unwrap();
+      const { specialties: _specialties, ...profileData } = editProfile as any;
+      await addLocumProfile(profileData as any).unwrap();
       setProfile(editProfile);
       localStorage.setItem('profile', JSON.stringify(editProfile));
       setEditMode(false);
       setEditProfile(null);
     } catch (error) {
-      alert('Failed to update profile');
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to update profile',
+        text: 'Please try again later.',
+        confirmButtonColor: '#d33',
+      });
+
     }
   };
 
@@ -108,7 +114,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
     return null;
   }
 
-  const renderEditField = (label: string, name: keyof Profile, icon: React.ReactNode, type: string = 'text') => (
+  const renderEditField = (
+    label: string,
+    name: keyof Profile,
+    icon: React.ReactNode,
+    type: string = 'text',
+    disabled: boolean = false
+  ) => (
     <div className="grid grid-cols-1 md:grid-cols-3 items-center pt-4">
       <div className="flex items-center gap-2">{icon}<span className="text-xs text-gray-500">{label}</span></div>
       <div className="col-span-2">
@@ -118,6 +130,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
           value={editProfile?.[name] || ''}
           onChange={handleChange}
           type={type}
+          disabled={disabled}
         />
       </div>
     </div>
@@ -158,13 +171,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
             {editMode ? (
               <>
                 {renderEditField('Full Name', 'fullName', <FaUserMd className="text-primary-700" />)}
-                {renderEditField('Email', 'emailAddress', <FaEnvelope className="text-primary-700" />)}
-                {renderEditField('GDC Number', 'gdcNumber', <FaIdBadge className="text-primary-700" />)}
+                {renderEditField('Email', 'emailAddress', <FaEnvelope className="text-primary-700" />, 'text', true)}
+                {renderEditField('GDC Number', 'gdcNumber', <FaIdBadge className="text-primary-700" />, 'text', true)}
                 {renderEditField('Contact', 'contactNumber', <FaPhone className="text-primary-700" />)}
-                {renderEditField('Date of Birth', 'dateOfBirth', <FaBirthdayCake className="text-primary-700" />, 'date')}
-                {renderEditField('Employee Type', 'employeeType', <FaBriefcase className="text-primary-700" />)}
-                {renderEditField('Address', 'address', <FaMapMarkerAlt className="text-primary-700" />)}
-                {renderEditField('Status', 'status', profile.status === 'Active' ? <FaCheckCircle className="text-green-600" /> : <FaTimesCircle className="text-red-600" />)}
+                {renderEditField('Employee Type', 'employeeType', <FaBriefcase className="text-primary-700" />, 'text', true)}
+                {renderEditField('Address', 'location', <FaMapMarkerAlt className="text-primary-700" />)}
+                {renderEditField('Status', 'status', profile.status === 'Active' ? <FaCheckCircle className="text-green-600" /> : <FaTimesCircle className="text-red-600" />, 'text', true)}
               </>
             ) : (
               <>
@@ -172,12 +184,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                 {renderViewField('Email', profile.emailAddress, <FaEnvelope className="text-primary-700" />)}
                 {renderViewField('GDC Number', profile.gdcNumber, <FaIdBadge className="text-primary-700" />)}
                 {renderViewField('Contact', profile.contactNumber, <FaPhone className="text-primary-700" />)}
-                {renderViewField('Date of Birth', profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-', <FaBirthdayCake className="text-primary-700" />)}
                 {renderViewField('Employee Type', profile.employeeType, <FaBriefcase className="text-primary-700" />)}
                 {renderViewField('Address', profile.location, <FaMapMarkerAlt className="text-primary-700" />)}
-                {renderViewField('Status', profile.status, profile.status === 'Active' ? <FaCheckCircle className="text-green-600" /> : <FaTimesCircle className="text-red-600" />, (
-                  <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide ${profile.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{profile.status}</span>
-                ))}
+                {renderViewField(
+                  'Status',
+                  undefined, 
+                  profile.status === 'Active'
+                    ? <FaCheckCircle className="text-green-600" />
+                    : <FaTimesCircle className="text-red-600" />,
+                  (
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide ${profile.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {profile.status}
+                    </span>
+                  )
+                )}
               </>
             )}
           </div>

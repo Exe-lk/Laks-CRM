@@ -100,7 +100,13 @@ const MyDocument = () => {
         setFieldValue: any
     ) => {
         if (!canvasRef.current || canvasRef.current.isEmpty()) {
-            alert("Please draw your signature first.");
+            // alert("Please draw your signature first.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Oops!',
+                text: 'Please draw your signature first.',
+                confirmButtonColor: '#3085d6',
+              });
             return;
         }
         const dataURL = canvasRef.current.getCanvas().toDataURL("image/png");

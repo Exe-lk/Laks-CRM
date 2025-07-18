@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
-import imageAbout from "../../../../public/assests/dental_nurses.jpg"
+import imageAbout from "../../../../public/assests/MacBook Air - 17.png"
 import imagechart from "../../../../public/assests/nurses3.jpg"
 
 

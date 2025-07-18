@@ -68,6 +68,7 @@ const LoginForm = () => {
           // Store the profile object for later use (NavBar/Profile page)
           localStorage.setItem('profile', JSON.stringify(result.data.profile));
 
+          console.log(result.data.profile)
           await Swal.fire({
             title: 'Login Successful!',
             text: 'Welcome back!',
@@ -78,7 +79,7 @@ const LoginForm = () => {
             timerProgressBar: true
           });
 
-          router.push('/');
+          router.push('/practiceUser/home');
         } else if ('error' in result && result.error) {
           let errorMessage = 'Login failed';
 

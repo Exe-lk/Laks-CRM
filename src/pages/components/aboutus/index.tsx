@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
-import imageAbout from "../../../../public/assests/aboutusimage1.jpg"
+import imageAbout from "../../../../public/assests/MacBook Air - 13.png"
 
 const AboutUs = () => {
   return (
