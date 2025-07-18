@@ -36,12 +36,12 @@ export default async function handler(
       });
     }
     
-    locumProfile.specialties.map(specialty => ({
-        ...specialty,
-        speciality: getSpecialityDisplayName(specialty.speciality)
-      }))
-  
-      console.log(locumProfile);
+    // Map specialties to use display names
+    const mappedSpecialties = locumProfile.specialties.map(specialty => ({
+      ...specialty,
+      speciality: getSpecialityDisplayName(specialty.speciality)
+    }));
+
     // Check profile status
     switch (locumProfile.status) {
       case "delete":
@@ -83,7 +83,10 @@ export default async function handler(
     // Return successful login response with tokens and profile data
     return res.status(200).json({
       message: "Login successful",
-      profile: locumProfile,
+      profile: {
+        ...locumProfile,
+        specialties: mappedSpecialties,
+      },
       accessToken: signInData.session?.access_token,
       refreshToken: signInData.session?.refresh_token,
       session: {
