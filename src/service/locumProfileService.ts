@@ -47,3 +47,13 @@ export const verifyEmail = async (email: string, status: string) =>{
         throw new Error(error.response?.data?.error || 'Failed to update status');
     }
 }
+
+
+export const updateLocumProfile = async (locumProfile: Omit<LocumProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+        const response = await axios.put('/api/locum-profile/register', locumProfile);
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.error || 'Failed to update locum profile');
+    }
+};

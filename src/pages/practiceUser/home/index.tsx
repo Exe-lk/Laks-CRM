@@ -1,10 +1,10 @@
 import Image from 'next/image';
-import NavBar from "./components/navBar/nav";
+import NavBar from "../../components/navBarPracticeUser";
 import image1 from "../../public/assests/66e8ec37c700d67af1aa8ac0608e157b5810b1f2.jpg";
 import image2 from "../../public/assests/867184619ad618a8c654853279eb113657284e77.png";
 import image3 from "../../public/assests/b274c82439ece60c86526c9adf4ed6912e98f6ed.jpg";
 import image4 from "../../public/assests/ba6dc03ed4c4ed9261da138a6a60eb3f64f798e3.jpg";
-import Footer from "./components/footer";
+import Footer from "../../components/footer";
 import { useRouter } from 'next/navigation';
 
 const Home = () => {

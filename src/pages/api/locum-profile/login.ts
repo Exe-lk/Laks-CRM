@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { getSpecialityDisplayName } from "@/lib/enums";
 
 export default async function handler(
   req: NextApiRequest,
@@ -34,7 +35,13 @@ export default async function handler(
         error: "Profile not found",
       });
     }
-
+    
+    locumProfile.specialties.map(specialty => ({
+        ...specialty,
+        speciality: getSpecialityDisplayName(specialty.speciality)
+      }))
+  
+      console.log(locumProfile);
     // Check profile status
     switch (locumProfile.status) {
       case "delete":
