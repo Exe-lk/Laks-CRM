@@ -14,7 +14,6 @@ const ForgotPassword = () => {
     setError('');
     setMessage('');
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
@@ -131,7 +130,7 @@ const ForgotPassword = () => {
             <div className="text-center pt-4">
               <button
                 type="button"
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/locumStaff/login')}
                 className="text-sm text-[#C3EAE7] hover:text-black font-semibold transition-colors hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}
               >
                 Back to Login

@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import Logo from "../../../../public/assests/logolaksCRM.jpg"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
-import ProfileModal from '../profile/ProfileModal';
-import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt } from 'react-icons/fa';
+import ProfileModal from '../profilePracticeUser/index';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 
 const NavBar = () => {
@@ -31,7 +31,19 @@ const NavBar = () => {
       const profileStr = localStorage.getItem('profile');
       if (profileStr) {
         try {
-          setProfile(JSON.parse(profileStr));
+          const rawProfile = JSON.parse(profileStr);
+          const mappedProfile = {
+            fullName: rawProfile.name,
+            emailAddress: rawProfile.email,
+            contactNumber: rawProfile.telephone,
+            address: rawProfile.address,
+            gdcNumber: rawProfile.GDCnumber,
+            employeeType: rawProfile.employeeType,
+            dateOfBirth: rawProfile.dob,
+            referenceNumber: rawProfile.referenceNumber,
+            status: rawProfile.status,
+          };
+          setProfile(mappedProfile);
         } catch {
           setProfile(null);
         }
@@ -49,7 +61,19 @@ const NavBar = () => {
         const profileStr = localStorage.getItem('profile');
         if (profileStr) {
           try {
-            setProfile(JSON.parse(profileStr));
+            const rawProfile = JSON.parse(profileStr);
+            const mappedProfile = {
+              fullName: rawProfile.name,
+              emailAddress: rawProfile.email,
+              contactNumber: rawProfile.telephone,
+              address: rawProfile.address,
+              gdcNumber: rawProfile.GDCnumber,
+              employeeType: rawProfile.employeeType,
+              dateOfBirth: rawProfile.dob,
+              referenceNumber: rawProfile.referenceNumber,
+              status: rawProfile.status,
+            };
+            setProfile(mappedProfile);
           } catch {
             setProfile(null);
           }
@@ -274,13 +298,6 @@ const NavBar = () => {
           {isLoggedIn && (
             <>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/components/myDocumnet')}
-              >
-                Document Upload
-              </li>
-              <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastAppointments')}
@@ -367,6 +384,7 @@ const NavBar = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+
             </div>
 
             <div className="px-4 py-6">
@@ -380,13 +398,6 @@ const NavBar = () => {
                 </li>
                 {isLoggedIn && (
                   <>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
-                    >
-                      Document Upload
-                    </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
@@ -420,13 +431,13 @@ const NavBar = () => {
                         </svg>
                       </button>
                       <button
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-              >
-                <FaSignOutAlt className="text-xl" />
-              </button>
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                        title="Logout"
+                      >
+                        <FaSignOutAlt className="text-xl" />
+                      </button>
                     </li>
                   </>
                 )}
@@ -504,5 +515,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
-

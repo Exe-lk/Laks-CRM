@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/locumProfileSlice';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import { MdOutlineMyLocation } from "react-icons/md";
 
 export interface Specialty {
     speciality: string;
@@ -16,6 +17,7 @@ export interface LocumProfile {
     emailAddress: string;
     contactNumber: string;
     address: string;
+    location: string;
     password: string;
     gdcNumber: string;
     employeeType: string;
@@ -47,6 +49,7 @@ const initialValues = {
     email: '',
     contactNumberDigits: '',
     address: '',
+    location: '',
     password: '',
     confirmPassword: '',
     gdcRegistration: '',
@@ -60,7 +63,7 @@ const initialValues = {
     hygienistYearsExperience: '',
 };
 
-const transformFormDataToAPI = (values: typeof initialValues): LocumProfile => {
+const transformFormDataToAPI = (values: typeof initialValues, addressLat: number | null, addressLng: number | null): LocumProfile => {
     const specialties: Specialty[] = [];
 
     switch (values.jobType) {
@@ -101,8 +104,9 @@ const transformFormDataToAPI = (values: typeof initialValues): LocumProfile => {
     return {
         fullName: values.fullName,
         emailAddress: values.email,
-        contactNumber: '+44' + values.contactNumberDigits, // Concatenate +44 with digits
-        address: values.address,
+        contactNumber: '+44' + values.contactNumberDigits,
+        address: addressLat && addressLng ? `${addressLat},${addressLng}` : '',
+        location: values.location,
         password: values.password,
         gdcNumber: values.gdcNumber,
         employeeType: values.jobType,
@@ -118,6 +122,8 @@ const SignUpForm = () => {
     const [addLocumProfile, { isLoading: isAdding }] = useAddLocumProfileMutation();
     const [open, setOpen] = useState(false);
     const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+    const [addressLat, setAddressLat] = useState<number | null>(null);
+    const [addressLng, setAddressLng] = useState<number | null>(null);
 
     const formik = useFormik({
         initialValues,
@@ -145,10 +151,22 @@ const SignUpForm = () => {
                 errors.address = 'Address is required';
             }
 
+            if (!values.location) {
+                errors.location = 'Location is required';
+            }
+
             if (!values.password) {
                 errors.password = 'Password is required';
             } else if (values.password.length < 6) {
                 errors.password = 'Password must be at least 6 characters';
+            } else if (!/[A-Z]/.test(values.password)) {
+                errors.password = 'Password must contain at least one uppercase letter';
+            } else if (!/[a-z]/.test(values.password)) {
+                errors.password = 'Password must contain at least one lowercase letter';
+            } else if (!/[0-9]/.test(values.password)) {
+                errors.password = 'Password must contain at least one number';
+            } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(values.password)) {
+                errors.password = 'Password must contain at least one special character';
             }
 
             if (!values.confirmPassword) {
@@ -179,10 +197,8 @@ const SignUpForm = () => {
             setIsSubmitting(true);
             try {
                 console.log('Registration form values:', values);
-
-                const apiData = transformFormDataToAPI(values);
+                const apiData = transformFormDataToAPI(values, addressLat, addressLng);
                 console.log('API payload:', apiData);
-
                 const response = await addLocumProfile(apiData);
                 console.log('Registration response:', response);
 
@@ -194,7 +210,6 @@ const SignUpForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                 } else if (response.error) {
-                    // Handle RTK Query error response
                     const errorMessage = 'data' in response.error
                         ? (response.error.data as ErrorResponse).error
                         : 'An unexpected error occurred';
@@ -232,24 +247,6 @@ const SignUpForm = () => {
         },
     });
 
-    const handleCheckbox = (field: string, setter: any, selected: string[]) => {
-        if (selected.includes(field)) {
-            setter(selected.filter((item) => item !== field));
-        } else {
-            setter([...selected, field]);
-        }
-    };
-
-    const handleMapClick = (lat: number, lng: number) => {
-        setSelectedLocation({ lat, lng });
-        const simulatedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)} - Sample Street, Sample City, Sample Country`;
-        formik.setFieldValue('address', simulatedAddress);
-    };
-
-    const confirmLocation = () => {
-        setShowMap(false);
-    };
-
     const handleDentistFieldChange = (field: string) => {
         const currentSelected = formik.values.selectedDentistFields;
         let newSelected;
@@ -264,6 +261,16 @@ const SignUpForm = () => {
         }
 
         formik.setFieldValue('selectedDentistFields', newSelected);
+    };
+
+    const handleMapClick = (lat: number, lng: number) => {
+        setSelectedLocation({ lat, lng });
+        const simulatedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)} - Sample Street, Sample City, Sample Country`;
+        formik.setFieldValue('address', simulatedAddress);
+    };
+
+    const confirmLocation = () => {
+        setShowMap(false);
     };
 
     const handleDentistExperienceChange = (field: string, value: string) => {
@@ -396,22 +403,16 @@ const SignUpForm = () => {
 
                         <div className="space-y-2 group">
                             <label className="block text-sm font-semibold text-black flex items-center gap-2">
-                                <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Address *
+                                <MdOutlineMyLocation color="#C3EAE7" size={16} />
+                                Select your location *
                             </label>
                             <div className="relative">
                                 <textarea
                                     name="address"
                                     value={formik.values.address}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 pr-12 border-2 ${formik.errors.address && formik.touched.address ? 'border-red-500' : 'border-gray-200'
-                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
-                                    placeholder="Enter your complete address or click the map icon to select location"
-                                    required
+                                    disabled
+                                    className={`w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    placeholder="Select address from map"
                                 />
                                 <button
                                     type="button"
@@ -424,6 +425,43 @@ const SignUpForm = () => {
                             </div>
                             {formik.errors.address && formik.touched.address && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.address}</div>
+                            )}
+                        </div>
+
+                        <div className="space-y-2 group">
+                            <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M12 11.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"
+                                    />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19.5 9c0 7.5-7.5 13.5-7.5 13.5S4.5 16.5 4.5 9a7.5 7.5 0 1115 0z"
+                                    />
+                                </svg>
+
+
+                                Address *
+                            </label>
+                            <div className="relative">
+                                {/* Location textarea (editable) */}
+                                <textarea
+                                    name="location"
+                                    value={formik.values.location}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                                    placeholder="Enter your location"
+                                    required
+                                />
+                            </div>
+                            {formik.errors.location && formik.touched.location && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.location}</div>
                             )}
                         </div>
 
@@ -510,7 +548,7 @@ const SignUpForm = () => {
                                         value={formik.values.gdcNumber}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={`w-full px-4 py-3 border-2 ${formik.errors.gdcNumber && formik.touched.gdcNumber ? 'border-red-500' : 'border-gray-200'
+                                        className={`w-full px-4 py-3 border-2 bg-white ${formik.errors.gdcNumber && formik.touched.gdcNumber ? 'border-red-500' : 'border-gray-200'
                                             } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none`}
                                         required
                                     />
@@ -855,6 +893,8 @@ const SignUpForm = () => {
                     onSelect={(loc) => {
                         setLocation(loc);
                         setOpen(false);
+                        setAddressLat(loc.lat);
+                        setAddressLng(loc.lng);
                         formik.setFieldValue('address', loc.address);
                     }}
                 />

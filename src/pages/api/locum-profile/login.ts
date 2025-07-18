@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { getSpecialityDisplayName } from "@/lib/enums";
 
 export default async function handler(
   req: NextApiRequest,
@@ -34,6 +35,12 @@ export default async function handler(
         error: "Profile not found",
       });
     }
+    
+    // Map specialties to use display names
+    const mappedSpecialties = locumProfile.specialties.map(specialty => ({
+      ...specialty,
+      speciality: getSpecialityDisplayName(specialty.speciality)
+    }));
 
     // Check profile status
     switch (locumProfile.status) {
@@ -76,7 +83,10 @@ export default async function handler(
     // Return successful login response with tokens and profile data
     return res.status(200).json({
       message: "Login successful",
-      profile: locumProfile,
+      profile: {
+        ...locumProfile,
+        specialties: mappedSpecialties,
+      },
       accessToken: signInData.session?.access_token,
       refreshToken: signInData.session?.refresh_token,
       session: {

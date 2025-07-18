@@ -68,9 +68,20 @@ const PracticeRegisterForm = () => {
             } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
                 errors.email = 'Invalid email address';
             }
-            if (!values.password) errors.password = 'Password is required';
+            if (!values.password) {
+                errors.password = 'Password is required';
+            } else if (values.password.length < 6) {
+                errors.password = 'Password must be at least 6 characters';
+            } else if (!/[A-Z]/.test(values.password)) {
+                errors.password = 'Password must contain at least one uppercase letter';
+            } else if (!/[a-z]/.test(values.password)) {
+                errors.password = 'Password must contain at least one lowercase letter';
+            } else if (!/[0-9]/.test(values.password)) {
+                errors.password = 'Password must contain at least one number';
+            } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(values.password)) {
+                errors.password = 'Password must contain at least one special character';
+            }
             if (!values.address) errors.address = 'Address is required';
-            else if (values.password.length < 6) errors.password = 'Password must be at least 6 characters';
             if (!values.confirmPassword) errors.confirmPassword = 'Please confirm your password';
             else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
             return errors;

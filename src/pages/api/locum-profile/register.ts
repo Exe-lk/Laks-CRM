@@ -35,6 +35,7 @@ export default async function handler(
           emailAddress,
           contactNumber,
           address,
+          location,
           password,
           gdcNumber,
           employeeType,
@@ -112,7 +113,7 @@ export default async function handler(
               gdcNumber,
               employeeType,
               dateOfBirth: new Date("1990-01-01"), // Default date, you may want to handle this differently
-              location: "", // Default empty string
+              location, // Default empty string
               software: software || "",
               status: "pending",
               role: "user",

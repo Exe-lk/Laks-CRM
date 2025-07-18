@@ -67,6 +67,7 @@ const LoginForm = () => {
           localStorage.setItem('locumId', JSON.stringify(result.data.profile.id));
           // Store the profile object for later use (NavBar/Profile page)
           localStorage.setItem('profile', JSON.stringify(result.data.profile));
+          console.log(result.data.profile)
 
           await Swal.fire({
             title: 'Login Successful!',
