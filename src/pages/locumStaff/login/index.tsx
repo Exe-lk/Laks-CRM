@@ -90,11 +90,12 @@ const LoginForm = () => {
             console.log('Error data:', errorData);
             errorMessage = errorData.error || errorMessage;
 
-            if (errorData.status === 'pending') {
+            if (errorData.status === 'pending' || errorData.status === 'verify') {
               errorMessage = 'Your account is still pending approval. Please wait for admin approval.';
             } else if (errorData.status === 'deleted') {
               errorMessage = 'Your account has been deleted by the administrator.';
             }
+
           } else if ('message' in result.error) {
             errorMessage = result.error.message || errorMessage;
           }

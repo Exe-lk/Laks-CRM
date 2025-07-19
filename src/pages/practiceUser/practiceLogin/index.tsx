@@ -90,7 +90,7 @@ const LoginForm = () => {
             console.log('Error data:', errorData);
             errorMessage = errorData.error || errorMessage;
 
-            if (errorData.status === 'pending') {
+            if (errorData.status === 'pending' || errorData.status === 'verify') {
               errorMessage = 'Your account is still pending approval. Please wait for admin approval.';
             } else if (errorData.status === 'deleted') {
               errorMessage = 'Your account has been deleted by the administrator.';
@@ -161,8 +161,8 @@ const LoginForm = () => {
                 value={formik.values.email}
                 onBlur={formik.handleBlur}
                 className={`w-full px-4 py-3 border-2 ${formik.errors.email && formik.touched.email
-                    ? 'border-red-500'
-                    : 'border-gray-200'
+                  ? 'border-red-500'
+                  : 'border-gray-200'
                   } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                 placeholder="Enter your email"
               />
@@ -187,8 +187,8 @@ const LoginForm = () => {
                   value={formik.values.password}
                   onBlur={formik.handleBlur}
                   className={`w-full px-4 py-3 pr-12 border-2 ${formik.errors.password && formik.touched.password
-                      ? 'border-red-500'
-                      : 'border-gray-200'
+                    ? 'border-red-500'
+                    : 'border-gray-200'
                     } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                   placeholder="Enter your password"
                 />
@@ -228,8 +228,8 @@ const LoginForm = () => {
                       className="sr-only"
                     />
                     <div className={`w-5 h-5 border-2 ${formik.values.rememberMe
-                        ? 'border-[#C3EAE7] bg-[#C3EAE7]'
-                        : 'border-gray-300 bg-white'
+                      ? 'border-[#C3EAE7] bg-[#C3EAE7]'
+                      : 'border-gray-300 bg-white'
                       } rounded group-hover:border-[#C3EAE7] transition-colors duration-300 flex items-center justify-center`}>
                       {formik.values.rememberMe && (
                         <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
@@ -280,9 +280,9 @@ const LoginForm = () => {
                 Register here
               </a>
             </p>
-              <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 mt-2">
               <a href="/" className="text-black font-bold">
-               🏠 Back to Home
+                🏠 Back to Home
               </a>
             </p>
           </div>

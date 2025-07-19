@@ -110,7 +110,7 @@ export default function VerifyEmail() {
             <div className="mt-4">
               <div className="text-red-600">✗ {message}</div>
               <button
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/locumStaff/login')}
                 className="mt-2 text-blue-600 hover:text-blue-500"
               >
                 Go to Login
