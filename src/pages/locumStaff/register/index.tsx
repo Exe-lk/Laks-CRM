@@ -230,7 +230,6 @@ const SignUpForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                 }
-                formik.resetForm();
 
             } catch (error: any) {
                 console.error('Registration failed:', error);
