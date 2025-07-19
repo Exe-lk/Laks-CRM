@@ -54,7 +54,7 @@ const ResetPassword = () => {
         setMessage('Password updated successfully! Redirecting to login...');
         // Redirect to login page after 2 seconds
         setTimeout(() => {
-          router.push('/login');
+          router.push('/');
         }, 2000);
       }
     } catch (err: any) {
