@@ -107,7 +107,7 @@ const PracticeRegisterForm = () => {
 
                 if (response.data && response.data.status === 200) {
                     Swal.fire({
-                        title: 'Registration completed successfully!',
+                        title: 'Registration completed successfully! Please check your email to verify your account before logging in.',
                         icon: 'success',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#C3EAE7'
