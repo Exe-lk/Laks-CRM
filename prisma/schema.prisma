@@ -15,15 +15,19 @@ model LocumProfile {
   dateOfBirth             DateTime    @map("dob")
   emailAddress            String      @unique @map("email_address")
   contactNumber           String      @unique @map("contact_number")
-  gdcNumber               String      @map("gdc_number")
+  gdcNumber               String?      @map("gdc_number")
   location                String
   employeeType            String      @map("employee_type")
-  software                String
+  software                String?
   gdcImage                String?     @map("gdc_image")
   indemnityInsuranceImage String?     @map("indemnity_insurance_image")
   hepatitisBImage         String?     @map("hepatitis_b_image")
   dbsImage                String?     @map("dbs_image")
-  referenceNumber         String      @map("reference_number")
+  referenceletter1        String?      @map("reference_number1")
+  referenceletter2        String?      @map("reference_number2")
+  bankDetails             String?
+  shareCode               String?
+  NIUTRnumber            String?
   cv                      String?
   status                  String?
   role                    String?
