@@ -24,6 +24,7 @@ export interface LocumProfile {
     software?: string;
     specialties?: Specialty[];
 }
+
 const jobTypes = ["Nurse", "Hygienist", "Receptionist"];
 
 const dentistFields = [
@@ -209,6 +210,7 @@ const SignUpForm = () => {
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#C3EAE7'
                     });
+                    formik.resetForm();
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
                         ? (response.error.data as ErrorResponse).error

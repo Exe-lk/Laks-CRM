@@ -40,7 +40,6 @@ const NavBar = () => {
             gdcNumber: rawProfile.GDCnumber,
             employeeType: rawProfile.employeeType,
             dateOfBirth: rawProfile.dob,
-            referenceNumber: rawProfile.referenceNumber,
             status: rawProfile.status,
           };
           setProfile(mappedProfile);
@@ -70,7 +69,6 @@ const NavBar = () => {
               gdcNumber: rawProfile.GDCnumber,
               employeeType: rawProfile.employeeType,
               dateOfBirth: rawProfile.dob,
-              referenceNumber: rawProfile.referenceNumber,
               status: rawProfile.status,
             };
             setProfile(mappedProfile);

@@ -143,13 +143,16 @@ const MyDocument = () => {
 
         const fieldMap: Record<string, string> = {
             gdcNumber: 'gdcImage',
-            indemnityInsurance: 'indemnityInsuranceImage',
-            hepatitisB: 'hepatitisBImage',
-            dbs: 'dbsImage',
-            referenceLetters1: 'referenceNumber',
-            referenceLetters2: 'referenceNumber',
+            indemnityInsuranceImage: 'indemnityInsuranceImage',
+            hepatitisBImage: 'hepatitisBImage',
+            dbsImage: 'dbsImage',
+            referenceletter1: 'referenceNumber',
+            referenceletter2: 'referenceNumber',
             cv: 'cv',
-            id: 'idImage',
+            idImage: 'idImage',
+            bankDetails : 'bankDetails',
+            shareCode: 'shareCode',
+            NIUTRnumber : 'niUtr'
         };
 
         Object.entries(documents).forEach(([key, value]) => {
