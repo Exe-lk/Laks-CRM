@@ -91,7 +91,7 @@ export default async function handler(
             email: emailAddress,
             password: password,
             options: {
-              emailRedirectTo: `${siteUrl}/verifyEmail`
+              emailRedirectTo: `${siteUrl}/locumStaff/verifyEmail`
             }
           });
 
@@ -117,7 +117,7 @@ export default async function handler(
               software: software || "",
               status: "pending",
               role: "user",
-              referenceNumber: `REF-${Date.now()}`,
+
             },
           });
 

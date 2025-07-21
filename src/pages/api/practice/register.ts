@@ -55,7 +55,7 @@ export default async function handler(
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `${siteUrl}/verifyEmail`,
+              emailRedirectTo: `${siteUrl}/practiceUser/verifyEmail`,
             },
           }
         );
