@@ -85,13 +85,13 @@ export default async function handler(
             specialty.speciality = specialityValue;
           }
         }
-        // Create user in Supabase Auth
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         const { data: authData, error: authError } =
           await supabase.auth.signUp({
             email: emailAddress,
             password: password,
             options: {
-              emailRedirectTo: `https://laks-crm.netlify.app/locumStaff/verifyEmail`
+              emailRedirectTo: `${siteUrl}/verifyEmail`
             }
           });
 
