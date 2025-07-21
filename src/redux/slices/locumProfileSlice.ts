@@ -20,7 +20,6 @@ export interface LocumProfile {
   location?: string;
   software?: string;
   status?: string;
-  referenceNumber?: string;
   specialties?: Specialty[];
   createdAt?: Date;
   updatedAt?: Date;

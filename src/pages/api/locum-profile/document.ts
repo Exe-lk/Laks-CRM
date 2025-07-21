@@ -26,7 +26,6 @@ interface FormData {
   indemnityInsuranceImage?: UploadedFile;
   hepatitisBImage?: UploadedFile;
   dbsImage?: UploadedFile;
-  referenceNumber?: UploadedFile;
   cv?: UploadedFile;
   idImage?: UploadedFile;
 }
@@ -94,7 +93,7 @@ export default async function handler(
       "dbsImage",
       "cv",
       "idImage",
-      "referenceletter1 ",
+      "referenceletter1",
       "referenceletter2",
       "bankDetails",
       "shareCode",

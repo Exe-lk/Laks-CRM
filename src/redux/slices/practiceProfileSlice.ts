@@ -11,7 +11,6 @@ export interface PracticeProfile {
   dob?: string;
   location?: string;
   status?: string;
-  referenceNumber?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

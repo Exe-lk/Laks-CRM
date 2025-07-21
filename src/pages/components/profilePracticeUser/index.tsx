@@ -13,7 +13,6 @@ interface Profile {
   location?: string;
   GDCnumber?: string;
   dob?: string;
-  referenceNumber?: string;
   status?: string;
 }
 

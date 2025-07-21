@@ -143,16 +143,16 @@ const MyDocument = () => {
 
         const fieldMap: Record<string, string> = {
             gdcNumber: 'gdcImage',
-            indemnityInsuranceImage: 'indemnityInsuranceImage',
-            hepatitisBImage: 'hepatitisBImage',
-            dbsImage: 'dbsImage',
-            referenceletter1: 'referenceNumber',
-            referenceletter2: 'referenceNumber',
+            indemnityInsurance: 'indemnityInsuranceImage',
+            hepatitisB: 'hepatitisBImage',
+            dbs: 'dbsImage',
+            referenceLetters1: 'referenceletter1',
+            referenceLetters2: 'referenceletter2',
             cv: 'cv',
-            idImage: 'idImage',
+            id: 'idImage',
             bankDetails : 'bankDetails',
             shareCode: 'shareCode',
-            NIUTRnumber : 'niUtr'
+            niUtr : 'NIUTRnumber'
         };
 
         Object.entries(documents).forEach(([key, value]) => {
@@ -162,10 +162,12 @@ const MyDocument = () => {
         });
 
         try {
+            console.log(formData)
             const response = await fetch('/api/locum-profile/document', {
                 method: 'POST',
                 body: formData,
             });
+            console.log(response)
             const result = await response.json();
             console.log(result);
             if (result.status === 200) {

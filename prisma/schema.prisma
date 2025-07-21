@@ -23,8 +23,8 @@ model LocumProfile {
   indemnityInsuranceImage String?     @map("indemnity_insurance_image")
   hepatitisBImage         String?     @map("hepatitis_b_image")
   dbsImage                String?     @map("dbs_image")
-  referenceletter1        String?      @map("reference_number1")
-  referenceletter2        String?      @map("reference_number2")
+  referenceletter1        String?      @map("referenceletter1")
+  referenceletter2        String?      @map("referenceletter2")
   bankDetails             String?
   shareCode               String?
   NIUTRnumber            String?

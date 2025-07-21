@@ -19,7 +19,6 @@ const NavBar = () => {
     gdcNumber?: string;
     employeeType?: string;
     dateOfBirth?: string;
-    referenceNumber?: string;
     status?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
