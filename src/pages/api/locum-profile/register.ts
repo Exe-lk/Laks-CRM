@@ -91,7 +91,7 @@ export default async function handler(
             email: emailAddress,
             password: password,
             options: {
-              emailRedirectTo: `${siteUrl}/locumStaff/verifyEmail`
+              emailRedirectTo: `http://localhost:3000/locumStaff/verifyEmail`
             }
           });
 
