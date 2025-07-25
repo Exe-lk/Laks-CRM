@@ -8,6 +8,7 @@ import Footer from "../../components/footer";
 import { useRouter } from 'next/navigation';
 
 const Home = () => {
+  
   const router = useRouter();
 
   return (

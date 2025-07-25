@@ -25,7 +25,7 @@ export interface LocumProfile {
     specialties?: Specialty[];
 }
 
-const jobTypes = ["Nurse", "Hygienist", "Receptionist"];
+const jobTypes = ["Nurse", "Hygienist", "Receptionist","Dentist"];
 
 const dentistFields = [
     "General Dentist",
@@ -58,6 +58,8 @@ const initialValues = {
     jobType: '',
     selectedDentistFields: [] as string[],
     dentistExperience: {} as Record<string, string>,
+    selectedNurseFields: [] as string[],
+    nurseExperience: {} as Record<string, string>,
     therapistExperience: {} as Record<string, string>,
     receptionistYearsExperience: '',
     receptionistSoftwareExperience: '',
@@ -89,6 +91,19 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
             break;
 
         case 'Nurse':
+            values.selectedNurseFields.forEach(field => {
+                const experienceStr = values.nurseExperience[field];
+                if (experienceStr) {
+                    const years = parseInt(experienceStr.replace(/\D/g, '')) || 0;
+                    specialties.push({
+                        speciality: field,
+                        numberOfYears: years
+                    });
+                }
+            });
+            break;
+
+         case 'Dentist':
             values.selectedDentistFields.forEach(field => {
                 const experienceStr = values.dentistExperience[field];
                 if (experienceStr) {
@@ -134,28 +149,22 @@ const SignUpForm = () => {
             if (!values.fullName) {
                 errors.fullName = 'Full name is required';
             }
-
             if (!values.email) {
                 errors.email = 'Email is required';
             } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
                 errors.email = 'Invalid email address';
             }
-
             if (!values.contactNumberDigits) {
                 errors.contactNumberDigits = 'Contact number is required';
             } else if (!/^\d{10}$/.test(values.contactNumberDigits)) {
                 errors.contactNumberDigits = 'Contact number must be exactly 10 digits';
             }
-
-
             if (!values.address) {
                 errors.address = 'Address is required';
             }
-
             if (!values.location) {
                 errors.location = 'Location is required';
             }
-
             if (!values.password) {
                 errors.password = 'Password is required';
             } else if (values.password.length < 6) {
@@ -169,17 +178,14 @@ const SignUpForm = () => {
             } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(values.password)) {
                 errors.password = 'Password must contain at least one special character';
             }
-
             if (!values.confirmPassword) {
                 errors.confirmPassword = 'Please confirm your password';
             } else if (values.password !== values.confirmPassword) {
                 errors.confirmPassword = 'Passwords do not match';
             }
-
             if (!values.gdcRegistration) {
                 errors.gdcRegistration = 'Please select GDC registration status';
             }
-
             if (values.gdcRegistration === 'yes') {
                 if (!values.gdcNumber) {
                     errors.gdcNumber = 'GDC registration number is required';
@@ -187,7 +193,6 @@ const SignUpForm = () => {
                     errors.gdcNumber = 'GDC number must be 4 to 7 digits long and contain only numbers';
                 }
             }
-
             if (!values.jobType) {
                 errors.jobType = 'Please select a job type';
             }
@@ -264,6 +269,22 @@ const SignUpForm = () => {
         formik.setFieldValue('selectedDentistFields', newSelected);
     };
 
+     const handleNursesFieldChange = (field: string) => {
+        const currentSelected = formik.values.selectedNurseFields;
+        let newSelected;
+
+        if (currentSelected.includes(field)) {
+            newSelected = currentSelected.filter((item) => item !== field);
+            const newExperience = { ...formik.values.nurseExperience };
+            delete newExperience[field];
+            formik.setFieldValue('nurseExperience', newExperience);
+        } else {
+            newSelected = [...currentSelected, field];
+        }
+
+        formik.setFieldValue('selectedNurseFields', newSelected);
+    };
+
     const handleMapClick = (lat: number, lng: number) => {
         setSelectedLocation({ lat, lng });
         const simulatedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)} - Sample Street, Sample City, Sample Country`;
@@ -277,6 +298,13 @@ const SignUpForm = () => {
     const handleDentistExperienceChange = (field: string, value: string) => {
         formik.setFieldValue('dentistExperience', {
             ...formik.values.dentistExperience,
+            [field]: value
+        });
+    };
+
+    const handleNurseExperienceChange = (field: string, value: string) => {
+        formik.setFieldValue('nurseExperience', {
+            ...formik.values.nurseExperience,
             [field]: value
         });
     };
@@ -601,11 +629,11 @@ const SignUpForm = () => {
                             </div>
                         </div>
 
-                        {formik.values.jobType === "Nurse" && (
+                        {formik.values.jobType === "Dentist" && (
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
                                 <h4 className="font-bold text-lg text-black flex items-center">
                                     <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
-                                    Nurse Experience in UK
+                                    Dentist Experience in UK
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {dentistFields.map((field) => (
@@ -633,6 +661,40 @@ const SignUpForm = () => {
                                 </div>
                             </div>
                         )}
+
+                        {formik.values.jobType === "Nurse" && (
+                            <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
+                                <h4 className="font-bold text-lg text-black flex items-center">
+                                    <div className="w-2 h-2 bg-[#C3EAE7] rounded-full mr-2"></div>
+                                    Nurse Experience in UK
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {dentistFields.map((field) => (
+                                        <div key={field} className="bg-white rounded-lg p-4 border border-gray-200">
+                                            <label className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formik.values.selectedNurseFields.includes(field)}
+                                                    onChange={() => handleNursesFieldChange(field)}
+                                                    className="w-5 h-5 text-black border-2 border-gray-300 rounded focus:ring-[#C3EAE7]"
+                                                />
+                                                <span className="font-medium text-black">{field}</span>
+                                            </label>
+                                            {formik.values.selectedNurseFields.includes(field) && (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter experience (e.g., 2 years, 6 months)"
+                                                    className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
+                                                    onChange={(e) => handleNurseExperienceChange(field, e.target.value)}
+                                                    value={formik.values.nurseExperience[field] || ""}
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
 
                         {formik.values.jobType === "Receptionist" && (
                             <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">

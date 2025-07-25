@@ -295,25 +295,11 @@ const NavBar = () => {
           {isLoggedIn && (
             <>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
-                onClick={() => router.push('/locumStaff/pastAppointments')}
+                onClick={() => router.push('/practiceUser/SelectNurses')}
               >
-                Past Appointments
-              </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/locumStaff/ongoingandfutureappointments')}
-              >
-                Ongoing and Future Appointments
-              </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/locumStaff/pastandcurrentpayments')}
-              >
-                Past and Current Payments
+                Nurses
               </li>
             </>
           )}
@@ -396,25 +382,11 @@ const NavBar = () => {
                 {isLoggedIn && (
                   <>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
-                      onClick={() => { router.push('/locumStaff/pastAppointments'); closeMobileMenu(); }}
+                      onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
                     >
-                      Past Appointments
-                    </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/locumStaff/ongoingandfutureappointments'); closeMobileMenu(); }}
-                    >
-                      Ongoing and Future Appointments
-                    </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/locumStaff/pastandcurrentpayments'); closeMobileMenu(); }}
-                    >
-                      Past and Current Payments
+                      Nurses
                     </li>
                     <li className="flex items-center space-x-2">
                       <button
