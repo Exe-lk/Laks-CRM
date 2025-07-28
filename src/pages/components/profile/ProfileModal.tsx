@@ -13,7 +13,6 @@ interface Profile {
   gdcNumber?: string;
   employeeType?: string;
   dateOfBirth?: string;
-  referenceNumber?: string;
   status?: string;
 }
 

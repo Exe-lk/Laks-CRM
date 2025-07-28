@@ -48,14 +48,14 @@ export default async function handler(
               "Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType",
           });
         }
-
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         // Create user in Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp(
           {
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `https://laks-crm.netlify.app/practiceUser/verifyEmail`,
+              emailRedirectTo: `http://localhost:3000/practiceUser/verifyEmail`,
             },
           }
         );
