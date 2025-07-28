@@ -26,6 +26,7 @@ interface FormData {
   indemnityInsuranceImage?: UploadedFile;
   hepatitisBImage?: UploadedFile;
   dbsImage?: UploadedFile;
+  referenceNumber?: UploadedFile;
   cv?: UploadedFile;
   idImage?: UploadedFile;
 }
@@ -87,13 +88,17 @@ export default async function handler(
 
     const updateData: any = {};
     const documentFields = [
-      'gdcImage',
-      'indemnityInsuranceImage', 
-      'hepatitisBImage',
-      'dbsImage',
-      'referenceNumber',
-      'cv',
-      'idImage'
+      "gdcImage",
+      "indemnityInsuranceImage",
+      "hepatitisBImage",
+      "dbsImage",
+      "cv",
+      "idImage",
+      "referenceletter1 ",
+      "referenceletter2",
+      "bankDetails",
+      "shareCode",
+      "NIUTRnumber",
     ];
 
     for (const fieldName of documentFields) {
