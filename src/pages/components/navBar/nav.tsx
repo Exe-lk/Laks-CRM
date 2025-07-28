@@ -279,22 +279,29 @@ const NavBar = () => {
               >
                 Document Upload
               </li>
+               <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/locumStaff/requestAppointments')}
+              >
+                Request Appointments
+              </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastAppointments')}
               >
                 Past Appointments
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/ongoingandfutureappointments')}
               >
                 Ongoing and Future Appointments
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastandcurrentpayments')}
               >
@@ -387,21 +394,28 @@ const NavBar = () => {
                       Document Upload
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/locumStaff/requestAppointments'); closeMobileMenu(); }}
+                    >
+                      Request Appointments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/pastAppointments'); closeMobileMenu(); }}
                     >
                       Past Appointments
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/ongoingandfutureappointments'); closeMobileMenu(); }}
                     >
                       Ongoing and Future Appointments
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/pastandcurrentpayments'); closeMobileMenu(); }}
                     >

@@ -35,7 +35,7 @@ const PastAndCurrentPaymentsPage = () => {
 
     const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
         const toRad = (value: number) => (value * Math.PI) / 180;
-        const R = 6371; 
+        const R = 6371;
 
         const dLat = toRad(lat2 - lat1);
         const dLon = toRad(lon2 - lon1);
@@ -45,7 +45,7 @@ const PastAndCurrentPaymentsPage = () => {
             Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; 
+        return R * c;
     };
 
     const [nearbyLocums, setNearbyLocums] = useState<Profile[]>([]);
@@ -76,16 +76,34 @@ const PastAndCurrentPaymentsPage = () => {
                         </svg>
                     </div>
                     <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
-                    Nearby Locum Nurses
+                        Nearby Locum Nurses
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                    Discover locum nurses available near your practice location.
+                        Discover locum nurses available near your practice location.
                     </p>
                     <div className="flex justify-center gap-2 mt-4">
                         <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
                         <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
                         <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                     </div>
+                    <div className="flex justify-center items-center gap-6 mt-6">
+                        <div className="flex flex-col">
+                            <label className="text-gray-700 font-medium mb-1">Select Date</label>
+                            <input
+                                type="date"
+                                className="border border-gray-300 rounded-lg px-4 py-2 w-56 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            />
+                        </div>
+
+                        <div className="flex flex-col">
+                            <label className="text-gray-700 font-medium mb-1">Select Time</label>
+                            <input
+                                type="time"
+                                className="border border-gray-300 rounded-lg px-4 py-2 w-56 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            />
+                        </div>
+                    </div>
+
                 </div>
 
                 <div className="bg-white rounded-none shadow-xl border-b-2 border-gray-200 w-full mx-auto px-2 sm:px-4 md:px-8">
