@@ -52,14 +52,8 @@ export default async function handler(
 
       case "pending":
         return res.status(403).json({
-          error: "Still not verify",
-          status: "pending",
-        });
-
-      case "verify":
-         return res.status(403).json({
           error: "Still not approved",
-          status: "verify",
+          status: "pending",
         });
 
       case "accept":

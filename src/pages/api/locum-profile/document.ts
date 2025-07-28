@@ -1,8 +1,8 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import formidable from 'formidable';
-import { supabase } from '../../../lib/supabase';
-import { PrismaClient } from '@prisma/client';
-import { Readable } from 'stream';
+import { NextApiRequest, NextApiResponse } from "next";
+import formidable from "formidable";
+import { supabase } from "../../../lib/supabase";
+import { PrismaClient } from "@prisma/client";
+import { Readable } from "stream";
 
 const prisma = new PrismaClient();
 
@@ -33,7 +33,7 @@ interface FormData {
 
 // Helper function to convert file to buffer without saving to disk
 async function fileToBuffer(file: UploadedFile): Promise<Buffer> {
-  const fs = require('fs');
+  const fs = require("fs");
   const buffer = fs.readFileSync(file.filepath);
   // Immediately delete the temporary file
   fs.unlinkSync(file.filepath);
@@ -44,8 +44,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -57,10 +57,12 @@ export default async function handler(
       filter: (part) => {
         // Only process files, not text fields
         return part.mimetype !== undefined;
-      }
+      },
     });
 
-    const [fields, files] = await new Promise<[formidable.Fields, formidable.Files]>((resolve, reject) => {
+    const [fields, files] = await new Promise<
+      [formidable.Fields, formidable.Files]
+    >((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) reject(err);
         else resolve([fields, files]);
@@ -68,9 +70,9 @@ export default async function handler(
     });
 
     const locumId = fields.locumId?.[0] as string;
-    
+
     if (!locumId) {
-      return res.status(400).json({ error: 'Locum ID is required' });
+      return res.status(400).json({ error: "Locum ID is required" });
     }
     console.log(locumId);
 
@@ -81,40 +83,46 @@ export default async function handler(
     console.log(existingProfile);
 
     if (!existingProfile) {
-      return res.status(404).json({ error: 'Locum profile not found' });
+      return res.status(404).json({ error: "Locum profile not found" });
     }
 
     const updateData: any = {};
     const documentFields = [
-      'gdcImage',
-      'indemnityInsuranceImage', 
-      'hepatitisBImage',
-      'dbsImage',
-      'referenceNumber',
-      'cv',
-      'idImage'
+      "gdcImage",
+      "indemnityInsuranceImage",
+      "hepatitisBImage",
+      "dbsImage",
+      "cv",
+      "idImage",
+      "referenceletter1 ",
+      "referenceletter2",
+      "bankDetails",
+      "shareCode",
+      "NIUTRnumber",
     ];
 
     for (const fieldName of documentFields) {
       const file = files[fieldName]?.[0] as UploadedFile;
-      
+
       if (file) {
         try {
           const fileBuffer = await fileToBuffer(file);
-          
+
           // Generate unique filename
-          const fileExtension = file.originalFilename?.split('.').pop() || 'pdf';
+          const fileExtension =
+            file.originalFilename?.split(".").pop() || "pdf";
           const fileName = `${locumId}_${fieldName}_${Date.now()}.${fileExtension}`;
           // Save in a folder named after locumId
           const filePath = `${locumId}/${fileName}`;
-          
+
           // Upload to Supabase storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('document')
-            .upload(filePath, fileBuffer, {
-              contentType: file.mimetype,
-              cacheControl: '3600',
-            });
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage
+              .from("document")
+              .upload(filePath, fileBuffer, {
+                contentType: file.mimetype,
+                cacheControl: "3600",
+              });
 
           if (uploadError) {
             console.error(`Error uploading ${fieldName}:`, uploadError);
@@ -123,12 +131,11 @@ export default async function handler(
 
           // Get public URL
           const { data: urlData } = supabase.storage
-            .from('document')
+            .from("document")
             .getPublicUrl(filePath);
 
           // Add to update data
           updateData[fieldName] = urlData.publicUrl;
-          
         } catch (error) {
           console.error(`Error processing ${fieldName}:`, error);
           // Continue with other files even if one fails
@@ -144,18 +151,19 @@ export default async function handler(
       });
 
       return res.status(200).json({
-        message: 'Documents uploaded successfully',
+        message: "Documents uploaded successfully",
         profile: updatedProfile,
         uploadedDocuments: Object.keys(updateData),
         status: 200,
       });
     } else {
-      return res.status(400).json({ error: 'No valid documents were uploaded' });
+      return res
+        .status(400)
+        .json({ error: "No valid documents were uploaded" });
     }
-
   } catch (error) {
-    console.error('Document upload error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Document upload error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   } finally {
     await prisma.$disconnect();
   }
