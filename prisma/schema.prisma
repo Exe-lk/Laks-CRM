@@ -74,7 +74,8 @@ model Booking {
   locum_id      String
   practice_id   String
   booking_date  DateTime
-  booking_time  String
+  booking_start_time  String
+  booking_end_time    String
   status        String
   location      String
   description   String?

@@ -39,7 +39,7 @@ export default async function handler(
         // Send password reset email using Supabase
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `http://localhost:3000/resetPassword`,
+          redirectTo: `${siteUrl}/resetPassword`,
         });
 
         if (error) {
