@@ -61,33 +61,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else if (req.method === 'PUT') {
     // Edit booking
     try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(401).json({ error: "Authorization header missing" });
+      }
+  
+      const token = authHeader.split(" ")[1]; // Bearer <token>
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser(token);
+  
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
+      }
       const {
         booking_id,
-        locum_id,
-        practice_id,
-        booking_date,
-        booking_start_time,
-        booking_end_time,
         status,
-        location,
         description,
         accept_time,
         cancel_by,
+        cancel_time
       } = req.body;
 
       const booking = await prisma.booking.update({
         where: { booking_id },
         data: {
-          locum_id,
-          practice_id,
-          booking_date: booking_date ? new Date(booking_date) : undefined,
-          booking_start_time,
-          booking_end_time,
-          status,
-          location,
-          description,
-          accept_time: accept_time ? new Date(accept_time) : undefined,
-          cancel_by,
+          status: status || null,
+          description: description || null,
+          accept_time: accept_time ? new Date(accept_time) : null,
+          cancel_by: cancel_by || null,
+          cancel_time: cancel_time ? new Date(cancel_time) : null,
         },
       });
 
