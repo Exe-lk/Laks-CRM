@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // --- Booking creation ---
       const {
-        locum_id,
+        
         practice_id,
         booking_date,
         booking_start_time,
@@ -36,13 +36,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         description,
       } = req.body;
   
-      if (!locum_id || !practice_id || !booking_date) {
+      if ( !practice_id || !booking_date) {
         return res.status(400).json({ error: "Missing required fields" });
       }
   
       const booking = await prisma.booking.create({
         data: {
-          locum_id,
           practice_id,
           booking_date: new Date(booking_date),
           booking_start_time,
@@ -77,6 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       const {
         booking_id,
+        locum_id,
         status,
         description,
         accept_time,
@@ -87,6 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const booking = await prisma.booking.update({
         where: { booking_id },
         data: {
+          locum_id: locum_id || null,
           status: status || null,
           description: description || null,
           accept_time: accept_time ? new Date(accept_time) : null,

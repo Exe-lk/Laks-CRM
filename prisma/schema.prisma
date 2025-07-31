@@ -71,7 +71,7 @@ model Practice {
 
 model Booking {
   booking_id    String        @id @default(cuid())
-  locum_id      String
+  locum_id      String?
   practice_id   String
   booking_date  DateTime
   booking_start_time  String
@@ -85,6 +85,6 @@ model Booking {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  locumProfile  LocumProfile  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+  locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
 }
