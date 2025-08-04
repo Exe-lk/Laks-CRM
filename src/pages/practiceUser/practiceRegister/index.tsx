@@ -43,6 +43,13 @@ const PracticeRegisterForm = () => {
         return value.replace(/\D/g, '').slice(0, 10);
     };
 
+    const today = new Date();
+    const minAgeDate = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+    );
+
     const formik = useFormik({
         initialValues,
         validate: (values) => {
@@ -62,7 +69,17 @@ const PracticeRegisterForm = () => {
                 }
             }
 
-            if (!values.dob) errors.dob = 'Date of Birth is required';
+            if (!values.dob) {
+                errors.dob = 'Date of Birth is required';
+            } else {
+                const dobDate = new Date(values.dob);
+
+                if (dobDate >= today) {
+                    errors.dob = 'Date of Birth cannot be today or in the future';
+                } else if (dobDate > minAgeDate) {
+                    errors.dob = 'You must be at least 18 years old';
+                }
+            }
             if (!values.email) {
                 errors.email = 'Email is required';
             } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {

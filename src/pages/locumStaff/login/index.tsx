@@ -134,7 +134,7 @@ const LoginForm = () => {
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">Welcome Back</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">Sign in to your account</p>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">Sign in to your locum user account</p>
 
           <div className="flex justify-center gap-2 mt-4">
             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>

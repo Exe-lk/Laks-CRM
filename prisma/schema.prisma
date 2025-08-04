@@ -15,15 +15,19 @@ model LocumProfile {
   dateOfBirth             DateTime    @map("dob")
   emailAddress            String      @unique @map("email_address")
   contactNumber           String      @unique @map("contact_number")
-  gdcNumber               String      @map("gdc_number")
+  gdcNumber               String?      @map("gdc_number")
   location                String
   employeeType            String      @map("employee_type")
-  software                String
+  software                String?
   gdcImage                String?     @map("gdc_image")
   indemnityInsuranceImage String?     @map("indemnity_insurance_image")
   hepatitisBImage         String?     @map("hepatitis_b_image")
   dbsImage                String?     @map("dbs_image")
-  referenceNumber         String      @map("reference_number")
+  referenceletter1        String?      @map("referenceletter1")
+  referenceletter2        String?      @map("referenceletter2")
+  bankDetails             String?
+  shareCode               String?
+  NIUTRnumber            String?
   cv                      String?
   status                  String?
   role                    String?
@@ -31,6 +35,7 @@ model LocumProfile {
   createdAt               DateTime    @default(now()) @map("created_at")
   updatedAt               DateTime    @updatedAt @map("updated_at")
   specialties             Specialty[]
+  bookings                Booking[]
 
   @@map("locum_profiles")
 }
@@ -59,4 +64,27 @@ model Practice {
   status     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  bookings   Booking[]
+
+  @@map("practices")
+}
+
+model Booking {
+  booking_id    String        @id @default(cuid())
+  locum_id      String?
+  practice_id   String
+  booking_date  DateTime
+  booking_start_time  String
+  booking_end_time    String
+  status        String
+  location      String
+  description   String?
+  accept_time   DateTime?
+  cancel_by     String?
+  cancel_time   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+  practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
 }

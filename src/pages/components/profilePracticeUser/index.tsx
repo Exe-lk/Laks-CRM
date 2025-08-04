@@ -4,7 +4,6 @@ import { useUpdatePracticeProfileMutation } from '../../../redux/slices/practice
 import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
-
 interface Profile {
   name?: string;
   email?: string;
@@ -13,7 +12,6 @@ interface Profile {
   location?: string;
   GDCnumber?: string;
   dob?: string;
-  referenceNumber?: string;
   status?: string;
 }
 
