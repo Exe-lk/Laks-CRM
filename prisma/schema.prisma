@@ -36,6 +36,8 @@ model LocumProfile {
   updatedAt               DateTime    @updatedAt @map("updated_at")
   specialties             Specialty[]
   bookings                Booking[]
+  appointmentResponses    AppointmentResponse[]
+  appointmentConfirmations AppointmentConfirmation[]
 
   @@map("locum_profiles")
 }
@@ -65,12 +67,14 @@ model Practice {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   bookings   Booking[]
+  appointmentRequests AppointmentRequest[]
 
   @@map("practices")
 }
 
 model Booking {
   booking_id    String        @id @default(cuid())
+  request_id          String        @unique
   locum_id      String?
   practice_id   String
   booking_date  DateTime
@@ -84,7 +88,61 @@ model Booking {
   cancel_time   DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  request             AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
 
   locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+}
+
+model AppointmentRequest {
+  request_id              String      @id @default(cuid())
+  practice_id             String
+  request_date            DateTime
+  request_start_time      String
+  request_end_time        String
+  location                String
+  status                  String      @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  
+  practice                Practice    @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+  responses               AppointmentResponse[]
+  confirmations           AppointmentConfirmation[]
+  booking                 Booking?
+
+  @@map("appointment_requests")
+}
+
+model AppointmentResponse {
+  response_id       String              @id @default(cuid())
+  request_id        String
+  locum_id          String
+  status            String              // ACCEPTED, REJECTED
+  response_message  String?
+  responded_at      DateTime            @default(now())
+  
+  request           AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  locumProfile      LocumProfile        @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+  
+  @@unique([request_id, locum_id])
+  @@map("appointment_responses")
+}
+
+model AppointmentConfirmation {
+  confirmation_id         String              @id @default(cuid())
+  request_id              String
+  chosen_locum_id         String
+  practice_confirmed_at   DateTime            @default(now())
+  locum_confirmed_at      DateTime?
+  status                  String              @default("PRACTICE_CONFIRMED") // PRACTICE_CONFIRMED, LOCUM_CONFIRMED, LOCUM_REJECTED
+  rejection_reason        String?
+  confirmation_number     Int
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  
+  request                 AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  chosenLocum             LocumProfile        @relation(fields: [chosen_locum_id], references: [id], onDelete: Cascade)
+  
+ 
+  @@map("appointment_confirmations")
 }
