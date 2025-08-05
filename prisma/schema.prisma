@@ -88,7 +88,7 @@ model Booking {
   cancel_time   DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  request             AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  request       AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
 
   locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
@@ -118,13 +118,12 @@ model AppointmentResponse {
   request_id        String
   locum_id          String
   status            String              // ACCEPTED, REJECTED
-  response_message  String?
   responded_at      DateTime            @default(now())
   
   request           AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
   locumProfile      LocumProfile        @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   
-  @@unique([request_id, locum_id])
+  @@unique([request_id, locum_id], name: "request_locum_unique")
   @@map("appointment_responses")
 }
 
@@ -134,6 +133,7 @@ model AppointmentConfirmation {
   chosen_locum_id         String
   practice_confirmed_at   DateTime            @default(now())
   locum_confirmed_at      DateTime?
+  expires_at              DateTime?    
   status                  String              @default("PRACTICE_CONFIRMED") // PRACTICE_CONFIRMED, LOCUM_CONFIRMED, LOCUM_REJECTED
   rejection_reason        String?
   confirmation_number     Int
