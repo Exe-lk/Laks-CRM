@@ -29,10 +29,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Locum ID required" });
     }
 
-    // Get all PENDING requests that locum hasn't responded to
+    // Get the locum's role to filter requests accordingly
+    const locumProfile = await prisma.locumProfile.findUnique({
+      where: { id: locum_id as string },
+      select: { role: true }
+    });
+
+    if (!locumProfile || !locumProfile.role) {
+      return res.status(404).json({ error: "Locum profile not found or role not specified" });
+    }
+
+    // Get all PENDING requests that match locum's role and locum hasn't responded to
     const availableJobs = await prisma.appointmentRequest.findMany({
       where: {
         status: 'PENDING',
+        required_role: locumProfile.role, // Filter by locum's role
         request_date: {
           gte: new Date()
         },
