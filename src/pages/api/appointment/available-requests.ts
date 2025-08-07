@@ -29,21 +29,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Locum ID required" });
     }
 
+    console.log('Looking for locum with ID:', locum_id);
+
     // Get the locum's role to filter requests accordingly
     const locumProfile = await prisma.locumProfile.findUnique({
       where: { id: locum_id as string },
-      select: { role: true }
+      select: { employeeType: true }
     });
 
-    if (!locumProfile || !locumProfile.role) {
-      return res.status(404).json({ error: "Locum profile not found or role not specified" });
+    console.log('Found locum profile:', locumProfile);
+
+    if (!locumProfile || !locumProfile.employeeType) {
+      return res.status(404).json({ error: "Locum profile not found or employee type not specified" });
     }
 
-    // Get all PENDING requests that match locum's role and locum hasn't responded to
+    // Get all PENDING requests that match locum's employeeType and locum hasn't responded to
     const availableJobs = await prisma.appointmentRequest.findMany({
       where: {
         status: 'PENDING',
-        required_role: locumProfile.role, // Filter by locum's role
+        required_role: locumProfile.employeeType, // Filter by locum's employeeType
         request_date: {
           gte: new Date()
         },
@@ -80,6 +84,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    console.log('Found appointment requests:', availableJobs.length);
+    console.log('First few requests:', availableJobs.slice(0, 2));
+
     // Filter out jobs that conflict with existing bookings
     const locumBookings = await prisma.booking.findMany({
       where: {
@@ -114,6 +121,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       time_until_appointment: Math.floor((job.request_date.getTime() - new Date().getTime()) / (1000 * 60 * 60)), // hours
       is_urgent: job.request_date.getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 // less than 24 hours
     }));
+
+    console.log('Final enhanced jobs to return:', enhancedJobs.length);
+    console.log('Enhanced jobs:', enhancedJobs);
 
     res.status(200).json({
       success: true,

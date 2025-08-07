@@ -10,7 +10,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
         if(!authHeader){
             return res.status(401).json({error:"Authorization headers are missing"})
         }
-        const token = authHeader.split("")[1]
+        const token = authHeader.split(" ")[1]
         const { data : {user}, error:userError} = await supabase.auth.getUser(token)
 
         if(userError || !user){

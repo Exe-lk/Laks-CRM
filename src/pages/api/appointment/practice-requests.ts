@@ -105,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         request_date: request.request_date,
         request_start_time: request.request_start_time,
         request_end_time: request.request_end_time,
+        required_role: request.required_role,
         location: request.location,
         status: request.status,
         total_applicants: request._count.responses,
