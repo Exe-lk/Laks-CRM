@@ -287,6 +287,13 @@ const NavBar = () => {
                 Request Appointments
               </li>
               <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/locumStaff/waitingList')}
+              >
+                Waiting List
+              </li>
+              <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastAppointments')}
@@ -399,6 +406,13 @@ const NavBar = () => {
                       onClick={() => { router.push('/locumStaff/requestAppointments'); closeMobileMenu(); }}
                     >
                       Request Appointments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/locumStaff/waitingList'); closeMobileMenu(); }}
+                    >
+                      Waiting List
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''

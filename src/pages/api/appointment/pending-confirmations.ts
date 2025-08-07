@@ -25,9 +25,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Locum ID required" });
     }
 
+    console.log("DEBUG: Looking for confirmations with locum_id:", locum_id, typeof locum_id);
+
+    // First, let's see all confirmations for this locum (try both as string and trimmed)
+    const allConfirmationsForLocum = await prisma.appointmentConfirmation.findMany({
+      where: {
+        chosen_locum_id: String(locum_id).trim()
+      }
+    });
+    console.log("DEBUG: All confirmations for this locum:", allConfirmationsForLocum.length, allConfirmationsForLocum);
+
+    // Also check all confirmations with PRACTICE_CONFIRMED status
+    const allPracticeConfirmed = await prisma.appointmentConfirmation.findMany({
+      where: {
+        status: "PRACTICE_CONFIRMED"
+      }
+    });
+    console.log("DEBUG: All PRACTICE_CONFIRMED confirmations:", allPracticeConfirmed.length, allPracticeConfirmed);
+
     const pendingConfirmations = await prisma.appointmentConfirmation.findMany({
       where: {
-        chosen_locum_id: locum_id as string,
+        chosen_locum_id: String(locum_id).trim(),
         status: "PRACTICE_CONFIRMED"
       },
       include: {

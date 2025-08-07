@@ -75,7 +75,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
       const booking = await tx.booking.create({
         data:{
-            request_id:confirmation_id.request_id,
+            request_id:confirmation.request_id,
             locum_id:locum_id,
             practice_id:confirmation.request.practice_id,
             booking_date:confirmation.request.request_date,
