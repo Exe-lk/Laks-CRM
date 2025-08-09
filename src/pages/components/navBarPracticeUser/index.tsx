@@ -4,7 +4,9 @@ import Logo from "../../../../public/assests/logolaksCRM.jpg"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import CalendarModal from '../calendar/CalendarModal';
+
 
 
 const NavBar = () => {
@@ -22,6 +24,7 @@ const NavBar = () => {
     status?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -254,6 +257,14 @@ const NavBar = () => {
                 </svg>
               </button>
               <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 mr-2"
+                onClick={() => setIsCalendarModalOpen(true)}
+                aria-label="View Calendar"
+                title="View Calendar"
+              >
+                <FaCalendarAlt className="text-xl" />
+              </button>
+              <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
                 onClick={handleLogout}
                 aria-label="Logout"
@@ -299,7 +310,14 @@ const NavBar = () => {
                   }`}
                 onClick={() => router.push('/practiceUser/SelectNurses')}
               >
-                Bookings
+                Appointments
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/practiceUser/myBookings')}
+              >
+                My Bookings
               </li>
             </>
           )}
@@ -386,7 +404,14 @@ const NavBar = () => {
                         }`}
                       onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
                     >
-                      Nurses
+                      Appointments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
+                    >
+                      My Bookings
                     </li>
                     <li className="flex items-center space-x-2">
                       <button
@@ -398,6 +423,14 @@ const NavBar = () => {
                           <circle cx="12" cy="8" r="4" />
                           <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                         </svg>
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
+                        onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
+                        aria-label="View Calendar"
+                        title="View Calendar"
+                      >
+                        <FaCalendarAlt className="text-xl" />
                       </button>
                       <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
@@ -478,6 +511,9 @@ const NavBar = () => {
       )}
       {isProfileModalOpen && (
         <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+      )}
+      {isCalendarModalOpen && (
+        <CalendarModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} />
       )}
     </nav>
   );
