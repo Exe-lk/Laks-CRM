@@ -58,14 +58,21 @@ const LoginForm = () => {
         if ('data' in result && result.data) {
           const { accessToken, session } = result.data;
 
+          console.log('Login data:', { accessToken, session }); 
+
           if (accessToken) {
             localStorage.setItem('token', accessToken);
+            console.log('Stored accessToken:', accessToken); 
           } else if (session?.access_token) {
             localStorage.setItem('token', session.access_token);
+            console.log('Stored session access_token:', session.access_token);
+          }
+
+          if (session?.refresh_token) {
+            localStorage.setItem('refresh_token', session.refresh_token);
           }
 
           localStorage.setItem('locumId', JSON.stringify(result.data.profile.id));
-          // Store the profile object for later use (NavBar/Profile page)
           localStorage.setItem('profile', JSON.stringify(result.data.profile));
           console.log(result.data.profile)
 

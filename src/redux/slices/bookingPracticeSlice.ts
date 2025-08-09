@@ -29,6 +29,7 @@ export const bookingApiSlice = createApi({
     baseUrl: '/api/booking',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token); 
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
@@ -37,8 +38,14 @@ export const bookingApiSlice = createApi({
   }),
   tagTypes: ['Booking'],
   endpoints: (builder) => ({
-    getBookings: builder.query<Booking[], void>({
-      query: () => 'booking',
+    getBookings: builder.query<any, { userId: string; userType: 'locum' | 'practice' }>({
+      query: ({ userId, userType }) => ({
+        url: 'booking',
+        params: {
+          user_id: userId,
+          user_type: userType
+        }
+      }),
       providesTags: ['Booking'],
     }),
 
@@ -72,6 +79,18 @@ export const bookingApiSlice = createApi({
       }),
       invalidatesTags: ['Booking'],
     }),
+
+    cancelBooking: builder.mutation<
+      { success: boolean; message: string; data: any }, 
+      { booking_id: string; user_id: string; user_type: 'locum' | 'practice'; cancellation_reason?: string }
+    >({
+      query: (cancelData) => ({
+        url: 'cancel-booking',
+        method: 'POST',
+        body: cancelData,
+      }),
+      invalidatesTags: ['Booking'],
+    }),
   }),
 });
 
@@ -81,4 +100,5 @@ export const {
   useAddBookingMutation,
   useUpdateBookingMutation,
   useDeleteBookingMutation,
+  useCancelBookingMutation,
 } = bookingApiSlice;

@@ -14,9 +14,23 @@ export const addBooking = async (
   }
 };
 
-export const getBookings = async () => {
+export const getBookings = async (userId?: string, userType?: 'locum' | 'practice') => {
   try {
-    const response = await axios.get('/api/booking');
+    const token = localStorage.getItem('token');
+    const config: any = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
+
+    if (userId && userType) {
+      config.params = {
+        user_id: userId,
+        user_type: userType
+      };
+    }
+
+    const response = await axios.get('/api/booking/booking', config);
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.error || 'Failed to fetch bookings');
@@ -51,3 +65,4 @@ export const deleteBooking = async (bookingId: string) => {
     throw new Error(error.response?.data?.error || 'Failed to delete booking');
   }
 };
+

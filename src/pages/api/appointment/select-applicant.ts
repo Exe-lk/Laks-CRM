@@ -62,6 +62,18 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                 throw new Error("Locum has not applied for this job");
             }
 
+            // Check if this locum has been previously rejected for this request
+            const previousRejection = await tx.appointmentConfirmation.findFirst({
+                where: {
+                    request_id,
+                    chosen_locum_id: locum_id,
+                    status: "LOCUM_REJECTED"
+                }
+            });
+            if(previousRejection){
+                throw new Error("This locum has been previously rejected for this appointment and cannot be selected again");
+            }
+
             const existingConfirmation = await tx.appointmentConfirmation.findFirst({
                 where:{
                     request_id,

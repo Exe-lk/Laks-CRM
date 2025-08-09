@@ -119,6 +119,41 @@ export interface ConfirmAppointmentResponse {
   data?: BookingData | any;
 }
 
+export interface ApplicationHistoryItem {
+  response_id: string;
+  request_id: string;
+  locum_id: string;
+  status: string;
+  message?: string;
+  responded_at: Date | string;
+  expires_at?: Date | string;
+  request: {
+    request_id: string;
+    practice_id: string;
+    request_date: Date | string;
+    request_start_time: string;
+    request_end_time: string;
+    location: string;
+    required_role: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    practice: {
+      name: string;
+      location: string;
+      telephone: string;
+    };
+    is_past: boolean;
+    status_label: string;
+  };
+}
+
+export interface ApplicationHistoryResponse {
+  success: boolean;
+  data: ApplicationHistoryItem[];
+  total: number;
+}
+
 export interface ErrorResponse {
   error: string;
   details?: string;
@@ -137,7 +172,7 @@ export const appointmentRequestsLocumApiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['AvailableRequests', 'PendingConfirmations'],
+  tagTypes: ['AvailableRequests', 'PendingConfirmations', 'ApplicationHistory'],
   endpoints: (builder) => ({
     getAvailableRequests: builder.query<AvailableRequestsResponse, { locum_id: string }>({
       query: ({ locum_id }) => ({
@@ -176,6 +211,16 @@ export const appointmentRequestsLocumApiSlice = createApi({
       }),
       invalidatesTags: ['PendingConfirmations'],
     }),
+
+    getApplicationHistory: builder.query<ApplicationHistoryResponse, { locum_id: string }>({
+      query: ({ locum_id }) => ({
+        url: 'locum-apply-history',
+        params: {
+          locum_id,
+        },
+      }),
+      providesTags: ['ApplicationHistory'],
+    }),
   }),
 });
 
@@ -184,4 +229,5 @@ export const {
   useAcceptAppointmentMutation,
   useGetPendingConfirmationsQuery,
   useConfirmAppointmentMutation,
+  useGetApplicationHistoryQuery,
 } = appointmentRequestsLocumApiSlice;

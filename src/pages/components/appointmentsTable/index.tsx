@@ -205,11 +205,13 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">{request.current_selection.chosen_locum}</div>
                           <div className={`text-xs ${
-                            request.current_selection.status === 'PRACTICE_CONFIRMED' ? 'text-green-600' :
-                            request.current_selection.status === 'LOCUM_CONFIRMED' ? 'text-blue-600' :
-                            'text-red-600'
+                            request.current_selection.status === 'PRACTICE_CONFIRMED' ? 'text-yellow-600' :
+                            request.current_selection.status === 'LOCUM_CONFIRMED' ? 'text-green-600' :
+                            request.current_selection.status === 'LOCUM_REJECTED' ? 'text-red-600' :
+                            'text-gray-600'
                           }`}>
-                            {request.current_selection.status.replace('_', ' ')}
+                            {request.current_selection.status === 'LOCUM_REJECTED' ? 'REJECTED - Can select another' : 
+                             request.current_selection.status.replace('_', ' ')}
                           </div>
                         </div>
                       ) : (

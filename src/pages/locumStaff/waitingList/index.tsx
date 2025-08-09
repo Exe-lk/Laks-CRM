@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from "../../components/navBar/nav";
-import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, FaSpinner } from "react-icons/fa";
-import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
+import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, FaSpinner, FaHistory, FaExclamationTriangle } from "react-icons/fa";
+import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import Swal from 'sweetalert2';
 
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
     const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [activeTab, setActiveTab] = useState<'pending-requests' | 'pending-confirmations'>('pending-confirmations');
 
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
@@ -31,9 +32,9 @@ const WaitingList = () => {
 
     const {
         data: pendingConfirmationsData,
-        isLoading,
-        error,
-        refetch
+        isLoading: isLoadingConfirmations,
+        error: confirmationsError,
+        refetch: refetchConfirmations
     } = useGetPendingConfirmationsQuery(
         { locum_id: profile?.id },
         { 
@@ -41,9 +42,25 @@ const WaitingList = () => {
             refetchOnMountOrArgChange: true,
         }
     );
+
+    const {
+        data: applicationHistoryData,
+        isLoading: isLoadingHistory,
+        error: historyError,
+        refetch: refetchHistory
+    } = useGetApplicationHistoryQuery(
+        { locum_id: profile?.id },
+        { 
+            skip: !profile?.id,
+            refetchOnMountOrArgChange: true,
+        }
+    );
+
     console.log("DEBUG: Query parameters:", { locum_id: profile?.id });
     console.log("DEBUG: Pending confirmations response:", pendingConfirmationsData);
-    console.log("DEBUG: Query error:", error);
+    console.log("DEBUG: Application history response:", applicationHistoryData);
+    console.log("DEBUG: Confirmations error:", confirmationsError);
+    console.log("DEBUG: History error:", historyError);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 
@@ -105,7 +122,7 @@ const WaitingList = () => {
                 confirmButtonColor: '#10B981'
             });
 
-            refetch();
+            refetchConfirmations();
         } catch (error: any) {
             await Swal.fire({
                 title: 'Error',
@@ -150,6 +167,9 @@ const WaitingList = () => {
         });
     };
 
+    const isLoading = activeTab === 'pending-confirmations' ? isLoadingConfirmations : isLoadingHistory;
+    const error = activeTab === 'pending-confirmations' ? confirmationsError : historyError;
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -157,7 +177,9 @@ const WaitingList = () => {
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex justify-center items-center h-64">
                         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
-                        <span className="ml-3 text-lg text-gray-600">Loading pending confirmations...</span>
+                        <span className="ml-3 text-lg text-gray-600">
+                            {activeTab === 'pending-confirmations' ? 'Loading pending confirmations...' : 'Loading application history...'}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -165,6 +187,7 @@ const WaitingList = () => {
     }
 
     const pendingConfirmations = pendingConfirmationsData?.data?.pending_confirmations || [];
+    const applicationHistory = applicationHistoryData?.data || [];
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -173,14 +196,54 @@ const WaitingList = () => {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Waiting List</h1>
                     <p className="text-gray-600">
-                        Appointments confirmed by practices waiting for your response
+                        {activeTab === 'pending-confirmations' 
+                            ? 'Appointments confirmed by practices waiting for your response'
+                            : 'Your application history for dental appointments'
+                        }
                     </p>
+                    
+                    <div className="mt-6 flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-lg">
+                        <button
+                            onClick={() => setActiveTab('pending-confirmations')}
+                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                                activeTab === 'pending-confirmations'
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            <FaExclamationTriangle className="mr-2" />
+                            Pending Confirmations
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('pending-requests')}
+                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                                activeTab === 'pending-requests'
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            <FaHistory className="mr-2" />
+                            Pending Requests
+                        </button>
+                    </div>
+
                     <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="flex items-center">
-                            <FaClock className="text-blue-600 mr-2" />
-                            <span className="text-blue-800 font-medium">
-                                You have {pendingConfirmations.length} pending confirmation{pendingConfirmations.length !== 1 ? 's' : ''}
-                            </span>
+                            {activeTab === 'pending-confirmations' ? (
+                                <>
+                                    <FaClock className="text-blue-600 mr-2" />
+                                    <span className="text-blue-800 font-medium">
+                                        You have {pendingConfirmations.length} pending confirmation{pendingConfirmations.length !== 1 ? 's' : ''}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <FaHistory className="text-blue-600 mr-2" />
+                                    <span className="text-blue-800 font-medium">
+                                        {applicationHistory.length} application{applicationHistory.length !== 1 ? 's' : ''} in your history
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -190,21 +253,22 @@ const WaitingList = () => {
                         <div className="flex items-center">
                             <FaTimes className="text-red-600 mr-2" />
                             <span className="text-red-800">
-                                Error loading confirmations. Please try again later.
+                                Error loading {activeTab === 'pending-confirmations' ? 'confirmations' : 'application history'}. Please try again later.
                             </span>
                         </div>
                     </div>
                 )}
 
-                {pendingConfirmations.length === 0 ? (
-                    <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                        <FaClock className="mx-auto text-gray-400 text-6xl mb-4" />
-                        <h3 className="text-xl font-semibold text-gray-600 mb-2">No Pending Confirmations</h3>
-                        <p className="text-gray-500">
-                            You don't have any appointments waiting for confirmation at the moment.
-                        </p>
-                    </div>
-                ) : (
+                {activeTab === 'pending-confirmations' ? (
+                    pendingConfirmations.length === 0 ? (
+                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                            <FaClock className="mx-auto text-gray-400 text-6xl mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Pending Confirmations</h3>
+                            <p className="text-gray-500">
+                                You don't have any appointments waiting for confirmation at the moment.
+                            </p>
+                        </div>
+                    ) : (
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
@@ -346,6 +410,116 @@ const WaitingList = () => {
                             </table>
                         </div>
                     </div>
+                    )
+                ) : (
+                    applicationHistory.length === 0 ? (
+                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                            <FaHistory className="mx-auto text-gray-400 text-6xl mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Application History</h3>
+                            <p className="text-gray-500">
+                                You haven't applied for any appointments yet.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Practice Details
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Appointment
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Applied Date
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Message
+                                            </th> */}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {applicationHistory.map((application) => (
+                                            <tr 
+                                                key={application.response_id}
+                                                className={`hover:bg-gray-50 ${
+                                                    application.request.is_past ? 'bg-gray-50' : ''
+                                                }`}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex flex-col">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {application.request.practice.name}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
+                                                            <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                            {application.request.practice.location}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
+                                                            <FaPhoneAlt className="mr-1 text-gray-400" />
+                                                            {application.request.practice.telephone}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex flex-col">
+                                                        <div className="text-sm font-medium text-gray-900 flex items-center">
+                                                            <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                            {formatDateTime(application.request.request_date)}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 mt-1">
+                                                            {application.request.request_start_time} - {application.request.request_end_time}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 mt-1">
+                                                            📍 {application.request.location}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400 mt-1">
+                                                            Role: {application.request.required_role}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">
+                                                        {formatDateTime(application.responded_at)}
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex flex-col">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                            application.status === 'ACCEPTED' 
+                                                                ? 'bg-green-100 text-green-800' 
+                                                                : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                            {application.request.status_label}
+                                                        </span>
+                                                        {application.request.is_past && (
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-1">
+                                                                Past Event
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+
+                                                {/* <td className="px-6 py-4">
+                                                    <div className="text-sm text-gray-600 max-w-xs truncate">
+                                                        {application.message || 'No message provided'}
+                                                    </div>
+                                                </td> */}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )
                 )}
             </div>
         </div>

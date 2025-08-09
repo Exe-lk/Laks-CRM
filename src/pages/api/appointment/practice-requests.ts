@@ -121,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           expires_at: latestConfirmation.expires_at
         } : null,
         booking_created: !!request.booking,
-        can_select_applicant: request.status === "PENDING" && !latestConfirmation,
+        can_select_applicant: request.status === "PENDING" && (!latestConfirmation || latestConfirmation.status === "LOCUM_REJECTED"),
         created_at: request.createdAt,
         updated_at: request.updatedAt
       };
