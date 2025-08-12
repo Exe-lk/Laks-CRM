@@ -77,6 +77,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: cancellation_reason || `Cancelled by ${user_type}`
         }
       });
+
+      await tx.appointmentRequest.update({
+        where: { request_id: booking.request_id },
+        data: {
+          status: 'CANCELLED',
+          updatedAt: now
+        }
+      });
+
       return cancelledBooking;
     });
 
