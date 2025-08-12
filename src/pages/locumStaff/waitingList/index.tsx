@@ -3,17 +3,18 @@ import NavBar from "../../components/navBar/nav";
 import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, FaSpinner, FaHistory, FaExclamationTriangle } from "react-icons/fa";
 import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import Swal from 'sweetalert2';
+import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
-    const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
+    const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [activeTab, setActiveTab] = useState<'pending-requests' | 'pending-confirmations'>('pending-confirmations');
+    const [activeTab, setActiveTab] = useState<'pending-requests' | 'request-appoitment' | 'pending-confirmations'>('request-appoitment');
 
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
         const locumIdStr = localStorage.getItem('locumId');
-        
+
         if (profileStr) {
             const parsedProfile = JSON.parse(profileStr);
             console.log("DEBUG: Profile data:", parsedProfile);
@@ -37,11 +38,89 @@ const WaitingList = () => {
         refetch: refetchConfirmations
     } = useGetPendingConfirmationsQuery(
         { locum_id: profile?.id },
-        { 
+        {
             skip: !profile?.id,
             refetchOnMountOrArgChange: true,
         }
     );
+
+    const {
+        data: availableRequestsData,
+        isLoading: isLoadingRequests,
+        error: requestsError,
+        refetch
+    } = useGetAvailableRequestsQuery(
+        { locum_id: profile?.id },
+        { skip: !profile?.id }
+    );
+
+    const [acceptAppointment] = useAcceptAppointmentMutation();
+
+    const handleAccept = async (requestId: string) => {
+        if (!profile?.id) return;
+
+        const result = await Swal.fire({
+            title: 'Confirm Application',
+            text: 'Are you sure you want to apply for this appointment?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Apply',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#10B981',
+            cancelButtonColor: '#6B7280'
+        });
+
+        if (!result.isConfirmed) return;
+
+        setLoadingStates(prev => ({ ...prev, [requestId]: true }));
+
+        try {
+            await acceptAppointment({
+                request_id: requestId,
+                locum_id: profile.id,
+            }).unwrap();
+
+            await Swal.fire({
+                title: 'Success!',
+                text: 'Successfully applied for the appointment! The practice will be notified.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10B981'
+            });
+
+            refetch();
+        } catch (error: any) {
+            await Swal.fire({
+                title: 'Error!',
+                text: error.message || 'Failed to accept appointment. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#EF4444'
+            });
+        } finally {
+            setLoadingStates(prev => ({ ...prev, [requestId]: false }));
+        }
+    };
+
+    const formatDate = (dateString: string | Date) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    const formatTime = (timeString: string) => {
+        const time = new Date(`2000-01-01T${timeString}`);
+        return time.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
+    const requests = availableRequestsData?.data || [];
 
     const {
         data: applicationHistoryData,
@@ -50,7 +129,7 @@ const WaitingList = () => {
         refetch: refetchHistory
     } = useGetApplicationHistoryQuery(
         { locum_id: profile?.id },
-        { 
+        {
             skip: !profile?.id,
             refetchOnMountOrArgChange: true,
         }
@@ -68,7 +147,7 @@ const WaitingList = () => {
         if (!profile?.id) return;
 
         let rejectionReason = '';
-        
+
         if (action === 'REJECT') {
             const result = await Swal.fire({
                 title: 'Reject Appointment',
@@ -178,7 +257,7 @@ const WaitingList = () => {
                     <div className="flex justify-center items-center h-64">
                         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
                         <span className="ml-3 text-lg text-gray-600">
-                            {activeTab === 'pending-confirmations' ? 'Loading pending confirmations...' : 'Loading application history...'}
+                            {activeTab === 'request-appoitment' ? 'Loading request appoitments...' : 'Loading application history...'}
                         </span>
                     </div>
                 </div>
@@ -189,41 +268,55 @@ const WaitingList = () => {
     const pendingConfirmations = pendingConfirmationsData?.data?.pending_confirmations || [];
     const applicationHistory = applicationHistoryData?.data || [];
 
+    const filteredApplicationHistory = applicationHistory.filter(application =>
+        application.status === 'ACCEPTED'
+    );
+
     return (
         <div className="min-h-screen bg-gray-50">
             <NavBar />
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Waiting List</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointment Requests</h1>
                     <p className="text-gray-600">
-                        {activeTab === 'pending-confirmations' 
+                        {activeTab === 'request-appoitment'
                             ? 'Appointments confirmed by practices waiting for your response'
-                            : 'Your application history for dental appointments'
+                            : activeTab === 'pending-requests'
+                                ? 'Your application history for dental appointments'
+                                : 'Appointments confirmed by practices waiting for your response'
                         }
                     </p>
-                    
+
                     <div className="mt-6 flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-lg">
                         <button
-                            onClick={() => setActiveTab('pending-confirmations')}
-                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                                activeTab === 'pending-confirmations'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            onClick={() => setActiveTab('request-appoitment')}
+                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'request-appoitment'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
-                            <FaExclamationTriangle className="mr-2" />
-                            Pending Confirmations
+                            <FaHistory className="mr-2" />
+                            Request Appoitment
                         </button>
                         <button
                             onClick={() => setActiveTab('pending-requests')}
-                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                                activeTab === 'pending-requests'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-requests'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <FaHistory className="mr-2" />
                             Pending Requests
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('pending-confirmations')}
+                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-confirmations'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            <FaExclamationTriangle className="mr-2" />
+                            Pending Confirmations
                         </button>
                     </div>
 
@@ -236,11 +329,18 @@ const WaitingList = () => {
                                         You have {pendingConfirmations.length} pending confirmation{pendingConfirmations.length !== 1 ? 's' : ''}
                                     </span>
                                 </>
+                            ) : activeTab === 'request-appoitment' ? (
+                                <>
+                                    <FaHistory className="text-blue-600 mr-2" />
+                                    <span className="text-blue-800 font-medium">
+                                        {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
+                                    </span>
+                                </>
                             ) : (
                                 <>
                                     <FaHistory className="text-blue-600 mr-2" />
                                     <span className="text-blue-800 font-medium">
-                                        {applicationHistory.length} application{applicationHistory.length !== 1 ? 's' : ''} in your history
+                                        {filteredApplicationHistory.length} pending application{filteredApplicationHistory.length !== 1 ? 's' : ''} with applied status
                                     </span>
                                 </>
                             )}
@@ -269,155 +369,153 @@ const WaitingList = () => {
                             </p>
                         </div>
                     ) : (
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Practice Details
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Appointment
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Time Left
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {pendingConfirmations.map((confirmation) => {
-                                        const timeLeft = formatTimeLeft(confirmation.expires_at);
-                                        const isLoading = loadingStates[confirmation.confirmation_id];
+                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Practice Details
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Appointment
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Time Left
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {pendingConfirmations.map((confirmation) => {
+                                            const timeLeft = formatTimeLeft(confirmation.expires_at);
+                                            const isLoading = loadingStates[confirmation.confirmation_id];
 
-                                        return (
-                                            <tr 
-                                                key={confirmation.confirmation_id}
-                                                className={`hover:bg-gray-50 ${
-                                                    timeLeft.expired ? 'bg-red-50' : ''
-                                                }`}
-                                            >
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {confirmation.practice.name}
+                                            return (
+                                                <tr
+                                                    key={confirmation.confirmation_id}
+                                                    className={`hover:bg-gray-50 ${timeLeft.expired ? 'bg-red-50' : ''
+                                                        }`}
+                                                >
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex flex-col">
+                                                            <div className="text-sm font-medium text-gray-900">
+                                                                {confirmation.practice.name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                                                                <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                                {confirmation.practice.location}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                                                                <FaPhoneAlt className="mr-1 text-gray-400" />
+                                                                {confirmation.practice.telephone}
+                                                            </div>
                                                         </div>
-                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                            <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                            {confirmation.practice.location}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                            <FaPhoneAlt className="mr-1 text-gray-400" />
-                                                            {confirmation.practice.telephone}
-                                                        </div>
-                                                    </div>
-                                                </td>
+                                                    </td>
 
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm font-medium text-gray-900 flex items-center">
-                                                            <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                            {formatDateTime(confirmation.appointment.date)}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex flex-col">
+                                                            <div className="text-sm font-medium text-gray-900 flex items-center">
+                                                                <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                                {formatDateTime(confirmation.appointment.date)}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500 mt-1">
+                                                                {confirmation.appointment.start_time} - {confirmation.appointment.end_time}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500 mt-1">
+                                                                📍 {confirmation.appointment.location}
+                                                            </div>
+                                                            <div className="text-xs text-gray-400 mt-1">
+                                                                Confirmation #{confirmation.confirmation_number}
+                                                            </div>
                                                         </div>
-                                                        <div className="text-sm text-gray-500 mt-1">
-                                                            {confirmation.appointment.start_time} - {confirmation.appointment.end_time}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 mt-1">
-                                                            📍 {confirmation.appointment.location}
-                                                        </div>
-                                                        <div className="text-xs text-gray-400 mt-1">
-                                                            Confirmation #{confirmation.confirmation_number}
-                                                        </div>
-                                                    </div>
-                                                </td>
+                                                    </td>
 
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                                        timeLeft.expired 
-                                                            ? 'bg-red-100 text-red-800' 
-                                                            : timeLeft.isUrgent 
-                                                                ? 'bg-orange-100 text-orange-800' 
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${timeLeft.expired
+                                                            ? 'bg-red-100 text-red-800'
+                                                            : timeLeft.isUrgent
+                                                                ? 'bg-orange-100 text-orange-800'
                                                                 : 'bg-green-100 text-green-800'
-                                                    }`}>
-                                                        <FaClock className="mr-1" />
-                                                        {timeLeft.display}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        Expires: {formatDateTime(confirmation.expires_at)}
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {timeLeft.expired ? (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                            <FaTimes className="mr-1" />
-                                                            Expired
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            }`}>
                                                             <FaClock className="mr-1" />
-                                                            Pending Response
-                                                        </span>
-                                                    )}
-                                                </td>
+                                                            {timeLeft.display}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            Expires: {formatDateTime(confirmation.expires_at)}
+                                                        </div>
+                                                    </td>
 
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    {!timeLeft.expired ? (
-                                                        <div className="flex space-x-2">
-                                                            <button
-                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM')}
-                                                                disabled={isLoading}
-                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                                                            >
-                                                                {isLoading ? (
-                                                                    <FaSpinner className="animate-spin mr-1" />
-                                                                ) : (
-                                                                    <FaCheck className="mr-1" />
-                                                                )}
-                                                                Accept
-                                                            </button>
-                                                            
-                                                            <button
-                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT')}
-                                                                disabled={isLoading}
-                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                                            >
-                                                                {isLoading ? (
-                                                                    <FaSpinner className="animate-spin mr-1" />
-                                                                ) : (
-                                                                    <FaTimes className="mr-1" />
-                                                                )}
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-red-600 text-sm">
-                                                            <FaTimes className="inline mr-1" />
-                                                            Auto-rejected
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {timeLeft.expired ? (
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                <FaTimes className="mr-1" />
+                                                                Expired
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                <FaClock className="mr-1" />
+                                                                Pending Response
+                                                            </span>
+                                                        )}
+                                                    </td>
+
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        {!timeLeft.expired ? (
+                                                            <div className="flex space-x-2">
+                                                                <button
+                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM')}
+                                                                    disabled={isLoading}
+                                                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                                                                >
+                                                                    {isLoading ? (
+                                                                        <FaSpinner className="animate-spin mr-1" />
+                                                                    ) : (
+                                                                        <FaCheck className="mr-1" />
+                                                                    )}
+                                                                    Accept
+                                                                </button>
+
+                                                                <button
+                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT')}
+                                                                    disabled={isLoading}
+                                                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                                                >
+                                                                    {isLoading ? (
+                                                                        <FaSpinner className="animate-spin mr-1" />
+                                                                    ) : (
+                                                                        <FaTimes className="mr-1" />
+                                                                    )}
+                                                                    Reject
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-red-600 text-sm">
+                                                                <FaTimes className="inline mr-1" />
+                                                                Auto-rejected
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     )
-                ) : (
-                    applicationHistory.length === 0 ? (
+                ) : activeTab === 'pending-requests' ? (
+                    filteredApplicationHistory.length === 0 ? (
                         <div className="bg-white rounded-lg shadow-md p-8 text-center">
                             <FaHistory className="mx-auto text-gray-400 text-6xl mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Application History</h3>
+                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Pending Applications</h3>
                             <p className="text-gray-500">
-                                You haven't applied for any appointments yet.
+                                You don't have any pending applications with "applied" status.
                             </p>
                         </div>
                     ) : (
@@ -444,12 +542,11 @@ const WaitingList = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {applicationHistory.map((application) => (
-                                            <tr 
+                                        {filteredApplicationHistory.map((application) => (
+                                            <tr
                                                 key={application.response_id}
-                                                className={`hover:bg-gray-50 ${
-                                                    application.request.is_past ? 'bg-gray-50' : ''
-                                                }`}
+                                                className={`hover:bg-gray-50 ${application.request.is_past ? 'bg-gray-50' : ''
+                                                    }`}
                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex flex-col">
@@ -493,11 +590,10 @@ const WaitingList = () => {
 
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex flex-col">
-                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                            application.status === 'ACCEPTED' 
-                                                                ? 'bg-green-100 text-green-800' 
-                                                                : 'bg-red-100 text-red-800'
-                                                        }`}>
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.status === 'ACCEPTED'
+                                                            ? 'bg-green-100 text-green-800'
+                                                            : 'bg-red-100 text-red-800'
+                                                            }`}>
                                                             {application.request.status_label}
                                                         </span>
                                                         {application.request.is_past && (
@@ -520,7 +616,110 @@ const WaitingList = () => {
                             </div>
                         </div>
                     )
-                )}
+                ) : (
+                    <><div className="text-center mb-8 pt-12 px-4">
+                        {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h1 className="text-2xl sm:text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
+                                    Available Appointment Requests
+                                </h1> */}
+                    </div><div className="w-full px-2 sm:px-6 md:px-12 mb-12">
+                            <div className="bg-[#C3EAE7] px-2 sm:px-4 py-6 w-full rounded-none mb-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-black">Available Requests</h2>
+                                        <p className="text-gray-700 mt-1">
+                                            {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => refetch()}
+                                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all"
+                                    >
+                                        Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+                                        <thead className="bg-[#C3EAE7]/20">
+                                            <tr>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Practice</th>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Request Date</th>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Start Time</th>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">End Time</th>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Location</th>
+                                                <th className="px-4 sm:px-6 py-3 text-center font-bold text-black uppercase tracking-wider">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-100">
+                                            {requests.length > 0 ? (
+                                                requests.map((req) => (
+                                                    <tr key={req.request_id} className="hover:bg-[#C3EAE7]/10 transition-all">
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                                            <div>
+                                                                <div className="text-gray-900 font-medium">{req.practice.name}</div>
+                                                                <div className="text-gray-500 text-sm">{req.practice.telephone}</div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
+                                                            <div className="flex items-center">
+                                                                {req.is_urgent && <FaExclamationTriangle className="text-red-500 mr-2" />}
+                                                                {formatDate(req.request_date)}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
+                                                            {formatTime(req.request_start_time)}
+                                                        </td>
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
+                                                            {formatTime(req.request_end_time)}
+                                                        </td>
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
+                                                            {req.location}
+                                                        </td>
+                                                        <td className="px-4 sm:px-6 py-4 text-center">
+                                                            <button
+                                                                onClick={() => handleAccept(req.request_id)}
+                                                                disabled={loadingStates[req.request_id]}
+                                                                className="flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
+                                                            >
+                                                                {loadingStates[req.request_id] ? (
+                                                                    <>
+                                                                        <FaSpinner className="animate-spin mr-2" />
+                                                                        Processing...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <FaCheck className="mr-2" />
+                                                                        Accept
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={6} className="text-center text-gray-500 py-8">
+                                                        <div className="flex flex-col items-center">
+                                                            <FaClock className="text-4xl mb-4 text-gray-300" />
+                                                            <p className="text-lg font-medium">No available appointments</p>
+                                                            <p className="text-sm">Check back later for new opportunities</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div></>
+                )
+                }
             </div>
         </div>
     );

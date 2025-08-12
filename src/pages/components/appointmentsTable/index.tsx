@@ -187,10 +187,12 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <FiUsers className="text-[#C3EAE7]" />
-                        <span className="text-sm font-medium text-gray-900">{request.total_applicants}</span>
-                        {request.total_applicants > 0 && (
+                      <div className={`flex items-center gap-2 ${request.status.toLowerCase() === 'cancelled' ? 'opacity-50' : ''}`}>
+                        <FiUsers className={request.status.toLowerCase() === 'cancelled' ? 'text-gray-400' : 'text-[#C3EAE7]'} />
+                        <span className={`text-sm font-medium ${request.status.toLowerCase() === 'cancelled' ? 'text-gray-400' : 'text-gray-900'}`}>
+                          {request.status.toLowerCase() === 'cancelled' ? '-' : request.total_applicants}
+                        </span>
+                        {request.total_applicants > 0 && request.status.toLowerCase() !== 'cancelled' && (
                           <div className="text-xs text-gray-500">
                             <div className="max-w-32 truncate">
                               Latest: {request.latest_applicants.slice(0, 2).map(app => app.locum_name).join(', ')}
@@ -201,17 +203,18 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {request.current_selection ? (
+                      {request.status.toLowerCase() === 'cancelled' ? (
+                        <span className="text-sm text-gray-400 opacity-50">-</span>
+                      ) : request.current_selection ? (
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">{request.current_selection.chosen_locum}</div>
-                          <div className={`text-xs ${
-                            request.current_selection.status === 'PRACTICE_CONFIRMED' ? 'text-yellow-600' :
-                            request.current_selection.status === 'LOCUM_CONFIRMED' ? 'text-green-600' :
-                            request.current_selection.status === 'LOCUM_REJECTED' ? 'text-red-600' :
-                            'text-gray-600'
-                          }`}>
-                            {request.current_selection.status === 'LOCUM_REJECTED' ? 'REJECTED - Can select another' : 
-                             request.current_selection.status.replace('_', ' ')}
+                          <div className={`text-xs ${request.current_selection.status === 'PRACTICE_CONFIRMED' ? 'text-yellow-600' :
+                              request.current_selection.status === 'LOCUM_CONFIRMED' ? 'text-green-600' :
+                                request.current_selection.status === 'LOCUM_REJECTED' ? 'text-red-600' :
+                                  'text-gray-600'
+                            }`}>
+                            {request.current_selection.status === 'LOCUM_REJECTED' ? 'REJECTED - Can select another' :
+                              request.current_selection.status.replace('_', ' ')}
                           </div>
                         </div>
                       ) : (
@@ -220,18 +223,24 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        {request.can_select_applicant && request.total_applicants > 0 && (
-                          <button 
-                            onClick={() => handleSelectApplicant(request.request_id)}
-                            className="px-3 py-1 bg-[#C3EAE7] text-black text-xs font-medium rounded-md hover:bg-[#A9DBD9] transition-colors"
-                          >
-                            Select Applicant
-                          </button>
-                        )}
-                        {request.booking_created && (
-                          <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-md">
-                            Booking Created
-                          </span>
+                        {request.status.toLowerCase() === 'cancelled' ? (
+                          <span className="text-sm text-gray-400 opacity-50">-</span>
+                        ) : (
+                          <>
+                            {request.can_select_applicant && request.total_applicants > 0 && (
+                              <button
+                                onClick={() => handleSelectApplicant(request.request_id)}
+                                className="px-3 py-1 bg-[#C3EAE7] text-black text-xs font-medium rounded-md hover:bg-[#A9DBD9] transition-colors"
+                              >
+                                Select Applicant
+                              </button>
+                            )}
+                            {request.booking_created && (
+                              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-md">
+                                Booking Created
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
@@ -244,7 +253,7 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
           {pagination && pagination.total_pages > 1 && (
             <div className="px-6 py-4 bg-gray-50 border-t flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                Showing page {pagination.page} of {pagination.total_pages} 
+                Showing page {pagination.page} of {pagination.total_pages}
                 ({pagination.total} total requests)
               </div>
               <div className="flex gap-2">
@@ -262,11 +271,10 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 text-sm border rounded-md ${
-                        page === currentPage
+                      className={`px-3 py-1 text-sm border rounded-md ${page === currentPage
                           ? 'bg-[#C3EAE7] border-[#C3EAE7] text-black'
                           : 'hover:bg-gray-100'
-                      }`}
+                        }`}
                     >
                       {page}
                     </button>

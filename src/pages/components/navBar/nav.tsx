@@ -290,13 +290,13 @@ const NavBar = () => {
               >
                 Document Upload
               </li>
-               <li
+              {/* <li
                 className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/requestAppointments')}
               >
                 Request Appointments
-              </li>
+              </li> */}
               <li
                 className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
@@ -411,13 +411,13 @@ const NavBar = () => {
                     >
                       Document Upload
                     </li>
-                    <li
+                    {/* <li
                       className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/requestAppointments'); closeMobileMenu(); }}
                     >
                       Request Appointments
-                    </li>
+                    </li> */}
                     <li
                       className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
@@ -466,13 +466,13 @@ const NavBar = () => {
                         <FaCalendarAlt className="text-xl" />
                       </button>
                       <button
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-              >
-                <FaSignOutAlt className="text-xl" />
-              </button>
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                        title="Logout"
+                      >
+                        <FaSignOutAlt className="text-xl" />
+                      </button>
                     </li>
                   </>
                 )}
