@@ -77,27 +77,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: cancellation_reason || `Cancelled by ${user_type}`
         }
       });
-
-      // Reset appointment request to PENDING so other locums can apply
-      await tx.appointmentRequest.update({
-        where: { request_id: booking.request_id },
-        data: { status: 'PENDING' }
-      });
-
-      // Update confirmation status if locum exists
-      if (booking.locum_id) {
-        await tx.appointmentConfirmation.updateMany({
-          where: { 
-            request_id: booking.request_id,
-            chosen_locum_id: booking.locum_id
-          },
-          data: { 
-            status: 'LOCUM_REJECTED', 
-            rejection_reason: 'Booking cancelled' 
-          }
-        });
-      }
-
       return cancelledBooking;
     });
 
