@@ -42,6 +42,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 location: true,
                 telephone: true
               }
+            },
+            confirmations: {
+              where: {
+                chosen_locum_id: locum_id as string
+              },
+              select: {
+                status: true,
+                locum_confirmed_at: true
+              }
+            },
+            booking: {
+              select: {
+                status: true
+              }
             }
           }
         }
@@ -51,14 +65,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    const enhancedHistory = applicationHistory.map(application => ({
-      ...application,
-      request: {
-        ...application.request,
-        is_past: application.request.request_date < new Date(),
-        status_label: application.status === 'ACCEPTED' ? 'Applied' : 'Rejected'
+    const enhancedHistory = applicationHistory.map(application => {
+      let statusLabel = '';
+      
+      if (application.status === 'REJECTED') {
+        statusLabel = 'Rejected';
+      } else if (application.status === 'ACCEPTED') {
+        statusLabel = 'Applied';
+      } else if (application.status === 'PRACTICE_CONFIRMED') {
+        // Check if there's a confirmation record
+        const confirmation = application.request.confirmations[0];
+        if (confirmation) {
+          if (confirmation.status === 'LOCUM_CONFIRMED') {
+            statusLabel = 'Confirmed';
+          } else if (confirmation.status === 'LOCUM_REJECTED') {
+            statusLabel = 'Declined by You';
+          } else {
+            statusLabel = 'Practice Confirmed - Awaiting Your Response';
+          }
+        } else {
+          statusLabel = 'Practice Confirmed';
+        }
       }
-    }));
+
+      // Check if there's a booking
+      if (application.request.booking && application.request.booking.status === 'CONFIRMED') {
+        statusLabel = 'Booked';
+      } else if (application.request.booking && application.request.booking.status === 'CANCELLED') {
+        statusLabel = 'Cancelled';
+      }
+
+      return {
+        ...application,
+        request: {
+          ...application.request,
+          is_past: application.request.request_date < new Date(),
+          status_label: statusLabel
+        }
+      };
+    });
 
     res.status(200).json({
       success: true,

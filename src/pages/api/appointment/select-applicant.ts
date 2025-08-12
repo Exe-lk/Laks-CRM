@@ -91,6 +91,19 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
             const expiryTime = calculateExpiryTime(request.request_date);
 
+            // Update the selected locum's response status to PRACTICE_CONFIRMED
+            await tx.appointmentResponse.update({
+                where: {
+                    request_locum_unique: {
+                        request_id,
+                        locum_id
+                    }
+                },
+                data: {
+                    status: "PRACTICE_CONFIRMED"
+                }
+            });
+
             const confirmation = await tx.appointmentConfirmation.create({
                 data:{
                     request_id,
