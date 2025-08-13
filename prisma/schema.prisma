@@ -31,6 +31,9 @@ model LocumProfile {
   cv                      String?
   status                  String?
   role                    String?
+  ratings                 Json?
+  averageRating           Float?      
+  totalRatings            Int?              
   idImage                 String?     @map("id_image")
   createdAt               DateTime    @default(now()) @map("created_at")
   updatedAt               DateTime    @updatedAt @map("updated_at")
@@ -147,3 +150,5 @@ model AppointmentConfirmation {
  
   @@map("appointment_confirmations")
 }
+
+
