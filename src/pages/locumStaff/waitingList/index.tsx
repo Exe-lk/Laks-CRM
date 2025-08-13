@@ -5,31 +5,59 @@ import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetA
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 
+type RequestWithDistance = any & {
+    distance: number | null;
+};
+
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
     const [currentTime, setCurrentTime] = useState(new Date());
     const [activeTab, setActiveTab] = useState<'pending-requests' | 'request-appoitment' | 'pending-confirmations'>('request-appoitment');
+    const [distanceFilter, setDistanceFilter] = useState<number>(80);
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    };
+
+    const parseCoordinates = (coordString: string): { lat: number, lon: number } | null => {
+        if (!coordString) return null;
+        const parts = coordString.split(',');
+        if (parts.length !== 2) return null;
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        if (isNaN(lat) || isNaN(lon)) return null;
+        return { lat, lon };
+    };
 
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
+        console.log("profile", profileStr)
         const locumIdStr = localStorage.getItem('locumId');
 
         if (profileStr) {
             const parsedProfile = JSON.parse(profileStr);
-            console.log("DEBUG: Profile data:", parsedProfile);
-            console.log("DEBUG: Separate locumId:", locumIdStr ? JSON.parse(locumIdStr) : null);
+            // console.log("DEBUG: Profile data:", parsedProfile);
+            // console.log("DEBUG: Separate locumId:", locumIdStr ? JSON.parse(locumIdStr) : null);
             setProfile(parsedProfile);
         }
     }, []);
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         setCurrentTime(new Date());
+    //     }, 1000);
 
-        return () => clearInterval(timer);
-    }, []);
+    //     return () => clearInterval(timer);
+    // }, []);
 
     const {
         data: pendingConfirmationsData,
@@ -53,6 +81,7 @@ const WaitingList = () => {
         { locum_id: profile?.id },
         { skip: !profile?.id }
     );
+    console.log(availableRequestsData)
 
     const [acceptAppointment] = useAcceptAppointmentMutation();
 
@@ -120,7 +149,37 @@ const WaitingList = () => {
         });
     };
 
-    const requests = availableRequestsData?.data || [];
+    const processedRequests = React.useMemo(() => {
+        const requestsData = availableRequestsData?.data || [];
+
+        if (!profile?.address) return requestsData;
+
+        const locumCoords = parseCoordinates(profile.address);
+        if (!locumCoords) return requestsData;
+
+        return requestsData
+            .map(req => {
+                const practiceCoords = parseCoordinates(req.practice.location);
+                if (!practiceCoords) {
+                    return { ...req, distance: null };
+                }
+
+                const distance = calculateDistance(
+                    locumCoords.lat,
+                    locumCoords.lon,
+                    practiceCoords.lat,
+                    practiceCoords.lon
+                );
+
+                return { ...req, distance: Math.round(distance * 10) / 10 };
+            })
+            .filter(req => {
+                if (req.distance === null) return true;
+                return distanceFilter === 999999 || req.distance <= distanceFilter;
+            });
+    }, [availableRequestsData?.data, profile?.address, distanceFilter]);
+
+    const requests: RequestWithDistance[] = processedRequests;
 
     const {
         data: applicationHistoryData,
@@ -135,11 +194,11 @@ const WaitingList = () => {
         }
     );
 
-    console.log("DEBUG: Query parameters:", { locum_id: profile?.id });
-    console.log("DEBUG: Pending confirmations response:", pendingConfirmationsData);
-    console.log("DEBUG: Application history response:", applicationHistoryData);
-    console.log("DEBUG: Confirmations error:", confirmationsError);
-    console.log("DEBUG: History error:", historyError);
+    // console.log("DEBUG: Query parameters:", { locum_id: profile?.id });
+    // console.log("DEBUG: Pending confirmations response:", pendingConfirmationsData);
+    // console.log("DEBUG: Application history response:", applicationHistoryData);
+    // console.log("DEBUG: Confirmations error:", confirmationsError);
+    // console.log("DEBUG: History error:", historyError);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 
@@ -633,14 +692,38 @@ const WaitingList = () => {
                                         <h2 className="text-2xl font-bold text-black">Available Requests</h2>
                                         <p className="text-gray-700 mt-1">
                                             {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
+                                            {distanceFilter !== 999999 && (
+                                                <span className="text-sm text-gray-500 ml-1">
+                                                    (within {distanceFilter} km)
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
-                                    <button
-                                        onClick={() => refetch()}
-                                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all"
-                                    >
-                                        Refresh
-                                    </button>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-2">
+                                            <label htmlFor="distance-filter" className="text-sm font-medium text-gray-700">
+                                                Distance:
+                                            </label>
+                                            <select
+                                                id="distance-filter"
+                                                value={distanceFilter}
+                                                onChange={(e) => setDistanceFilter(Number(e.target.value))}
+                                                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value={15}>Within 15 km</option>
+                                                <option value={40}>Within 40 km</option>
+                                                <option value={80}>Within 80 km</option>
+                                                <option value={160}>Within 160 km</option>
+                                                <option value={999999}>All distances</option>
+                                            </select>
+                                        </div>
+                                        <button
+                                            onClick={() => refetch()}
+                                            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all"
+                                        >
+                                            Refresh
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
@@ -653,6 +736,7 @@ const WaitingList = () => {
                                                 <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Start Time</th>
                                                 <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">End Time</th>
                                                 <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Location</th>
+                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Distance</th>
                                                 <th className="px-4 sm:px-6 py-3 text-center font-bold text-black uppercase tracking-wider">Action</th>
                                             </tr>
                                         </thead>
@@ -681,6 +765,16 @@ const WaitingList = () => {
                                                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
                                                             {req.location}
                                                         </td>
+                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
+                                                            {req.distance !== null ? (
+                                                                <span className="flex items-center">
+                                                                    <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                                    {req.distance} km
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-gray-400 text-sm">N/A</span>
+                                                            )}
+                                                        </td>
                                                         <td className="px-4 sm:px-6 py-4 text-center">
                                                             <button
                                                                 onClick={() => handleAccept(req.request_id)}
@@ -704,7 +798,7 @@ const WaitingList = () => {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan={6} className="text-center text-gray-500 py-8">
+                                                    <td colSpan={7} className="text-center text-gray-500 py-8">
                                                         <div className="flex flex-col items-center">
                                                             <FaClock className="text-4xl mb-4 text-gray-300" />
                                                             <p className="text-lg font-medium">No available appointments</p>

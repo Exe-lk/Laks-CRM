@@ -133,6 +133,7 @@ export interface Applicant {
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
+    averageRating:string;
     specialties: Array<{
       speciality: string;
       numberOfYears: number;

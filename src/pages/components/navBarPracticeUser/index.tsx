@@ -7,8 +7,6 @@ import ProfileModal from '../profilePracticeUser/index';
 import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import CalendarModal from '../calendar/CalendarModal';
 
-
-
 const NavBar = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -319,6 +317,13 @@ const NavBar = () => {
               >
                 My Bookings
               </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/practiceUser/Rating')}
+              >
+                Rating
+              </li>
             </>
           )}
           {
@@ -412,6 +417,13 @@ const NavBar = () => {
                       onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
                     >
                       My Bookings
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/practiceUser/Rating'); closeMobileMenu(); }}
+                    >
+                      Rating
                     </li>
                     <li className="flex items-center space-x-2">
                       <button

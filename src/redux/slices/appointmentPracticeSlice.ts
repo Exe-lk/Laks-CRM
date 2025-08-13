@@ -95,6 +95,7 @@ export interface Applicant {
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
+    averageRating?: number;
     specialties: Array<{
       speciality: string;
       numberOfYears: number;
