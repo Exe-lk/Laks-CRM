@@ -1,36 +1,36 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { json } from "stream/consumers";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req:NextApiRequest, res:NextApiResponse) {
-    if(req.method !== "POST"){
-        return res.status(405).json({error:"Method not allowed"})
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
     }
-    try {
-        const {to, message } = req.body;
-        if(!to || !message){
-            return res.status(400).json({error: "Missing Recipient or Message"});
-        }
-        
-        const SUPABASE_FN_URL = process.env.SUPABASE_SEND_SMS_FN_URL!;
-        const SMS_FUNCTION_SECRET = process.env.SMS_FUNCTION_SECRET!;
 
-        if(!SUPABASE_FN_URL || !SMS_FUNCTION_SECRET){
-            return res.status(500).json({error: "Server not configured"});
-        }
-
-        const response = await fetch(SUPABASE_FN_URL,{
-            method:'POST',
-            headers:{
-                'content-type':'application/json',
-                'x-functions-secret':SMS_FUNCTION_SECRET
-            },
-            body:JSON.stringify({to, message})
-        });
-
-        const data = await response.json().catch(() => null);
-        return res.status(response.status).json(data);
-    } catch (error) {
-        console.error("Send SMS error:", error);
-        res.status(500).json({ error: "Failed to send SMS" });
+    const { to, body } = req.body || {};
+    if (!to || !body) {
+      return res.status(400).json({ error: "Missing 'to' or 'body'" });
     }
+
+    const SUPABASE_FUNCTION_URL = process.env.SUPABASE_FUNCTION_URL;
+    const SUPABASE_FN_SECRET = process.env.SUPABASE_FN_SECRET;
+
+    if (!SUPABASE_FUNCTION_URL || !SUPABASE_FN_SECRET) {
+      return res.status(500).json({ error: "Server misconfigured" });
+    }
+
+    const resp = await fetch(SUPABASE_FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SUPABASE_FN_SECRET}`
+      },
+      body: JSON.stringify({ to, body })
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    return res.status(resp.status).json(data);
+
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || String(err) });
+  }
 }
