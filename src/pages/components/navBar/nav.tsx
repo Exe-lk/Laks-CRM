@@ -4,7 +4,9 @@ import Logo from "../../../../public/assests/logolaksCRM.jpg"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profile/ProfileModal';
-import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt } from 'react-icons/fa';
+import CalendarModal from '../calendar/CalendarModal';
+import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
 
 
 const NavBar = () => {
@@ -22,6 +24,7 @@ const NavBar = () => {
     status?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -212,10 +215,10 @@ const NavBar = () => {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
           {!isLoggedIn ? (
             <>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleLoginClick}>
+              <button className="bg-[#C3EAE7] text-black text-xs px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick}>
                 Login
               </button>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleRegisterClick}>
+              <button className="bg-[#C3EAE7] text-black text-xs px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick}>
                 Register
               </button>
             </>
@@ -230,6 +233,14 @@ const NavBar = () => {
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                 </svg>
+              </button>
+              <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 mr-2"
+                onClick={() => setIsCalendarModalOpen(true)}
+                aria-label="View Calendar"
+                title="View Calendar"
+              >
+                <FaCalendarAlt className="text-xl" />
               </button>
               <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
@@ -263,7 +274,7 @@ const NavBar = () => {
       <div className="hidden md:block border-t border-gray-300">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
           <li
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+            className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
               }`}
             onClick={() => router.push('/')}
           >
@@ -273,35 +284,42 @@ const NavBar = () => {
           {isLoggedIn && (
             <>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/components/myDocumnet')}
               >
                 Document Upload
               </li>
-               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+              {/* <li
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/requestAppointments')}
               >
                 Request Appointments
+              </li> */}
+              <li
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/locumStaff/waitingList')}
+              >
+                Waiting List
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastAppointments')}
               >
                 Past Appointments
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
-                onClick={() => router.push('/locumStaff/ongoingandfutureappointments')}
+                onClick={() => router.push('/locumStaff/myBookings')}
               >
-                Ongoing and Future Appointments
+                My Bookings
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastandcurrentpayments')}
               >
@@ -313,42 +331,42 @@ const NavBar = () => {
             !isLoggedIn && (
               <>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/aboutus')}
                 >
                   About Us
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/dentalpractices')}
                 >
                   Dental Practices
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/dentalnurses')}
                 >
                   Dental Nurses
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/hygienist')}
                 >
                   Hygienist
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/accounting')}
                 >
                   Accounting
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/contactus')}
                 >
@@ -387,35 +405,42 @@ const NavBar = () => {
                 {isLoggedIn && (
                   <>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/myDocumnet') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/components/myDocumnet'); closeMobileMenu(); }}
                     >
                       Document Upload
                     </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                    {/* <li
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/requestAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/requestAppointments'); closeMobileMenu(); }}
                     >
                       Request Appointments
+                    </li> */}
+                    <li
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/waitingList') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/locumStaff/waitingList'); closeMobileMenu(); }}
+                    >
+                      Waiting List
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/pastAppointments'); closeMobileMenu(); }}
                     >
                       Past Appointments
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/ongoingandfutureappointments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
-                      onClick={() => { router.push('/locumStaff/ongoingandfutureappointments'); closeMobileMenu(); }}
+                      onClick={() => { router.push('/locumStaff/myBookings'); closeMobileMenu(); }}
                     >
                       Ongoing and Future Appointments
                     </li>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/locumStaff/pastandcurrentpayments'); closeMobileMenu(); }}
                     >
@@ -433,13 +458,21 @@ const NavBar = () => {
                         </svg>
                       </button>
                       <button
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-              >
-                <FaSignOutAlt className="text-xl" />
-              </button>
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
+                        onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
+                        aria-label="View Calendar"
+                        title="View Calendar"
+                      >
+                        <FaCalendarAlt className="text-xl" />
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                        title="Logout"
+                      >
+                        <FaSignOutAlt className="text-xl" />
+                      </button>
                     </li>
                   </>
                 )}
@@ -447,42 +480,42 @@ const NavBar = () => {
                   !isLoggedIn && (
                     <>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}
                       >
                         About Us
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/dentalpractices'); closeMobileMenu(); }}
                       >
                         Dental Practices
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/dentalnurses'); closeMobileMenu(); }}
                       >
                         Dental Nurses
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/hygienist'); closeMobileMenu(); }}
                       >
                         Hygienist
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/accounting'); closeMobileMenu(); }}
                       >
                         Accounting
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}
                       >
@@ -496,10 +529,10 @@ const NavBar = () => {
               <div className="mt-8 space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-xs px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
                       Login
                     </button>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-xs px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
                       Register
                     </button>
                   </>
@@ -511,6 +544,9 @@ const NavBar = () => {
       )}
       {isProfileModalOpen && (
         <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+      )}
+      {isCalendarModalOpen && (
+        <CalendarModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} />
       )}
     </nav>
   );

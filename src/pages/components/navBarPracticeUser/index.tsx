@@ -4,8 +4,8 @@ import Logo from "../../../../public/assests/logolaksCRM.jpg"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';
-import { FaSignOutAlt } from 'react-icons/fa';
-
+import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import CalendarModal from '../calendar/CalendarModal';
 
 const NavBar = () => {
   const router = useRouter();
@@ -22,6 +22,7 @@ const NavBar = () => {
     status?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -254,6 +255,14 @@ const NavBar = () => {
                 </svg>
               </button>
               <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 mr-2"
+                onClick={() => setIsCalendarModalOpen(true)}
+                aria-label="View Calendar"
+                title="View Calendar"
+              >
+                <FaCalendarAlt className="text-xl" />
+              </button>
+              <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
                 onClick={handleLogout}
                 aria-label="Logout"
@@ -285,9 +294,9 @@ const NavBar = () => {
       <div className="hidden md:block border-t border-gray-300">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
           <li
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
               }`}
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/practiceUser/home')}
           >
             Home
           </li>
@@ -295,11 +304,25 @@ const NavBar = () => {
           {isLoggedIn && (
             <>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/practiceUser/SelectNurses')}
               >
-                Nurses
+                Appointments
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/practiceUser/myBookings')}
+              >
+                My Bookings
+              </li>
+              <li
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/practiceUser/Rating')}
+              >
+                Rating
               </li>
             </>
           )}
@@ -373,20 +396,34 @@ const NavBar = () => {
             <div className="px-4 py-6">
               <ul className="space-y-4 text-lg font-medium text-gray-800">
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
-                  onClick={() => { router.push('/'); closeMobileMenu(); }}
+                  onClick={() => { router.push('/practiceUser/home'); closeMobileMenu(); }}
                 >
                   Home
                 </li>
                 {isLoggedIn && (
                   <>
                     <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
                         }`}
                       onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
                     >
-                      Nurses
+                      Appointments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
+                    >
+                      My Bookings
+                    </li>
+                    <li
+                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/practiceUser/Rating'); closeMobileMenu(); }}
+                    >
+                      Rating
                     </li>
                     <li className="flex items-center space-x-2">
                       <button
@@ -398,6 +435,14 @@ const NavBar = () => {
                           <circle cx="12" cy="8" r="4" />
                           <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                         </svg>
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
+                        onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
+                        aria-label="View Calendar"
+                        title="View Calendar"
+                      >
+                        <FaCalendarAlt className="text-xl" />
                       </button>
                       <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
@@ -478,6 +523,9 @@ const NavBar = () => {
       )}
       {isProfileModalOpen && (
         <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+      )}
+      {isCalendarModalOpen && (
+        <CalendarModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} />
       )}
     </nav>
   );
