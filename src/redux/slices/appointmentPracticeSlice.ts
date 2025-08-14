@@ -150,6 +150,7 @@ export const appointmentApiSlice = createApi({
       return headers;
     },
   }),
+
   tagTypes: ['AppointmentRequest'],
   endpoints: (builder) => ({
     createAppointmentRequest: builder.mutation<
