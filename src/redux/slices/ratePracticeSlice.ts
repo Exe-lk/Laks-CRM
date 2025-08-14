@@ -44,7 +44,7 @@ export interface GetAllLocumsResponse {
 export const ratePracticeApiSlice = createApi({
   reducerPath: 'ratePracticeApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: '/api/',
+    baseUrl: 'https://laks-crm.netlify.app/api/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;
