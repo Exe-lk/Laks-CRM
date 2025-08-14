@@ -11,8 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Missing 'to' or 'body'" });
     }
 
-    const SUPABASE_FUNCTION_URL = process.env.SUPABASE_FUNCTION_URL;
-    const SUPABASE_FN_SECRET = process.env.SUPABASE_FN_SECRET;
+    const SUPABASE_FUNCTION_URL = process.env.SUPABASE_SEND_SMS_FN_URL;
+    const SUPABASE_FN_SECRET = process.env.SMS_FUNCTION_SECRET;
 
     if (!SUPABASE_FUNCTION_URL || !SUPABASE_FN_SECRET) {
       return res.status(500).json({ error: "Server misconfigured" });
