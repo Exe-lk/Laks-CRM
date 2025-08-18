@@ -39,11 +39,74 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   const jobDetails = applicantsData?.data?.job || null;
   const canSelectApplicant = applicantsData?.data?.can_select_applicant || false;
 
-  const filteredApplicants = applicants.filter(applicant => {
-    if (ratingFilter === null) return true;
-    const rating = applicant.locumProfile.averageRating || 0;
-    return rating >= ratingFilter;
+  // Function to calculate distance between two coordinates (in kilometers)
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Parse coordinates from address string (format: "lat,lon")
+  const parseCoordinates = (address: string): { lat: number; lon: number } | null => {
+    try {
+      const parts = address.split(',');
+      if (parts.length === 2) {
+        const lat = parseFloat(parts[0].trim());
+        const lon = parseFloat(parts[1].trim());
+        if (!isNaN(lat) && !isNaN(lon)) {
+          return { lat, lon };
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing coordinates:', error);
+    }
+    return null;
+  };
+
+  // Sort applicants by rating (highest first) and then by distance (closest first)
+  const sortedApplicants = [...applicants].sort((a, b) => {
+    // First sort by rating (highest to lowest)
+    const ratingA = a.locumProfile.averageRating || 0;
+    const ratingB = b.locumProfile.averageRating || 0;
+    
+    if (ratingA !== ratingB) {
+      return ratingB - ratingA; // Higher rating first
+    }
+    
+    // If ratings are equal, sort by distance (closest first)
+    if (jobDetails?.practice?.address && a.locumProfile.address && b.locumProfile.address) {
+      const practiceCoords = parseCoordinates(jobDetails.practice.address);
+      const locumCoordsA = parseCoordinates(a.locumProfile.address);
+      const locumCoordsB = parseCoordinates(b.locumProfile.address);
+      
+      if (practiceCoords && locumCoordsA && locumCoordsB) {
+        const distanceA = calculateDistance(
+          practiceCoords.lat, practiceCoords.lon,
+          locumCoordsA.lat, locumCoordsA.lon
+        );
+        const distanceB = calculateDistance(
+          practiceCoords.lat, practiceCoords.lon,
+          locumCoordsB.lat, locumCoordsB.lon
+        );
+        return distanceA - distanceB; // Closer distance first
+      }
+    }
+    
+    return 0; // Keep original order if no distance data
   });
+
+  const filteredApplicants = ratingFilter === null 
+    ? sortedApplicants 
+    : sortedApplicants.filter(applicant => {
+        const rating = applicant.locumProfile.averageRating || 0;
+        return rating >= ratingFilter;
+      });
 
   const getFilterTooltip = (rating: number | null) => {
     if (rating === null) {
@@ -209,6 +272,37 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
     });
   };
 
+  const getDistanceText = (applicant: Applicant) => {
+    // Debug information - showing actual addresses
+    const practiceAddr = jobDetails?.practice?.location;
+    const locumAddr = applicant.locumProfile.address;
+    
+    if (!practiceAddr) {
+      return `Practice address missing`;
+    }
+    
+    if (!locumAddr) {
+      return `Locum address missing`;
+    }
+    
+    const practiceCoords = parseCoordinates(practiceAddr);
+    const locumCoords = parseCoordinates(locumAddr);
+    
+    if (!practiceCoords) {
+      return `Practice coords invalid: "${practiceAddr}"`;
+    }
+    
+    if (!locumCoords) {
+      return `Locum coords invalid: "${locumAddr}"`;
+    }
+    
+    const distance = calculateDistance(
+      practiceCoords.lat, practiceCoords.lon,
+      locumCoords.lat, locumCoords.lon
+    );
+    return `${distance.toFixed(1)} km away`;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -249,6 +343,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                 <h3 className="text-lg font-semibold text-gray-800">
                   {filteredApplicants.length} of {applicants.length} Applicant{applicants.length !== 1 ? 's' : ''}
                   {ratingFilter && ` (${ratingFilter}+ stars)`}
+                  <span className="text-sm font-normal text-gray-600 block">Sorted by rating (highest first) and distance (closest first)</span>
                 </h3>
                 <div className="flex gap-2 items-center">
                   <button
@@ -274,7 +369,8 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
 
               {showFilters && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Filter by Rating</h4>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Filter by Minimum Rating</h4>
+                  <p className="text-xs text-gray-500 mb-3">Applicants are automatically sorted by rating (5★ to 1★) and then by distance (closest first)</p>
                   <div className="flex gap-2 flex-wrap relative">
                     <div className="relative">
                       <button
@@ -379,6 +475,10 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <FiClock className="text-[#C3EAE7]" />
                           Applied: {formatResponseTime(applicant.responded_at)}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 col-span-1 md:col-span-2">
+                          <FiMapPin className="text-green-500" />
+                          <span className="font-medium text-green-600">{getDistanceText(applicant)}</span>
                         </div>
                       </div>
 

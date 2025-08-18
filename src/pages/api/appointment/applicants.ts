@@ -31,7 +31,8 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
             practice:{
                 select:{
                     name:true,
-                    location:true
+                    location:true,
+                    address:true
                 }
             }
         }
@@ -67,6 +68,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     id:true,
                     fullName:true,
                     location:true,
+                    address:true,
                     contactNumber:true,
                     emailAddress:true,
                     employeeType:true,

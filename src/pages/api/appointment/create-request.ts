@@ -29,10 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       request_start_time,
       request_end_time,
       location,
-      required_role
+      required_role,
+      address
     } = req.body;
 
-    if (!practice_id || !request_date || !request_start_time || !request_end_time || !location || !required_role) {
+    if (!practice_id || !request_date || !request_start_time || !request_end_time || !location || !required_role || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -49,13 +50,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         request_end_time,
         location,
         required_role,
+        address,
         status: 'PENDING'
       },
       include: {
         practice: {
           select: {
             name: true,
-            location: true
+            location: true,
+            address:true
           }
         }
       }

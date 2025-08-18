@@ -7,6 +7,7 @@ export interface AppointmentRequest {
   request_start_time: string;
   request_end_time: string;
   location: string;
+  address: string;
   required_role: string;
   status?: string;
   createdAt?: Date;
@@ -26,6 +27,7 @@ export interface CreateAppointmentRequestData {
   request_end_time: string;
   location: string;
   required_role: string;
+  address: string;
 }
 
 export interface AvailableRequestsParams {
@@ -92,6 +94,7 @@ export interface Applicant {
     id: string;
     fullName: string;
     location: string;
+    address: string;
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
@@ -110,9 +113,11 @@ export interface JobDetails {
   request_end_time: string;
   location: string;
   required_role: string;
+  address: string;
   practice: {
     name: string;
     location: string;
+    address: string;
   };
 }
 

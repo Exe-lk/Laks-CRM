@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ratePracticeService } from '@/service/ratePracticeService';
 
 export interface Specialty {
   speciality: string;
