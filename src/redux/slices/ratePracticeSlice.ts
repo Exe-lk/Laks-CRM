@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { ratePracticeService } from '@/service/ratePracticeService';
 
 export interface Specialty {
   speciality: string;
@@ -44,7 +43,7 @@ export interface GetAllLocumsResponse {
 export const ratePracticeApiSlice = createApi({
   reducerPath: 'ratePracticeApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: '/api/',
+    baseUrl: 'https://laks-crm.netlify.app/api/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;

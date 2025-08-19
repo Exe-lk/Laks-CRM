@@ -131,6 +131,14 @@ const RatingPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <NavBarPracticeUser />
+      {isLoading && (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading locum staff...</p>
+        </div>
+      </div>
+    )}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Rate Locum Staff</h1>
         <p className="text-gray-600">

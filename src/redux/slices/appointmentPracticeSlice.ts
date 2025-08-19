@@ -7,6 +7,7 @@ export interface AppointmentRequest {
   request_start_time: string;
   request_end_time: string;
   location: string;
+  address: string;
   required_role: string;
   status?: string;
   createdAt?: Date;
@@ -26,6 +27,7 @@ export interface CreateAppointmentRequestData {
   request_end_time: string;
   location: string;
   required_role: string;
+  address: string;
 }
 
 export interface AvailableRequestsParams {
@@ -92,6 +94,7 @@ export interface Applicant {
     id: string;
     fullName: string;
     location: string;
+    address: string;
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
@@ -110,9 +113,11 @@ export interface JobDetails {
   request_end_time: string;
   location: string;
   required_role: string;
+  address: string;
   practice: {
     name: string;
     location: string;
+    address: string;
   };
 }
 
@@ -141,7 +146,7 @@ export interface SelectApplicantResponse {
 export const appointmentApiSlice = createApi({
   reducerPath: 'appointmentApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api/appointment',
+    baseUrl: 'https://laks-crm.netlify.app/api/appointment',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -150,6 +155,7 @@ export const appointmentApiSlice = createApi({
       return headers;
     },
   }),
+
   tagTypes: ['AppointmentRequest'],
   endpoints: (builder) => ({
     createAppointmentRequest: builder.mutation<

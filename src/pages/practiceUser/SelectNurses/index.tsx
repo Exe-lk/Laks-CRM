@@ -10,6 +10,7 @@ import { useCreateAppointmentRequestMutation, useGetPracticeRequestsQuery } from
 interface Profile {
     id?: string;
     address?: string;
+    location?: string;
 }
 
 const CreateAppointmentPage = () => {
@@ -42,7 +43,8 @@ const CreateAppointmentPage = () => {
         request_start_time: '',
         request_end_time: '',
         location: '',
-        required_role:''
+        required_role:'',
+        address:profile?.location || ''
     });
 
     // Helper function to check if appointment is within 24 hours
@@ -72,7 +74,8 @@ const CreateAppointmentPage = () => {
             setAppointmentFormData(prev => ({
                 ...prev,
                 practice_id: profile.id || '',
-                location: profile.address || ''
+                location: profile.address || '',
+                address: profile.location || ''
             }));
         }
         setIsAppointmentModalOpen(true);
@@ -86,7 +89,8 @@ const CreateAppointmentPage = () => {
             request_start_time: '',
             request_end_time: '',
             location: '',
-            required_role:''
+            required_role:'',
+            address:profile?.location || ''
         });
     };
 

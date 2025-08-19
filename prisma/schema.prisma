@@ -104,6 +104,7 @@ model AppointmentRequest {
   request_start_time      String
   request_end_time        String
   location                String
+  address                 String      // Address for the appointment location
   required_role           String      // Role required for this appointment (e.g., "Nurse", "Hygienist")
   status                  String      @default("PENDING") // PENDING, CONFIRMED, CANCELLED
   createdAt               DateTime    @default(now())
