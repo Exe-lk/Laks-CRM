@@ -45,6 +45,17 @@ const CreateAppointmentPage = () => {
         required_role:''
     });
 
+    // Helper function to check if appointment is within 24 hours
+    const isUrgentAppointment = (dateStr: string): boolean => {
+        if (!dateStr) return false;
+        const appointmentDate = new Date(dateStr);
+        const now = new Date();
+        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        return appointmentDate <= twentyFourHoursFromNow;
+    };
+
+    const isUrgent = isUrgentAppointment(appointmentFormData.request_date);
+
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
         if (profileStr) {
@@ -94,6 +105,33 @@ const CreateAppointmentPage = () => {
                 confirmButtonColor: '#C3EAE7',
             });
             return;
+        }
+
+        // Show urgent appointment confirmation if within 24 hours
+        if (isUrgent) {
+            const confirmResult = await Swal.fire({
+                icon: 'warning',
+                title: 'Urgent Appointment Request',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-3">This appointment is within 24 hours. Please note:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>If no locum applies within <strong>15 minutes</strong>, this request will be automatically cancelled</li>
+                            <li>You may need to contact locums directly for urgent placements</li>
+                            <li>Consider extending the time frame if possible</li>
+                        </ul>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Create Urgent Request',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+            });
+
+            if (!confirmResult.isConfirmed) {
+                return;
+            }
         }
 
         try {
@@ -184,12 +222,27 @@ const CreateAppointmentPage = () => {
                                     name="request_date"
                                     value={appointmentFormData.request_date}
                                     onChange={handleAppointmentChange}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl 
-                           focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+                           focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md"
+                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                           ${isUrgent 
+                             ? 'border-orange-300 focus:border-orange-400 bg-orange-50' 
+                             : 'border-gray-200 focus:border-[#C3EAE7]'
+                           }`}
                                     required
                                 />
+                                {isUrgent && (
+                                    <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                        <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <div className="text-sm">
+                                            <p className="font-semibold text-orange-800">Urgent Request</p>
+                                            <p className="text-orange-700">This appointment is within 24 hours. It will auto-cancel in 15 minutes if no one applies.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2 group">
@@ -305,10 +358,12 @@ const CreateAppointmentPage = () => {
                                 className={`px-5 py-2 font-bold rounded-xl transition-all duration-200 
                                     ${isCreatingAppointment
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : isUrgent
+                                        ? 'bg-orange-500 text-white hover:bg-orange-600'
                                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                     }`}
                             >
-                                {isCreatingAppointment ? 'Creating...' : 'Create Request'}
+                                {isCreatingAppointment ? 'Creating...' : isUrgent ? 'Create Urgent Request' : 'Create Request'}
                             </button>
                         </div>
                     </div>

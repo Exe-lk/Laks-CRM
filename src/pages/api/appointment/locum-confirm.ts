@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { date } from "yup";
+import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -70,6 +71,9 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
           }
         });
 
+        // Cancel auto-cancellation since confirmation was rejected (appointment may get new applicants)
+        cancelAutoCancellation(confirmation.request_id);
+
         return { type: "REJECTED", data:updatedConfirmation}
       }
 
@@ -113,6 +117,10 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         where:{request_id:confirmation.request_id},
         data:{status:"CONFIRMED"}
       });
+
+      // Cancel auto-cancellation since appointment is now confirmed
+      cancelAutoCancellation(confirmation.request_id);
+
       return {type:"CONFIRMED", data:booking}
     });
 

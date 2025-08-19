@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
+import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -28,6 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!request_id || !practice_id) {
       return res.status(400).json({ error: "Request ID and Practice ID are required" });
     }
+
+    // Cancel auto-cancellation timer since request is being manually cancelled
+    cancelAutoCancellation(request_id);
 
     const result = await prisma.$transaction(async (tx) => {
       // Check if request exists and belongs to the practice

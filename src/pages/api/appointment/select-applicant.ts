@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabaseclient";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
+import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient()
 
@@ -135,6 +136,9 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     }
                 }
             });
+
+            // Cancel auto-cancellation since a locum has been selected
+            cancelAutoCancellation(request_id);
 
             return confirmation;
         });

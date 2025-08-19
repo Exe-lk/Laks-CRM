@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
+import { cancelAutoCancellation, scheduleAutoCancellation, isWithin24Hours } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -74,14 +75,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("Cannot update request with active confirmations pending");
       }
 
+      // Cancel existing auto-cancellation timer
+      cancelAutoCancellation(request_id);
+
       // Prepare update data
       const updateData: any = {};
+      let newRequestDate = existingRequest.request_date;
+      
       if (request_date) {
         const requestDate = new Date(request_date);
         if (requestDate < new Date()) {
           throw new Error("Request date must be in the future");
         }
         updateData.request_date = requestDate;
+        newRequestDate = requestDate;
       }
       if (request_start_time) updateData.request_start_time = request_start_time;
       if (request_end_time) updateData.request_end_time = request_end_time;
@@ -111,6 +118,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
       });
+
+      // Check if we need to reschedule auto-cancellation
+      const hasAcceptedApplications = existingRequest.responses.some(response => response.status === 'ACCEPTED');
+      const roleChanged = required_role && required_role !== existingRequest.required_role;
+      
+      if (isWithin24Hours(newRequestDate) && (!hasAcceptedApplications || roleChanged)) {
+        scheduleAutoCancellation(request_id);
+        console.log(`Rescheduled auto-cancellation for updated appointment request: ${request_id}`);
+      }
 
       return updatedRequest;
     });
