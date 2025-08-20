@@ -40,7 +40,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
        if(!request){
         return res.status(404).json({error: "Job Not found"})
        }
-       // Get rejected locum IDs for this specific request
        const rejectedLocums = await prisma.appointmentConfirmation.findMany({
         where: {
             request_id: request_id as string,
@@ -57,7 +56,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         where:{
             request_id:request_id as string,
             status: "ACCEPTED",
-            // Exclude locums who have been rejected for this specific request
             locum_id: {
                 notIn: rejectedLocumIds
             }

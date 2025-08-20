@@ -86,7 +86,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Found appointment requests:', availableJobs.length);
     console.log('First few requests:', availableJobs.slice(0, 2));
 
-    // Filter out jobs that conflict with existing bookings
     const locumBookings = await prisma.booking.findMany({
       where: {
         locum_id: locum_id as string,

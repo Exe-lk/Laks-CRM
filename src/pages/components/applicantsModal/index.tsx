@@ -39,9 +39,8 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   const jobDetails = applicantsData?.data?.job || null;
   const canSelectApplicant = applicantsData?.data?.can_select_applicant || false;
 
-  // Function to calculate distance between two coordinates (in kilometers)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Earth's radius in kilometers
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -52,7 +51,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
     return R * c;
   };
 
-  // Parse coordinates from address string (format: "lat,lon")
   const parseCoordinates = (address: string): { lat: number; lon: number } | null => {
     try {
       const parts = address.split(',');
@@ -69,17 +67,14 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
     return null;
   };
 
-  // Sort applicants by rating (highest first) and then by distance (closest first)
   const sortedApplicants = [...applicants].sort((a, b) => {
-    // First sort by rating (highest to lowest)
     const ratingA = a.locumProfile.averageRating || 0;
     const ratingB = b.locumProfile.averageRating || 0;
     
     if (ratingA !== ratingB) {
-      return ratingB - ratingA; // Higher rating first
+      return ratingB - ratingA; 
     }
     
-    // If ratings are equal, sort by distance (closest first)
     if (jobDetails?.practice?.address && a.locumProfile.address && b.locumProfile.address) {
       const practiceCoords = parseCoordinates(jobDetails.practice.address);
       const locumCoordsA = parseCoordinates(a.locumProfile.address);
@@ -94,11 +89,11 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
           practiceCoords.lat, practiceCoords.lon,
           locumCoordsB.lat, locumCoordsB.lon
         );
-        return distanceA - distanceB; // Closer distance first
+        return distanceA - distanceB; 
       }
     }
     
-    return 0; // Keep original order if no distance data
+    return 0; 
   });
 
   const filteredApplicants = ratingFilter === null 
@@ -273,7 +268,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   };
 
   const getDistanceText = (applicant: Applicant) => {
-    // Debug information - showing actual addresses
     const practiceAddr = jobDetails?.practice?.location;
     const locumAddr = applicant.locumProfile.address;
     

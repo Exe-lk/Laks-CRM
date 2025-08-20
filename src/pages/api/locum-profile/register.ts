@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
@@ -11,14 +10,12 @@ export default async function handler(
   try {
     switch (req.method) {
       case "GET":
-        // Get all locum profiles
         const profiles = await prisma.locumProfile.findMany({
           include: {
             specialties: true,
           },
           orderBy: { createdAt: "desc" },
         });
-        // Map specialties to use display names
         const profilesWithDisplayNames = profiles.map(profile => ({
           ...profile,
           specialties: profile.specialties.map(specialty => ({
@@ -29,7 +26,6 @@ export default async function handler(
         return res.status(200).json(profilesWithDisplayNames);
 
       case "POST":
-        // Create a new locum profile
         const {
           fullName,
           emailAddress,
@@ -40,10 +36,9 @@ export default async function handler(
           gdcNumber,
           employeeType,
           software,
-          specialties, // Array of specialty objects
+          specialties, 
         } = req.body;
 
-        // Basic validation
         if (
           !fullName ||
           !emailAddress ||
@@ -57,7 +52,6 @@ export default async function handler(
               "Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType",
           });
         }
-        // Validate each specialty object
         if (specialties) {
           for (const specialty of specialties) {
             if (!specialty.speciality || !specialty.numberOfYears) {
@@ -74,14 +68,12 @@ export default async function handler(
                 error: "numberOfYears must be a positive number",
               });
             }
-            // Validate speciality value and convert to numeric enum
             const specialityValue = getSpecialityValue(specialty.speciality);
             if (specialityValue === null) {
               return res.status(400).json({
                 error: `ff`,
               });
             }
-            // Replace the display name with numeric value
             specialty.speciality = specialityValue;
           }
         }
@@ -101,9 +93,7 @@ export default async function handler(
           });
         }
 
-        // Create locum profile and specialties in a transaction
         const result = await prisma.$transaction(async (tx) => {
-          // Create locum profile
           const newProfile = await tx.locumProfile.create({
             data: {
               fullName,
@@ -112,8 +102,8 @@ export default async function handler(
               address,
               gdcNumber,
               employeeType,
-              dateOfBirth: new Date("1990-01-01"), // Default date, you may want to handle this differently
-              location, // Default empty string
+              dateOfBirth: new Date("1990-01-01"), 
+              location, 
               software: software || "",
               status: "pending",
               role: "user",
@@ -121,7 +111,6 @@ export default async function handler(
             },
           });
 
-          // Create specialties if provided
           let createdSpecialties = [];
           if (specialties && specialties.length > 0) {
             for (const specialty of specialties) {
@@ -147,7 +136,6 @@ export default async function handler(
         });
 
       case "PUT":
-        // Update a locum profile
         const { id, ...updateData } = req.body;
 
         if (!id) {
@@ -167,7 +155,6 @@ export default async function handler(
         return res.status(200).json(updatedProfile);
 
       case "DELETE":
-        // Delete a locum profile
         const profileId = req.query.id as string;
 
         if (!profileId) {
@@ -189,14 +176,12 @@ export default async function handler(
   } catch (error: any) {
    
 
-    // Handle Prisma-specific errors
     if (error.code === "P2002") {
       return res.status(400).json({
         error: "Email address or mobile number already exists",
       });
     }
 
-    // Handle database connection errors
     if (error.code === "P1001") {
       return res.status(500).json({
         error: `Database connection error: ${
@@ -205,7 +190,6 @@ export default async function handler(
       });
     }
 
-    // Handle Supabase auth errors
     if (error.message && error.message.includes("supabase")) {
       return res.status(500).json({
         error: `Supabase error: ${error.message}`,

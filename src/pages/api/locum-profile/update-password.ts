@@ -8,24 +8,20 @@ export default async function handler(
   try {
     switch (req.method) {
       case "POST":
-        // Update user password
         const { password } = req.body;
 
-        // Basic validation
         if (!password) {
           return res.status(400).json({
             error: "New password is required",
           });
         }
 
-        // Validate password strength (minimum 6 characters)
         if (password.length < 6) {
           return res.status(400).json({
             error: "Password must be at least 6 characters long",
           });
         }
 console.log("password", password)
-        // Update user password using Supabase
         const { data, error } = await supabase.auth.updateUser({
           password: password,
         });

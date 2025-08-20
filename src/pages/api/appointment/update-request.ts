@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
+import { cancelAutoCancellation, scheduleAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -38,7 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // Check if request exists and belongs to the practice
       const existingRequest = await tx.appointmentRequest.findUnique({
         where: { request_id },
         include: {
@@ -60,12 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("Only pending requests can be updated");
       }
 
-      // Check if there are any confirmed bookings
       if (existingRequest.booking) {
         throw new Error("Cannot update request with confirmed booking");
       }
 
-      // Check if there are active confirmations
       const activeConfirmations = existingRequest.confirmations.filter(
         conf => conf.status === 'PRACTICE_CONFIRMED'
       );
@@ -74,28 +72,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("Cannot update request with active confirmations pending");
       }
 
-      // Prepare update data
+      cancelAutoCancellation(request_id);
+
       const updateData: any = {};
+      let newRequestDate = existingRequest.request_date;
+      
       if (request_date) {
         const requestDate = new Date(request_date);
         if (requestDate < new Date()) {
           throw new Error("Request date must be in the future");
         }
         updateData.request_date = requestDate;
+        newRequestDate = requestDate;
       }
       if (request_start_time) updateData.request_start_time = request_start_time;
       if (request_end_time) updateData.request_end_time = request_end_time;
       if (location) updateData.location = location;
       if (required_role) updateData.required_role = required_role;
 
-      // If role is being changed, remove all existing responses
       if (required_role && required_role !== existingRequest.required_role) {
         await tx.appointmentResponse.deleteMany({
           where: { request_id }
         });
       }
 
-      // Update the request
       const updatedRequest = await tx.appointmentRequest.update({
         where: { request_id },
         data: {
@@ -111,6 +111,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
       });
+
+      const hasAcceptedApplications = existingRequest.responses.some(response => response.status === 'ACCEPTED');
+      const roleChanged = required_role && required_role !== existingRequest.required_role;
+      
+      const now = new Date();
+      const timeDiff = (newRequestDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      
+      if (timeDiff < 24 && (!hasAcceptedApplications || roleChanged)) {
+        const startTime = updateData.request_start_time || existingRequest.request_start_time;
+        scheduleAutoCancellation(request_id, now, newRequestDate, startTime);
+        console.log(`Rescheduled auto-cancellation for updated appointment request: ${request_id}`);
+      }
 
       return updatedRequest;
     });

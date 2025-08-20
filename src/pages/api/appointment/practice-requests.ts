@@ -1,4 +1,3 @@
-// src/pages/api/appointment/practice-requests.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";

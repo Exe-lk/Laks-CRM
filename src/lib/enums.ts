@@ -14,7 +14,6 @@ export enum Speciality {
 export const SPECIALITY_VALUES = Object.values(Speciality).filter(value => typeof value === 'number');
 export const SPECIALITY_KEYS = Object.keys(Speciality);
 
-// Helper function to get display name from numeric value
 export const getSpecialityDisplayName = (value: number): string => {
   switch (value) {
     case Speciality.GENERAL_DENTISTRY:
@@ -40,7 +39,6 @@ export const getSpecialityDisplayName = (value: number): string => {
   }
 };
 
-// Helper function to get numeric value from display name
 export const getSpecialityValue = (displayName: string): number | null => {
   switch (displayName) {
     case "General Dentist":

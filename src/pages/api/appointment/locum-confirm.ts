@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { date } from "yup";
+import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +20,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { confirmation_id, locum_id, action } = req.body; // action: "CONFIRM" or "REJECT"
+    const { confirmation_id, locum_id, action } = req.body; 
 
     if (!confirmation_id || !locum_id || !action) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -50,7 +51,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         }
 
         if (confirmation.expires_at && new Date() > confirmation.expires_at) {
-        // Auto-reject expired confirmation
         await tx.appointmentConfirmation.update({
           where: { confirmation_id },
           data: {
@@ -69,6 +69,8 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
             rejection_reason: "Rejected by locum"
           }
         });
+
+        cancelAutoCancellation(confirmation.request_id);
 
         return { type: "REJECTED", data:updatedConfirmation}
       }
@@ -113,6 +115,9 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         where:{request_id:confirmation.request_id},
         data:{status:"CONFIRMED"}
       });
+
+      cancelAutoCancellation(confirmation.request_id);
+
       return {type:"CONFIRMED", data:booking}
     });
 

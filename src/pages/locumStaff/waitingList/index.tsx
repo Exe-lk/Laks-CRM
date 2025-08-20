@@ -274,6 +274,8 @@ const WaitingList = () => {
         }
     };
 
+    console.log(pendingConfirmationsData)
+
     const formatTimeLeft = (expiresAt: string | Date) => {
         const expiry = new Date(expiresAt);
         const now = currentTime;
