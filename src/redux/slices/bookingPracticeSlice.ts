@@ -26,7 +26,7 @@ export interface ErrorResponse {
 export const bookingApiSlice = createApi({
   reducerPath: 'bookingApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://laks-crm.netlify.app/api/booking',
+    baseUrl: '/api/booking',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       console.log('Token from localStorage:', token); 

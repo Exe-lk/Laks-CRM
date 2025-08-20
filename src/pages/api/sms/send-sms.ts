@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const SUPABASE_FUNCTION_URL = process.env.SUPABASE_SEND_SMS_FN_URL;
-    const SUPABASE_FN_SECRET = process.env.SMS_FUNCTION_SECRET?.trim(); // Trim whitespace
+    const SUPABASE_FN_SECRET = process.env.SMS_FUNCTION_SECRET?.trim(); 
 
     if (!SUPABASE_FUNCTION_URL || !SUPABASE_FN_SECRET) {
       return res.status(500).json({ 
@@ -43,7 +43,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const data = await resp.json().catch(() => ({}));
     
-    // Add more debugging info for failed requests
     if (!resp.ok) {
       console.error("Supabase function error:", {
         status: resp.status,

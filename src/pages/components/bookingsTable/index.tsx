@@ -69,7 +69,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     if (!booking.can_cancel) {
       await Swal.fire({
         title: 'Cannot Cancel',
-        text: 'This booking can only be cancelled more than 48 hours in advance or is not in a confirmed status.',
+        text: 'This booking can only be cancelled more than 48 hours before the appointment start time or is not in a confirmed status.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: '#C3EAE7'
@@ -235,7 +235,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           <h2 className="text-2xl font-bold text-gray-800">Your Bookings</h2>
         </div>
         <p className="text-gray-600 mt-1">
-          Manage your bookings • You can cancel confirmed bookings up to 48 hours in advance
+          Manage your bookings • You can cancel confirmed bookings more than 48 hours before the appointment start time
         </p>
       </div>
 
@@ -361,7 +361,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       <div className={`font-medium ${booking.is_past ? 'text-gray-500' : booking.time_until_booking <= 48 ? 'text-red-600' : 'text-green-600'}`}>
                         {getTimeUntilText(booking.time_until_booking)}
                       </div>
-                      {booking.is_upcoming && booking.time_until_booking <= 48 && booking.status === 'CONFIRMED' && (
+                      {booking.is_upcoming && !booking.can_cancel && booking.status === 'CONFIRMED' && (
                         <div className="text-xs text-red-500 mt-1">Cannot cancel</div>
                       )}
                     </div>

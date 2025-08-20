@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
-import { scheduleAutoCancellation, isWithin24Hours } from '@/lib/autoCancelManager';
+import { scheduleAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient();
 
@@ -43,9 +43,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Request date must be in the future" });
     }
 
-    // Check if the appointment is within 24 hours
-    const isUrgent = isWithin24Hours(requestDate);
-
     const appointmentRequest = await prisma.appointmentRequest.create({
       data: {
         practice_id,
@@ -68,21 +65,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    // If the appointment is within 24 hours, schedule auto-cancellation after 15 minutes
-    if (isUrgent) {
-      scheduleAutoCancellation(appointmentRequest.request_id);
-      console.log(`Scheduled auto-cancellation for urgent appointment request: ${appointmentRequest.request_id}`);
-    }
+    scheduleAutoCancellation(
+      appointmentRequest.request_id, 
+      appointmentRequest.createdAt, 
+      requestDate, 
+      request_start_time
+    );
+    console.log(`Scheduled auto-cancellation for appointment request: ${appointmentRequest.request_id}`);
 
-    const message = isUrgent 
-      ? "Urgent job posted successfully! Locums will be notified. If no one applies within 15 minutes, the request will be automatically cancelled."
-      : "Job posted successfully! Locums will be notified.";
+    const message = "Job posted successfully! Locums will be notified. The request will be automatically cancelled if no one applies within the designated time.";
 
     res.status(201).json({
       success: true,
       data: appointmentRequest,
-      message,
-      isUrgent
+      message
     });
 
   } catch (error) {

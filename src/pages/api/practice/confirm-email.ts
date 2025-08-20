@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 
@@ -11,7 +10,6 @@ export default async function handler(
     switch (req.method) {
       
       case "PUT":
-        // Update a locum profile's status by email
         const { email, status } = req.body;
 
         if (!email || !status) {
@@ -33,14 +31,12 @@ export default async function handler(
   } catch (error: any) {
    
 
-    // Handle Prisma-specific errors
     if (error.code === "P2002") {
       return res.status(400).json({
         error: "Email address or mobile number already exists",
       });
     }
 
-    // Handle database connection errors
     if (error.code === "P1001") {
       return res.status(500).json({
         error: `Database connection error: ${
@@ -49,7 +45,6 @@ export default async function handler(
       });
     }
 
-    // Handle Supabase auth errors
     if (error.message && error.message.includes("supabase")) {
       return res.status(500).json({
         error: `Supabase error: ${error.message}`,

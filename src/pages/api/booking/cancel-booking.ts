@@ -50,7 +50,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("Only confirmed bookings can be cancelled");
       }
 
-      // Verify ownership
       if (user_type === 'locum' && booking.locum_id !== user_id) {
         throw new Error("You can only cancel your own bookings");
       }
@@ -58,16 +57,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("You can only cancel your practice's bookings");
       }
 
-      // Check 48-hour rule
       const now = new Date();
       const bookingDateTime = new Date(booking.booking_date);
+      const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
+      bookingDateTime.setHours(hours, minutes, 0, 0);
+      
       const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
       if (timeDiffHours <= 48) {
         throw new Error("Bookings can only be cancelled more than 48 hours in advance");
       }
 
-      // Cancel the booking
       const cancelledBooking = await tx.booking.update({
         where: { booking_id },
         data: {

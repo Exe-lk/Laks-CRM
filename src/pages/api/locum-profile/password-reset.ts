@@ -8,17 +8,14 @@ export default async function handler(
   try {
     switch (req.method) {
       case "POST":
-        // Send password reset email
         const { email } = req.body;
 
-        // Basic validation
         if (!email) {
           return res.status(400).json({
             error: "Email address is required",
           });
         }
 
-        // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
           return res.status(400).json({
@@ -26,7 +23,6 @@ export default async function handler(
           });
         }
 
-        // Check if the email is registered in Supabase
         const { data: users, error: listError } = await supabase.auth.admin.listUsers();
         if (listError) {
           return res.status(500).json({ error: "Failed to check user existence" });
@@ -36,7 +32,6 @@ export default async function handler(
           return res.status(404).json({ error: "Email is not registered" });
         }
 
-        // Send password reset email using Supabase
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${siteUrl}/resetPassword`,

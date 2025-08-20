@@ -1,4 +1,3 @@
-// src/pages/api/appointment/pending-confirmations.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
@@ -27,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log("DEBUG: Looking for confirmations with locum_id:", locum_id, typeof locum_id);
 
-    // First, let's see all confirmations for this locum (try both as string and trimmed)
     const allConfirmationsForLocum = await prisma.appointmentConfirmation.findMany({
       where: {
         chosen_locum_id: String(locum_id).trim()
@@ -35,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     console.log("DEBUG: All confirmations for this locum:", allConfirmationsForLocum.length, allConfirmationsForLocum);
 
-    // Also check all confirmations with PRACTICE_CONFIRMED status
     const allPracticeConfirmed = await prisma.appointmentConfirmation.findMany({
       where: {
         status: "PRACTICE_CONFIRMED"
@@ -68,7 +65,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const now = new Date();
 
-    // Check for expired confirmations and auto-reject them
     const expiredConfirmations = pendingConfirmations.filter(
       conf => conf.expires_at && conf.expires_at < now
     );
@@ -87,7 +83,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Return only non-expired confirmations
     const validConfirmations = pendingConfirmations.filter(
       conf => !conf.expires_at || conf.expires_at >= now
     );

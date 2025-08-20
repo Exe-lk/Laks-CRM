@@ -243,7 +243,7 @@ const CreateAppointmentPage = () => {
                                         </svg>
                                         <div className="text-sm">
                                             <p className="font-semibold text-orange-800">Urgent Request</p>
-                                            <p className="text-orange-700">This appointment is within 24 hours. It will auto-cancel in 15 minutes if no one applies.</p>
+                                            <p className="text-orange-700">This appointment is within 24 hours. It will auto-cancel in 15 minutes if no one confirms.</p>
                                         </div>
                                     </div>
                                 )}

@@ -14,14 +14,12 @@ export default async function handler(
   try {
     const { email, password } = req.body;
 
-    // Basic validation
     if (!email || !password) {
       return res.status(400).json({
         error: "Email and password are required",
       });
     }
 
-    // First, check if the locum profile exists and get its status
     const practice = await prisma.practice.findUnique({
       where: {email: email }
       
@@ -33,7 +31,6 @@ export default async function handler(
       });
     }
 
-    // Check profile status
     switch (practice.status) {
       case "delete":
         return res.status(403).json({
@@ -55,7 +52,6 @@ export default async function handler(
 
 
       case "accept":
-        // Proceed with authentication
         break;
 
       default:
@@ -65,7 +61,6 @@ export default async function handler(
         });
     }
 
-    // Authenticate with Supabase
     const { data: signInData, error: signInError } =
       await supabase.auth.signInWithPassword({
         email: email,
@@ -78,7 +73,6 @@ export default async function handler(
       });
     }
 
-    // Return successful login response with tokens and profile data
     return res.status(200).json({
       message: "Login successful",
       profile: practice,
@@ -95,7 +89,6 @@ export default async function handler(
   } catch (error: any) {
     console.error("Login API Error:", error);
 
-    // Handle Prisma-specific errors
     if (error.code === "P1001") {
       return res.status(500).json({
         error: `Database connection error: ${
@@ -104,7 +97,6 @@ export default async function handler(
       });
     }
 
-    // Handle Supabase auth errors
     if (error.message && error.message.includes("supabase")) {
       return res.status(500).json({
         error: `Supabase error: ${error.message}`,

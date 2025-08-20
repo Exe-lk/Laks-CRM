@@ -64,7 +64,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const enhancedBookings = bookings.map(booking => {
       const now = new Date();
+      
       const bookingDateTime = new Date(booking.booking_date);
+      const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
+      bookingDateTime.setHours(hours, minutes, 0, 0);
+      
       const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
       
       return {

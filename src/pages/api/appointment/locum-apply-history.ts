@@ -73,7 +73,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else if (application.status === 'ACCEPTED') {
         statusLabel = 'Applied';
       } else if (application.status === 'PRACTICE_CONFIRMED') {
-        // Check if there's a confirmation record
         const confirmation = application.request.confirmations[0];
         if (confirmation) {
           if (confirmation.status === 'LOCUM_CONFIRMED') {
@@ -88,7 +87,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      // Check if there's a booking
       if (application.request.booking && application.request.booking.status === 'CONFIRMED') {
         statusLabel = 'Booked';
       } else if (application.request.booking && application.request.booking.status === 'CANCELLED') {

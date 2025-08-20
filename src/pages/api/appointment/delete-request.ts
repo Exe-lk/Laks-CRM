@@ -30,11 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Request ID and Practice ID are required" });
     }
 
-    // Cancel auto-cancellation timer since request is being manually cancelled
     cancelAutoCancellation(request_id);
 
     const result = await prisma.$transaction(async (tx) => {
-      // Check if request exists and belongs to the practice
       const existingRequest = await tx.appointmentRequest.findUnique({
         where: { request_id },
         include: {
@@ -55,9 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("You can only delete your own appointment requests");
       }
 
-      // Check if there's a confirmed booking
       if (existingRequest.booking && existingRequest.booking.status === 'CONFIRMED') {
-        // Check 48-hour rule for cancellation
         const now = new Date();
         const bookingDateTime = new Date(existingRequest.request_date);
         const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -66,7 +62,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           throw new Error("Cannot cancel appointment within 48 hours of the scheduled time");
         }
 
-        // Cancel the booking first
         await tx.booking.update({
           where: { booking_id: existingRequest.booking.booking_id },
           data: {
@@ -78,7 +73,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      // Delete all related records (cascading should handle most, but being explicit)
       await tx.appointmentConfirmation.deleteMany({
         where: { request_id }
       });
@@ -87,7 +81,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { request_id }
       });
 
-      // Update status to CANCELLED instead of deleting (for audit trail)
       const cancelledRequest = await tx.appointmentRequest.update({
         where: { request_id },
         data: {

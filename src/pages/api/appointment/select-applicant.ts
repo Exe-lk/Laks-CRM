@@ -5,21 +5,30 @@ import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 
 const prisma = new PrismaClient()
 
-function calculateExpiryTime(appointmentDate: Date): Date {
-  const now = new Date();
-  const hoursUntilAppointment = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-  
+function calculateExpiryTime(createdAt: Date, requestDate: Date, requestStartTime: string): Date {
+  // Parse start time and combine with request date to get full appointment datetime
+  const [hours, minutes] = requestStartTime.split(':').map(Number);
+  const appointmentDateTime = new Date(requestDate);
+  appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+  // Calculate time difference between creation and appointment start
+  const timeDiff = appointmentDateTime.getTime() - createdAt.getTime();
+  const hoursUntilAppointment = timeDiff / (1000 * 60 * 60);
+
   let responseTimeMs: number;
   
-  if (hoursUntilAppointment >= 24) {
-    responseTimeMs = 2 * 60 * 60 * 1000; // 2 hours
-  } else if (hoursUntilAppointment >= 12) {
-    responseTimeMs = 15 * 60 * 1000; // 15 minutes
+  if (hoursUntilAppointment < 24) {
+    // Below 24 hours: 15 minutes timeout
+    responseTimeMs = 15 * 60 * 1000;
+  } else if (hoursUntilAppointment >= 24 && hoursUntilAppointment <= 48) {
+    // 24-48 hours: 1 hour timeout
+    responseTimeMs = 60 * 60 * 1000;
   } else {
-    responseTimeMs = 5 * 60 * 1000; // 5 minutes
+    // More than 48 hours: 2 hours timeout
+    responseTimeMs = 2 * 60 * 60 * 1000;
   }
   
-  return new Date(now.getTime() + responseTimeMs);
+  return new Date(createdAt.getTime() + responseTimeMs);
 }
 
 export default async function handler(req:NextApiRequest, res:NextApiResponse) {
@@ -44,9 +53,11 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         }
 
         const result = await prisma.$transaction(async(tx) =>{
+            console.log(`Starting transaction for request_id: ${request_id}, locum_id: ${locum_id}`);
             const request = await tx.appointmentRequest.findUnique({
                 where:{ request_id}
             });
+            console.log(`Found request: ${request?.request_id}, status: ${request?.status}`);
             if(!request || request.status !== "PENDING"){
                 throw new Error("Job No longer available for selection")
             }
@@ -59,6 +70,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     }
                 }
             });
+            console.log(`Found application: ${application?.response_id}, status: ${application?.status}`);
             if(!application || application.status !== 'ACCEPTED'){
                 throw new Error("Locum has not applied for this job");
             }
@@ -90,9 +102,11 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                 where:{request_id}
             });
 
-            const expiryTime = calculateExpiryTime(request.request_date);
+            const expiryTime = calculateExpiryTime(request.createdAt, request.request_date, request.request_start_time);
+            console.log(`Calculated expiry time: ${expiryTime}`);
 
             // Update the selected locum's response status to PRACTICE_CONFIRMED
+            console.log(`About to update appointment response for request_id: ${request_id}, locum_id: ${locum_id}`);
             await tx.appointmentResponse.update({
                 where: {
                     request_locum_unique: {
@@ -140,7 +154,11 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
             // Cancel auto-cancellation since a locum has been selected
             cancelAutoCancellation(request_id);
 
+            console.log(`Transaction completed successfully for request_id: ${request_id}`);
             return confirmation;
+        }, {
+            maxWait: 10000, // 10 seconds
+            timeout: 15000, // 15 seconds
         });
 
         res.status(201).json({

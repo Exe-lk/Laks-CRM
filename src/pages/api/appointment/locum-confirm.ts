@@ -20,7 +20,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { confirmation_id, locum_id, action } = req.body; // action: "CONFIRM" or "REJECT"
+    const { confirmation_id, locum_id, action } = req.body; 
 
     if (!confirmation_id || !locum_id || !action) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -51,7 +51,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         }
 
         if (confirmation.expires_at && new Date() > confirmation.expires_at) {
-        // Auto-reject expired confirmation
         await tx.appointmentConfirmation.update({
           where: { confirmation_id },
           data: {
@@ -71,7 +70,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
           }
         });
 
-        // Cancel auto-cancellation since confirmation was rejected (appointment may get new applicants)
         cancelAutoCancellation(confirmation.request_id);
 
         return { type: "REJECTED", data:updatedConfirmation}
@@ -118,7 +116,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         data:{status:"CONFIRMED"}
       });
 
-      // Cancel auto-cancellation since appointment is now confirmed
       cancelAutoCancellation(confirmation.request_id);
 
       return {type:"CONFIRMED", data:booking}

@@ -2,21 +2,37 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Store active timeouts to allow cancellation if needed
 const activeTimeouts = new Map<string, NodeJS.Timeout>();
 
-export const scheduleAutoCancellation = (requestId: string, delayMs: number = 15 * 60 * 1000) => {
-  // Clear any existing timeout for this request
+export const calculateAutoCancelDelay = (createdAt: Date, requestDate: Date, requestStartTime: string): number => {
+  const [hours, minutes] = requestStartTime.split(':').map(Number);
+  const appointmentDateTime = new Date(requestDate);
+  appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+  const timeDiff = appointmentDateTime.getTime() - createdAt.getTime();
+  const hoursUntilAppointment = timeDiff / (1000 * 60 * 60);
+
+  if (hoursUntilAppointment < 24) {
+    return 15 * 60 * 1000;
+  } else if (hoursUntilAppointment >= 24 && hoursUntilAppointment <= 48) {
+    return 60 * 60 * 1000;
+  } else {
+    return 2 * 60 * 60 * 1000;
+  }
+};
+
+export const scheduleAutoCancellation = (requestId: string, createdAt: Date, requestDate: Date, requestStartTime: string) => {
   if (activeTimeouts.has(requestId)) {
     clearTimeout(activeTimeouts.get(requestId)!);
   }
+
+  const delayMs = calculateAutoCancelDelay(createdAt, requestDate, requestStartTime);
 
   const timeoutId = setTimeout(async () => {
     try {
       console.log(`Checking auto-cancellation for request: ${requestId}`);
       
       await prisma.$transaction(async (tx) => {
-        // First, check if the request still exists and is PENDING
         const request = await tx.appointmentRequest.findUnique({
           where: { request_id: requestId },
           include: {
@@ -36,13 +52,11 @@ export const scheduleAutoCancellation = (requestId: string, delayMs: number = 15
           return;
         }
 
-        // Check if anyone has accepted the appointment
         if (request.responses.length > 0) {
           console.log(`Request ${requestId} has ${request.responses.length} applicants - not cancelling`);
           return;
         }
 
-        // No applicants - cancel the request
         await tx.appointmentRequest.update({
           where: { request_id: requestId },
           data: { 
@@ -51,19 +65,20 @@ export const scheduleAutoCancellation = (requestId: string, delayMs: number = 15
           }
         });
 
-        console.log(`Auto-cancelled appointment request ${requestId} - no applicants within 15 minutes`);
+        const timeoutHours = delayMs / (1000 * 60 * 60);
+        console.log(`Auto-cancelled appointment request ${requestId} - no applicants within ${timeoutHours} hours`);
       });
 
     } catch (error) {
       console.error(`Error in auto-cancellation for request ${requestId}:`, error);
     } finally {
-      // Clean up the timeout reference
       activeTimeouts.delete(requestId);
     }
   }, delayMs);
 
   activeTimeouts.set(requestId, timeoutId);
-  console.log(`Scheduled auto-cancellation for request ${requestId} in ${delayMs}ms`);
+  const timeoutHours = delayMs / (1000 * 60 * 60);
+  console.log(`Scheduled auto-cancellation for request ${requestId} in ${timeoutHours} hours (${delayMs}ms)`);
 };
 
 export const cancelAutoCancellation = (requestId: string) => {
@@ -74,8 +89,4 @@ export const cancelAutoCancellation = (requestId: string) => {
   }
 };
 
-export const isWithin24Hours = (appointmentDate: Date): boolean => {
-  const now = new Date();
-  const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  return appointmentDate <= twentyFourHoursFromNow;
-}; 
+ 
