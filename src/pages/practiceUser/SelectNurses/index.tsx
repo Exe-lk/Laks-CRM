@@ -4,14 +4,112 @@ import Footer from "../../components/footer/index";
 import AppointmentsTable from "../../components/appointmentsTable";
 import { FiPlus } from "react-icons/fi";
 import Swal from 'sweetalert2';
+import { useFormik } from 'formik';
 import { useCreateAppointmentRequestMutation, useGetPracticeRequestsQuery } from '../../../redux/slices/appointmentPracticeSlice';
-
 
 interface Profile {
     id?: string;
     address?: string;
     location?: string;
 }
+
+interface FormValues {
+    practice_id: string;
+    request_date: string;
+    request_start_time: string;
+    request_end_time: string;
+    location: string;
+    required_role: string;
+    address: string;
+}
+
+const validateAppointmentForm = (values: FormValues) => {
+    const errors: Partial<FormValues> = {};
+
+    if (!values.practice_id) {
+        errors.practice_id = 'Practice ID is required';
+    }
+
+    if (!values.request_date) {
+        errors.request_date = 'Date is required';
+    } else {
+        const selectedDate = new Date(values.request_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+            errors.request_date = 'Cannot select a past date';
+        }
+
+        const sixMonthsFromNow = new Date();
+        sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+        if (selectedDate > sixMonthsFromNow) {
+            errors.request_date = 'Cannot schedule more than 6 months in advance';
+        }
+    }
+
+    if (!values.request_start_time) {
+        errors.request_start_time = 'Start time is required';
+    } else {
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(values.request_start_time)) {
+            errors.request_start_time = 'Please enter a valid time';
+        }
+    }
+
+    if (!values.request_end_time) {
+        errors.request_end_time = 'End time is required';
+    } else {
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(values.request_end_time)) {
+            errors.request_end_time = 'Please enter a valid time';
+        }
+    }
+
+    if (values.request_start_time && values.request_end_time) {
+        const start = new Date(`2000-01-01T${values.request_start_time}`);
+        const end = new Date(`2000-01-01T${values.request_end_time}`);
+
+        if (start >= end) {
+            errors.request_start_time = 'Start time must be before end time';
+            errors.request_end_time = 'End time must be after start time';
+        } else {
+            const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+            if (diffMinutes < 30) {
+                errors.request_end_time = 'Appointment must be at least 30 minutes long';
+            }
+            if (diffMinutes > 720) {
+                errors.request_end_time = 'Appointment cannot exceed 12 hours';
+            }
+        }
+    }
+
+    if (!values.location?.trim()) {
+        errors.location = 'Location is required';
+    } else {
+        if (values.location.trim().length < 3) {
+            errors.location = 'Location must be at least 3 characters long';
+        }
+        if (values.location.trim().length > 100) {
+            errors.location = 'Location must be less than 100 characters';
+        }
+        const invalidChars = /[<>"']/;
+        if (invalidChars.test(values.location)) {
+            errors.location = 'Location contains invalid characters';
+        }
+    }
+
+    if (!values.required_role) {
+        errors.required_role = 'Role selection is required';
+    } else {
+        const validRoles = ['Nurse', 'Receptionist', 'Hygienist', 'Dentist'];
+        if (!validRoles.includes(values.required_role)) {
+            errors.required_role = 'Please select a valid role';
+        }
+    }
+
+    return errors;
+};
 
 const CreateAppointmentPage = () => {
 
@@ -20,34 +118,41 @@ const CreateAppointmentPage = () => {
     console.log(profile)
 
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
-    
-    const { 
-        data: practiceRequestsData, 
-        isLoading: isLoadingRequests, 
-        refetch: refetchRequests 
+
+    const {
+        data: practiceRequestsData,
+        isLoading: isLoadingRequests,
+        refetch: refetchRequests
     } = useGetPracticeRequestsQuery(
-        { 
-            practice_id: profile?.id || '', 
-            page: currentPage, 
-            limit: 20 
+        {
+            practice_id: profile?.id || '',
+            page: currentPage,
+            limit: 20
         },
-        { 
-            skip: !profile?.id 
+        {
+            skip: !profile?.id
         }
     );
     console.log(practiceRequestsData)
     const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
-    const [appointmentFormData, setAppointmentFormData] = useState({
-        practice_id: '',
-        request_date: '',
-        request_start_time: '',
-        request_end_time: '',
-        location: '',
-        required_role:'',
-        address:profile?.location || ''
+
+    const formik = useFormik<FormValues>({
+        initialValues: {
+            practice_id: '',
+            request_date: '',
+            request_start_time: '',
+            request_end_time: '',
+            location: '',
+            required_role: '',
+            address: profile?.location || ''
+        },
+        validate: validateAppointmentForm,
+        enableReinitialize: true,
+        onSubmit: async (values) => {
+            await handleFormSubmit(values);
+        }
     });
 
-    // Helper function to check if appointment is within 24 hours
     const isUrgentAppointment = (dateStr: string): boolean => {
         if (!dateStr) return false;
         const appointmentDate = new Date(dateStr);
@@ -56,7 +161,7 @@ const CreateAppointmentPage = () => {
         return appointmentDate <= twentyFourHoursFromNow;
     };
 
-    const isUrgent = isUrgentAppointment(appointmentFormData.request_date);
+    const isUrgent = isUrgentAppointment(formik.values.request_date);
 
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
@@ -71,47 +176,26 @@ const CreateAppointmentPage = () => {
 
     const openAppointmentModal = () => {
         if (profile?.id && profile?.address) {
-            setAppointmentFormData(prev => ({
-                ...prev,
+            formik.setValues({
                 practice_id: profile.id || '',
+                request_date: '',
+                request_start_time: '',
+                request_end_time: '',
                 location: profile.address || '',
+                required_role: '',
                 address: profile.location || ''
-            }));
+            });
         }
         setIsAppointmentModalOpen(true);
     };
 
     const closeAppointmentModal = () => {
         setIsAppointmentModalOpen(false);
-        setAppointmentFormData({
-            practice_id: '',
-            request_date: '',
-            request_start_time: '',
-            request_end_time: '',
-            location: '',
-            required_role:'',
-            address:profile?.location || ''
-        });
+        formik.resetForm();
     };
 
-    const handleAppointmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAppointmentFormData({ ...appointmentFormData, [e.target.name]: e.target.value });
-    };
+    const handleFormSubmit = async (values: typeof formik.values) => {
 
-    const handleAppointmentSubmit = async () => {
-        if (!appointmentFormData.practice_id || !appointmentFormData.request_date ||
-            !appointmentFormData.request_start_time || !appointmentFormData.request_end_time ||
-            !appointmentFormData.location || !appointmentFormData.required_role) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Fields',
-                text: 'All fields are required.',
-                confirmButtonColor: '#C3EAE7',
-            });
-            return;
-        }
-
-        // Show urgent appointment confirmation if within 24 hours
         if (isUrgent) {
             const confirmResult = await Swal.fire({
                 icon: 'warning',
@@ -139,7 +223,7 @@ const CreateAppointmentPage = () => {
         }
 
         try {
-            const result = await createAppointmentRequest(appointmentFormData).unwrap();
+            const result = await createAppointmentRequest(values).unwrap();
 
             Swal.fire({
                 icon: 'success',
@@ -212,7 +296,7 @@ const CreateAppointmentPage = () => {
                     <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 border border-gray-100">
                         <h2 className="text-2xl font-bold mb-6 text-black text-center">Create Appointment Request</h2>
 
-                        <div className="space-y-4">
+                        <form onSubmit={formik.handleSubmit} className="space-y-4">
 
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -224,19 +308,30 @@ const CreateAppointmentPage = () => {
                                 <input
                                     type="date"
                                     name="request_date"
-                                    value={appointmentFormData.request_date}
-                                    onChange={handleAppointmentChange}
+                                    value={formik.values.request_date}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     className={`w-full px-4 py-3 border-2 rounded-xl 
                            focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
                            hover:border-[#C3EAE7]/50 group-hover:shadow-md
-                           ${isUrgent 
-                             ? 'border-orange-300 focus:border-orange-400 bg-orange-50' 
-                             : 'border-gray-200 focus:border-[#C3EAE7]'
-                           }`}
+                           ${formik.touched.request_date && formik.errors.request_date
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : isUrgent
+                                                ? 'border-orange-300 focus:border-orange-400 bg-orange-50'
+                                                : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
                                     required
                                 />
-                                {isUrgent && (
+                                {formik.touched.request_date && formik.errors.request_date && (
+                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm text-red-700">{formik.errors.request_date}</p>
+                                    </div>
+                                )}
+                                {isUrgent && !(formik.touched.request_date && formik.errors.request_date) && (
                                     <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                                         <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -259,14 +354,27 @@ const CreateAppointmentPage = () => {
                                 <input
                                     type="time"
                                     name="request_start_time"
-                                    value={appointmentFormData.request_start_time}
-                                    onChange={handleAppointmentChange}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl 
-                           focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 
+                                    value={formik.values.request_start_time}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+                           focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md"
+                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                           ${formik.touched.request_start_time && formik.errors.request_start_time
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
                                     required
                                 />
+                                {formik.touched.request_start_time && formik.errors.request_start_time && (
+                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm text-red-700">{formik.errors.request_start_time}</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2 group">
@@ -279,14 +387,27 @@ const CreateAppointmentPage = () => {
                                 <input
                                     type="time"
                                     name="request_end_time"
-                                    value={appointmentFormData.request_end_time}
-                                    onChange={handleAppointmentChange}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl 
-                           focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 
+                                    value={formik.values.request_end_time}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+                           focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md"
+                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                           ${formik.touched.request_end_time && formik.errors.request_end_time
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
                                     required
                                 />
+                                {formik.touched.request_end_time && formik.errors.request_end_time && (
+                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm text-red-700">{formik.errors.request_end_time}</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-2 group">
@@ -300,16 +421,29 @@ const CreateAppointmentPage = () => {
                                 <input
                                     type="text"
                                     name="location"
-                                    value={appointmentFormData.location}
-                                    onChange={handleAppointmentChange}
+                                    value={formik.values.location}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     placeholder="Enter location"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl 
-                           focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+                           focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md"
+                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                           ${formik.touched.location && formik.errors.location
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
                                     required
                                     disabled
                                 />
+                                {formik.touched.location && formik.errors.location && (
+                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm text-red-700">{formik.errors.location}</p>
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -330,12 +464,17 @@ const CreateAppointmentPage = () => {
                                 </label>
                                 <select
                                     name="required_role"
-                                    value={appointmentFormData.required_role}
-                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAppointmentChange(e as unknown as React.ChangeEvent<HTMLInputElement>)}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl 
-               focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 
+                                    value={formik.values.required_role}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+               focus:ring-2 focus:ring-[#C3EAE7]/30 
                transition-all duration-200 outline-none 
-               hover:border-[#C3EAE7]/50 group-hover:shadow-md"
+               hover:border-[#C3EAE7]/50 group-hover:shadow-md
+               ${formik.touched.required_role && formik.errors.required_role
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
                                     required
                                 >
                                     <option value="">Select Role</option>
@@ -344,32 +483,40 @@ const CreateAppointmentPage = () => {
                                     <option value="Hygienist">Hygienist</option>
                                     <option value="Dentist">Dentist</option>
                                 </select>
+                                {formik.touched.required_role && formik.errors.required_role && (
+                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm text-red-700">{formik.errors.required_role}</p>
+                                    </div>
+                                )}
                             </div>
 
-                        </div>
-
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                onClick={closeAppointmentModal}
-                                className="px-5 py-2 bg-gray-300 text-black rounded-xl 
-                         hover:bg-gray-400 transition-all duration-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleAppointmentSubmit}
-                                disabled={isCreatingAppointment}
-                                className={`px-5 py-2 font-bold rounded-xl transition-all duration-200 
-                                    ${isCreatingAppointment
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : isUrgent
-                                        ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                    }`}
-                            >
-                                {isCreatingAppointment ? 'Creating...' : isUrgent ? 'Create Urgent Request' : 'Create Request'}
-                            </button>
-                        </div>
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={closeAppointmentModal}
+                                    className="px-5 py-2 bg-gray-300 text-black rounded-xl 
+                             hover:bg-gray-400 transition-all duration-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isCreatingAppointment || !formik.isValid}
+                                    className={`px-5 py-2 font-bold rounded-xl transition-all duration-200 
+                                        ${isCreatingAppointment || !formik.isValid
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : isUrgent
+                                                ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                                : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                        }`}
+                                >
+                                    {isCreatingAppointment ? 'Creating...' : isUrgent ? 'Create Urgent Request' : 'Create Request'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

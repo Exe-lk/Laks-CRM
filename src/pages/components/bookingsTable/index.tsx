@@ -18,7 +18,7 @@ interface Practice {
 }
 
 interface Booking {
-  booking_id: string;
+  id: string;
   locum_id: string;
   practice_id: string;
   booking_date: string;
@@ -97,19 +97,19 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
     if (cancellationReason !== undefined) {
       try {
-        setCancellingBooking(booking.booking_id);
+        setCancellingBooking(booking.id);
 
         const token = localStorage.getItem('token');
         console.log('Token before cancel request:', token);
         console.log('Cancel request data:', {
-          booking_id: booking.booking_id,
+          booking_id: booking.id,
           user_id: userId,
           user_type: userType,
           cancellation_reason: cancellationReason
         });
 
         const result = await cancelBooking({
-          booking_id: booking.booking_id,
+          booking_id: booking.id,
           user_id: userId,
           user_type: userType,
           cancellation_reason: cancellationReason
@@ -275,7 +275,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {bookings.map((booking: Booking) => (
-                <tr key={booking.booking_id} className="hover:bg-gray-50 transition-colors">
+                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
@@ -371,10 +371,10 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       {booking.can_cancel && booking.status === 'CONFIRMED' && (
                         <button
                           onClick={() => handleCancelBooking(booking)}
-                          disabled={cancellingBooking === booking.booking_id}
+                          disabled={cancellingBooking === booking.id}
                           className="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-md hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {cancellingBooking === booking.booking_id ? 'Cancelling...' : 'Cancel'}
+                          {cancellingBooking === booking.id ? 'Cancelling...' : 'Cancel'}
                         </button>
                       )}
                       {booking.status === 'CANCELLED' && (

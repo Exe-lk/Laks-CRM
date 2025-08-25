@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const result = await prisma.$transaction(async (tx) => {
       const booking = await tx.booking.findUnique({
-        where: { booking_id },
+        where: { id: booking_id },
         include: {
           locumProfile: { select: { fullName: true } },
           practice: { select: { name: true } }
@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const cancelledBooking = await tx.booking.update({
-        where: { booking_id },
+        where: { id: booking_id },
         data: {
           status: 'CANCELLED',
           cancel_by: user_type,

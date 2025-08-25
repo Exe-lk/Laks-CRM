@@ -76,13 +76,14 @@ model Practice {
 }
 
 model Booking {
-  booking_id    String        @id @default(cuid())
-  request_id          String        @unique
+  id            String      @id @default(cuid())
+  request_id    String        @unique
   locum_id      String?
   practice_id   String
   booking_date  DateTime
   booking_start_time  String
   booking_end_time    String
+  bookingUniqueid String 
   status        String
   location      String
   description   String?

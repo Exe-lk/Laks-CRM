@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         booking: {
           select: {
-            booking_id: true,
+            id: true,
             status: true
           }
         },

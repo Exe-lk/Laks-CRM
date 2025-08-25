@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export interface Booking {
-  booking_id?: string;
+  id?: string;
   locum_id: string;
   practice_id: string;
   booking_date: Date;
@@ -26,7 +26,7 @@ export interface ErrorResponse {
 export const bookingApiSlice = createApi({
   reducerPath: 'bookingApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://laks-crm.netlify.app/api/booking',
+    baseUrl: '/api/booking',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       console.log('Token from localStorage:', token); 
@@ -54,7 +54,7 @@ export const bookingApiSlice = createApi({
       providesTags: ['Booking'],
     }),
 
-    addBooking: builder.mutation<Booking, Omit<Booking, 'booking_id' | 'createdAt' | 'updatedAt'>>({
+    addBooking: builder.mutation<Booking, Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>>({
       query: (newBooking) => ({
         url: 'booking',
         method: 'POST',
@@ -63,7 +63,7 @@ export const bookingApiSlice = createApi({
       invalidatesTags: ['Booking'],
     }),
 
-    updateBooking: builder.mutation<Booking, Partial<Booking> & { booking_id: string }>({
+    updateBooking: builder.mutation<Booking, Partial<Booking> & { id: string }>({
       query: (updatedBooking) => ({
         url: 'booking',
         method: 'PUT',

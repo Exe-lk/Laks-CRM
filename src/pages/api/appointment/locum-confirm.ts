@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { date } from "yup";
 import { cancelAutoCancellation } from '@/lib/autoCancelManager';
+import { generateBookingId } from '@/lib/bookingIdGenerator';
 
 const prisma = new PrismaClient();
 
@@ -75,6 +76,14 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         return { type: "REJECTED", data:updatedConfirmation}
       }
 
+      const bookingId = generateBookingId({
+        practiceId: confirmation.request.practice_id,
+        locumId: locum_id,
+        bookingDate: confirmation.request.request_date,
+        bookingStartTime: confirmation.request.request_start_time,
+        location: confirmation.request.location
+      });
+
       const booking = await tx.booking.create({
         data:{
             request_id:confirmation.request_id,
@@ -84,6 +93,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
             booking_start_time:confirmation.request.request_start_time,
             booking_end_time:confirmation.request.request_end_time,
             location:confirmation.request.location,
+            bookingUniqueid:bookingId,
             status:"CONFIRMED",
             accept_time:new Date()
         },
