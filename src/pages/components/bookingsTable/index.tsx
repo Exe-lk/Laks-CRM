@@ -401,8 +401,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div>
               Total: {bookings.length} bookings | 
-              Upcoming: {bookings.filter((b: Booking) => b.is_upcoming).length} | 
-              Past: {bookings.filter((b: Booking) => b.is_past).length}
+              Upcoming: {bookings.filter((b: Booking) => b.is_upcoming && b.status !== 'CANCELLED').length} | 
+              Past: {bookings.filter((b: Booking) => b.is_past).length} | 
+              Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
             </div>
             <button
               onClick={() => refetchBookings()}
