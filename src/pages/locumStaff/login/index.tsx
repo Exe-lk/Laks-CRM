@@ -86,7 +86,7 @@ const LoginForm = () => {
             timerProgressBar: true
           });
 
-          router.push('/');
+          router.push('/locumStaff/dashboard');
         } else if ('error' in result && result.error) {
           let errorMessage = 'Login failed';
 

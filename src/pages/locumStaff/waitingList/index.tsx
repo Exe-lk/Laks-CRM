@@ -51,13 +51,13 @@ const WaitingList = () => {
         }
     }, []);
 
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setCurrentTime(new Date());
-    //     }, 1000);
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
 
-    //     return () => clearInterval(timer);
-    // }, []);
+        return () => clearInterval(timer);
+    }, []);
 
     const {
         data: pendingConfirmationsData,
