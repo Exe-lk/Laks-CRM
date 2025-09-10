@@ -23,8 +23,8 @@ model LocumProfile {
   indemnityInsuranceImage String?     @map("indemnity_insurance_image")
   hepatitisBImage         String?     @map("hepatitis_b_image")
   dbsImage                String?     @map("dbs_image")
-  referenceletter1        String?      @map("referenceletter1")
-  referenceletter2        String?      @map("referenceletter2")
+  referenceletter1        String?     @map("referenceletter1")
+  referenceletter2        String?     @map("referenceletter2")
   bankDetails             String?
   shareCode               String?
   NIUTRnumber            String?
@@ -71,6 +71,7 @@ model Practice {
   updatedAt  DateTime @updatedAt
   bookings   Booking[]
   appointmentRequests AppointmentRequest[]
+  branches   Branch[]
 
   @@map("practices")
 }
@@ -151,6 +152,23 @@ model AppointmentConfirmation {
   
  
   @@map("appointment_confirmations")
+}
+
+model Branch {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  location    String
+  telephone   String?
+  email       String?
+  practiceId  String   @map("practice_id")
+  status      String   @default("active") // active, inactive
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  
+  @@map("branches")
 }
 
 

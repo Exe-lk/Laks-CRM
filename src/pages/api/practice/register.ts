@@ -144,7 +144,6 @@ export default async function handler(
     }
   } catch (error: any) {
     if (error.code === "P2002") {
-      // This should now rarely happen since we check for duplicates before auth creation
       return res.status(400).json({
         error: "Email address or phone number already exists",
       });
