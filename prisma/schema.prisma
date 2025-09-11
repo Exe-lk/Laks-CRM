@@ -72,6 +72,7 @@ model Practice {
   bookings   Booking[]
   appointmentRequests AppointmentRequest[]
   branches   Branch[]
+  paymentCards PaymentCard[]
 
   @@map("practices")
 }
@@ -169,6 +170,26 @@ model Branch {
   practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   
   @@map("branches")
+}
+
+model PaymentCard {
+  id              String   @id @default(cuid())
+  practiceId      String   @map("practice_id")
+  cardHolderName  String   @map("card_holder_name")
+  cardNumber      String   @map("card_number") // Encrypted
+  lastFourDigits  String   @map("last_four_digits") // For display purposes
+  expiryMonth     String   @map("expiry_month") // Encrypted
+  expiryYear      String   @map("expiry_year") // Encrypted
+  cvv             String   // Encrypted
+  cardType        String   @map("card_type") // VISA, MASTERCARD, AMEX, DISCOVER, etc.
+  isDefault       Boolean  @default(false) @map("is_default")
+  status          String   @default("active") // active, inactive
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  practice        Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  
+  @@map("payment_cards")
 }
 
 
