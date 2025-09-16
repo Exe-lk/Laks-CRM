@@ -73,6 +73,7 @@ model Practice {
   appointmentRequests AppointmentRequest[]
   branches   Branch[]
   paymentCards PaymentCard[]
+  stripeCustomer StripeCustomer?
 
   @@map("practices")
 }
@@ -190,6 +191,20 @@ model PaymentCard {
   practice        Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   
   @@map("payment_cards")
+}
+
+model StripeCustomer {
+  id                String   @id @default(cuid())
+  practiceId        String   @unique @map("practice_id")
+  stripeCustomerId  String   @unique @map("stripe_customer_id")
+  email             String
+  name              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  practice          Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  
+  @@map("stripe_customers")
 }
 
 
