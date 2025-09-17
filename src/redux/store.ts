@@ -6,6 +6,9 @@ import {bookingApiSlice} from './slices/bookingPracticeSlice';
 import { appointmentApiSlice } from './slices/appointmentPracticeSlice';
 import { appointmentRequestsLocumApiSlice } from './slices/appoitmentRequestsLocumSlice';
 import { ratePracticeApiSlice } from './slices/ratePracticeSlice';
+import { PracticeUserPaymentApiSlice } from './slices/practiceUserPaymentSlice';
+import { cardPracticeUserApiSlice } from './slices/cardPracticeUserSlice';
+import branchReducer from './slices/branchPracticeSlice';
 
 const store = configureStore({
 	reducer: {
@@ -14,7 +17,10 @@ const store = configureStore({
 		[bookingApiSlice.reducerPath]: bookingApiSlice.reducer,
 		[appointmentApiSlice.reducerPath]: appointmentApiSlice.reducer,
 		[appointmentRequestsLocumApiSlice.reducerPath]: appointmentRequestsLocumApiSlice.reducer,
-		[ratePracticeApiSlice.reducerPath]: ratePracticeApiSlice.reducer
+		[ratePracticeApiSlice.reducerPath]: ratePracticeApiSlice.reducer,
+		[PracticeUserPaymentApiSlice.reducerPath]: PracticeUserPaymentApiSlice.reducer,
+		[cardPracticeUserApiSlice.reducerPath]: cardPracticeUserApiSlice.reducer,
+		branches: branchReducer
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -23,7 +29,9 @@ const store = configureStore({
 			bookingApiSlice.middleware,
 			appointmentApiSlice.middleware,
 			appointmentRequestsLocumApiSlice.middleware,
-			ratePracticeApiSlice.middleware
+			ratePracticeApiSlice.middleware,
+			PracticeUserPaymentApiSlice.middleware,
+			cardPracticeUserApiSlice.middleware
 		),
 });
 setupListeners(store.dispatch);

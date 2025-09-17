@@ -6,11 +6,23 @@ import { FiPlus } from "react-icons/fi";
 import Swal from 'sweetalert2';
 import { useFormik } from 'formik';
 import { useCreateAppointmentRequestMutation, useGetPracticeRequestsQuery } from '../../../redux/slices/appointmentPracticeSlice';
+import { useCheckPracticeHasCardsQuery } from '../../../redux/slices/cardPracticeUserSlice';
+import { useRouter } from 'next/router';
 
 interface Profile {
     id?: string;
     address?: string;
     location?: string;
+}
+
+interface Branch {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+    telephone?: string;
+    email?: string;
+    status: string;
 }
 
 interface FormValues {
@@ -21,6 +33,7 @@ interface FormValues {
     location: string;
     required_role: string;
     address: string;
+    branch_id: string;
 }
 
 const validateAppointmentForm = (values: FormValues) => {
@@ -51,8 +64,10 @@ const validateAppointmentForm = (values: FormValues) => {
     if (!values.request_start_time) {
         errors.request_start_time = 'Start time is required';
     } else {
-        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(values.request_start_time)) {
+        // Accept both 24-hour (HH:MM) and 12-hour (H:MM AM/PM) formats
+        const time24Regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        const time12Regex = /^(1[0-2]|[1-9]):[0-5][0-9]\s?(AM|PM)$/i;
+        if (!time24Regex.test(values.request_start_time) && !time12Regex.test(values.request_start_time)) {
             errors.request_start_time = 'Please enter a valid time';
         }
     }
@@ -60,15 +75,37 @@ const validateAppointmentForm = (values: FormValues) => {
     if (!values.request_end_time) {
         errors.request_end_time = 'End time is required';
     } else {
-        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(values.request_end_time)) {
+        // Accept both 24-hour (HH:MM) and 12-hour (H:MM AM/PM) formats
+        const time24Regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        const time12Regex = /^(1[0-2]|[1-9]):[0-5][0-9]\s?(AM|PM)$/i;
+        if (!time24Regex.test(values.request_end_time) && !time12Regex.test(values.request_end_time)) {
             errors.request_end_time = 'Please enter a valid time';
         }
     }
 
     if (values.request_start_time && values.request_end_time) {
-        const start = new Date(`2000-01-01T${values.request_start_time}`);
-        const end = new Date(`2000-01-01T${values.request_end_time}`);
+        // Convert times to 24-hour format for comparison
+        const convertTo24Hour = (timeStr: string) => {
+            if (timeStr.includes('AM') || timeStr.includes('PM')) {
+                // 12-hour format
+                const [time, period] = timeStr.split(/\s+/);
+                const [hours, minutes] = time.split(':');
+                let hour24 = parseInt(hours);
+                if (period.toUpperCase() === 'PM' && hour24 !== 12) {
+                    hour24 += 12;
+                } else if (period.toUpperCase() === 'AM' && hour24 === 12) {
+                    hour24 = 0;
+                }
+                return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+            }
+            return timeStr; // Already in 24-hour format
+        };
+
+        const start24 = convertTo24Hour(values.request_start_time);
+        const end24 = convertTo24Hour(values.request_end_time);
+        
+        const start = new Date(`2000-01-01T${start24}`);
+        const end = new Date(`2000-01-01T${end24}`);
 
         if (start >= end) {
             errors.request_start_time = 'Start time must be before end time';
@@ -87,16 +124,14 @@ const validateAppointmentForm = (values: FormValues) => {
     if (!values.location?.trim()) {
         errors.location = 'Location is required';
     } else {
-        if (values.location.trim().length < 3) {
+        const trimmedLocation = values.location.trim();
+        if (trimmedLocation.length < 3) {
             errors.location = 'Location must be at least 3 characters long';
         }
-        if (values.location.trim().length > 100) {
-            errors.location = 'Location must be less than 100 characters';
+        if (trimmedLocation.length > 200) { // Increased limit for longer addresses
+            errors.location = 'Location must be less than 200 characters';
         }
-        const invalidChars = /[<>"']/;
-        if (invalidChars.test(values.location)) {
-            errors.location = 'Location contains invalid characters';
-        }
+        // Removed invalid characters check as addresses can contain various characters
     }
 
     if (!values.required_role) {
@@ -108,16 +143,30 @@ const validateAppointmentForm = (values: FormValues) => {
         }
     }
 
+    if (!values.branch_id) {
+        errors.branch_id = 'Branch selection is required';
+    }
+
     return errors;
 };
 
 const CreateAppointmentPage = () => {
-
+    const router = useRouter();
     const [profile, setProfile] = useState<Profile | null>(null);
+    const [branches, setBranches] = useState<Branch[]>([]);
+    const [loadingBranches, setLoadingBranches] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     console.log(profile)
 
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
+    
+    // Check if practice has payment cards
+    const { 
+        data: cardStatusData, 
+        isLoading: isLoadingCardStatus 
+    } = useCheckPracticeHasCardsQuery(profile?.id || '', {
+        skip: !profile?.id
+    });
 
     const {
         data: practiceRequestsData,
@@ -144,7 +193,8 @@ const CreateAppointmentPage = () => {
             request_end_time: '',
             location: '',
             required_role: '',
-            address: profile?.location || ''
+            address: profile?.location || '',
+            branch_id: ''
         },
         validate: validateAppointmentForm,
         enableReinitialize: true,
@@ -163,6 +213,13 @@ const CreateAppointmentPage = () => {
 
     const isUrgent = isUrgentAppointment(formik.values.request_date);
 
+    // Custom validation check for button state
+    const isFormValid = () => {
+        const values = formik.values;
+        const errors = validateAppointmentForm(values);
+        return Object.keys(errors).length === 0 && values.practice_id;
+    };
+
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
         if (profileStr) {
@@ -174,6 +231,45 @@ const CreateAppointmentPage = () => {
         }
     }, []);
 
+    // Fetch branches when profile is loaded
+    useEffect(() => {
+        if (profile?.id) {
+            fetchBranches(profile.id);
+        }
+    }, [profile?.id]);
+
+    const fetchBranches = async (practiceId: string) => {
+        setLoadingBranches(true);
+        try {
+            const response = await fetch(`/api/branch/practice-branches?practiceId=${practiceId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setBranches(data.branches || []);
+            } else {
+                console.error('Failed to fetch branches');
+                setBranches([]);
+            }
+        } catch (error) {
+            console.error('Error fetching branches:', error);
+            setBranches([]);
+        } finally {
+            setLoadingBranches(false);
+        }
+    };
+
+    // Debug: Log form validation state
+    useEffect(() => {
+        console.log('Form validation state:', {
+            isValid: formik.isValid,
+            errors: formik.errors,
+            values: formik.values,
+            touched: formik.touched,
+            practice_id: formik.values.practice_id,
+            hasErrors: Object.keys(formik.errors).length > 0,
+            errorKeys: Object.keys(formik.errors)
+        });
+    }, [formik.isValid, formik.errors, formik.values, formik.touched]);
+
     const openAppointmentModal = () => {
         if (profile?.id && profile?.address) {
             formik.setValues({
@@ -183,8 +279,13 @@ const CreateAppointmentPage = () => {
                 request_end_time: '',
                 location: profile.address || '',
                 required_role: '',
-                address: profile.location || ''
+                address: profile.location || '',
+                branch_id: ''
             });
+            // Force validation to re-run after setting values
+            setTimeout(() => {
+                formik.validateForm();
+            }, 100);
         }
         setIsAppointmentModalOpen(true);
     };
@@ -194,7 +295,39 @@ const CreateAppointmentPage = () => {
         formik.resetForm();
     };
 
+    const handleBranchSelection = (branchId: string) => {
+        const selectedBranch = branches.find(branch => branch.id === branchId);
+        if (selectedBranch) {
+            formik.setValues({
+                ...formik.values,
+                branch_id: branchId,
+                location: selectedBranch.location,  // Branch's location
+                address: selectedBranch.address     // Branch's address
+            });
+        }
+    };
+
     const handleFormSubmit = async (values: typeof formik.values) => {
+        // Check if practice has payment cards before proceeding
+        if (cardStatusData && !cardStatusData.hasCards) {
+            const result = await Swal.fire({
+                title: 'Payment Card Required',
+                text: 'You need to add a payment card before creating appointments. Would you like to add one now?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Add Payment Card',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#C3EAE7',
+                cancelButtonColor: '#6B7280',
+            });
+
+            if (result.isConfirmed) {
+                router.push('/practiceUser/payment');
+                return;
+            } else {
+                return;
+            }
+        }
 
         if (isUrgent) {
             const confirmResult = await Swal.fire({
@@ -223,6 +356,18 @@ const CreateAppointmentPage = () => {
         }
 
         try {
+            // Log the values being sent for debugging
+            console.log('Submitting appointment request with values:', {
+                practice_id: values.practice_id,
+                request_date: values.request_date,
+                request_start_time: values.request_start_time,
+                request_end_time: values.request_end_time,
+                location: values.location,
+                address: values.address,
+                required_role: values.required_role,
+                branch_id: values.branch_id
+            });
+            
             const result = await createAppointmentRequest(values).unwrap();
 
             Swal.fire({
@@ -247,6 +392,8 @@ const CreateAppointmentPage = () => {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+
+    console.log("branches",branches)
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
@@ -413,37 +560,47 @@ const CreateAppointmentPage = () => {
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                     <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    Location *
+                                    Select Branch *
                                 </label>
-                                <input
-                                    type="text"
-                                    name="location"
-                                    value={formik.values.location}
-                                    onChange={formik.handleChange}
+                                <select
+                                    name="branch_id"
+                                    value={formik.values.branch_id}
+                                    onChange={(e) => {
+                                        formik.handleChange(e);
+                                        handleBranchSelection(e.target.value);
+                                    }}
                                     onBlur={formik.handleBlur}
-                                    placeholder="Enter location"
                                     className={`w-full px-4 py-3 border-2 rounded-xl 
                            focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 
                            hover:border-[#C3EAE7]/50 group-hover:shadow-md
-                           ${formik.touched.location && formik.errors.location
+                           ${formik.touched.branch_id && formik.errors.branch_id
                                             ? 'border-red-300 focus:border-red-400 bg-red-50'
                                             : 'border-gray-200 focus:border-[#C3EAE7]'
                                         }`}
                                     required
-                                    disabled
-                                />
-                                {formik.touched.location && formik.errors.location && (
+                                    disabled={loadingBranches}
+                                >
+                                    <option value="">
+                                        {loadingBranches ? 'Loading branches...' : 'Select a branch'}
+                                    </option>
+                                    {branches.map((branch) => (
+                                        <option key={branch.id} value={branch.id}>
+                                            {branch.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {formik.touched.branch_id && formik.errors.branch_id && (
                                     <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                                         <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <p className="text-sm text-red-700">{formik.errors.location}</p>
+                                        <p className="text-sm text-red-700">{formik.errors.branch_id}</p>
                                     </div>
                                 )}
+                               
                             </div>
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -504,9 +661,9 @@ const CreateAppointmentPage = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isCreatingAppointment || !formik.isValid}
+                                    disabled={isCreatingAppointment || !formik.isValid || !formik.values.practice_id}
                                     className={`px-5 py-2 font-bold rounded-xl transition-all duration-200 
-                                        ${isCreatingAppointment || !formik.isValid
+                                        ${isCreatingAppointment || !formik.isValid || !formik.values.practice_id
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                             : isUrgent
                                                 ? 'bg-orange-500 text-white hover:bg-orange-600'

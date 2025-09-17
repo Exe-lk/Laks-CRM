@@ -31,12 +31,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       request_end_time,
       location,
       required_role,
-      address
+      address,
+      branch_id
     } = req.body;
 
     if (!practice_id || !request_date || !request_start_time || !request_end_time || !location || !required_role || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    // Log the received values for debugging
+    console.log('Creating appointment request with values:', {
+      practice_id,
+      request_date,
+      request_start_time,
+      request_end_time,
+      location,
+      address,
+      required_role,
+      branch_id
+    });
 
     const requestDate = new Date(request_date);
     if (requestDate < new Date()) {
