@@ -33,6 +33,7 @@ model LocumProfile {
   role                    String?
   ratings                 Json?
   averageRating           Float?      
+  hourlyPayRate           Float?
   totalRatings            Int?              
   idImage                 String?     @map("id_image")
   createdAt               DateTime    @default(now()) @map("created_at")
