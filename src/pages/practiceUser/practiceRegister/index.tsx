@@ -15,6 +15,7 @@ export interface PracticeProfile {
     password: string;
     address: string;
     location: string;
+    practiceType: string;
 }
 
 const initialValues = {

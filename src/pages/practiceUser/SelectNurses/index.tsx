@@ -13,6 +13,7 @@ interface Profile {
     id?: string;
     address?: string;
     location?: string;
+    practiceType?: string;
 }
 
 interface Branch {
@@ -36,7 +37,7 @@ interface FormValues {
     branch_id: string;
 }
 
-const validateAppointmentForm = (values: FormValues) => {
+const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
     const errors: Partial<FormValues> = {};
 
     if (!values.practice_id) {
@@ -143,7 +144,8 @@ const validateAppointmentForm = (values: FormValues) => {
         }
     }
 
-    if (!values.branch_id) {
+    // Only require branch_id for Corporate practices
+    if (practiceType === 'Corporate' && !values.branch_id) {
         errors.branch_id = 'Branch selection is required';
     }
 
@@ -196,7 +198,7 @@ const CreateAppointmentPage = () => {
             address: profile?.location || '',
             branch_id: ''
         },
-        validate: validateAppointmentForm,
+        validate: (values) => validateAppointmentForm(values, profile?.practiceType),
         enableReinitialize: true,
         onSubmit: async (values) => {
             await handleFormSubmit(values);
@@ -216,7 +218,7 @@ const CreateAppointmentPage = () => {
     // Custom validation check for button state
     const isFormValid = () => {
         const values = formik.values;
-        const errors = validateAppointmentForm(values);
+        const errors = validateAppointmentForm(values, profile?.practiceType);
         return Object.keys(errors).length === 0 && values.practice_id;
     };
 
@@ -272,14 +274,18 @@ const CreateAppointmentPage = () => {
 
     const openAppointmentModal = () => {
         if (profile?.id && profile?.address) {
+            // For Private practices, use practice location; for Corporate, leave empty for branch selection
+            const initialLocation = profile.practiceType === 'Private' ? (profile.address || '') : '';
+            const initialAddress = profile.practiceType === 'Private' ? (profile.location || '') : '';
+            
             formik.setValues({
                 practice_id: profile.id || '',
                 request_date: '',
                 request_start_time: '',
                 request_end_time: '',
-                location: profile.address || '',
+                location: initialLocation,
                 required_role: '',
-                address: profile.location || '',
+                address: initialAddress,
                 branch_id: ''
             });
             // Force validation to re-run after setting values
@@ -356,19 +362,27 @@ const CreateAppointmentPage = () => {
         }
 
         try {
+            // For Private practices, ensure location and address are set to practice details
+            const submissionValues = { ...values };
+            if (profile?.practiceType === 'Private') {
+                submissionValues.location = profile.address || '';
+                submissionValues.address = profile.location || '';
+                submissionValues.branch_id = ''; // No branch for Private practices
+            }
+            
             // Log the values being sent for debugging
             console.log('Submitting appointment request with values:', {
-                practice_id: values.practice_id,
-                request_date: values.request_date,
-                request_start_time: values.request_start_time,
-                request_end_time: values.request_end_time,
-                location: values.location,
-                address: values.address,
-                required_role: values.required_role,
-                branch_id: values.branch_id
+                practice_id: submissionValues.practice_id,
+                request_date: submissionValues.request_date,
+                request_start_time: submissionValues.request_start_time,
+                request_end_time: submissionValues.request_end_time,
+                location: submissionValues.location,
+                address: submissionValues.address,
+                required_role: submissionValues.required_role,
+                branch_id: submissionValues.branch_id
             });
             
-            const result = await createAppointmentRequest(values).unwrap();
+            const result = await createAppointmentRequest(submissionValues).unwrap();
 
             Swal.fire({
                 icon: 'success',
@@ -557,51 +571,94 @@ const CreateAppointmentPage = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-2 group">
-                                <label className="block text-sm font-semibold text-black flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    Select Branch *
-                                </label>
-                                <select
-                                    name="branch_id"
-                                    value={formik.values.branch_id}
-                                    onChange={(e) => {
-                                        formik.handleChange(e);
-                                        handleBranchSelection(e.target.value);
-                                    }}
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 rounded-xl 
-                           focus:ring-2 focus:ring-[#C3EAE7]/30 
-                           transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
-                           ${formik.touched.branch_id && formik.errors.branch_id
-                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
-                                            : 'border-gray-200 focus:border-[#C3EAE7]'
-                                        }`}
-                                    required
-                                    disabled={loadingBranches}
-                                >
-                                    <option value="">
-                                        {loadingBranches ? 'Loading branches...' : 'Select a branch'}
-                                    </option>
-                                    {branches.map((branch) => (
-                                        <option key={branch.id} value={branch.id}>
-                                            {branch.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formik.touched.branch_id && formik.errors.branch_id && (
-                                    <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            {profile?.practiceType === 'Corporate' && (
+                                <div className="space-y-2 group">
+                                    <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                         </svg>
-                                        <p className="text-sm text-red-700">{formik.errors.branch_id}</p>
-                                    </div>
-                                )}
-                               
-                            </div>
+                                        Select Branch *
+                                    </label>
+                                    <select
+                                        name="branch_id"
+                                        value={formik.values.branch_id}
+                                        onChange={(e) => {
+                                            formik.handleChange(e);
+                                            handleBranchSelection(e.target.value);
+                                        }}
+                                        onBlur={formik.handleBlur}
+                                        className={`w-full px-4 py-3 border-2 rounded-xl 
+                               focus:ring-2 focus:ring-[#C3EAE7]/30 
+                               transition-all duration-200 outline-none 
+                               hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                               ${formik.touched.branch_id && formik.errors.branch_id
+                                                ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                                : 'border-gray-200 focus:border-[#C3EAE7]'
+                                            }`}
+                                        required
+                                        disabled={loadingBranches}
+                                    >
+                                        <option value="">
+                                            {loadingBranches ? 'Loading branches...' : 'Select a branch'}
+                                        </option>
+                                        {branches.map((branch) => (
+                                            <option key={branch.id} value={branch.id}>
+                                                {branch.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {formik.touched.branch_id && formik.errors.branch_id && (
+                                        <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                            <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p className="text-sm text-red-700">{formik.errors.branch_id}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {profile?.practiceType === 'Private' && (
+                                <div className="space-y-2 group">
+                                    <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        Location *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="location"
+                                        value={formik.values.location}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        className={`w-full px-4 py-3 border-2 rounded-xl 
+                               focus:ring-2 focus:ring-[#C3EAE7]/30 
+                               transition-all duration-200 outline-none 
+                               hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                               ${formik.touched.location && formik.errors.location
+                                                ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                                : 'border-gray-200 focus:border-[#C3EAE7]'
+                                            }`}
+                                        placeholder="Practice location"
+                                        required
+                                        readOnly
+                                    />
+                                    <p className="text-sm text-gray-600">
+                                        Location is automatically set to your practice address for Private practices.
+                                    </p>
+                                    {formik.touched.location && formik.errors.location && (
+                                        <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                                            <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p className="text-sm text-red-700">{formik.errors.location}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                     <svg
