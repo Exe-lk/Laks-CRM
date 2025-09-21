@@ -164,7 +164,8 @@ model Branch {
   address     String
   location    String
   telephone   String?
-  email       String?
+  email       String?  @unique
+  password    String?
   practiceId  String   @map("practice_id")
   status      String   @default("active") // active, inactive
   createdAt   DateTime @default(now())
