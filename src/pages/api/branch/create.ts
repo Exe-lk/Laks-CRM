@@ -36,6 +36,12 @@ export default async function handler(
       });
     }
 
+    if (practice.practiceType !== "Corporate") {
+      return res.status(403).json({
+        error: "Only Corporate practices can create branches",
+      });
+    }
+
     const newBranch = await prisma.branch.create({
       data: {
         name,

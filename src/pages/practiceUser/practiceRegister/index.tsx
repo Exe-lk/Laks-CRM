@@ -27,7 +27,8 @@ const initialValues = {
     confirmPassword: '',
     address: '',
     location: '',
-    gdcRegistration: ''
+    gdcRegistration: '',
+    practiceType: 'Private'
 };
 
 const PracticeRegisterForm = () => {
@@ -118,6 +119,7 @@ const PracticeRegisterForm = () => {
                     password: values.password,
                     address: values.address,
                     location: values.location,
+                    practiceType: values.practiceType,
                 };
                 const response = await addLocumProfile(submitValues);
                 console.log('Registration response:', response);
@@ -421,6 +423,29 @@ const PracticeRegisterForm = () => {
                                     )}
                                 </div>
                             )}
+                        </div>
+                        <div className="bg-[#C3EAE7]/20 rounded-xl p-6 space-y-4">
+                            <label className="block text-sm font-semibold text-black">
+                                Practice Type *
+                            </label>
+                            <select
+                                name="practiceType"
+                                value={formik.values.practiceType}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                className={`w-full px-4 py-3 border-2 ${formik.errors.practiceType && formik.touched.practiceType ? 'border-red-500' : 'border-gray-200'
+                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                required
+                            >
+                                <option value="Private">Private Practice</option>
+                                <option value="Corporate">Corporate Practice</option>
+                            </select>
+                            {formik.errors.practiceType && formik.touched.practiceType && (
+                                <div className="text-red-500 text-sm mt-1">{formik.errors.practiceType}</div>
+                            )}
+                            <p className="text-sm text-gray-600">
+                                Corporate practices can create multiple branches, while private practices operate as a single location.
+                            </p>
                         </div>
                         <div className="pt-6">
                             <div className="relative group">

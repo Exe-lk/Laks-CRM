@@ -21,6 +21,7 @@ interface Profile {
   id: string;
   name: string;
   email: string;
+  practiceType?: string;
   [key: string]: any;
 }
 
@@ -46,6 +47,19 @@ const BranchesPage = () => {
       try {
         const parsedProfile = JSON.parse(profileStr);
         setProfile(parsedProfile);
+        
+        // Check if practice is Corporate type
+        if (parsedProfile.practiceType !== 'Corporate') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Access Restricted',
+            text: 'Branch management is only available for Corporate practices. Private practices operate as a single location.',
+            confirmButtonColor: '#C3EAE7',
+          }).then(() => {
+            router.push('/practiceUser/dashboard');
+          });
+          return;
+        }
         
         // Fetch branches for this practice
         if (parsedProfile.id) {

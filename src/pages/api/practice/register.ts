@@ -29,7 +29,8 @@ export default async function handler(
               telephone,
               address,
               location,
-              password
+              password,
+              practiceType = "Private"
         } = req.body;
 
         if (
@@ -92,6 +93,7 @@ export default async function handler(
               address,
               location,
               status: "pending",
+              practiceType,
             },
           });
 

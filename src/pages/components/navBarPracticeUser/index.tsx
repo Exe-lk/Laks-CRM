@@ -21,6 +21,7 @@ const NavBar = () => {
     employeeType?: string;
     dateOfBirth?: string;
     status?: string;
+    practiceType?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -309,13 +310,15 @@ const NavBar = () => {
 
           {isLoggedIn && (
             <>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/practiceUser/branches')}
-              >
-                Branches
-              </li>
+              {profile?.practiceType === 'Corporate' && (
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
+                  onClick={() => router.push('/practiceUser/branches')}
+                >
+                  Branches
+                </li>
+              )}
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}

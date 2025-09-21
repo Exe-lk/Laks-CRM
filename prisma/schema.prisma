@@ -59,20 +59,21 @@ model Specialty {
 }
 
 model Practice {
-  id         String   @id @default(cuid())
-  name       String
-  telephone  String   @unique
-  email      String   @unique
-  dob        DateTime
-  GDCnumber  String
-  address    String?
-  location   String?
-  status     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  bookings   Booking[]
+  id           String   @id @default(cuid())
+  name         String
+  telephone    String   @unique
+  email        String   @unique
+  dob          DateTime
+  GDCnumber    String
+  address      String?
+  location     String?
+  status       String
+  practiceType String   @default("Private") // Private or Corporate
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  bookings     Booking[]
   appointmentRequests AppointmentRequest[]
-  branches   Branch[]
+  branches     Branch[]
   paymentCards PaymentCard[]
   stripeCustomer StripeCustomer?
 
