@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import { FiX, FiMapPin, FiPhone, FiMail, FiHome } from 'react-icons/fi';
+import { FiX, FiMapPin, FiPhone, FiMail, FiHome, FiLock } from 'react-icons/fi';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { Branch, CreateBranchData, UpdateBranchData } from '../../../redux/slices/branchPracticeSlice';
@@ -20,9 +20,10 @@ interface FormValues {
   location: string;
   telephone: string;
   email: string;
+  password: string;
 }
 
-const validateBranchForm = (values: FormValues) => {
+const validateBranchForm = (values: FormValues, isEditing: boolean = false) => {
   const errors: Partial<FormValues> = {};
 
   if (!values.name?.trim()) {
@@ -56,9 +57,29 @@ const validateBranchForm = (values: FormValues) => {
     }
   }
 
-  if (values.email && values.email.trim()) {
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = 'Invalid email address';
+  if (!values.email?.trim()) {
+    errors.email = 'Email address is required';
+  } else {
+    const email = values.email.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      errors.email = 'Invalid email format. Please enter a valid email address.';
+    } else if (email.length > 254) {
+      errors.email = 'Email address is too long (maximum 254 characters).';
+    } else if (email.includes('..')) {
+      errors.email = 'Email address cannot contain consecutive dots.';
+    }
+  }
+
+  if (!isEditing && !values.password?.trim()) {
+    errors.password = 'Password is required';
+  } else if (values.password?.trim()) {
+    if (values.password.trim().length < 8) {
+      errors.password = 'Password must be at least 8 characters long';
+    } else if (values.password.trim().length > 50) {
+      errors.password = 'Password must be less than 50 characters';
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(values.password)) {
+      errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
     }
   }
 
@@ -83,21 +104,38 @@ const BranchModal: React.FC<BranchModalProps> = ({
       location: '',
       telephone: '',
       email: '',
+      password: '',
     },
-    validate: validateBranchForm,
+    validate: (values) => validateBranchForm(values, isEditing),
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const branchData = {
+        const baseData = {
           name: values.name.trim(),
           address: values.address.trim(),
           location: values.location.trim(),
           telephone: values.telephone.trim() || undefined,
-          email: values.email.trim() || undefined,
-          status: "pending approval" as const,
-          ...(isEditing ? { id: branch!.id } : { practiceId }),
+          email: values.email.trim(),
+          status: "active" as const,
         };
 
+        const branchData = isEditing
+          ? ({
+            ...baseData,
+            id: branch!.id,
+            ...(values.password.trim() && { password: values.password.trim() }),
+          } as UpdateBranchData)
+          : ({
+            ...baseData,
+            password: values.password.trim(), // Password is required for creation
+            practiceId,
+          } as CreateBranchData);
+
+        console.log('Submitting branch data:', {
+          ...branchData,
+          email: `"${branchData.email}"`, 
+          password: '[REDACTED]'
+        });
         await onSubmit(branchData);
         formik.resetForm();
         onClose();
@@ -114,6 +152,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
         location: branch.location,
         telephone: branch.telephone || '',
         email: branch.email || '',
+        password: '',
       });
     } else if (!branch && isOpen) {
       formik.resetForm();
@@ -302,7 +341,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiMail className="w-4 h-4 text-[#C3EAE7]" />
-                Email Address
+                Email Address *
               </label>
               <input
                 type="email"
@@ -319,6 +358,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     ? 'border-red-300 focus:border-red-400 bg-red-50'
                     : 'border-gray-200 focus:border-[#C3EAE7]'
                   }`}
+                required
               />
               {formik.touched.email && formik.errors.email && (
                 <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
@@ -326,6 +366,41 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-sm text-red-700">{formik.errors.email}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <FiLock className="w-4 h-4 text-[#C3EAE7]" />
+                Password *
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder={isEditing ? "Enter new password (leave empty to keep current password)" : "Enter password"}
+                className={`w-full px-4 py-3 border-2 rounded-xl 
+                  focus:ring-2 focus:ring-[#C3EAE7]/30 
+                  transition-all duration-200 outline-none 
+                  hover:border-[#C3EAE7]/50
+                  ${formik.touched.password && formik.errors.password
+                    ? 'border-red-300 focus:border-red-400 bg-red-50'
+                    : 'border-gray-200 focus:border-[#C3EAE7]'
+                  }`}
+                required={!isEditing}
+              />
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters with uppercase, lowercase, number, and special character
+              </p>
+              {formik.touched.password && formik.errors.password && (
+                <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                  <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-red-700">{formik.errors.password}</p>
                 </div>
               )}
             </div>

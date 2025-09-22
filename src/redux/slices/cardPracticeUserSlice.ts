@@ -59,13 +59,11 @@ export const cardPracticeUserApiSlice = createApi({
   }),
   tagTypes: ['PaymentCard'],
   endpoints: (builder) => ({
-    // Get all cards for a practice
     getPracticeCards: builder.query<CardsResponse, string>({
       query: (practiceId) => `card/practice-cards?practiceId=${practiceId}`,
       providesTags: ['PaymentCard'],
     }),
     
-    // Create a new card
     createCard: builder.mutation<CreateCardResponse, CreateCardRequest>({
       query: (cardData) => ({
         url: 'card/create',
@@ -75,7 +73,6 @@ export const cardPracticeUserApiSlice = createApi({
       invalidatesTags: ['PaymentCard'],
     }),
     
-    // Update a card
     updateCard: builder.mutation<CreateCardResponse, { id: string; data: Partial<CreateCardRequest> }>({
       query: ({ id, data }) => ({
         url: `card/update?id=${id}`,
@@ -85,7 +82,6 @@ export const cardPracticeUserApiSlice = createApi({
       invalidatesTags: ['PaymentCard'],
     }),
     
-    // Delete a card
     deleteCard: builder.mutation<{ message: string }, string>({
       query: (id) => ({
         url: `card/delete?id=${id}`,
@@ -94,7 +90,6 @@ export const cardPracticeUserApiSlice = createApi({
       invalidatesTags: ['PaymentCard'],
     }),
     
-    // Check if practice has any cards
     checkPracticeHasCards: builder.query<{ hasCards: boolean; count: number }, string>({
       query: (practiceId) => `card/practice-cards?practiceId=${practiceId}`,
       transformResponse: (response: CardsResponse) => ({

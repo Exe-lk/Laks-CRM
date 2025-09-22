@@ -16,7 +16,6 @@ export const PracticeUserPaymentApiSlice = createApi({
   }),
   tagTypes: ['PaymentStatus'],
   endpoints: (builder) => ({
-    // Check if practice has payment methods
     checkPaymentStatus: builder.query<PaymentStatusResponse, string>({
       query: (practiceId) => `card/practice-cards?practiceId=${practiceId}`,
       transformResponse: (response: any) => ({

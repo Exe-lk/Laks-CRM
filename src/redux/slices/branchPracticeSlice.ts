@@ -7,7 +7,8 @@ export interface Branch {
   location: string;
   telephone?: string;
   email?: string;
-  status: 'approved' | 'pending approval' | 'cancel';
+  password:string;
+  status: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
   practiceId: string;
   createdAt: string;
   updatedAt: string;
@@ -25,8 +26,9 @@ export interface CreateBranchData {
   location: string;
   telephone?: string;
   email?: string;
+  password:string;
   practiceId: string;
-  status?: 'approved' | 'pending approval' | 'cancel';
+  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
 }
 
 export interface UpdateBranchData {
@@ -36,7 +38,8 @@ export interface UpdateBranchData {
   location?: string;
   telephone?: string;
   email?: string;
-  status?: 'approved' | 'pending approval' | 'cancel';
+  password?: string;
+  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
 }
 
 interface BranchState {
@@ -53,7 +56,6 @@ const initialState: BranchState = {
   currentBranch: null,
 };
 
-// Async thunks
 export const fetchBranches = createAsyncThunk(
   'branches/fetchBranches',
   async (practiceId: string) => {
@@ -135,7 +137,6 @@ const branchSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch branches
       .addCase(fetchBranches.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -149,7 +150,6 @@ const branchSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch branches';
       })
-      // Create branch
       .addCase(createBranch.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -163,7 +163,6 @@ const branchSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to create branch';
       })
-      // Update branch
       .addCase(updateBranch.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -180,7 +179,6 @@ const branchSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to update branch';
       })
-      // Delete branch
       .addCase(deleteBranch.pending, (state) => {
         state.loading = true;
         state.error = null;
