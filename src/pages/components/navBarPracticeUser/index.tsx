@@ -13,6 +13,7 @@ const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<{
+    id?: string;
     fullName?: string;
     emailAddress?: string;
     contactNumber?: string;
@@ -40,6 +41,7 @@ const NavBar = () => {
         try {
           const rawProfile = JSON.parse(profileStr);
           const mappedProfile = {
+            id: rawProfile.id,
             fullName: rawProfile.name,
             emailAddress: rawProfile.email,
             contactNumber: rawProfile.telephone,
@@ -48,6 +50,7 @@ const NavBar = () => {
             employeeType: rawProfile.employeeType,
             dateOfBirth: rawProfile.dob,
             status: rawProfile.status,
+            practiceType: rawProfile.practiceType,
           };
           setProfile(mappedProfile);
         } catch {
@@ -69,6 +72,7 @@ const NavBar = () => {
           try {
             const rawProfile = JSON.parse(profileStr);
             const mappedProfile = {
+              id: rawProfile.id,
               fullName: rawProfile.name,
               emailAddress: rawProfile.email,
               contactNumber: rawProfile.telephone,
@@ -77,6 +81,7 @@ const NavBar = () => {
               employeeType: rawProfile.employeeType,
               dateOfBirth: rawProfile.dob,
               status: rawProfile.status,
+              practiceType: rawProfile.practiceType,
             };
             setProfile(mappedProfile);
           } catch {
