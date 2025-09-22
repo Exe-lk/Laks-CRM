@@ -18,8 +18,6 @@ const Home = () => {
 
     if (profileStr) {
         const parsedProfile = JSON.parse(profileStr);
-        // console.log("DEBUG: Profile data:", parsedProfile);
-        // console.log("DEBUG: Separate locumId:", locumIdStr ? JSON.parse(locumIdStr) : null);
         setProfile(parsedProfile);
     }
 }, []);
@@ -31,7 +29,6 @@ const Home = () => {
   );
   console.log(practiceRequestsData)
 
-  // Calculate appointment statistics
   const appointmentsData = practiceRequestsData?.data?.requests || [];
   const totalAppointments = appointmentsData.length;
   const pendingAppointments = appointmentsData.filter((appointment: any) => appointment.status === 'PENDING').length;
@@ -206,7 +203,6 @@ const Home = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📋 Activity</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 xl:gap-16">
                 
-                {/* Pending Appointments */}
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
                   <div className="p-8">
@@ -237,7 +233,6 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Cancelled Appointments */}
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-red-600"></div>
                   <div className="p-8">
@@ -268,7 +263,6 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Confirmed Appointments */}
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
                   <div className="p-8">
@@ -299,7 +293,6 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* All Appointments */}
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
                   <div className="p-8">

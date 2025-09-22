@@ -44,7 +44,6 @@ const validateBranchForm = (values: FormValues) => {
   if (!values.location?.trim()) {
     errors.location = 'Coordinates are required';
   } else {
-    // Validate coordinates format (longitude,latitude)
     const coordRegex = /^-?\d+\.?\d*,-?\d+\.?\d*$/;
     if (!coordRegex.test(values.location.trim())) {
       errors.location = 'Invalid coordinates format. Use longitude,latitude (e.g., -0.1278,51.5074)';
@@ -103,7 +102,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
         formik.resetForm();
         onClose();
       } catch (error) {
-        // Error handling is done in the parent component
       }
     }
   });
@@ -124,7 +122,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
   const handleMapSelect = (location: { lat: number; lng: number; address: string }) => {
     formik.setFieldValue('address', location.address);
-    // Store coordinates as "longitude,latitude" in location field
     formik.setFieldValue('location', `${location.lng},${location.lat}`);
     setShowMap(false);
   };
@@ -161,7 +158,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
         <form onSubmit={formik.handleSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Branch Name */}
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiHome className="w-4 h-4 text-[#C3EAE7]" />
@@ -194,7 +190,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
               )}
             </div>
 
-            {/* Address */}
             <div className="md:col-span-2 space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiMapPin className="w-4 h-4 text-[#C3EAE7]" />
@@ -237,7 +232,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
               )}
             </div>
 
-            {/* Location */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiMapPin className="w-4 h-4 text-[#C3EAE7]" />
@@ -274,7 +268,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
               )}
             </div>
 
-            {/* Telephone */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiPhone className="w-4 h-4 text-[#C3EAE7]" />
@@ -306,7 +299,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
               )}
             </div>
 
-            {/* Email */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiMail className="w-4 h-4 text-[#C3EAE7]" />
@@ -339,7 +331,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <button
               type="button"
@@ -368,7 +359,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
         </form>
       </div>
 
-      {/* Google Map Modal */}
       <GoogleMapModal
         open={showMap}
         onClose={() => setShowMap(false)}

@@ -18,7 +18,6 @@ const PaymentPage = () => {
       const parsedProfile = JSON.parse(profileStr);
       setProfile(parsedProfile);
     } else {
-      // Redirect to login if no profile
       router.push('/practiceUser/practiceLogin');
     }
   }, [router]);
@@ -36,7 +35,6 @@ const PaymentPage = () => {
   };
 
   const handleEditCard = (card: any) => {
-    // For now, we'll just show a message that editing is not implemented
     Swal.fire({
       title: 'Edit Card',
       text: 'Card editing functionality will be available soon.',
@@ -62,7 +60,6 @@ const PaymentPage = () => {
       <NavBarPracticeUser />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -80,7 +77,6 @@ const PaymentPage = () => {
           </div>
         </div>
 
-        {/* Cards Section */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
           {isLoadingCards ? (
             <div className="text-center py-8">
@@ -96,7 +92,6 @@ const PaymentPage = () => {
           )}
         </div>
 
-        {/* Information Section */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
@@ -122,7 +117,6 @@ const PaymentPage = () => {
           </div>
         </div>
 
-        {/* Security Notice */}
         <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center space-x-2">
             <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +129,6 @@ const PaymentPage = () => {
         </div>
       </div>
 
-      {/* Add Card Modal */}
       <AddCardModal
         isOpen={isAddCardModalOpen}
         onClose={() => setIsAddCardModalOpen(false)}

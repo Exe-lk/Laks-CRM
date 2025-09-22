@@ -95,7 +95,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       setEditMode(false);
       setEditProfile(null);
     } catch (error) {
-      // alert('Failed to update profile');
       Swal.fire({
         icon: 'error',
         title: 'Failed to update profile',

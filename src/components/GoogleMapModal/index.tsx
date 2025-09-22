@@ -107,7 +107,6 @@ export const GoogleMapModal: FC<GoogleMapModalProps> = ({ open, onClose, onSelec
                 }}
               />
             </Autocomplete>
-            {/* Clear button */}
             <button
               type="button"
               onClick={() => {

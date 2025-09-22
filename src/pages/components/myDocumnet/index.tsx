@@ -100,7 +100,6 @@ const MyDocument = () => {
         setFieldValue: any
     ) => {
         if (!canvasRef.current || canvasRef.current.isEmpty()) {
-            // alert("Please draw your signature first.");
             Swal.fire({
                 icon: 'warning',
                 title: 'Oops!',

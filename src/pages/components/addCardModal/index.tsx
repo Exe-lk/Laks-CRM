@@ -90,7 +90,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
       setFormData(prev => ({ ...prev, [field]: value }));
     }
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -122,7 +121,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
         confirmButtonColor: '#C3EAE7'
       });
 
-      // Reset form
       setFormData({
         cardHolderName: '',
         cardNumber: '',
@@ -168,7 +166,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-6 space-y-4">
-          {/* Card Holder Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Card Holder Name *
@@ -187,7 +184,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             )}
           </div>
 
-          {/* Card Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Card Number *
@@ -207,7 +203,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             )}
           </div>
 
-          {/* Expiry Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -262,7 +257,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             </div>
           </div>
 
-          {/* CVV */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               CVV *
@@ -282,7 +276,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             )}
           </div>
 
-          {/* Default Card Checkbox */}
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -296,7 +289,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             </label>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"

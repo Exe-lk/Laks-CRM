@@ -65,7 +65,6 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
     if (!values.request_start_time) {
         errors.request_start_time = 'Start time is required';
     } else {
-        // Accept both 24-hour (HH:MM) and 12-hour (H:MM AM/PM) formats
         const time24Regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         const time12Regex = /^(1[0-2]|[1-9]):[0-5][0-9]\s?(AM|PM)$/i;
         if (!time24Regex.test(values.request_start_time) && !time12Regex.test(values.request_start_time)) {
@@ -76,7 +75,6 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
     if (!values.request_end_time) {
         errors.request_end_time = 'End time is required';
     } else {
-        // Accept both 24-hour (HH:MM) and 12-hour (H:MM AM/PM) formats
         const time24Regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
         const time12Regex = /^(1[0-2]|[1-9]):[0-5][0-9]\s?(AM|PM)$/i;
         if (!time24Regex.test(values.request_end_time) && !time12Regex.test(values.request_end_time)) {
@@ -85,10 +83,8 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
     }
 
     if (values.request_start_time && values.request_end_time) {
-        // Convert times to 24-hour format for comparison
         const convertTo24Hour = (timeStr: string) => {
             if (timeStr.includes('AM') || timeStr.includes('PM')) {
-                // 12-hour format
                 const [time, period] = timeStr.split(/\s+/);
                 const [hours, minutes] = time.split(':');
                 let hour24 = parseInt(hours);
@@ -99,7 +95,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
                 }
                 return `${hour24.toString().padStart(2, '0')}:${minutes}`;
             }
-            return timeStr; // Already in 24-hour format
+            return timeStr; 
         };
 
         const start24 = convertTo24Hour(values.request_start_time);
@@ -129,10 +125,9 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         if (trimmedLocation.length < 3) {
             errors.location = 'Location must be at least 3 characters long';
         }
-        if (trimmedLocation.length > 200) { // Increased limit for longer addresses
+        if (trimmedLocation.length > 200) { 
             errors.location = 'Location must be less than 200 characters';
         }
-        // Removed invalid characters check as addresses can contain various characters
     }
 
     if (!values.required_role) {
@@ -144,7 +139,6 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         }
     }
 
-    // Only require branch_id for Corporate practices
     if (practiceType === 'Corporate' && !values.branch_id) {
         errors.branch_id = 'Branch selection is required';
     }
@@ -162,7 +156,6 @@ const CreateAppointmentPage = () => {
 
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
     
-    // Check if practice has payment cards
     const { 
         data: cardStatusData, 
         isLoading: isLoadingCardStatus 
@@ -215,7 +208,6 @@ const CreateAppointmentPage = () => {
 
     const isUrgent = isUrgentAppointment(formik.values.request_date);
 
-    // Custom validation check for button state
     const isFormValid = () => {
         const values = formik.values;
         const errors = validateAppointmentForm(values, profile?.practiceType);
@@ -233,7 +225,6 @@ const CreateAppointmentPage = () => {
         }
     }, []);
 
-    // Fetch branches when profile is loaded
     useEffect(() => {
         if (profile?.id) {
             fetchBranches(profile.id);
@@ -259,7 +250,6 @@ const CreateAppointmentPage = () => {
         }
     };
 
-    // Debug: Log form validation state
     useEffect(() => {
         console.log('Form validation state:', {
             isValid: formik.isValid,
@@ -274,7 +264,6 @@ const CreateAppointmentPage = () => {
 
     const openAppointmentModal = () => {
         if (profile?.id && profile?.address) {
-            // For Private practices, use practice location; for Corporate, leave empty for branch selection
             const initialLocation = profile.practiceType === 'Private' ? (profile.address || '') : '';
             const initialAddress = profile.practiceType === 'Private' ? (profile.location || '') : '';
             
@@ -288,7 +277,6 @@ const CreateAppointmentPage = () => {
                 address: initialAddress,
                 branch_id: ''
             });
-            // Force validation to re-run after setting values
             setTimeout(() => {
                 formik.validateForm();
             }, 100);
@@ -307,14 +295,13 @@ const CreateAppointmentPage = () => {
             formik.setValues({
                 ...formik.values,
                 branch_id: branchId,
-                location: selectedBranch.location,  // Branch's location
-                address: selectedBranch.address     // Branch's address
+                location: selectedBranch.location,  
+                address: selectedBranch.address     
             });
         }
     };
 
     const handleFormSubmit = async (values: typeof formik.values) => {
-        // Check if practice has payment cards before proceeding
         if (cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
@@ -362,15 +349,13 @@ const CreateAppointmentPage = () => {
         }
 
         try {
-            // For Private practices, ensure location and address are set to practice details
             const submissionValues = { ...values };
             if (profile?.practiceType === 'Private') {
                 submissionValues.location = profile.address || '';
                 submissionValues.address = profile.location || '';
-                submissionValues.branch_id = ''; // No branch for Private practices
+                submissionValues.branch_id = ''; 
             }
             
-            // Log the values being sent for debugging
             console.log('Submitting appointment request with values:', {
                 practice_id: submissionValues.practice_id,
                 request_date: submissionValues.request_date,

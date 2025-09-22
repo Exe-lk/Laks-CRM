@@ -27,7 +27,6 @@ const NavBar = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
-  // Check if practice has payment cards
   const { data: cardStatusData } = useCheckPracticeHasCardsQuery(profile?.id || '', {
     skip: !profile?.id || !isLoggedIn
   });

@@ -20,8 +20,6 @@ const Home = () => {
 
     if (profileStr) {
         const parsedProfile = JSON.parse(profileStr);
-        // console.log("DEBUG: Profile data:", parsedProfile);
-        // console.log("DEBUG: Separate locumId:", locumIdStr ? JSON.parse(locumIdStr) : null);
         setProfile(parsedProfile);
     }
 }, []);

@@ -26,7 +26,6 @@ const ResetPassword = () => {
     setError('');
     setMessage('');
 
-    // Validate passwords
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       setLoading(false);
@@ -40,7 +39,6 @@ const ResetPassword = () => {
     }
 
     try {
-      // Call the update-password API
       const { data, error } = await supabase.auth.updateUser({
         password: password,
       });
@@ -52,7 +50,6 @@ const ResetPassword = () => {
         setError(error.message || 'Failed to update password');
       } else {
         setMessage('Password updated successfully! Redirecting to login...');
-        // Redirect to login page after 2 seconds
         setTimeout(() => {
           router.push('/');
         }, 2000);

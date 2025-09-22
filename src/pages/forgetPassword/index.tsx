@@ -48,7 +48,6 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +63,6 @@ const ForgotPassword = () => {
           </div>
         </div>
 
-        {/* Card Section */}
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
           <div className="bg-[#C3EAE7] px-8 py-6">
             <h2 className="text-2xl font-bold text-black">Reset Password</h2>

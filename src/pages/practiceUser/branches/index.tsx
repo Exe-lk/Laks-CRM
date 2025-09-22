@@ -48,7 +48,6 @@ const BranchesPage = () => {
         const parsedProfile = JSON.parse(profileStr);
         setProfile(parsedProfile);
         
-        // Check if practice is Corporate type
         if (parsedProfile.practiceType !== 'Corporate') {
           Swal.fire({
             icon: 'warning',
@@ -61,7 +60,6 @@ const BranchesPage = () => {
           return;
         }
         
-        // Fetch branches for this practice
         if (parsedProfile.id) {
           dispatch(fetchBranches(parsedProfile.id));
         }
@@ -81,7 +79,6 @@ const BranchesPage = () => {
   const handleSubmitBranch = async (branchData: CreateBranchData | UpdateBranchData) => {
     try {
       if (editingBranch) {
-        // Update existing branch
         await dispatch(updateBranch(branchData as UpdateBranchData)).unwrap();
         
         Swal.fire({
@@ -91,7 +88,6 @@ const BranchesPage = () => {
           confirmButtonColor: '#C3EAE7',
         });
       } else {
-        // Create new branch
         await dispatch(createBranch(branchData as CreateBranchData)).unwrap();
         
         Swal.fire({
@@ -102,7 +98,6 @@ const BranchesPage = () => {
         });
       }
       
-      // Refresh the branches list
       if (profile?.id) {
         dispatch(fetchBranches(profile.id));
       }
@@ -113,7 +108,7 @@ const BranchesPage = () => {
         text: error.message || `Failed to ${editingBranch ? 'update' : 'create'} branch. Please try again.`,
         confirmButtonColor: '#C3EAE7',
       });
-      throw error; // Re-throw to prevent modal from closing
+      throw error; 
     }
   };
 
@@ -166,7 +161,6 @@ const BranchesPage = () => {
       
       <div className="flex-1 flex flex-col py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          {/* Header Section */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -193,7 +187,6 @@ const BranchesPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center justify-between">
@@ -250,7 +243,6 @@ const BranchesPage = () => {
             </div>
           </div>
 
-          {/* Branches Table */}
           <div className="mb-8">
             <BranchesTable
               branches={branches}
@@ -260,7 +252,6 @@ const BranchesPage = () => {
             />
           </div>
 
-          {/* Information Section */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +271,6 @@ const BranchesPage = () => {
         </div>
       </div>
 
-      {/* Branch Modal */}
       <BranchModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
