@@ -21,27 +21,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { weekStartDate, weekEndDate, practiceId } = req.query;
+    const { month, year } = req.query;
 
     // Build where clause for locked timesheets
     let whereClause: any = {
       status: 'LOCKED'
     };
 
-    // Add date range filter if provided
-    if (weekStartDate || weekEndDate) {
-      whereClause.weekStartDate = {};
-      if (weekStartDate) {
-        whereClause.weekStartDate.gte = new Date(weekStartDate as string);
-      }
-      if (weekEndDate) {
-        whereClause.weekStartDate.lte = new Date(weekEndDate as string);
-      }
+    // Add month/year filter if provided
+    if (month) {
+      whereClause.month = parseInt(month as string);
     }
-
-    // Add practice filter if provided
-    if (practiceId) {
-      whereClause.practiceId = practiceId as string;
+    if (year) {
+      whereClause.year = parseInt(year as string);
     }
 
     // Get all locked timesheets for payout
@@ -57,59 +49,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             bankDetails: true
           }
         },
-        practice: {
-          select: {
-            name: true,
-            email: true,
-            telephone: true,
-            location: true,
-            practiceType: true
-          }
-        },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-            location: true
-          }
-        },
-        timesheetEntries: {
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                name: true,
+                email: true,
+                telephone: true,
+                location: true,
+                practiceType: true
+              }
+            },
+            branch: {
+              select: {
+                name: true,
+                location: true
+              }
+            }
+          },
           orderBy: {
-            date: 'asc'
+            jobDate: 'asc'
           }
         }
       },
       orderBy: {
-        weekStartDate: 'desc'
+        month: 'desc',
+        year: 'desc'
       }
     });
-
-    // Group by practice for easier processing
-    const payoutsByPractice = lockedTimesheets.reduce((acc: any, timesheet: any) => {
-      const practiceId = timesheet.practiceId;
-      const practiceName = timesheet.practice.name;
-      
-      if (!acc[practiceId]) {
-        acc[practiceId] = {
-          practiceId,
-          practiceName,
-          practiceEmail: timesheet.practice.email,
-          practiceLocation: timesheet.practice.location,
-          timesheets: [],
-          totalHours: 0,
-          totalPay: 0,
-          locumCount: 0
-        };
-      }
-      
-      acc[practiceId].timesheets.push(timesheet);
-      acc[practiceId].totalHours += timesheet.totalHours || 0;
-      acc[practiceId].totalPay += timesheet.totalPay || 0;
-      acc[practiceId].locumCount += 1;
-      
-      return acc;
-    }, {} as any);
 
     // Group by locum for individual payouts
     const payoutsByLocum = lockedTimesheets.reduce((acc: any, timesheet: any) => {
@@ -127,14 +94,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           timesheets: [],
           totalHours: 0,
           totalPay: 0,
-          practiceCount: 0
+          totalJobs: 0
         };
       }
       
       acc[locumId].timesheets.push(timesheet);
       acc[locumId].totalHours += timesheet.totalHours || 0;
       acc[locumId].totalPay += timesheet.totalPay || 0;
-      acc[locumId].practiceCount += 1;
+      acc[locumId].totalJobs += timesheet.timesheetJobs.length;
+      
+      return acc;
+    }, {} as any);
+
+    // Group by practice for practice-wise payouts
+    const payoutsByPractice = lockedTimesheets.reduce((acc: any, timesheet: any) => {
+      timesheet.timesheetJobs.forEach((job: any) => {
+        const practiceId = job.practiceId;
+        const practiceName = job.practice.name;
+        
+        if (!acc[practiceId]) {
+          acc[practiceId] = {
+            practiceId,
+            practiceName,
+            practiceEmail: job.practice.email,
+            practiceLocation: job.practice.location,
+            practiceType: job.practice.practiceType,
+            jobs: [],
+            totalHours: 0,
+            totalPay: 0,
+            locumCount: 0
+          };
+        }
+        
+        acc[practiceId].jobs.push(job);
+        acc[practiceId].totalHours += job.totalHours || 0;
+        acc[practiceId].totalPay += job.totalPay || 0;
+        
+        // Count unique locums for this practice
+        const locumIds = new Set(acc[practiceId].jobs.map((j: any) => j.timesheet.locumId));
+        acc[practiceId].locumCount = locumIds.size;
+      });
       
       return acc;
     }, {} as any);

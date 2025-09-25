@@ -35,13 +35,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get the timesheet with entries
+    // Get the timesheet with jobs
     const timesheet = await prisma.timesheet.findUnique({
       where: { id: timesheetId },
       include: {
-        timesheetEntries: true,
-        locumProfile: true,
-        practice: true
+        timesheetJobs: {
+          include: {
+            practice: true
+          }
+        },
+        locumProfile: {
+          select: {
+            fullName: true,
+            emailAddress: true
+          }
+        }
       }
     });
 
@@ -49,29 +57,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Timesheet not found" });
     }
 
-    // Check if timesheet is in PENDING_APPROVAL status
-    if (timesheet.status !== 'PENDING_APPROVAL') {
+    // Check if timesheet is in SUBMITTED status
+    if (timesheet.status !== 'SUBMITTED') {
       return res.status(400).json({ 
-        error: `Timesheet is not pending approval. Current status: ${timesheet.status}` 
-      });
-    }
-
-    // Verify that the manager belongs to the same practice
-    const practice = await prisma.practice.findUnique({
-      where: { id: timesheet.practiceId }
-    });
-
-    if (!practice) {
-      return res.status(404).json({ error: "Practice not found" });
-    }
-
-    // For now, we'll assume managerId is the practice email or ID
-    // In a real implementation, you might have a separate managers table
-    const isValidManager = practice.email === managerId || practice.id === managerId;
-    
-    if (!isValidManager) {
-      return res.status(403).json({ 
-        error: "Unauthorized: Manager does not belong to this practice" 
+        error: `Timesheet is not submitted. Current status: ${timesheet.status}` 
       });
     }
 
@@ -90,17 +79,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           submittedAt: new Date()
         },
         include: {
-          timesheetEntries: true,
+          timesheetJobs: {
+            include: {
+              practice: {
+                select: {
+                  name: true,
+                  location: true
+                }
+              },
+              branch: {
+                select: {
+                  name: true,
+                  location: true
+                }
+              }
+            }
+          },
           locumProfile: {
             select: {
               fullName: true,
               emailAddress: true
-            }
-          },
-          practice: {
-            select: {
-              name: true,
-              email: true
             }
           }
         }
@@ -116,17 +114,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           staffSignatureDate: null
         },
         include: {
-          timesheetEntries: true,
+          timesheetJobs: {
+            include: {
+              practice: {
+                select: {
+                  name: true,
+                  location: true
+                }
+              },
+              branch: {
+                select: {
+                  name: true,
+                  location: true
+                }
+              }
+            }
+          },
           locumProfile: {
             select: {
               fullName: true,
               emailAddress: true
-            }
-          },
-          practice: {
-            select: {
-              name: true,
-              email: true
             }
           }
         }
@@ -144,15 +151,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         submittedAt: action === 'approve' ? updatedTimesheet.submittedAt : null,
         totalHours: updatedTimesheet.totalHours,
         totalPay: updatedTimesheet.totalPay,
-        weekStartDate: updatedTimesheet.weekStartDate,
-        weekEndDate: updatedTimesheet.weekEndDate,
+        month: updatedTimesheet.month,
+        year: updatedTimesheet.year,
         locumName: updatedTimesheet.locumProfile.fullName,
-        practiceName: updatedTimesheet.practice.name
+        totalJobs: updatedTimesheet.timesheetJobs.length
       }
     });
 
   } catch (error) {
-    console.error("Timesheet approval error:", error);
+    console.error("Approve timesheet error:", error);
     res.status(500).json({ error: "Failed to process timesheet approval" });
   }
 }

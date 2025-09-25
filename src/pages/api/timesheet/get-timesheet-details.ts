@@ -40,29 +40,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             hourlyPayRate: true
           }
         },
-        practice: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            telephone: true,
-            location: true,
-            address: true,
-            practiceType: true
-          }
-        },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-            location: true,
-            telephone: true
-          }
-        },
-        timesheetEntries: {
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                id: true,
+                name: true,
+                location: true,
+                practiceType: true
+              }
+            },
+            branch: {
+              select: {
+                id: true,
+                name: true,
+                location: true
+              }
+            },
+            booking: {
+              select: {
+                booking_start_time: true,
+                booking_end_time: true,
+                location: true,
+                description: true
+              }
+            }
+          },
           orderBy: {
-            date: 'asc'
+            jobDate: 'asc'
           }
         }
       }
@@ -72,36 +77,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Timesheet not found" });
     }
 
-    // Calculate daily breakdown
-    const dailyBreakdown = timesheet.timesheetEntries.map(entry => {
-      const date = entry.date.toISOString().split('T')[0];
-      const clockIn = entry.clockInTime?.toISOString() || null;
-      const clockOut = entry.clockOutTime?.toISOString() || null;
-      const lunchStart = entry.lunchStartTime?.toISOString() || null;
-      const lunchEnd = entry.lunchEndTime?.toISOString() || null;
+    // Calculate job breakdown
+    const jobBreakdown = timesheet.timesheetJobs.map(job => {
+      const date = job.jobDate.toISOString().split('T')[0];
+      const startTime = job.startTime?.toISOString() || null;
+      const endTime = job.endTime?.toISOString() || null;
+      const lunchStart = job.lunchStartTime?.toISOString() || null;
+      const lunchEnd = job.lunchEndTime?.toISOString() || null;
       
       return {
-        id: entry.id,
+        id: job.id,
+        bookingId: job.bookingId,
         date: date,
-        clockInTime: clockIn,
-        clockOutTime: clockOut,
+        startTime: startTime,
+        endTime: endTime,
         lunchStartTime: lunchStart,
         lunchEndTime: lunchEnd,
-        totalHours: entry.totalHours || 0,
-        notes: entry.notes,
-        isComplete: !!(entry.clockInTime && entry.clockOutTime)
+        totalHours: job.totalHours || 0,
+        hourlyRate: job.hourlyRate || 0,
+        totalPay: job.totalPay || 0,
+        notes: job.notes,
+        isComplete: !!(job.startTime && job.endTime),
+        practice: job.practice,
+        branch: job.branch,
+        booking: job.booking
       };
     });
 
-    // Calculate week summary
-    const weekSummary = {
-      totalDays: timesheet.timesheetEntries.length,
-      completedDays: timesheet.timesheetEntries.filter(e => e.clockInTime && e.clockOutTime).length,
+    // Calculate month summary
+    const monthSummary = {
+      totalJobs: timesheet.timesheetJobs.length,
+      completedJobs: timesheet.timesheetJobs.filter(j => j.startTime && j.endTime).length,
       totalHours: timesheet.totalHours || 0,
       totalPay: timesheet.totalPay || 0,
-      hourlyRate: timesheet.hourlyRate || 0,
-      averageHoursPerDay: timesheet.timesheetEntries.length > 0 
-        ? (timesheet.totalHours || 0) / timesheet.timesheetEntries.length 
+      averageHoursPerJob: timesheet.timesheetJobs.length > 0 
+        ? (timesheet.totalHours || 0) / timesheet.timesheetJobs.length 
         : 0
     };
 
@@ -110,13 +120,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         id: timesheet.id,
         locumId: timesheet.locumId,
-        practiceId: timesheet.practiceId,
-        weekStartDate: timesheet.weekStartDate,
-        weekEndDate: timesheet.weekEndDate,
+        month: timesheet.month,
+        year: timesheet.year,
         status: timesheet.status,
         totalHours: timesheet.totalHours,
         totalPay: timesheet.totalPay,
-        hourlyRate: timesheet.hourlyRate,
         staffSignature: timesheet.staffSignature,
         staffSignatureDate: timesheet.staffSignatureDate,
         managerSignature: timesheet.managerSignature,
@@ -126,11 +134,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdAt: timesheet.createdAt,
         updatedAt: timesheet.updatedAt,
         locumProfile: timesheet.locumProfile,
-        practice: timesheet.practice,
-        branch: timesheet.branch,
-        createdBy: timesheet.createdBy,
-        dailyBreakdown: dailyBreakdown,
-        weekSummary: weekSummary
+        jobBreakdown: jobBreakdown,
+        monthSummary: monthSummary
       }
     });
 

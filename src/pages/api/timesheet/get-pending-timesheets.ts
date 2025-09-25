@@ -21,49 +21,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { practiceId } = req.query;
+    const { month, year } = req.query;
 
-    if (!practiceId) {
-      return res.status(400).json({ error: "practiceId is required" });
+    // Build where clause for submitted timesheets
+    let whereClause: any = {
+      status: 'SUBMITTED'
+    };
+
+    // Add month/year filter if provided
+    if (month) {
+      whereClause.month = parseInt(month as string);
+    }
+    if (year) {
+      whereClause.year = parseInt(year as string);
     }
 
-    // Get all timesheets pending approval for this practice (only locum-created timesheets need approval)
+    // Get all submitted timesheets
     const pendingTimesheets = await prisma.timesheet.findMany({
-      where: {
-        practiceId: practiceId as string,
-        status: 'PENDING_APPROVAL',
-        createdBy: 'LOCUM' // Only locum-created timesheets need approval
-      },
+      where: whereClause,
       include: {
         locumProfile: {
           select: {
             fullName: true,
             emailAddress: true,
             contactNumber: true,
-            role: true,
-            hourlyPayRate: true
+            role: true
           }
         },
-        practice: {
-          select: {
-            name: true,
-            email: true,
-            telephone: true,
-            location: true,
-            practiceType: true
-          }
-        },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-            location: true
-          }
-        },
-        timesheetEntries: {
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                name: true,
+                location: true,
+                practiceType: true
+              }
+            },
+            branch: {
+              select: {
+                name: true,
+                location: true
+              }
+            }
+          },
           orderBy: {
-            date: 'asc'
+            jobDate: 'asc'
           }
         }
       },
@@ -88,18 +90,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ? Math.floor((new Date().getTime() - timesheet.staffSignatureDate.getTime()) / (1000 * 60 * 60 * 24))
         : 0;
 
-      const completedDays = timesheet.timesheetEntries.filter(entry => 
-        entry.clockInTime && entry.clockOutTime
+      const completedJobs = timesheet.timesheetJobs.filter(job => 
+        job.startTime && job.endTime
       ).length;
 
-      const totalDays = timesheet.timesheetEntries.length;
+      const totalJobs = timesheet.timesheetJobs.length;
 
       return {
         ...timesheet,
         daysSinceSubmission,
-        completedDays,
-        totalDays,
-        completionRate: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
+        completedJobs,
+        totalJobs,
+        completionRate: totalJobs > 0 ? (completedJobs / totalJobs) * 100 : 0,
         isOverdue: daysSinceSubmission > 7 // Consider overdue after 7 days
       };
     });
@@ -111,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error("Get pending approvals error:", error);
-    res.status(500).json({ error: "Failed to get pending timesheet approvals" });
+    console.error("Get pending timesheets error:", error);
+    res.status(500).json({ error: "Failed to get pending timesheets" });
   }
 }

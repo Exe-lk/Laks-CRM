@@ -21,15 +21,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { userId, userType, status, weekStartDate, weekEndDate } = req.query;
+    const { userId, userType, status, month, year } = req.query;
 
     if (!userId || !userType) {
       return res.status(400).json({ error: "userId and userType are required" });
     }
 
-    if (!['locum', 'practice', 'admin'].includes(userType as string)) {
+    if (!['locum', 'admin'].includes(userType as string)) {
       return res.status(400).json({ 
-        error: "Invalid userType. Must be 'locum', 'practice', or 'admin'" 
+        error: "Invalid userType. Must be 'locum' or 'admin'" 
       });
     }
 
@@ -38,8 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (userType === 'locum') {
       whereClause.locumId = userId as string;
-    } else if (userType === 'practice') {
-      whereClause.practiceId = userId as string;
     }
     // For admin, no additional filtering (can see all timesheets)
 
@@ -48,15 +46,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       whereClause.status = status as string;
     }
 
-    // Add date range filter if provided
-    if (weekStartDate || weekEndDate) {
-      whereClause.weekStartDate = {};
-      if (weekStartDate) {
-        whereClause.weekStartDate.gte = new Date(weekStartDate as string);
-      }
-      if (weekEndDate) {
-        whereClause.weekStartDate.lte = new Date(weekEndDate as string);
-      }
+    // Add month/year filter if provided
+    if (month) {
+      whereClause.month = parseInt(month as string);
+    }
+    if (year) {
+      whereClause.year = parseInt(year as string);
     }
 
     const timesheets = await prisma.timesheet.findMany({
@@ -70,31 +65,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             role: true
           }
         },
-        practice: {
-          select: {
-            name: true,
-            email: true,
-            telephone: true,
-            location: true,
-            practiceType: true
-          }
-        },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-            location: true
-          }
-        },
-        timesheetEntries: {
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                name: true,
+                location: true,
+                practiceType: true
+              }
+            },
+            branch: {
+              select: {
+                name: true,
+                location: true
+              }
+            }
+          },
           orderBy: {
-            date: 'asc'
+            jobDate: 'asc'
           }
         }
       },
       orderBy: {
-        weekStartDate: 'desc'
+        year: 'desc',
+        month: 'desc'
       }
     });
 
@@ -102,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const summary = {
       total: timesheets.length,
       draft: timesheets.filter(t => t.status === 'DRAFT').length,
-      pendingApproval: timesheets.filter(t => t.status === 'PENDING_APPROVAL').length,
+      submitted: timesheets.filter(t => t.status === 'SUBMITTED').length,
       locked: timesheets.filter(t => t.status === 'LOCKED').length,
       totalHours: timesheets.reduce((sum, t) => sum + (t.totalHours || 0), 0),
       totalPay: timesheets.reduce((sum, t) => sum + (t.totalPay || 0), 0)

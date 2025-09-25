@@ -29,13 +29,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get the timesheet with entries
+    // Get the timesheet with jobs
     const timesheet = await prisma.timesheet.findUnique({
       where: { id: timesheetId },
       include: {
-        timesheetEntries: true,
-        locumProfile: true,
-        practice: true
+        timesheetJobs: true,
+        locumProfile: {
+          select: {
+            fullName: true,
+            emailAddress: true
+          }
+        }
       }
     });
 
@@ -50,60 +54,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // If timesheet was created by practice, it doesn't need approval - lock it directly
-    if (timesheet.createdBy === 'PRACTICE') {
-      const updatedTimesheet = await prisma.timesheet.update({
-        where: { id: timesheetId },
-        data: {
-          staffSignature: staffSignature,
-          staffSignatureDate: new Date(),
-          status: 'LOCKED',
-          submittedAt: new Date()
-        },
-        include: {
-          timesheetEntries: true,
-          locumProfile: {
-            select: {
-              fullName: true,
-              emailAddress: true
-            }
-          },
-          practice: {
-            select: {
-              name: true,
-              email: true
-            }
-          }
-        }
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Practice-created timesheet submitted and locked successfully",
-        data: {
-          timesheetId: updatedTimesheet.id,
-          status: updatedTimesheet.status,
-          staffSignatureDate: updatedTimesheet.staffSignatureDate,
-          submittedAt: updatedTimesheet.submittedAt,
-          totalHours: updatedTimesheet.totalHours,
-          totalPay: updatedTimesheet.totalPay,
-          weekStartDate: updatedTimesheet.weekStartDate,
-          weekEndDate: updatedTimesheet.weekEndDate,
-          locumName: updatedTimesheet.locumProfile.fullName,
-          practiceName: updatedTimesheet.practice.name,
-          createdBy: updatedTimesheet.createdBy
-        }
-      });
-    }
-
-    // Validate that all entries have complete clock-in/clock-out times
-    const incompleteEntries = timesheet.timesheetEntries.filter(entry => 
-      !entry.clockInTime || !entry.clockOutTime
+    // Validate that all jobs have complete start/end times
+    const incompleteJobs = timesheet.timesheetJobs.filter(job => 
+      !job.startTime || !job.endTime
     );
 
-    if (incompleteEntries.length > 0) {
+    if (incompleteJobs.length > 0) {
       return res.status(400).json({ 
-        error: "All timesheet entries must have complete clock-in and clock-out times before submission" 
+        error: "All jobs must have complete start and end times before submission" 
       });
     }
 
@@ -114,26 +72,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Update timesheet with staff signature and change status to PENDING_APPROVAL
+    // Update timesheet with staff signature and change status to SUBMITTED
     const updatedTimesheet = await prisma.timesheet.update({
       where: { id: timesheetId },
       data: {
         staffSignature: staffSignature,
         staffSignatureDate: new Date(),
-        status: 'PENDING_APPROVAL'
+        status: 'SUBMITTED'
       },
       include: {
-        timesheetEntries: true,
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                name: true,
+                location: true
+              }
+            },
+            branch: {
+              select: {
+                name: true,
+                location: true
+              }
+            }
+          }
+        },
         locumProfile: {
           select: {
             fullName: true,
             emailAddress: true
-          }
-        },
-        practice: {
-          select: {
-            name: true,
-            email: true
           }
         }
       }
@@ -148,15 +115,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         staffSignatureDate: updatedTimesheet.staffSignatureDate,
         totalHours: updatedTimesheet.totalHours,
         totalPay: updatedTimesheet.totalPay,
-        weekStartDate: updatedTimesheet.weekStartDate,
-        weekEndDate: updatedTimesheet.weekEndDate,
+        month: updatedTimesheet.month,
+        year: updatedTimesheet.year,
         locumName: updatedTimesheet.locumProfile.fullName,
-        practiceName: updatedTimesheet.practice.name
+        totalJobs: updatedTimesheet.timesheetJobs.length
       }
     });
 
   } catch (error) {
-    console.error("Timesheet submission error:", error);
+    console.error("Submit timesheet error:", error);
     res.status(500).json({ error: "Failed to submit timesheet" });
   }
 }
