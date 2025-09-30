@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export interface AppointmentRequest {
   id?: string;
   practice_id: string;
+  branch_id?: string;
   request_date: Date | string;
   request_start_time: string;
   request_end_time: string;
@@ -18,10 +19,17 @@ export interface AppointmentRequest {
     location: string;
     address: string;
   };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  };
 }
 
 export interface CreateAppointmentRequestData {
   practice_id: string;
+  branch_id?: string;
   request_date: Date | string;
   request_start_time: string;
   request_end_time: string;
@@ -118,6 +126,12 @@ export interface JobDetails {
     name: string;
     location: string;
     address: string;
+  };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
   };
 }
 

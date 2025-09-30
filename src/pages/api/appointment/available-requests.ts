@@ -68,6 +68,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             telephone: true
           }
         },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            location: true
+          }
+        },
         _count: {
           select: {
             responses: {

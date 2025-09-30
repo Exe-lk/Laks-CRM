@@ -59,6 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const appointmentRequest = await prisma.appointmentRequest.create({
       data: {
         practice_id,
+        branch_id: branch_id || null,
         request_date: requestDate,
         request_start_time,
         request_end_time,
@@ -74,7 +75,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             location: true,
             address:true
           }
-        }
+        },
+        branch: branch_id ? {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            location: true
+          }
+        } : false
       }
     });
 

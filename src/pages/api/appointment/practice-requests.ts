@@ -34,6 +34,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         practice_id: practice_id as string
       },
       include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            location: true
+          }
+        },
         responses: {
           where: {
             status: 'ACCEPTED'
@@ -107,6 +115,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         required_role: request.required_role,
         location: request.location,
         status: request.status,
+        branch: request.branch ? {
+          id: request.branch.id,
+          name: request.branch.name,
+          address: request.branch.address,
+          location: request.branch.location
+        } : null,
         total_applicants: request._count.responses,
         latest_applicants: request.responses.slice(0, 3).map(response => ({
           locum_name: response.locumProfile.fullName,

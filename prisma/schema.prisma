@@ -109,6 +109,7 @@ model Booking {
 model AppointmentRequest {
   request_id              String      @id @default(cuid())
   practice_id             String
+  branch_id               String?     // Optional branch ID for corporate practices
   request_date            DateTime
   request_start_time      String
   request_end_time        String
@@ -120,6 +121,7 @@ model AppointmentRequest {
   updatedAt               DateTime    @updatedAt
   
   practice                Practice    @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+  branch                  Branch?     @relation(fields: [branch_id], references: [id], onDelete: SetNull)
   responses               AppointmentResponse[]
   confirmations           AppointmentConfirmation[]
   booking                 Booking?
@@ -176,6 +178,7 @@ model Branch {
   
   practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   timesheetJobs TimesheetJob[]
+  appointmentRequests AppointmentRequest[]
   
   @@map("branches")
 }

@@ -38,6 +38,8 @@ Automatically adds a confirmed booking to the locum's timesheet.
 }
 ```
 
+**Note:** When creating appointment requests, you can now optionally include a `branch_id` for corporate practices with multiple branches. This will be automatically included in the timesheet job data.
+
 **Response:**
 ```json
 {
@@ -54,7 +56,12 @@ Automatically adds a confirmed booking to the locum's timesheet.
       "location": "London",
       "practiceType": "Private"
     },
-    "branch": null,
+    "branch": {
+      "id": "branch_123",
+      "name": "ABC Dental - Central Branch",
+      "address": "123 Main Street, London",
+      "location": "Central London"
+    },
     "booking": {
       "booking_start_time": "2024-01-15T09:00:00Z",
       "booking_end_time": "2024-01-15T17:00:00Z",
@@ -96,8 +103,17 @@ Updates start/end times and lunch breaks for a specific job.
       "lunchEndTime": "2024-01-15T13:00:00Z",
       "totalHours": 7.0,
       "totalPay": 175.00,
-      "practice": { ... },
-      "branch": { ... }
+      "practice": { 
+        "name": "ABC Dental Practice",
+        "location": "London",
+        "practiceType": "Private"
+      },
+      "branch": {
+        "id": "branch_123",
+        "name": "ABC Dental - Central Branch",
+        "address": "123 Main Street, London",
+        "location": "Central London"
+      }
     },
     "monthTotalHours": 35.0,
     "monthTotalPay": 875.00
@@ -341,9 +357,22 @@ Gets detailed information for a specific timesheet.
         "hourlyRate": 25.00,
         "totalPay": 175.00,
         "isComplete": true,
-        "practice": { ... },
-        "branch": { ... },
-        "booking": { ... }
+        "practice": { 
+          "name": "ABC Dental Practice",
+          "location": "London",
+          "practiceType": "Private"
+        },
+        "branch": {
+          "id": "branch_123",
+          "name": "ABC Dental - Central Branch",
+          "address": "123 Main Street, London",
+          "location": "Central London"
+        },
+        "booking": { 
+          "booking_start_time": "2024-01-15T09:00:00Z",
+          "booking_end_time": "2024-01-15T17:00:00Z",
+          "location": "123 Main St"
+        }
       }
     ],
     "monthSummary": {
@@ -463,3 +492,13 @@ Common HTTP status codes:
 - ✅ **Automatic calculations** - Hours and pay calculated automatically
 - ✅ **Digital signatures** - Staff and manager signatures
 - ✅ **Comprehensive reporting** - Detailed breakdowns and summaries
+- ✅ **Branch support** - Corporate practices can specify branches for appointments
+
+## Branch Support
+
+The system now supports corporate practices with multiple branches:
+
+- **Optional branch_id** - When creating appointment requests, practices can specify which branch the appointment is for
+- **Branch information** - All timesheet jobs include branch details when applicable
+- **Automatic inclusion** - Branch information is automatically included in timesheet data when appointments are created with a branch_id
+- **Backward compatibility** - Existing appointments without branch information continue to work normally
