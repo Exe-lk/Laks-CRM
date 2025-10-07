@@ -282,10 +282,153 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   onClose,
   onUpdate
 }) => {
-  // Helper function to check if booking is in the past
-  const isBookingPast = (booking: Booking): boolean => {
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [lunchStartTime, setLunchStartTime] = useState<string>('');
+  const [lunchEndTime, setLunchEndTime] = useState<string>('');
+  const [timesheetJobId, setTimesheetJobId] = useState<string | null>(null);
+  const [timesheetId, setTimesheetId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [hourlyRate, setHourlyRate] = useState<number | null>(null);
+  const [totalHours, setTotalHours] = useState<number | null>(null);
+  const [totalPay, setTotalPay] = useState<number | null>(null);
+
+  // Fetch existing timesheet job data when booking is selected
+  useEffect(() => {
+    const fetchTimesheetJob = async () => {
+      if (!selectedBooking || !selectedDate) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const token = getAuthToken();
+        const profileStr = localStorage.getItem('profile');
+        if (!profileStr) return;
+        
+        const profile = JSON.parse(profileStr);
+        const locumId = profile.id;
+
+        // Get the booking date
+        const bookingDate = new Date(selectedBooking.booking_date as any);
+        const month = bookingDate.getMonth() + 1;
+        const year = bookingDate.getFullYear();
+
+        // Fetch the timesheet for this month
+        const response = await fetch(
+          `/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Find the job for this booking
+          const existingJob = data.data.allJobs?.find(
+            (job: any) => job.bookingId === selectedBooking.id
+          );
+
+          if (existingJob) {
+            // Auto-fill the times if they exist
+            setTimesheetJobId(existingJob.id);
+            setTimesheetId(existingJob.timesheetId);
+            
+            // Set hourly rate, total hours, and total pay
+            setHourlyRate(existingJob.hourlyRate || null);
+            setTotalHours(existingJob.totalHours || null);
+            setTotalPay(existingJob.totalPay || null);
+            
+            if (existingJob.startTime) {
+              const startDate = new Date(existingJob.startTime);
+              setStartTime(startDate.toTimeString().substring(0, 5));
+            }
+            
+            if (existingJob.endTime) {
+              const endDate = new Date(existingJob.endTime);
+              setEndTime(endDate.toTimeString().substring(0, 5));
+            }
+            
+            if (existingJob.lunchStartTime) {
+              const lunchStart = new Date(existingJob.lunchStartTime);
+              setLunchStartTime(lunchStart.toTimeString().substring(0, 5));
+            }
+            
+            if (existingJob.lunchEndTime) {
+              const lunchEnd = new Date(existingJob.lunchEndTime);
+              setLunchEndTime(lunchEnd.toTimeString().substring(0, 5));
+            }
+
+            setSuccess('Previous time entries loaded successfully!');
+          } else {
+            // Reset if no existing job found
+            setStartTime('');
+            setEndTime('');
+            setLunchStartTime('');
+            setLunchEndTime('');
+            setTimesheetJobId(null);
+            setTimesheetId(null);
+            setHourlyRate(null);
+            setTotalHours(null);
+            setTotalPay(null);
+          }
+        } else {
+          // Reset if API call fails
+          setStartTime('');
+          setEndTime('');
+          setLunchStartTime('');
+          setLunchEndTime('');
+          setTimesheetJobId(null);
+          setTimesheetId(null);
+        }
+      } catch (err) {
+        console.error('Error fetching timesheet job:', err);
+        // Reset on error
+        setStartTime('');
+        setEndTime('');
+        setLunchStartTime('');
+        setLunchEndTime('');
+        setTimesheetJobId(null);
+        setTimesheetId(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTimesheetJob();
+  }, [selectedBooking?.id, selectedDate]);
+
+  // Helper function to check if booking start time has passed
+  const hasBookingStarted = (booking: Booking): boolean => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0].split('-').join('-');
+    const today = now.toISOString().split('T')[0];
+    const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
+    
+    // If booking date is in the past, it has started
+    if (bookingDate < today) return true;
+    
+    // If booking date is today, check if start time has passed
+    if (bookingDate === today) {
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      const [startHour, startMinute] = booking.booking_start_time.split(':').map(Number);
+      const bookingStartTime = startHour * 60 + startMinute;
+      return currentTime >= bookingStartTime;
+    }
+    
+    return false;
+  };
+
+  // Helper function to check if booking is completed
+  const isBookingCompleted = (booking: Booking): boolean => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
     const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
     
     if (bookingDate < today) return true;
@@ -300,14 +443,280 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     return false;
   };
 
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || '';
+  };
+
+  const handleStartClick = async () => {
+    if (!selectedBooking) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const token = getAuthToken();
+      const now = new Date();
+      const timeString = now.toTimeString().substring(0, 5);
+      
+      // Combine booking date with current time
+      const bookingDate = new Date(selectedBooking.booking_date as any);
+      const combinedDateTime = new Date(
+        bookingDate.getFullYear(),
+        bookingDate.getMonth(),
+        bookingDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+      
+      let jobId = timesheetJobId;
+      let tsId = timesheetId;
+
+      // Step 1: Add job to timesheet only if it doesn't exist (creates timesheet if not exists)
+      if (!jobId) {
+        const addJobResponse = await fetch('/api/timesheet/add-job-to-timesheet', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            bookingId: selectedBooking.id
+          })
+        });
+
+        if (!addJobResponse.ok) {
+          const errorData = await addJobResponse.json();
+          throw new Error(errorData.error || 'Failed to add job to timesheet');
+        }
+
+        const addJobData = await addJobResponse.json();
+        jobId = addJobData.data.timesheetJobId;
+        tsId = addJobData.data.timesheetId;
+        
+        setTimesheetJobId(jobId);
+        setTimesheetId(tsId);
+        
+        // Set hourly rate from the created job
+        if (addJobData.data.hourlyRate !== undefined) {
+          setHourlyRate(addJobData.data.hourlyRate);
+        }
+      }
+
+      // Step 2: Update start time with combined date and current time
+      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timesheetJobId: jobId,
+          startTime: combinedDateTime.toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to set start time');
+      }
+
+      const updateData = await updateResponse.json();
+      
+      setStartTime(timeString);
+      setSuccess('Start time recorded successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to record start time');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEndClick = async () => {
+    if (!timesheetJobId || !selectedBooking) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const token = getAuthToken();
+      const now = new Date();
+      const timeString = now.toTimeString().substring(0, 5);
+
+      // Combine booking date with current time
+      const bookingDate = new Date(selectedBooking.booking_date as any);
+      const combinedDateTime = new Date(
+        bookingDate.getFullYear(),
+        bookingDate.getMonth(),
+        bookingDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+
+      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timesheetJobId: timesheetJobId,
+          endTime: combinedDateTime.toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to set end time');
+      }
+
+      const updateData = await updateResponse.json();
+      
+      // Extract calculated values from the response
+      if (updateData.data && updateData.data.job) {
+        setTotalHours(updateData.data.job.totalHours || null);
+        setTotalPay(updateData.data.job.totalPay || null);
+        setHourlyRate(updateData.data.job.hourlyRate || null);
+      }
+
+      setEndTime(timeString);
+      
+      // Show success message with calculated totals
+      const hoursText = updateData.data?.job?.totalHours 
+        ? ` Total Hours: ${updateData.data.job.totalHours.toFixed(2)}h` 
+        : '';
+      const payText = updateData.data?.job?.totalPay 
+        ? `, Total Pay: £${updateData.data.job.totalPay.toFixed(2)}` 
+        : '';
+      
+      setSuccess(`End time recorded successfully!${hoursText}${payText} Please add your signature.`);
+      
+      // Show signature modal after end time is set
+      setTimeout(() => setShowSignatureModal(true), 1500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to record end time');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLunchStartClick = async () => {
+    if (!timesheetJobId || !selectedBooking) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const token = getAuthToken();
+      const now = new Date();
+      const timeString = now.toTimeString().substring(0, 5);
+
+      // Combine booking date with current time
+      const bookingDate = new Date(selectedBooking.booking_date as any);
+      const combinedDateTime = new Date(
+        bookingDate.getFullYear(),
+        bookingDate.getMonth(),
+        bookingDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+
+      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timesheetJobId: timesheetJobId,
+          lunchStartTime: combinedDateTime.toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to set lunch start time');
+      }
+
+      setLunchStartTime(timeString);
+      setSuccess('Lunch start time recorded successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to record lunch start time');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLunchEndClick = async () => {
+    if (!timesheetJobId || !selectedBooking) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const token = getAuthToken();
+      const now = new Date();
+      const timeString = now.toTimeString().substring(0, 5);
+
+      // Combine booking date with current time
+      const bookingDate = new Date(selectedBooking.booking_date as any);
+      const combinedDateTime = new Date(
+        bookingDate.getFullYear(),
+        bookingDate.getMonth(),
+        bookingDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+
+      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timesheetJobId: timesheetJobId,
+          lunchEndTime: combinedDateTime.toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to set lunch end time');
+      }
+
+      const updateData = await updateResponse.json();
+      
+      // Update totals if they've been recalculated (in case end time was already set)
+      if (updateData.data && updateData.data.job) {
+        if (updateData.data.job.totalHours !== null) {
+          setTotalHours(updateData.data.job.totalHours);
+        }
+        if (updateData.data.job.totalPay !== null) {
+          setTotalPay(updateData.data.job.totalPay);
+        }
+      }
+
+      setLunchEndTime(timeString);
+      setSuccess('Lunch end time recorded successfully! Totals updated.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to record lunch end time');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2 border-b">
           <h3 className="text-lg font-semibold">
             Bookings for {selectedDate ? new Date(selectedDate).toLocaleDateString() : ''}
           </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
             ×
           </button>
         </div>
@@ -316,18 +725,25 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           {bookings.length > 0 ? (
             <div className="space-y-3">
               {bookings.map((booking) => {
-                const isPast = isBookingPast(booking);
+                const hasStarted = hasBookingStarted(booking);
+                const isCompleted = isBookingCompleted(booking);
+                const canSelect = hasStarted; // Can only select if start time has passed
+                
                 return (
                 <div
                   key={booking.id}
                   className={`p-4 border rounded-lg transition-colors ${
                     selectedBooking?.id === booking.id 
                       ? 'border-[#C3EAE7] bg-[#C3EAE7]/10' 
-                      : isPast 
-                        ? 'border-green-200 bg-green-50 hover:bg-green-100'
-                        : 'border-blue-200 bg-blue-50 hover:bg-blue-100'
+                      : hasStarted
+                        ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer'
+                        : 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
                   }`}
-                  onClick={() => onBookingSelect(booking)}
+                  onClick={() => {
+                    if (canSelect) {
+                      onBookingSelect(booking);
+                    }
+                  }}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -347,16 +763,23 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           {booking.status}
                         </span>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          isPast 
+                          isCompleted 
                             ? 'bg-gray-100 text-gray-700' 
-                            : 'bg-blue-100 text-blue-700'
+                            : hasStarted
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-orange-100 text-orange-700'
                         }`}>
-                          {isPast ? '✓ Completed' : '⏰ Upcoming'}
+                          {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '🔒 Not Started'}
                         </span>
                         <span className="text-xs text-gray-500">
                           Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                         </span>
                       </div>
+                      {!hasStarted && (
+                        <div className="mt-2 text-xs text-orange-600 font-medium">
+                          ℹ️ Can only select after job start time
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-medium text-gray-900">
@@ -375,12 +798,364 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           )}
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">❌ {error}</p>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-700">✅ {success}</p>
+          </div>
+        )}
+
+        {/* Time Tracking Section - Only visible when booking is selected */}
+        {selectedBooking && (
+          <div className="mt-6 p-4 bg-[#C3EAE7]/10 rounded-lg border border-[#C3EAE7]">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Time Tracking</h4>
+            
+            {isLoading && (
+              <div className="mb-3 flex items-center text-blue-600">
+                <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                <span className="text-sm">Processing...</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Start Time */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={startTime}
+                    readOnly
+                    placeholder="--:--"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                  />
+                  <button
+                    onClick={handleStartClick}
+                    disabled={!!startTime}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      startTime
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                    }`}
+                  >
+                    {startTime ? '✓ Set' : 'Start'}
+                  </button>
+                </div>
+              </div>
+
+              {/* End Time */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={endTime}
+                    readOnly
+                    placeholder="--:--"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                  />
+                  <button
+                    onClick={handleEndClick}
+                    disabled={!startTime || !!endTime}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      !startTime || endTime
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                    }`}
+                  >
+                    {endTime ? '✓ Set' : 'End'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Lunch Start Time */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Lunch Start</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={lunchStartTime}
+                    readOnly
+                    placeholder="--:--"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                  />
+                  <button
+                    onClick={handleLunchStartClick}
+                    disabled={!startTime || !!lunchStartTime}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      !startTime || lunchStartTime
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                    }`}
+                  >
+                    {lunchStartTime ? '✓ Set' : 'Start'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Lunch End Time */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Lunch End</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={lunchEndTime}
+                    readOnly
+                    placeholder="--:--"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
+                  />
+                  <button
+                    onClick={handleLunchEndClick}
+                    disabled={!lunchStartTime || !!lunchEndTime}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      !lunchStartTime || lunchEndTime
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                    }`}
+                  >
+                    {lunchEndTime ? '✓ Set' : 'End'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Booking Details */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-600">
+                Selected Booking: <span className="font-medium text-gray-900">{selectedBooking.location}</span>
+              </p>
+              <p className="text-xs text-gray-600">
+                Scheduled: {selectedBooking.booking_start_time} - {selectedBooking.booking_end_time}
+              </p>
+              {timesheetJobId && (
+                <p className="text-xs text-green-600 mt-1">
+                  ✓ Timesheet job created - ID: {timesheetJobId.substring(0, 8)}...
+                </p>
+              )}
+            </div>
+
+            {/* Payment Details */}
+            {hourlyRate !== null && (
+              <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 p-3 rounded">
+                <h5 className="text-xs font-semibold text-blue-900 mb-2">Payment Details</h5>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-700">Hourly Rate:</span>
+                    <span className="font-medium text-blue-900">£{hourlyRate.toFixed(2)}/hour</span>
+                  </div>
+                  {totalHours !== null && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-blue-700">Total Hours:</span>
+                      <span className="font-medium text-blue-900">{totalHours.toFixed(2)} hours</span>
+                    </div>
+                  )}
+                  {totalPay !== null && (
+                    <div className="flex justify-between text-xs pt-2 border-t border-blue-200">
+                      <span className="text-blue-700 font-semibold">Total Pay:</span>
+                      <span className="font-bold text-green-700 text-sm">£{totalPay.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {totalHours === null && (
+                    <p className="text-xs text-blue-600 italic mt-1">
+                      ⏳ Total hours and pay will be calculated when end time is recorded
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Info message when no booking selected */}
+        {!selectedBooking && bookings.length > 0 && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              ℹ️ Select a booking that has started to track your time
+            </p>
+          </div>
+        )}
+
+      </div>
+
+      {/* Signature Modal */}
+      {showSignatureModal && timesheetId && (
+        <SignatureModal
+          timesheetId={timesheetId}
+          onClose={() => setShowSignatureModal(false)}
+          onSubmit={() => {
+            setShowSignatureModal(false);
+            setSuccess('Timesheet submitted successfully!');
+            onUpdate();
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+interface SignatureModalProps {
+  timesheetId: string;
+  onClose: () => void;
+  onSubmit: () => void;
+}
+
+const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, onSubmit }) => {
+  const [staffSignature, setStaffSignature] = useState('');
+  const [managerSignature, setManagerSignature] = useState('');
+  const [managerId, setManagerId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getAuthToken = () => {
+    return localStorage.getItem('token') || '';
+  };
+
+  const handleSubmit = async () => {
+    if (!staffSignature.trim()) {
+      setError('Staff signature is required');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const token = getAuthToken();
+
+      const submitResponse = await fetch('/api/timesheet/submit-timesheet', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timesheetId: timesheetId,
+          staffSignature: staffSignature
+        })
+      });
+
+      if (!submitResponse.ok) {
+        const errorData = await submitResponse.json();
+        throw new Error(errorData.error || 'Failed to submit timesheet');
+      }
+
+      // If manager signature and ID are provided, approve the timesheet
+      if (managerSignature.trim() && managerId.trim()) {
+        const approveResponse = await fetch('/api/timesheet/approve-timesheet', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            timesheetId: timesheetId,
+            managerSignature: managerSignature,
+            managerId: managerId,
+            action: 'approve'
+          })
+        });
+
+        if (!approveResponse.ok) {
+          console.error('Failed to add manager signature and approve');
+        }
+      }
+
+      onSubmit();
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit timesheet');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60]">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-semibold mb-4">Submit Timesheet</h3>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">❌ {error}</p>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {/* Staff Signature */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Staff Signature <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={staffSignature}
+              onChange={(e) => setStaffSignature(e.target.value)}
+              placeholder="Enter your full name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Manager Signature (Optional) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Manager Signature <span className="text-gray-400">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              value={managerSignature}
+              onChange={(e) => setManagerSignature(e.target.value)}
+              placeholder="Manager's full name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Manager ID (Optional) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Manager ID <span className="text-gray-400">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              value={managerId}
+              onChange={(e) => setManagerId(e.target.value)}
+              placeholder="Manager's ID"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="text-xs bg-blue-50 p-3 rounded border border-blue-200 mt-2">
+            <p className="text-blue-800 font-medium">ℹ️ Important Information:</p>
+            <ul className="mt-2 space-y-1 text-blue-700">
+              <li>• By signing, you confirm that all time entries are accurate</li>
+              <li>• Manager signature and ID are optional at this stage</li>
+              <li>• <span className="font-medium">If both manager fields are filled</span>, the timesheet will be automatically approved and locked</li>
+              <li>• If manager fields are left empty, the timesheet will be submitted for approval</li>
+            </ul>
+          </div>
+        </div>
+
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isLoading}
           >
-            Close
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-[#C3EAE7] text-black font-medium rounded-lg hover:bg-[#A9DBD9] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            disabled={isLoading || !staffSignature.trim()}
+          >
+            {isLoading ? 'Submitting...' : 'Submit Timesheet'}
           </button>
         </div>
       </div>

@@ -78,6 +78,7 @@ model Practice {
   paymentCards PaymentCard[]
   stripeCustomer StripeCustomer?
   timesheetJobs TimesheetJob[]
+  invoices     Invoice[]
 
   @@map("practices")
 }
@@ -182,6 +183,7 @@ model Branch {
   bookings    Booking[]
   timesheetJobs TimesheetJob[]
   appointmentRequests AppointmentRequest[]
+  invoices    Invoice[]
   
   @@map("branches")
 }
@@ -266,6 +268,7 @@ model TimesheetJob {
   booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   practice              Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   branch                Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  invoiceLineItems      InvoiceLineItem[]
   
   @@map("timesheet_jobs")
 }

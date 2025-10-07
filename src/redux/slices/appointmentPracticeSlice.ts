@@ -64,6 +64,12 @@ export interface PracticeRequest {
   required_role:string;
   location: string;
   status: string;
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  } | null;
   total_applicants: number;
   latest_applicants: Array<{
     locum_name: string;

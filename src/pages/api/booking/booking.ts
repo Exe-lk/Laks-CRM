@@ -60,6 +60,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             location: true,
             address: true
           }
+        },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            location: true,
+            telephone: true
+          }
         }
       },
       orderBy: {

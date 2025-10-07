@@ -22,6 +22,8 @@ const BranchNavBar = () => {
     dateOfBirth?: string;
     status?: string;
     practiceType?: string;
+    name?: string;
+    practiceName?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -45,6 +47,8 @@ const BranchNavBar = () => {
             dateOfBirth: rawProfile.dob || rawProfile.dateOfBirth,
             status: rawProfile.status,
             practiceType: rawProfile.practiceType,
+            name: rawProfile.name,
+            practiceName: rawProfile.practiceName,
           };
           setProfile(mappedProfile);
         } catch {
@@ -76,6 +80,8 @@ const BranchNavBar = () => {
               dateOfBirth: rawProfile.dob || rawProfile.dateOfBirth,
               status: rawProfile.status,
               practiceType: rawProfile.practiceType,
+              name: rawProfile.name,
+              practiceName: rawProfile.practiceName,
             };
             setProfile(mappedProfile);
           } catch {
@@ -260,6 +266,12 @@ const BranchNavBar = () => {
             </>
           ) : (
             <>
+              {profile?.name && profile?.practiceName && (
+                <div className="text-center mr-3 py-2 px-4 bg-[#C3EAE7]/30 rounded-lg">
+                  <p className="text-sm font-semibold text-gray-800">{profile.name}</p>
+                  <p className="text-xs text-gray-600">{profile.practiceName}</p>
+                </div>
+              )}
               <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition mr-2"
                 title="View Profile"
@@ -324,7 +336,7 @@ const BranchNavBar = () => {
                   }`}
                 onClick={() => router.push('/branch/SelectNurses')}
               >
-                Select Nurses
+                Appointments
               </li>
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
@@ -432,7 +444,7 @@ const BranchNavBar = () => {
                         }`}
                       onClick={() => { router.push('/branch/SelectNurses'); closeMobileMenu(); }}
                     >
-                      Select Nurses
+                      Appointments
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
@@ -455,33 +467,41 @@ const BranchNavBar = () => {
                     >
                       Payment
                     </li>
-                    <li className="flex items-center space-x-2">
-                      <button
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"
-                        title="View Profile"
-                        onClick={() => { setIsProfileModalOpen(true); closeMobileMenu(); }}
-                      >
-                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                          <circle cx="12" cy="8" r="4" />
-                          <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-                        </svg>
-                      </button>
-                      <button
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
-                        onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
-                        aria-label="View Calendar"
-                        title="View Calendar"
-                      >
-                        <FaCalendarAlt className="text-xl" />
-                      </button>
-                      <button
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
-                        onClick={handleLogout}
-                        aria-label="Logout"
-                        title="Logout"
-                      >
-                        <FaSignOutAlt className="text-xl" />
-                      </button>
+                    <li className="flex flex-col items-center space-y-3">
+                      {profile?.name && profile?.practiceName && (
+                        <div className="text-center w-full py-2 px-3 bg-[#C3EAE7]/30 rounded-lg">
+                          <p className="text-sm font-semibold text-gray-800">{profile.name}</p>
+                          <p className="text-xs text-gray-600">{profile.practiceName}</p>
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                          title="View Profile"
+                          onClick={() => { setIsProfileModalOpen(true); closeMobileMenu(); }}
+                        >
+                          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                          </svg>
+                        </button>
+                        <button
+                          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
+                          onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
+                          aria-label="View Calendar"
+                          title="View Calendar"
+                        >
+                          <FaCalendarAlt className="text-xl" />
+                        </button>
+                        <button
+                          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
+                          onClick={handleLogout}
+                          aria-label="Logout"
+                          title="Logout"
+                        >
+                          <FaSignOutAlt className="text-xl" />
+                        </button>
+                      </div>
                     </li>
                   </>
                 )}

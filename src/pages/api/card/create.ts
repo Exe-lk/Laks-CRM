@@ -49,8 +49,50 @@ export default async function handler(
     // Clean card number (remove spaces)
     const cleanCardNumber = cardNumber.replace(/\s/g, '');
 
+    console.log('Card validation debug:', {
+      originalCardNumber: cardNumber,
+      cleanCardNumber: cleanCardNumber,
+      length: cleanCardNumber.length,
+      isNumeric: /^\d+$/.test(cleanCardNumber)
+    });
+
+    // Test Luhn algorithm step by step
+    console.log('Testing Luhn algorithm for:', cleanCardNumber);
+    let sum = 0;
+    let isEven = false;
+    let debugSteps = [];
+    
+    for (let i = cleanCardNumber.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleanCardNumber.charAt(i));
+      let originalDigit = digit;
+      
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+      
+      sum += digit;
+      debugSteps.push({
+        position: i,
+        originalDigit,
+        processedDigit: digit,
+        isEven,
+        runningSum: sum
+      });
+      isEven = !isEven;
+    }
+    
+    console.log('Luhn steps:', debugSteps);
+    console.log('Final sum:', sum, 'Sum % 10:', sum % 10, 'Valid:', sum % 10 === 0);
+
     // Validate card data
     if (!validateCardNumber(cleanCardNumber)) {
+      console.error('Card validation failed for:', {
+        cardNumber: cleanCardNumber,
+        length: cleanCardNumber.length
+      });
       return res.status(400).json({
         error: "Invalid card number",
       });

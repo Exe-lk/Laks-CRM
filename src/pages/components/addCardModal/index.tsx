@@ -68,18 +68,19 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
   };
 
   const formatCardNumber = (value: string): string => {
+    // Remove all spaces and non-digit characters
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
+    
+    // Limit to 19 digits (maximum card number length)
+    const truncated = v.substring(0, 19);
+    
+    // Split into groups of 4 digits
     const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
+    for (let i = 0, len = truncated.length; i < len; i += 4) {
+      parts.push(truncated.substring(i, i + 4));
     }
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return v;
-    }
+    
+    return parts.length ? parts.join(' ') : v;
   };
 
   const handleInputChange = (field: keyof CardFormData, value: string | boolean) => {
@@ -135,6 +136,11 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
       onClose();
     } catch (error: any) {
       console.error('Error creating card:', error);
+      console.error('Error details:', {
+        status: error?.status,
+        data: error?.data,
+        message: error?.data?.error
+      });
       
       await Swal.fire({
         title: 'Error!',
@@ -196,7 +202,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
                 errors.cardNumber ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="1234 5678 9012 3456"
-              maxLength={19}
+              maxLength={23}
             />
             {errors.cardNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>
