@@ -50,6 +50,12 @@ export interface PracticeRequestsParams {
   limit?: number;
 }
 
+export interface BranchRequestsParams {
+  branch_id: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface PracticeRequest {
   request_id: string;
   request_date: string;
@@ -208,6 +214,18 @@ export const appointmentApiSlice = createApi({
       providesTags: ['AppointmentRequest'],
     }),
 
+    getBranchRequests: builder.query<PracticeRequestsResponse, BranchRequestsParams>({
+      query: ({ branch_id, page = 1, limit = 20 }) => ({
+        url: 'branch-requests',
+        params: {
+          branch_id,
+          page,
+          limit,
+        },
+      }),
+      providesTags: ['AppointmentRequest'],
+    }),
+
     getApplicants: builder.query<GetApplicantsResponse, { request_id: string }>({
       query: ({ request_id }) => ({
         url: 'applicants',
@@ -233,6 +251,7 @@ export const {
   useCreateAppointmentRequestMutation,
   useGetAvailableRequestsQuery,
   useGetPracticeRequestsQuery,
+  useGetBranchRequestsQuery,
   useGetApplicantsQuery,
   useSelectApplicantMutation,
 } = appointmentApiSlice;

@@ -172,7 +172,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                 </td>
                 <td className="px-6 py-4">
                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    branch.status === 'approved'
+                    branch.status === 'active'
                       ? 'bg-green-100 text-green-800'
                       : branch.status === 'pending approval'
                       ? 'bg-yellow-100 text-yellow-800'
@@ -181,7 +181,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                       : 'bg-gray-100 text-gray-800'
                   }`}>
                     <div className={`w-2 h-2 rounded-full mr-2 ${
-                      branch.status === 'approved' 
+                      branch.status === 'active' 
                         ? 'bg-green-500' 
                         : branch.status === 'pending approval'
                         ? 'bg-yellow-500'
@@ -189,8 +189,8 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                         ? 'bg-red-500'
                         : 'bg-gray-400'
                     }`}></div>
-                    {branch.status === 'approved' 
-                      ? 'Approved' 
+                    {branch.status === 'active' 
+                      ? 'Active' 
                       : branch.status === 'pending approval'
                       ? 'Pending Approval'
                       : branch.status === 'cancel'

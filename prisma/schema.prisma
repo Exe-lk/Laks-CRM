@@ -87,6 +87,7 @@ model Booking {
   request_id    String        @unique
   locum_id      String?
   practice_id   String
+  branch_id     String?     @map("branch_id") // Optional branch ID for corporate practices
   booking_date  DateTime
   booking_start_time  String
   booking_end_time    String
@@ -103,6 +104,7 @@ model Booking {
 
   locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+  branch        Branch?       @relation(fields: [branch_id], references: [id], onDelete: SetNull)
   timesheetJobs TimesheetJob[]
 }
 
@@ -177,6 +179,7 @@ model Branch {
   updatedAt   DateTime @updatedAt
   
   practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
   timesheetJobs TimesheetJob[]
   appointmentRequests AppointmentRequest[]
   

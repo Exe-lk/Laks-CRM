@@ -89,6 +89,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
             request_id:confirmation.request_id,
             locum_id:locum_id,
             practice_id:confirmation.request.practice_id,
+            branch_id:confirmation.request.branch_id || null,
             booking_date:confirmation.request.request_date,
             booking_start_time:confirmation.request.request_start_time,
             booking_end_time:confirmation.request.request_end_time,

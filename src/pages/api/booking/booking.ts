@@ -29,13 +29,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "User ID and user type required" });
     }
 
-    if (!['locum', 'practice'].includes(user_type as string)) {
-      return res.status(400).json({ error: "Invalid user type. Must be 'locum' or 'practice'" });
+    if (!['locum', 'practice', 'branch'].includes(user_type as string)) {
+      return res.status(400).json({ error: "Invalid user type. Must be 'locum', 'practice', or 'branch'" });
     }
 
-    const whereClause = user_type === 'locum' 
-      ? { locum_id: user_id as string }
-      : { practice_id: user_id as string };
+    let whereClause;
+    if (user_type === 'locum') {
+      whereClause = { locum_id: user_id as string };
+    } else if (user_type === 'branch') {
+      whereClause = { branch_id: user_id as string };
+    } else {
+      whereClause = { practice_id: user_id as string };
+    }
 
     const bookings = await prisma.booking.findMany({
       where: whereClause,

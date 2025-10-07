@@ -116,7 +116,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
           location: values.location.trim(),
           telephone: values.telephone.trim() || undefined,
           email: values.email.trim(),
-          status: "active" as const,
+          status: "pending approval" as const,
         };
 
         const branchData = isEditing

@@ -29,8 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!['locum', 'practice'].includes(user_type)) {
-      return res.status(400).json({ error: "Invalid user type. Must be 'locum' or 'practice'" });
+    if (!['locum', 'practice', 'branch'].includes(user_type)) {
+      return res.status(400).json({ error: "Invalid user type. Must be 'locum', 'practice', or 'branch'" });
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -38,7 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id: booking_id },
         include: {
           locumProfile: { select: { fullName: true } },
-          practice: { select: { name: true } }
+          practice: { select: { name: true } },
+          branch: { select: { name: true } }
         }
       });
 
@@ -55,6 +56,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       if (user_type === 'practice' && booking.practice_id !== user_id) {
         throw new Error("You can only cancel your practice's bookings");
+      }
+      if (user_type === 'branch' && booking.branch_id !== user_id) {
+        throw new Error("You can only cancel your branch's bookings");
       }
 
       const now = new Date();

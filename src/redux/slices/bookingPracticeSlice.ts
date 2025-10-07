@@ -38,7 +38,7 @@ export const bookingApiSlice = createApi({
   }),
   tagTypes: ['Booking'],
   endpoints: (builder) => ({
-    getBookings: builder.query<any, { userId: string; userType: 'locum' | 'practice' }>({
+    getBookings: builder.query<any, { userId: string; userType: 'locum' | 'practice' | 'branch' }>({
       query: ({ userId, userType }) => ({
         url: 'booking',
         params: {
@@ -82,7 +82,7 @@ export const bookingApiSlice = createApi({
 
     cancelBooking: builder.mutation<
       { success: boolean; message: string; data: any }, 
-      { booking_id: string; user_id: string; user_type: 'locum' | 'practice'; cancellation_reason?: string }
+      { booking_id: string; user_id: string; user_type: 'locum' | 'practice' | 'branch'; cancellation_reason?: string }
     >({
       query: (cancelData) => ({
         url: 'cancel-booking',

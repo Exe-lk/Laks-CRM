@@ -41,7 +41,7 @@ interface Booking {
 }
 
 interface BookingsTableProps {
-  userType: 'locum' | 'practice';
+  userType: 'locum' | 'practice' | 'branch';
   userId: string;
   onBookingCancelled?: () => void;
 }
