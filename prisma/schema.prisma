@@ -230,9 +230,9 @@ model Timesheet {
   status                String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, LOCKED
   totalHours            Float?   @map("total_hours")
   totalPay              Float?   @map("total_pay")
-  staffSignature        String?  @map("staff_signature") // Base64 encoded signature
+  staffSignature        String?  @map("staff_signature") // URL to signature image in Supabase storage
   staffSignatureDate    DateTime? @map("staff_signature_date")
-  managerSignature      String?  @map("manager_signature") // Base64 encoded signature
+  managerSignature      String?  @map("manager_signature") // URL to signature image in Supabase storage
   managerSignatureDate  DateTime? @map("manager_signature_date")
   managerId             String?  @map("manager_id") // ID of the practice manager who approved
   submittedAt           DateTime? @map("submitted_at")

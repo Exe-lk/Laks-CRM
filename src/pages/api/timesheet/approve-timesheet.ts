@@ -21,11 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, managerSignature, managerId, action } = req.body;
+    const { timesheetId, managerSignatureUrl, managerId, action } = req.body;
 
-    if (!timesheetId || !managerSignature || !managerId || !action) {
+    if (!timesheetId || !managerSignatureUrl || !managerId || !action) {
       return res.status(400).json({ 
-        error: "timesheetId, managerSignature, managerId, and action are required" 
+        error: "timesheetId, managerSignatureUrl, managerId, and action are required" 
       });
     }
 
@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       updatedTimesheet = await prisma.timesheet.update({
         where: { id: timesheetId },
         data: {
-          managerSignature: managerSignature,
+          managerSignature: managerSignatureUrl,
           managerSignatureDate: new Date(),
           managerId: managerId,
           status: 'LOCKED',
