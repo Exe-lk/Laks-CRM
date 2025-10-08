@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export interface AppointmentRequest {
   id?: string;
   practice_id: string;
+  branch_id?: string;
   request_date: Date | string;
   request_start_time: string;
   request_end_time: string;
@@ -18,10 +19,17 @@ export interface AppointmentRequest {
     location: string;
     address: string;
   };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  };
 }
 
 export interface CreateAppointmentRequestData {
   practice_id: string;
+  branch_id?: string;
   request_date: Date | string;
   request_start_time: string;
   request_end_time: string;
@@ -42,6 +50,12 @@ export interface PracticeRequestsParams {
   limit?: number;
 }
 
+export interface BranchRequestsParams {
+  branch_id: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface PracticeRequest {
   request_id: string;
   request_date: string;
@@ -50,6 +64,18 @@ export interface PracticeRequest {
   required_role:string;
   location: string;
   status: string;
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  };
+  practice?: {
+    id: string;
+    name: string;
+    email?: string;
+    telephone?: string;
+  };
   total_applicants: number;
   latest_applicants: Array<{
     locum_name: string;
@@ -119,6 +145,12 @@ export interface JobDetails {
     location: string;
     address: string;
   };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  };
 }
 
 export interface GetApplicantsResponse {
@@ -146,7 +178,7 @@ export interface SelectApplicantResponse {
 export const appointmentApiSlice = createApi({
   reducerPath: 'appointmentApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://laks-crm.netlify.app/api/appointment',
+    baseUrl: '/api/appointment',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -194,6 +226,18 @@ export const appointmentApiSlice = createApi({
       providesTags: ['AppointmentRequest'],
     }),
 
+    getBranchRequests: builder.query<PracticeRequestsResponse, BranchRequestsParams>({
+      query: ({ branch_id, page = 1, limit = 20 }) => ({
+        url: 'branch-requests',
+        params: {
+          branch_id,
+          page,
+          limit,
+        },
+      }),
+      providesTags: ['AppointmentRequest'],
+    }),
+
     getApplicants: builder.query<GetApplicantsResponse, { request_id: string }>({
       query: ({ request_id }) => ({
         url: 'applicants',
@@ -219,6 +263,7 @@ export const {
   useCreateAppointmentRequestMutation,
   useGetAvailableRequestsQuery,
   useGetPracticeRequestsQuery,
+  useGetBranchRequestsQuery,
   useGetApplicantsQuery,
   useSelectApplicantMutation,
 } = appointmentApiSlice;

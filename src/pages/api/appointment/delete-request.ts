@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         await tx.booking.update({
-          where: { booking_id: existingRequest.booking.booking_id },
+          where: { id: existingRequest.booking.id },
           data: {
             status: 'CANCELLED',
             cancel_by: 'practice',

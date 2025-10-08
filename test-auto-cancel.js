@@ -17,3 +17,13 @@ const in72Hours = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 const delay72 = calculateAutoCancelDelay(now, in72Hours, '10:00');
 console.log('72 hours in advance:', delay72 / (1000 * 60 * 60), 'hours');
 
+
+
+
+
+
+
+
+
+
+

@@ -43,6 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 telephone: true
               }
             },
+            branch: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+                location: true
+              }
+            },
             confirmations: {
               where: {
                 chosen_locum_id: locum_id as string

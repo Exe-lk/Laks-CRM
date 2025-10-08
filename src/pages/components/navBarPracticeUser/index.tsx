@@ -6,12 +6,14 @@ import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';
 import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import CalendarModal from '../calendar/CalendarModal';
+import { useCheckPracticeHasCardsQuery } from '../../../redux/slices/cardPracticeUserSlice';
 
 const NavBar = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<{
+    id?: string;
     fullName?: string;
     emailAddress?: string;
     contactNumber?: string;
@@ -20,9 +22,14 @@ const NavBar = () => {
     employeeType?: string;
     dateOfBirth?: string;
     status?: string;
+    practiceType?: string;
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+
+  const { data: cardStatusData } = useCheckPracticeHasCardsQuery(profile?.id || '', {
+    skip: !profile?.id || !isLoggedIn
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -33,6 +40,7 @@ const NavBar = () => {
         try {
           const rawProfile = JSON.parse(profileStr);
           const mappedProfile = {
+            id: rawProfile.id,
             fullName: rawProfile.name,
             emailAddress: rawProfile.email,
             contactNumber: rawProfile.telephone,
@@ -41,6 +49,7 @@ const NavBar = () => {
             employeeType: rawProfile.employeeType,
             dateOfBirth: rawProfile.dob,
             status: rawProfile.status,
+            practiceType: rawProfile.practiceType,
           };
           setProfile(mappedProfile);
         } catch {
@@ -62,6 +71,7 @@ const NavBar = () => {
           try {
             const rawProfile = JSON.parse(profileStr);
             const mappedProfile = {
+              id: rawProfile.id,
               fullName: rawProfile.name,
               emailAddress: rawProfile.email,
               contactNumber: rawProfile.telephone,
@@ -70,6 +80,7 @@ const NavBar = () => {
               employeeType: rawProfile.employeeType,
               dateOfBirth: rawProfile.dob,
               status: rawProfile.status,
+              practiceType: rawProfile.practiceType,
             };
             setProfile(mappedProfile);
           } catch {
@@ -303,27 +314,49 @@ const NavBar = () => {
 
           {isLoggedIn && (
             <>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/practiceUser/SelectNurses')}
-              >
-                Appointments
-              </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/practiceUser/myBookings')}
-              >
-                My Bookings
-              </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/practiceUser/Rating')}
-              >
-                Rating
-              </li>
+              {profile?.practiceType === 'Corporate' ? (
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
+                  onClick={() => router.push('/practiceUser/branches')}
+                >
+                  Branches
+                </li>
+              ) : (
+                <>
+                  <li
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                      }`}
+                    onClick={() => router.push('/practiceUser/SelectNurses')}
+                  >
+                    Appointments
+                  </li>
+                  <li
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                      }`}
+                    onClick={() => router.push('/practiceUser/myBookings')}
+                  >
+                    My Bookings
+                  </li>
+                  <li
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                      }`}
+                    onClick={() => router.push('/practiceUser/Rating')}
+                  >
+                    Rating
+                  </li>
+                  <li
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                      }`}
+                    onClick={() => router.push('/practiceUser/payment')}
+                  >
+                    Payment
+                    {cardStatusData && !cardStatusData.hasCards && (
+                      <span className="ml-1 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full"></span>
+                    )}
+                  </li>
+                </>
+              )}
             </>
           )}
           {
@@ -404,27 +437,49 @@ const NavBar = () => {
                 </li>
                 {isLoggedIn && (
                   <>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
-                    >
-                      Appointments
-                    </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
-                    >
-                      My Bookings
-                    </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/practiceUser/Rating'); closeMobileMenu(); }}
-                    >
-                      Rating
-                    </li>
+                    {profile?.practiceType === 'Corporate' ? (
+                      <li
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
+                          }`}
+                        onClick={() => { router.push('/practiceUser/branches'); closeMobileMenu(); }}
+                      >
+                        Branches
+                      </li>
+                    ) : (
+                      <>
+                        <li
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                            }`}
+                          onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
+                        >
+                          Appointments
+                        </li>
+                        <li
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                            }`}
+                          onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
+                        >
+                          My Bookings
+                        </li>
+                        <li
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
+                            }`}
+                          onClick={() => { router.push('/practiceUser/Rating'); closeMobileMenu(); }}
+                        >
+                          Rating
+                        </li>
+                        <li
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                            }`}
+                          onClick={() => { router.push('/practiceUser/payment'); closeMobileMenu(); }}
+                        >
+                          Payment
+                          {cardStatusData && !cardStatusData.hasCards && (
+                            <span className="ml-1 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full"></span>
+                          )}
+                        </li>
+                      </>
+                    )}
                     <li className="flex items-center space-x-2">
                       <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition"

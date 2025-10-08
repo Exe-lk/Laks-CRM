@@ -31,12 +31,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       request_end_time,
       location,
       required_role,
-      address
+      address,
+      branch_id
     } = req.body;
 
     if (!practice_id || !request_date || !request_start_time || !request_end_time || !location || !required_role || !address) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
+    // Log the received values for debugging
+    console.log('Creating appointment request with values:', {
+      practice_id,
+      request_date,
+      request_start_time,
+      request_end_time,
+      location,
+      address,
+      required_role,
+      branch_id
+    });
 
     const requestDate = new Date(request_date);
     if (requestDate < new Date()) {
@@ -46,6 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const appointmentRequest = await prisma.appointmentRequest.create({
       data: {
         practice_id,
+        branch_id: branch_id || null,
         request_date: requestDate,
         request_start_time,
         request_end_time,
@@ -61,7 +75,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             location: true,
             address:true
           }
-        }
+        },
+        branch: branch_id ? {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            location: true
+          }
+        } : false
       }
     });
 

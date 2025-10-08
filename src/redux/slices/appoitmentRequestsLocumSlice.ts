@@ -93,7 +93,7 @@ export interface ConfirmAppointmentData {
 }
 
 export interface BookingData {
-  booking_id: string;
+  id: string;
   request_id: string;
   locum_id: string;
   practice_id: string;
@@ -163,7 +163,7 @@ export interface ErrorResponse {
 export const appointmentRequestsLocumApiSlice = createApi({
   reducerPath: 'appointmentRequestsLocumApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://laks-crm.netlify.app/api/appointment',
+    baseUrl: '/api/appointment',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {

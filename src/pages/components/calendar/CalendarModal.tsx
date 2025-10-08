@@ -8,7 +8,7 @@ interface CalendarModalProps {
 }
 
 interface BookingData {
-  booking_id: string;
+  id: string;
   booking_date: string;
   booking_start_time: string;
   booking_end_time: string;

@@ -1,9 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { PrismaClient } from "@prisma/client";
-import { error } from "console";
 import { NextApiRequest, NextApiResponse } from "next";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function handler(req:NextApiRequest, res:NextApiResponse) {
     try {
@@ -33,6 +32,14 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     name:true,
                     location:true,
                     address:true
+                }
+            },
+            branch:{
+                select:{
+                    id:true,
+                    name:true,
+                    address:true,
+                    location:true
                 }
             }
         }

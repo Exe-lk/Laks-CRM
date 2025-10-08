@@ -17,10 +17,19 @@ interface Practice {
   address: string;
 }
 
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  location: string;
+  telephone?: string;
+}
+
 interface Booking {
-  booking_id: string;
+  id: string;
   locum_id: string;
   practice_id: string;
+  branch_id?: string;
   booking_date: string;
   booking_start_time: string;
   booking_end_time: string;
@@ -34,6 +43,7 @@ interface Booking {
   updatedAt: string;
   locumProfile?: LocumProfile;
   practice?: Practice;
+  branch?: Branch;
   is_past: boolean;
   is_upcoming: boolean;
   can_cancel: boolean;
@@ -41,7 +51,7 @@ interface Booking {
 }
 
 interface BookingsTableProps {
-  userType: 'locum' | 'practice';
+  userType: 'locum' | 'practice' | 'branch';
   userId: string;
   onBookingCancelled?: () => void;
 }
@@ -97,19 +107,19 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
     if (cancellationReason !== undefined) {
       try {
-        setCancellingBooking(booking.booking_id);
+        setCancellingBooking(booking.id);
 
         const token = localStorage.getItem('token');
         console.log('Token before cancel request:', token);
         console.log('Cancel request data:', {
-          booking_id: booking.booking_id,
+          booking_id: booking.id,
           user_id: userId,
           user_type: userType,
           cancellation_reason: cancellationReason
         });
 
         const result = await cancelBooking({
-          booking_id: booking.booking_id,
+          booking_id: booking.id,
           user_id: userId,
           user_type: userType,
           cancellation_reason: cancellationReason
@@ -275,7 +285,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {bookings.map((booking: Booking) => (
-                <tr key={booking.booking_id} className="hover:bg-gray-50 transition-colors">
+                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
@@ -306,6 +316,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         {userType === 'locum' ? (
                           <div>
                             <div className="font-medium text-gray-900">{booking.practice?.name}</div>
+                            {booking.branch && (
+                              <div className="text-xs text-blue-600 font-medium">Branch: {booking.branch.name}</div>
+                            )}
                             {booking.practice?.location && (
                               <div className="text-xs text-gray-500">{booking.practice.location}</div>
                             )}
@@ -371,10 +384,10 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       {booking.can_cancel && booking.status === 'CONFIRMED' && (
                         <button
                           onClick={() => handleCancelBooking(booking)}
-                          disabled={cancellingBooking === booking.booking_id}
+                          disabled={cancellingBooking === booking.id}
                           className="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-md hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {cancellingBooking === booking.booking_id ? 'Cancelling...' : 'Cancel'}
+                          {cancellingBooking === booking.id ? 'Cancelling...' : 'Cancel'}
                         </button>
                       )}
                       {booking.status === 'CANCELLED' && (
@@ -401,8 +414,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div>
               Total: {bookings.length} bookings | 
-              Upcoming: {bookings.filter((b: Booking) => b.is_upcoming).length} | 
-              Past: {bookings.filter((b: Booking) => b.is_past).length}
+              Upcoming: {bookings.filter((b: Booking) => b.is_upcoming && b.status !== 'CANCELLED').length} | 
+              Past: {bookings.filter((b: Booking) => b.is_past).length} | 
+              Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
             </div>
             <button
               onClick={() => refetchBookings()}

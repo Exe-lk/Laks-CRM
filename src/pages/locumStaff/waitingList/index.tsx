@@ -45,19 +45,17 @@ const WaitingList = () => {
 
         if (profileStr) {
             const parsedProfile = JSON.parse(profileStr);
-            // console.log("DEBUG: Profile data:", parsedProfile);
-            // console.log("DEBUG: Separate locumId:", locumIdStr ? JSON.parse(locumIdStr) : null);
             setProfile(parsedProfile);
         }
     }, []);
 
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setCurrentTime(new Date());
-    //     }, 1000);
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
 
-    //     return () => clearInterval(timer);
-    // }, []);
+        return () => clearInterval(timer);
+    }, []);
 
     const {
         data: pendingConfirmationsData,
@@ -193,12 +191,6 @@ const WaitingList = () => {
             refetchOnMountOrArgChange: true,
         }
     );
-
-    // console.log("DEBUG: Query parameters:", { locum_id: profile?.id });
-    // console.log("DEBUG: Pending confirmations response:", pendingConfirmationsData);
-    // console.log("DEBUG: Application history response:", applicationHistoryData);
-    // console.log("DEBUG: Confirmations error:", confirmationsError);
-    // console.log("DEBUG: History error:", historyError);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 

@@ -29,7 +29,8 @@ export default async function handler(
               telephone,
               address,
               location,
-              password
+              password,
+              practiceType = "Private"
         } = req.body;
 
         if (
@@ -42,6 +43,28 @@ export default async function handler(
               "Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType",
           });
         }
+
+        // Check for existing user with same email or telephone BEFORE creating authentication
+        const existingUserByEmail = await prisma.practice.findUnique({
+          where: { email: email }
+        });
+
+        if (existingUserByEmail) {
+          return res.status(400).json({
+            error: "Email address already exists",
+          });
+        }
+
+        const existingUserByPhone = await prisma.practice.findUnique({
+          where: { telephone: telephone }
+        });
+
+        if (existingUserByPhone) {
+          return res.status(400).json({
+            error: "Phone number already exists",
+          });
+        }
+
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         const { data: authData, error: authError } = await supabase.auth.signUp(
           {
@@ -70,6 +93,7 @@ export default async function handler(
               address,
               location,
               status: "pending",
+              practiceType,
             },
           });
 
@@ -123,7 +147,7 @@ export default async function handler(
   } catch (error: any) {
     if (error.code === "P2002") {
       return res.status(400).json({
-        error: "Email address or mobile number already exists",
+        error: "Email address or phone number already exists",
       });
     }
 

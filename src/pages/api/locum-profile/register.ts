@@ -52,6 +52,28 @@ export default async function handler(
               "Missing required fields: fullName, emailAddress, contactNumber, address, password, gdcNumber, employeeType",
           });
         }
+
+        // Check for existing user with same email or contact number BEFORE creating authentication
+        const existingUserByEmail = await prisma.locumProfile.findUnique({
+          where: { emailAddress: emailAddress }
+        });
+
+        if (existingUserByEmail) {
+          return res.status(400).json({
+            error: "Email address already exists",
+          });
+        }
+
+        const existingUserByPhone = await prisma.locumProfile.findUnique({
+          where: { contactNumber: contactNumber }
+        });
+
+        if (existingUserByPhone) {
+          return res.status(400).json({
+            error: "Phone number already exists",
+          });
+        }
+
         if (specialties) {
           for (const specialty of specialties) {
             if (!specialty.speciality || !specialty.numberOfYears) {
@@ -177,8 +199,9 @@ export default async function handler(
    
 
     if (error.code === "P2002") {
+      // This should now rarely happen since we check for duplicates before auth creation
       return res.status(400).json({
-        error: "Email address or mobile number already exists",
+        error: "Email address or phone number already exists",
       });
     }
 

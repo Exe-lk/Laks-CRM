@@ -1,234 +1,389 @@
 import Image from 'next/image';
-import NavBar from "../../components/navBarPracticeUser";
-import image1 from "../../../../public/assests/66e8ec37c700d67af1aa8ac0608e157b5810b1f2.jpg";
-import image2 from "../../../../public/assests/867184619ad618a8c654853279eb113657284e77.png";
-import image3 from "../../../../public/assests/b274c82439ece60c86526c9adf4ed6912e98f6ed.jpg";
-import image4 from "../../../../public/assests/ba6dc03ed4c4ed9261da138a6a60eb3f64f798e3.jpg";
+import { useEffect,useState } from 'react';
+import NavBarPracticeUser from "../../components/navBarPracticeUser";
 import Footer from "../../components/footer";
 import { useRouter } from 'next/navigation';
+import { useGetPracticeRequestsQuery} from '../../../redux/slices/appointmentPracticeSlice';
+import Swal from 'sweetalert2';
+import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
 
 const Home = () => {
-  
   const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const profileStr = localStorage.getItem('profile');
+    console.log("profile", profileStr)
+    const practiceIdStr = localStorage.getItem('practiceId');
+
+    if (profileStr) {
+        const parsedProfile = JSON.parse(profileStr);
+        setProfile(parsedProfile);
+    }
+}, []);
+
+
+  const { data: practiceRequestsData, isLoading: isLoadingRequests, refetch: refetchRequests } = useGetPracticeRequestsQuery(
+    { practice_id: profile?.id || '', page: 1, limit: 20 },
+    { skip: !profile?.id }
+  );
+  console.log(practiceRequestsData)
+
+  const appointmentsData = practiceRequestsData?.data?.requests || [];
+  const totalAppointments = appointmentsData.length;
+  const pendingAppointments = appointmentsData.filter((appointment: any) => appointment.status === 'PENDING').length;
+  const cancelledAppointments = appointmentsData.filter((appointment: any) => appointment.status === 'CANCELLED').length;
+  const confirmedAppointments = appointmentsData.filter((appointment: any) => appointment.status === 'CONFIRMED').length;
+
+  const { data: bookings, isLoading: loadingBookings, error: errorBookings } = useGetBookingsQuery(
+    { userId: profile?.id, userType: 'practice' }
+  );
+  console.log("bookings", bookings)
+
+  
+
+  const bookingsData = bookings?.data || [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  const totalBookings = bookingsData.length;
+  const cancelledBookings = bookingsData.filter((booking: any) => booking.status === 'CANCELLED').length;
+  const acceptedBookings = bookingsData.filter((booking: any) => booking.status === 'CONFIRMED').length;
+  const pastBookings = bookingsData.filter((booking: any) => {
+    const bookingDate = new Date(booking.booking_date);
+    bookingDate.setHours(0, 0, 0, 0);
+    return bookingDate < today;
+  }).length;
+
+  // const totalPendingConfirmations = pendingConfirmations?.data?.pending_confirmations?.length || 0;
+  // const totalApplicationHistory = applicationHistory?.data?.length || 0;
+  // const totalAvailableRequests = availableRequests?.data?.length || 0;
+
+  const isLoggedIn = !!profile?.id;
 
   return (
     <>
-      <NavBar />
+      <NavBarPracticeUser />
 
       <main className="min-h-screen bg-white">
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[#C3EAE7]/5"></div>
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[#C3EAE7]/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#C3EAE7]/15 rounded-full blur-3xl"></div>
 
-          <div className="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-              <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center px-4 py-2 bg-[#C3EAE7] text-black rounded-full text-sm font-medium">
-                    <span className="w-2 h-2 bg-black rounded-full mr-2 animate-pulse"></span>
-                    Trusted by 10,000+ Nurses
+        <section className="py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-[#C3EAE7]/20">
+          <div className="max-w-7xl mx-auto px-4">
+
+            <div className="mb-12 bg-gradient-to-br from-[#d1eeeb] to-[#c3eae7] rounded-3xl p-10 text-black">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold mb-4">Booking Overview</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{loadingBookings ? '...' : totalBookings}</div>
+                    <div className="text-black text-sm font-semibold">Total</div>
                   </div>
-                  <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-black leading-tight">
-                    Empowering Your{' '}
-                    <span className="text-[#C3EAE7]">
-                      Nursing Journey
-                    </span>
-                  </h1>
-                  <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-lg">
-                    Grow your skills, discover new job opportunities, and connect with peers — all through a trusted platform built just for nurses. Welcome to your next step.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="group relative px-6 lg:px-8 py-3 lg:py-4 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                    onClick={() => router.push('/register')}>
-                    <span className="relative z-10">Register Now</span>
-                    <div className="absolute inset-0 bg-[#C3EAE7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </button>
-                  <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300">
-                    User Guide
-                  </button>
-                </div>
-
-                <div className="flex items-center space-x-4 lg:space-x-6 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="w-6 h-6 lg:w-8 lg:h-8 bg-[#C3EAE7] rounded-full border-2 border-white"></div>
-                      ))}
-                    </div>
-                    <span className="ml-3">Join 10,000+ nurses</span>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-300">{loadingBookings ? '...' : acceptedBookings}</div>
+                    <div className="text-black text-sm font-semibold">Confirmed</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-300">{loadingBookings ? '...' : cancelledBookings}</div>
+                    <div className="text-black text-sm font-semibold">Cancelled</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-gray-300">{loadingBookings ? '...' : pastBookings}</div>
+                    <div className="text-black text-sm font-semibold">Past</div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="relative order-1 lg:order-2">
-                <div className="lg:hidden">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-3">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image4}
-                          alt="Doctor"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
+            <div className="mb-12">
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📊 Booking Statistics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
+
+
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-indigo-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-indigo-100 rounded-xl">
+                        <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                       </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image2}
-                          alt="Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
+                      <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full font-medium">Total</span>
                     </div>
-                    <div className="space-y-3 pt-6">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image1}
-                          alt="Smiling Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {loadingBookings || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : errorBookings ? (
+                          <span className="text-3xl font-bold text-red-500">--</span>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{totalBookings}</span>
+                        )}
                       </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image3}
-                          alt="Surgery"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Total Bookings</p>
+                      <button
+                        onClick={() => router.push('/locumStaff/myBookings')}
+                        className="w-full mt-3 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                      >
+                        View All →
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="hidden lg:block">
-                  <div className="grid grid-cols-2 gap-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                    <div className="space-y-6">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image4}
-                          alt="Doctor"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-green-100 rounded-xl">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                       </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image2}
-                          alt="Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
+                      <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Future & Ongoing Bookings</span>
                     </div>
-                    <div className="space-y-6 pt-12">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image1}
-                          alt="Smiling Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {loadingBookings || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : errorBookings ? (
+                          <span className="text-3xl font-bold text-red-500">--</span>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{acceptedBookings-pastBookings}</span>
+                        )}
                       </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image3}
-                          alt="Surgery"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Future & Ongoing Bookings</p>
+                      <button
+                        onClick={() => router.push('/locumStaff/myBookings')}
+                        className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
+                      >
+                        View Ongoing →
+                      </button>
                     </div>
                   </div>
                 </div>
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-red-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-red-100 rounded-xl">
+                        <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                      <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">Cancelled</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {loadingBookings || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : errorBookings ? (
+                          <span className="text-3xl font-bold text-red-500">--</span>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{cancelledBookings}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Cancelled Bookings</p>
+                      <button
+                        onClick={() => router.push('/locumStaff/myBookings')}
+                        className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
+                      >
+                        View Cancelled →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+
+
+              </div>
+            </div>
+
+            <div className="mb-12">
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📋 Activity</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 xl:gap-16">
+                
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-yellow-100 rounded-xl">
+                        <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full font-medium">Pending</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {isLoadingRequests || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{pendingAppointments}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Pending Appointments</p>
+                      <button
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        className="w-full mt-3 text-xs text-yellow-600 hover:text-yellow-700 font-medium transition-colors"
+                      >
+                        View Details →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-400 to-red-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-red-100 rounded-xl">
+                        <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                      <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">Cancelled</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {isLoadingRequests || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{cancelledAppointments}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Cancelled Appointments</p>
+                      <button
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
+                      >
+                        View Details →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-green-100 rounded-xl">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Confirmed</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {isLoadingRequests || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{confirmedAppointments}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">Confirmed Appointments</p>
+                      <button
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
+                      >
+                        View Details →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-blue-100 rounded-xl">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-medium">All</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-baseline">
+                        {isLoadingRequests || !isLoggedIn ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{totalAppointments}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 font-medium">All Appointments</p>
+                      <button
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                      >
+                        View All →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-16 lg:py-20 bg-[#C3EAE7]/10">
+        <section className="py-16 lg:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12 lg:mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
-                Everything You Need to Succeed
+            <div className="text-center mb-12">
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Quick Actions
               </h2>
-              <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
-                Comprehensive tools and resources designed specifically for nursing professionals
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Access frequently used features with just one click
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-              {[
-                {
-                  title: 'Learn & Grow',
-                  description: 'Access cutting-edge courses and certifications to advance your career',
-                  icon: '📚',
-                },
-                {
-                  title: 'On Board',
-                  description: 'Find your dream position with our curated job listings',
-                  icon: '💼',
-                },
-                {
-                  title: 'Community',
-                  description: 'Connect with peers, share experiences, and build your network',
-                  icon: '🤝',
-                }
-              ].map((feature, index) => (
-                <div
-                  key={feature.title}
-                  className="group relative p-6 lg:p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-[#C3EAE7]/20"
-                >
-                  <div className="w-14 h-14 lg:w-16 lg:h-16 bg-[#C3EAE7] rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              <button
+                onClick={() => router.push('/locumStaff/waitingList')}
+                className="group p-6 bg-gradient-to-br from-[#C3EAE7] to-[#A8D8D4] rounded-2xl hover:from-[#A8D8D4] hover:to-[#8CCCC7] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                   </div>
-                  <h3 className="text-xl lg:text-2xl font-bold text-black mb-4">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-sm lg:text-base">
-                    {feature.description}
-                  </p>
-                  <div className="mt-6">
-                    <button className="text-black font-semibold hover:text-[#C3EAE7] transition-colors duration-200">
-                      Learn More →
-                    </button>
-                  </div>
+                  <h3 className="text-xl font-bold text-white">View Appointments</h3>
+                  <p className="text-white/80">Check your appointment requests and confirmations</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </button>
 
-        <section className="py-16 lg:py-20 bg-black">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 text-center">
-              {[
-                { number: '10,000+', label: 'Active Nurses' },
-                { number: '500+', label: 'Job Opportunities' },
-                { number: '50+', label: 'Certification Courses' },
-                { number: '99%', label: 'Satisfaction Rate' }
-              ].map((stat, index) => (
-                <div key={stat.label} className="group">
-                  <div className="text-3xl lg:text-4xl xl:text-5xl font-bold text-[#C3EAE7] mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {stat.number}
+              <button
+                onClick={() => router.push('/locumStaff/myBookings')}
+                className="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
                   </div>
-                  <div className="text-gray-300 text-sm lg:text-lg">
-                    {stat.label}
-                  </div>
+                  <h3 className="text-xl font-bold text-white">My Bookings</h3>
+                  <p className="text-white/80">Manage your current and upcoming bookings</p>
                 </div>
-              ))}
+              </button>
+
+              <button
+                onClick={() => router.push('/locumStaff/pastAppointments')}
+                className="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Past Bookings</h3>
+                  <p className="text-white/80">Browse your past bookings</p>
+                </div>
+              </button>
             </div>
           </div>
         </section>
