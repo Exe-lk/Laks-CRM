@@ -13,10 +13,10 @@ interface BranchesTableProps {
 }
 
 const BranchesTable: React.FC<BranchesTableProps> = ({
-  branches,
-  loading,
-  onBranchUpdated,
-  onEditBranch
+  branches = [],
+  loading = false,
+  onBranchUpdated = () => {},
+  onEditBranch = () => {}
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [deletingId, setDeletingId] = useState<string | null>(null);

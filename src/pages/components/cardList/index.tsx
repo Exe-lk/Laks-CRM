@@ -9,7 +9,7 @@ interface CardListProps {
   onAddNew?: () => void;
 }
 
-const CardList: React.FC<CardListProps> = ({ cards, onEdit, onAddNew }) => {
+const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew }) => {
   const [deleteCard, { isLoading: isDeleting }] = useDeleteCardMutation();
 
   const handleDeleteCard = async (cardId: string, cardNumber: string) => {
