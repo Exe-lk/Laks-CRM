@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/redux/store';
 import { useGetBookingsQuery, Booking } from '../../../redux/slices/bookingPracticeSlice';
 import NavBar from "../../components/navBar/nav";
+import SignatureCanvas from 'react-signature-canvas';
 
 interface LocumTimesheetProps { }
 
@@ -958,8 +959,8 @@ interface SignatureModalProps {
 }
 
 const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, onSubmit }) => {
-  const [staffSignature, setStaffSignature] = useState('');
-  const [managerSignature, setManagerSignature] = useState('');
+  const staffSignatureRef = useRef<SignatureCanvas>(null);
+  const managerSignatureRef = useRef<SignatureCanvas>(null);
   const [managerId, setManagerId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -968,8 +969,46 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     return localStorage.getItem('token') || '';
   };
 
+  const clearStaffSignature = () => {
+    staffSignatureRef.current?.clear();
+  };
+
+  const clearManagerSignature = () => {
+    managerSignatureRef.current?.clear();
+  };
+
+  const uploadSignatureImage = async (signatureDataUrl: string, signatureType: 'staff' | 'manager'): Promise<string> => {
+    const token = getAuthToken();
+    
+    // Convert data URL to blob
+    const blob = await fetch(signatureDataUrl).then(r => r.blob());
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('signature', blob, `${signatureType}_signature.png`);
+    formData.append('timesheetId', timesheetId);
+    formData.append('signatureType', signatureType);
+
+    // Upload to server
+    const uploadResponse = await fetch('/api/timesheet/upload-signature', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json();
+      throw new Error(errorData.error || 'Failed to upload signature');
+    }
+
+    const uploadData = await uploadResponse.json();
+    return uploadData.data.signatureUrl;
+  };
+
   const handleSubmit = async () => {
-    if (!staffSignature.trim()) {
+    if (!staffSignatureRef.current || staffSignatureRef.current.isEmpty()) {
       setError('Staff signature is required');
       return;
     }
@@ -980,6 +1019,13 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     try {
       const token = getAuthToken();
 
+      // Get staff signature as data URL
+      const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
+      
+      // Upload staff signature
+      const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
+
+      // Submit timesheet with staff signature
       const submitResponse = await fetch('/api/timesheet/submit-timesheet', {
         method: 'POST',
         headers: {
@@ -988,7 +1034,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         },
         body: JSON.stringify({
           timesheetId: timesheetId,
-          staffSignature: staffSignature
+          staffSignatureUrl: staffSignatureUrl
         })
       });
 
@@ -997,7 +1043,11 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
-      if (managerSignature.trim() && managerId.trim()) {
+      // If manager signature is provided, upload and approve
+      if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
+        const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
+        const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
+
         const approveResponse = await fetch('/api/timesheet/approve-timesheet', {
           method: 'POST',
           headers: {
@@ -1006,7 +1056,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
           },
           body: JSON.stringify({
             timesheetId: timesheetId,
-            managerSignature: managerSignature,
+            managerSignatureUrl: managerSignatureUrl,
             managerId: managerId,
             action: 'approve'
           })
@@ -1026,8 +1076,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60]">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">Submit Timesheet</h3>
 
         {error && (
@@ -1038,31 +1088,53 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Staff Signature <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={staffSignature}
-              onChange={(e) => setStaffSignature(e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
-              disabled={isLoading}
-            />
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Staff Signature <span className="text-red-500">*</span>
+              </label>
+              <button
+                onClick={clearStaffSignature}
+                className="text-xs text-blue-600 hover:text-blue-800"
+                disabled={isLoading}
+              >
+                Clear
+              </button>
+            </div>
+            <div className="border-2 border-gray-300 rounded-lg bg-white">
+              <SignatureCanvas
+                ref={staffSignatureRef}
+                canvasProps={{
+                  className: 'w-full h-40 cursor-crosshair',
+                }}
+                backgroundColor="rgb(255, 255, 255)"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Draw your signature above</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Manager Signature <span className="text-gray-400">(Optional)</span>
-            </label>
-            <input
-              type="text"
-              value={managerSignature}
-              onChange={(e) => setManagerSignature(e.target.value)}
-              placeholder="Manager's full name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
-              disabled={isLoading}
-            />
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Manager Signature <span className="text-gray-400">(Optional)</span>
+              </label>
+              <button
+                onClick={clearManagerSignature}
+                className="text-xs text-blue-600 hover:text-blue-800"
+                disabled={isLoading}
+              >
+                Clear
+              </button>
+            </div>
+            <div className="border-2 border-gray-300 rounded-lg bg-white">
+              <SignatureCanvas
+                ref={managerSignatureRef}
+                canvasProps={{
+                  className: 'w-full h-40 cursor-crosshair',
+                }}
+                backgroundColor="rgb(255, 255, 255)"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Manager can draw signature above</p>
           </div>
 
           <div>
@@ -1084,8 +1156,9 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
             <ul className="mt-2 space-y-1 text-blue-700">
               <li>• By signing, you confirm that all time entries are accurate</li>
               <li>• Manager signature and ID are optional at this stage</li>
-              <li>• <span className="font-medium">If both manager fields are filled</span>, the timesheet will be automatically approved and locked</li>
+              <li>• <span className="font-medium">If both manager signature and ID are provided</span>, the timesheet will be automatically approved and locked</li>
               <li>• If manager fields are left empty, the timesheet will be submitted for approval</li>
+              <li>• Signatures will be saved as images</li>
             </ul>
           </div>
         </div>
@@ -1101,7 +1174,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
           <button
             onClick={handleSubmit}
             className="px-4 py-2 bg-[#C3EAE7] text-black font-medium rounded-lg hover:bg-[#A9DBD9] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            disabled={isLoading || !staffSignature.trim()}
+            disabled={isLoading}
           >
             {isLoading ? 'Submitting...' : 'Submit Timesheet'}
           </button>
