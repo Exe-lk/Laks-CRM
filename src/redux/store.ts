@@ -9,6 +9,7 @@ import { ratePracticeApiSlice } from './slices/ratePracticeSlice';
 import { PracticeUserPaymentApiSlice } from './slices/practiceUserPaymentSlice';
 import { cardPracticeUserApiSlice } from './slices/cardPracticeUserSlice';
 import branchReducer from './slices/branchPracticeSlice';
+import timesheetReducer from './slices/timesheetSlice';
 
 const store = configureStore({
 	reducer: {
@@ -20,7 +21,8 @@ const store = configureStore({
 		[ratePracticeApiSlice.reducerPath]: ratePracticeApiSlice.reducer,
 		[PracticeUserPaymentApiSlice.reducerPath]: PracticeUserPaymentApiSlice.reducer,
 		[cardPracticeUserApiSlice.reducerPath]: cardPracticeUserApiSlice.reducer,
-		branches: branchReducer
+		branches: branchReducer,
+		timesheet: timesheetReducer
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(

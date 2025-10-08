@@ -17,10 +17,19 @@ interface Practice {
   address: string;
 }
 
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  location: string;
+  telephone?: string;
+}
+
 interface Booking {
   id: string;
   locum_id: string;
   practice_id: string;
+  branch_id?: string;
   booking_date: string;
   booking_start_time: string;
   booking_end_time: string;
@@ -34,6 +43,7 @@ interface Booking {
   updatedAt: string;
   locumProfile?: LocumProfile;
   practice?: Practice;
+  branch?: Branch;
   is_past: boolean;
   is_upcoming: boolean;
   can_cancel: boolean;
@@ -41,7 +51,7 @@ interface Booking {
 }
 
 interface BookingsTableProps {
-  userType: 'locum' | 'practice';
+  userType: 'locum' | 'practice' | 'branch';
   userId: string;
   onBookingCancelled?: () => void;
 }
@@ -306,6 +316,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         {userType === 'locum' ? (
                           <div>
                             <div className="font-medium text-gray-900">{booking.practice?.name}</div>
+                            {booking.branch && (
+                              <div className="text-xs text-blue-600 font-medium">Branch: {booking.branch.name}</div>
+                            )}
                             {booking.practice?.location && (
                               <div className="text-xs text-gray-500">{booking.practice.location}</div>
                             )}

@@ -169,7 +169,12 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-sm text-gray-900">
                         <FiMapPin className="text-[#C3EAE7]" />
-                        {request.location}
+                        <div>
+                          <div>{request.location}</div>
+                          {request.branch && (
+                            <div className="text-xs text-blue-600 font-medium mt-1">Branch: {request.branch.name}</div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">

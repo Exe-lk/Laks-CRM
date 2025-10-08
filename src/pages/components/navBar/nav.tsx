@@ -134,6 +134,9 @@ const NavBar = () => {
           <button id="dentalBtn" class="w-full bg-[#A9DBD9] hover:bg-[#92cfc7] text-black py-2 px-4 rounded-md text-base font-medium">
             🏥 Dental Practice
           </button>
+          <button id="branchBtn" class="w-full bg-[#B8E6E3] hover:bg-[#9dd6d1] text-black py-2 px-4 rounded-md text-base font-medium">
+            🏢 Branch
+          </button>
         </div>
       `,
       customClass: {
@@ -144,6 +147,7 @@ const NavBar = () => {
         const popup = Swal.getPopup();
         const locumBtn = popup ? popup.querySelector<HTMLButtonElement>('#locumBtn') : null;
         const dentalBtn = popup ? popup.querySelector<HTMLButtonElement>('#dentalBtn') : null;
+        const branchBtn = popup ? popup.querySelector<HTMLButtonElement>('#branchBtn') : null;
 
         if (locumBtn) {
           locumBtn.addEventListener('click', () => {
@@ -155,6 +159,13 @@ const NavBar = () => {
         if (dentalBtn) {
           dentalBtn.addEventListener('click', () => {
             router.push('/practiceUser/practiceLogin');
+            Swal.close();
+          });
+        }
+
+        if (branchBtn) {
+          branchBtn.addEventListener('click', () => {
+            router.push('/branch/login');
             Swal.close();
           });
         }
@@ -320,6 +331,13 @@ const NavBar = () => {
                 My Bookings
               </li>
               <li
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/timesheet') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/locumStaff/timesheet')}
+              >
+                Timesheet
+              </li>
+              <li
                 className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastandcurrentpayments') ? 'bg-[#C3EAE7] text-black' : ''
                   }`}
                 onClick={() => router.push('/locumStaff/pastandcurrentpayments')}
@@ -447,6 +465,13 @@ const NavBar = () => {
                       onClick={() => { router.push('/locumStaff/pastandcurrentpayments'); closeMobileMenu(); }}
                     >
                       Past and Current Payments
+                    </li>
+                    <li
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/timesheet') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/locumStaff/timesheet'); closeMobileMenu(); }}
+                    >
+                      Timesheet
                     </li>
                     <li className="flex items-center space-x-2">
                       <button
