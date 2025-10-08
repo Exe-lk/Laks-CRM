@@ -99,12 +99,12 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
                 }
                 return `${hour24.toString().padStart(2, '0')}:${minutes}`;
             }
-            return timeStr; 
+            return timeStr;
         };
 
         const start24 = convertTo24Hour(values.request_start_time);
         const end24 = convertTo24Hour(values.request_end_time);
-        
+
         const start = new Date(`2000-01-01T${start24}`);
         const end = new Date(`2000-01-01T${end24}`);
 
@@ -129,7 +129,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         if (trimmedLocation.length < 3) {
             errors.location = 'Location must be at least 3 characters long';
         }
-        if (trimmedLocation.length > 200) { 
+        if (trimmedLocation.length > 200) {
             errors.location = 'Location must be less than 200 characters';
         }
     }
@@ -161,40 +161,39 @@ const CreateAppointmentPage = () => {
     console.log(profile)
 
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
-    
-    const { 
-        data: cardStatusData, 
-        isLoading: isLoadingCardStatus 
+
+    const {
+        data: cardStatusData,
+        isLoading: isLoadingCardStatus
     } = useCheckPracticeHasCardsQuery(profile?.id || '', {
         skip: !profile?.id
     });
 
-    // Use different API based on user type
     const {
         data: practiceRequestsData,
         isLoading: isLoadingRequests,
         refetch: refetchRequests
-    } = isBranchUser 
-        ? useGetBranchRequestsQuery(
-            {
-                branch_id: profile?.id || '',
-                page: currentPage,
-                limit: 20
-            },
-            {
-                skip: !profile?.id || !isBranchUser
-            }
-        )
-        : useGetPracticeRequestsQuery(
-            {
-                practice_id: profile?.id || '',
-                page: currentPage,
-                limit: 20
-            },
-            {
-                skip: !profile?.id || isBranchUser
-            }
-        );
+    } = isBranchUser
+            ? useGetBranchRequestsQuery(
+                {
+                    branch_id: profile?.id || '',
+                    page: currentPage,
+                    limit: 20
+                },
+                {
+                    skip: !profile?.id || !isBranchUser
+                }
+            )
+            : useGetPracticeRequestsQuery(
+                {
+                    practice_id: profile?.id || '',
+                    page: currentPage,
+                    limit: 20
+                },
+                {
+                    skip: !profile?.id || isBranchUser
+                }
+            );
     console.log(practiceRequestsData)
     const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
@@ -216,24 +215,22 @@ const CreateAppointmentPage = () => {
         }
     });
 
-    // Update form values when profile changes (for branch users)
     useEffect(() => {
         if (profile && isBranchUser) {
-            // Map branch fields correctly: location field gets address, address field gets location
             const hasLocation = profile.location && profile.location.trim();
             const hasAddress = profile.address && profile.address.trim();
-            
+
             const formValues = {
                 practice_id: profile.practiceId || '',
                 request_date: '',
                 request_start_time: '',
                 request_end_time: '',
-                location: hasAddress ? profile.address! : '', // location field gets the street address
+                location: hasAddress ? profile.address! : '',
                 required_role: '',
-                address: hasLocation ? profile.location! : '', // address field gets the coordinates
+                address: hasLocation ? profile.location! : '',
                 branch_id: profile.id || ''
             };
-            
+
             console.log('Setting form values in useEffect:', formValues);
             formik.setValues(formValues);
         }
@@ -261,13 +258,11 @@ const CreateAppointmentPage = () => {
             try {
                 const parsedProfile = JSON.parse(profileStr);
                 setProfile(parsedProfile);
-                
-                // Check if user is a branch user
+
                 if (parsedProfile.userType === 'branch') {
                     setIsBranchUser(true);
                     setShowAccessDenied(false);
                 } else {
-                    // Practice users cannot create appointments directly
                     setIsBranchUser(false);
                     setShowAccessDenied(true);
                 }
@@ -319,24 +314,23 @@ const CreateAppointmentPage = () => {
 
     const openAppointmentModal = () => {
         if (profile?.id) {
-            // Map branch fields correctly: location field gets address, address field gets location
             const hasLocation = profile.location && profile.location.trim();
             const hasAddress = profile.address && profile.address.trim();
-            
-            const initialLocation = hasAddress ? profile.address : ''; // location field gets the street address
-            const initialAddress = hasLocation ? profile.location : ''; // address field gets the coordinates
-            
+
+            const initialLocation = hasAddress ? profile.address : '';
+            const initialAddress = hasLocation ? profile.location : '';
+
             const formValues = {
-                practice_id: profile.practiceId || '', // Use the actual practice ID
+                practice_id: profile.practiceId || '',
                 request_date: '',
                 request_start_time: '',
                 request_end_time: '',
                 location: initialLocation || '',
                 required_role: '',
                 address: initialAddress || '',
-                branch_id: profile.id || '' // Use the branch ID
+                branch_id: profile.id || ''
             };
-            
+
             console.log('Setting form values in openAppointmentModal:', formValues);
             formik.setValues(formValues);
             setTimeout(() => {
@@ -357,14 +351,13 @@ const CreateAppointmentPage = () => {
             formik.setValues({
                 ...formik.values,
                 branch_id: branchId,
-                location: selectedBranch.location,  
-                address: selectedBranch.address     
+                location: selectedBranch.location,
+                address: selectedBranch.address
             });
         }
     };
 
     const handleFormSubmit = async (values: typeof formik.values) => {
-        // Only branch users can create appointments
         if (!isBranchUser) {
             Swal.fire({
                 icon: 'error',
@@ -372,7 +365,7 @@ const CreateAppointmentPage = () => {
                 text: 'Only branch users can create appointments.',
                 confirmButtonColor: '#C3EAE7',
             });
-                return;
+            return;
         }
 
         if (isUrgent) {
@@ -403,7 +396,7 @@ const CreateAppointmentPage = () => {
 
         try {
             console.log('Submitting appointment request with values:', values);
-            
+
             const result = await createAppointmentRequest(values).unwrap();
 
             Swal.fire({
@@ -429,9 +422,8 @@ const CreateAppointmentPage = () => {
         setCurrentPage(page);
     };
 
-    console.log("branches",branches)
+    console.log("branches", branches)
 
-    // Show access denied message for practice users
     if (showAccessDenied && !isBranchUser) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -462,7 +454,6 @@ const CreateAppointmentPage = () => {
         );
     }
 
-    // Show loading state
     if (!profile) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -476,9 +467,8 @@ const CreateAppointmentPage = () => {
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            {/* Always show the full navigation bar */}
             <NavBar />
-            
+
             <div className="flex-1 w-full">
                 <div className="text-center mb-8 pt-12">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg">
@@ -488,7 +478,7 @@ const CreateAppointmentPage = () => {
                     </div>
                     <h1 className="text-4xl font-bold text-black mb-2">Create Appointment Request</h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        {isBranchUser 
+                        {isBranchUser
                             ? `Schedule appointments for ${profile.name} branch.`
                             : 'Schedule your appointment by filling out the form below with all required details.'
                         }
@@ -500,16 +490,16 @@ const CreateAppointmentPage = () => {
                     </div>
 
                     {isBranchUser && (
-                    <div className="flex justify-center mt-8">
-                        <button
-                            onClick={openAppointmentModal}
-                            className="flex items-center gap-2 px-8 py-4 bg-[#C3EAE7] text-black font-bold rounded-xl 
+                        <div className="flex justify-center mt-8">
+                            <button
+                                onClick={openAppointmentModal}
+                                className="flex items-center gap-2 px-8 py-4 bg-[#C3EAE7] text-black font-bold rounded-xl 
                                      hover:bg-[#A9DBD9] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                            <FiPlus className="text-xl" />
-                            Create New Appointment
-                        </button>
-                    </div>
+                            >
+                                <FiPlus className="text-xl" />
+                                Create New Appointment
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -643,56 +633,54 @@ const CreateAppointmentPage = () => {
                                 )}
                             </div>
 
-                            {/* Location Field - Read-only for branch users */}
-                                <div className="space-y-2 group">
-                                    <label className="block text-sm font-semibold text-black flex items-center gap-2">
-                                        <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        Location *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="location"
-                                        value={formik.values.location}
+                            <div className="space-y-2 group">
+                                <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Location *
+                                </label>
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={formik.values.location}
                                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600"
-                                        readOnly
-                                    />
-                                    <p className="text-sm text-gray-600">
-                                    {isBranchUser 
+                                    readOnly
+                                />
+                                <p className="text-sm text-gray-600">
+                                    {isBranchUser
                                         ? 'Location is automatically set to your branch location and cannot be edited.'
                                         : 'Location is automatically set to your practice address and cannot be edited.'
                                     }
                                 </p>
                             </div>
 
-                            {/* Address Field - Read-only for branch users - Only show if location is not available */}
                             {!formik.values.location && (
-                            <div className="space-y-2 group">
-                                <label className="block text-sm font-semibold text-black flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                    Address *
-                                </label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    value={formik.values.address}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600"
-                                    readOnly
-                                />
-                                <p className="text-sm text-gray-600">
-                                    {isBranchUser 
-                                        ? 'Address is automatically set to your branch address and cannot be edited.'
-                                        : 'Address is automatically set to your practice address and cannot be edited.'
-                                    }
-                                </p>
+                                <div className="space-y-2 group">
+                                    <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        Address *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formik.values.address}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                                        readOnly
+                                    />
+                                    <p className="text-sm text-gray-600">
+                                        {isBranchUser
+                                            ? 'Address is automatically set to your branch address and cannot be edited.'
+                                            : 'Address is automatically set to your practice address and cannot be edited.'
+                                        }
+                                    </p>
                                 </div>
                             )}
-                            
+
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                     <svg

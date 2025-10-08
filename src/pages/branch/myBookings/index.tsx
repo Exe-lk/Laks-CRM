@@ -31,7 +31,6 @@ const MyBookingsPage = () => {
         const parsedProfile = JSON.parse(profileStr);
         setProfile(parsedProfile);
         
-        // Detect if this is a branch user
         if (parsedProfile.userType === 'branch' || parsedProfile.practiceType === 'Branch') {
           setUserType('branch');
         } else {
