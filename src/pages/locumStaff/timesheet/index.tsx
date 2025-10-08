@@ -4,17 +4,17 @@ import { RootState, AppDispatch } from '@/redux/store';
 import { useGetBookingsQuery, Booking } from '../../../redux/slices/bookingPracticeSlice';
 import NavBar from "../../components/navBar/nav";
 
-interface LocumTimesheetProps {}
+interface LocumTimesheetProps { }
 
 const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   const dispatch = useDispatch<AppDispatch>();
-  
+
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [locumId, setLocumId] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  
+
   const { data: bookingsData, refetch: refetchBookings, isLoading: bookingsLoading } = useGetBookingsQuery(
     { userId: locumId, userType: 'locum' },
     { skip: !locumId }
@@ -34,12 +34,11 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
     }
   }, []);
 
-  // No need for timesheet fetching - we'll focus on bookings only
 
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day; 
+    const diff = d.getDate() - day;
     const weekStart = new Date(d.setDate(diff));
     weekStart.setHours(0, 0, 0, 0);
     return weekStart;
@@ -79,7 +78,6 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
     return days;
   }
 
-  // Helper function to format date in local timezone (YYYY-MM-DD)
   function formatLocalDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -87,7 +85,6 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
     return `${year}-${month}-${day}`;
   }
 
-  // Helper function to get UTC date string from a UTC date string (for bookings stored in UTC)
   function getUTCDateString(dateString: string): string {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
@@ -96,12 +93,10 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   function getBookingsForDate(date: Date): Booking[] {
     if (!bookingsData?.data) return [];
     const localDateString = formatLocalDate(date);
-    
+
     return bookingsData.data.filter((booking: Booking) => {
-      // Get the UTC date from booking (cast to string since API returns string)
       const bookingUTCDate = getUTCDateString(booking.booking_date as any);
-      
-      // Show all bookings that match the date and are confirmed
+
       return bookingUTCDate === localDateString && booking.status === 'CONFIRMED';
     });
   }
@@ -109,7 +104,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   const handleDateClick = (date: Date) => {
     const dateString = formatLocalDate(date);
     setSelectedDate(dateString);
-    setSelectedBooking(null); // Reset selected booking
+    setSelectedBooking(null);
     setShowEntryModal(true);
   };
 
@@ -196,7 +191,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                 const bookings = getBookingsForDate(date);
                 const isToday = date.toDateString() === new Date().toDateString();
                 const hasBookings = bookings.length > 0;
-                
+
                 return (
                   <div
                     key={index}
@@ -211,8 +206,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                       <div className={`text-sm font-medium ${isToday ? 'text-black' : 'text-gray-900'}`}>
                         {date.getDate()}
                       </div>
-                      
-                      {/* Show booking information */}
+
                       {hasBookings && (
                         <div className="mt-1 text-xs space-y-1">
                           <div className="text-blue-600 font-medium">
@@ -257,7 +251,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
             setSelectedBooking(null);
           }}
           onUpdate={() => {
-            refetchBookings(); // Refresh bookings data
+            refetchBookings();
           }}
         />
       )}
@@ -296,7 +290,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   const [totalHours, setTotalHours] = useState<number | null>(null);
   const [totalPay, setTotalPay] = useState<number | null>(null);
 
-  // Fetch existing timesheet job data when booking is selected
   useEffect(() => {
     const fetchTimesheetJob = async () => {
       if (!selectedBooking || !selectedDate) return;
@@ -308,16 +301,14 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         const token = getAuthToken();
         const profileStr = localStorage.getItem('profile');
         if (!profileStr) return;
-        
+
         const profile = JSON.parse(profileStr);
         const locumId = profile.id;
 
-        // Get the booking date
         const bookingDate = new Date(selectedBooking.booking_date as any);
         const month = bookingDate.getMonth() + 1;
         const year = bookingDate.getFullYear();
 
-        // Fetch the timesheet for this month
         const response = await fetch(
           `/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
           {
@@ -330,37 +321,34 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
         if (response.ok) {
           const data = await response.json();
-          
-          // Find the job for this booking
+
           const existingJob = data.data.allJobs?.find(
             (job: any) => job.bookingId === selectedBooking.id
           );
 
           if (existingJob) {
-            // Auto-fill the times if they exist
             setTimesheetJobId(existingJob.id);
             setTimesheetId(existingJob.timesheetId);
-            
-            // Set hourly rate, total hours, and total pay
+
             setHourlyRate(existingJob.hourlyRate || null);
             setTotalHours(existingJob.totalHours || null);
             setTotalPay(existingJob.totalPay || null);
-            
+
             if (existingJob.startTime) {
               const startDate = new Date(existingJob.startTime);
               setStartTime(startDate.toTimeString().substring(0, 5));
             }
-            
+
             if (existingJob.endTime) {
               const endDate = new Date(existingJob.endTime);
               setEndTime(endDate.toTimeString().substring(0, 5));
             }
-            
+
             if (existingJob.lunchStartTime) {
               const lunchStart = new Date(existingJob.lunchStartTime);
               setLunchStartTime(lunchStart.toTimeString().substring(0, 5));
             }
-            
+
             if (existingJob.lunchEndTime) {
               const lunchEnd = new Date(existingJob.lunchEndTime);
               setLunchEndTime(lunchEnd.toTimeString().substring(0, 5));
@@ -368,7 +356,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
             setSuccess('Previous time entries loaded successfully!');
           } else {
-            // Reset if no existing job found
             setStartTime('');
             setEndTime('');
             setLunchStartTime('');
@@ -380,7 +367,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
             setTotalPay(null);
           }
         } else {
-          // Reset if API call fails
           setStartTime('');
           setEndTime('');
           setLunchStartTime('');
@@ -390,7 +376,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         }
       } catch (err) {
         console.error('Error fetching timesheet job:', err);
-        // Reset on error
         setStartTime('');
         setEndTime('');
         setLunchStartTime('');
@@ -405,41 +390,37 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     fetchTimesheetJob();
   }, [selectedBooking?.id, selectedDate]);
 
-  // Helper function to check if booking start time has passed
   const hasBookingStarted = (booking: Booking): boolean => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
-    
-    // If booking date is in the past, it has started
+
     if (bookingDate < today) return true;
-    
-    // If booking date is today, check if start time has passed
+
     if (bookingDate === today) {
       const currentTime = now.getHours() * 60 + now.getMinutes();
       const [startHour, startMinute] = booking.booking_start_time.split(':').map(Number);
       const bookingStartTime = startHour * 60 + startMinute;
       return currentTime >= bookingStartTime;
     }
-    
+
     return false;
   };
 
-  // Helper function to check if booking is completed
   const isBookingCompleted = (booking: Booking): boolean => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
-    
+
     if (bookingDate < today) return true;
-    
+
     if (bookingDate === today) {
       const currentTime = now.getHours() * 60 + now.getMinutes();
       const [endHour, endMinute] = booking.booking_end_time.split(':').map(Number);
       const bookingEndTime = endHour * 60 + endMinute;
       return currentTime >= bookingEndTime;
     }
-    
+
     return false;
   };
 
@@ -449,16 +430,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   const handleStartClick = async () => {
     if (!selectedBooking) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = getAuthToken();
       const now = new Date();
       const timeString = now.toTimeString().substring(0, 5);
-      
-      // Combine booking date with current time
+
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
@@ -468,11 +448,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getMinutes(),
         now.getSeconds()
       );
-      
+
       let jobId = timesheetJobId;
       let tsId = timesheetId;
 
-      // Step 1: Add job to timesheet only if it doesn't exist (creates timesheet if not exists)
       if (!jobId) {
         const addJobResponse = await fetch('/api/timesheet/add-job-to-timesheet', {
           method: 'POST',
@@ -493,17 +472,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         const addJobData = await addJobResponse.json();
         jobId = addJobData.data.timesheetJobId;
         tsId = addJobData.data.timesheetId;
-        
+
         setTimesheetJobId(jobId);
         setTimesheetId(tsId);
-        
-        // Set hourly rate from the created job
+
         if (addJobData.data.hourlyRate !== undefined) {
           setHourlyRate(addJobData.data.hourlyRate);
         }
       }
 
-      // Step 2: Update start time with combined date and current time
       const updateResponse = await fetch('/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
@@ -522,7 +499,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       }
 
       const updateData = await updateResponse.json();
-      
+
       setStartTime(timeString);
       setSuccess('Start time recorded successfully!');
     } catch (err: any) {
@@ -534,16 +511,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   const handleEndClick = async () => {
     if (!timesheetJobId || !selectedBooking) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = getAuthToken();
       const now = new Date();
       const timeString = now.toTimeString().substring(0, 5);
 
-      // Combine booking date with current time
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
@@ -572,8 +548,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       }
 
       const updateData = await updateResponse.json();
-      
-      // Extract calculated values from the response
+
       if (updateData.data && updateData.data.job) {
         setTotalHours(updateData.data.job.totalHours || null);
         setTotalPay(updateData.data.job.totalPay || null);
@@ -581,18 +556,16 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       }
 
       setEndTime(timeString);
-      
-      // Show success message with calculated totals
-      const hoursText = updateData.data?.job?.totalHours 
-        ? ` Total Hours: ${updateData.data.job.totalHours.toFixed(2)}h` 
+
+      const hoursText = updateData.data?.job?.totalHours
+        ? ` Total Hours: ${updateData.data.job.totalHours.toFixed(2)}h`
         : '';
-      const payText = updateData.data?.job?.totalPay 
-        ? `, Total Pay: £${updateData.data.job.totalPay.toFixed(2)}` 
+      const payText = updateData.data?.job?.totalPay
+        ? `, Total Pay: £${updateData.data.job.totalPay.toFixed(2)}`
         : '';
-      
+
       setSuccess(`End time recorded successfully!${hoursText}${payText} Please add your signature.`);
-      
-      // Show signature modal after end time is set
+
       setTimeout(() => setShowSignatureModal(true), 1500);
     } catch (err: any) {
       setError(err.message || 'Failed to record end time');
@@ -603,16 +576,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   const handleLunchStartClick = async () => {
     if (!timesheetJobId || !selectedBooking) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = getAuthToken();
       const now = new Date();
       const timeString = now.toTimeString().substring(0, 5);
 
-      // Combine booking date with current time
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
@@ -651,16 +623,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   const handleLunchEndClick = async () => {
     if (!timesheetJobId || !selectedBooking) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const token = getAuthToken();
       const now = new Date();
       const timeString = now.toTimeString().substring(0, 5);
 
-      // Combine booking date with current time
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
@@ -689,8 +660,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       }
 
       const updateData = await updateResponse.json();
-      
-      // Update totals if they've been recalculated (in case end time was already set)
+
       if (updateData.data && updateData.data.job) {
         if (updateData.data.job.totalHours !== null) {
           setTotalHours(updateData.data.job.totalHours);
@@ -727,68 +697,65 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               {bookings.map((booking) => {
                 const hasStarted = hasBookingStarted(booking);
                 const isCompleted = isBookingCompleted(booking);
-                const canSelect = hasStarted; // Can only select if start time has passed
-                
+                const canSelect = hasStarted;
+
                 return (
-                <div
-                  key={booking.id}
-                  className={`p-4 border rounded-lg transition-colors ${
-                    selectedBooking?.id === booking.id 
-                      ? 'border-[#C3EAE7] bg-[#C3EAE7]/10' 
-                      : hasStarted
-                        ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer'
-                        : 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
-                  }`}
-                  onClick={() => {
-                    if (canSelect) {
-                      onBookingSelect(booking);
-                    }
-                  }}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{booking.location}</h4>
-                      <div className="mt-1 text-sm text-gray-600">
-                        <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
-                        {booking.description && (
-                          <p className="mt-1">{booking.description}</p>
+                  <div
+                    key={booking.id}
+                    className={`p-4 border rounded-lg transition-colors ${selectedBooking?.id === booking.id
+                        ? 'border-[#C3EAE7] bg-[#C3EAE7]/10'
+                        : hasStarted
+                          ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer'
+                          : 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
+                      }`}
+                    onClick={() => {
+                      if (canSelect) {
+                        onBookingSelect(booking);
+                      }
+                    }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{booking.location}</h4>
+                        <div className="mt-1 text-sm text-gray-600">
+                          <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
+                          {booking.description && (
+                            <p className="mt-1">{booking.description}</p>
+                          )}
+                        </div>
+                        <div className="mt-2 flex items-center space-x-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${booking.status === 'CONFIRMED'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                            {booking.status}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs ${isCompleted
+                              ? 'bg-gray-100 text-gray-700'
+                              : hasStarted
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-orange-100 text-orange-700'
+                            }`}>
+                            {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '🔒 Not Started'}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
+                          </span>
+                        </div>
+                        {!hasStarted && (
+                          <div className="mt-2 text-xs text-orange-600 font-medium">
+                            ℹ️ Can only select after job start time
+                          </div>
                         )}
                       </div>
-                      <div className="mt-2 flex items-center space-x-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          booking.status === 'CONFIRMED' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {booking.status}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          isCompleted 
-                            ? 'bg-gray-100 text-gray-700' 
-                            : hasStarted
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-orange-100 text-orange-700'
-                        }`}>
-                          {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '🔒 Not Started'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
+                      <div className="text-right">
+                        <span className="text-sm font-medium text-gray-900">
+                          Rate TBD
                         </span>
                       </div>
-                      {!hasStarted && (
-                        <div className="mt-2 text-xs text-orange-600 font-medium">
-                          ℹ️ Can only select after job start time
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium text-gray-900">
-                        Rate TBD
-                      </span>
                     </div>
                   </div>
-                </div>
-              );
+                );
               })}
             </div>
           ) : (
@@ -798,25 +765,22 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           )}
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-700">❌ {error}</p>
           </div>
         )}
 
-        {/* Success Message */}
         {success && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-700">✅ {success}</p>
           </div>
         )}
 
-        {/* Time Tracking Section - Only visible when booking is selected */}
         {selectedBooking && (
           <div className="mt-6 p-4 bg-[#C3EAE7]/10 rounded-lg border border-[#C3EAE7]">
             <h4 className="text-sm font-semibold text-gray-900 mb-3">Time Tracking</h4>
-            
+
             {isLoading && (
               <div className="mb-3 flex items-center text-blue-600">
                 <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
@@ -824,7 +788,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
-              {/* Start Time */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
                 <div className="flex items-center space-x-2">
@@ -838,18 +801,16 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   <button
                     onClick={handleStartClick}
                     disabled={!!startTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      startTime
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${startTime
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                    }`}
+                      }`}
                   >
                     {startTime ? '✓ Set' : 'Start'}
                   </button>
                 </div>
               </div>
 
-              {/* End Time */}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
                 <div className="flex items-center space-x-2">
@@ -863,20 +824,18 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   <button
                     onClick={handleEndClick}
                     disabled={!startTime || !!endTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      !startTime || endTime
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!startTime || endTime
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                    }`}
+                      }`}
                   >
                     {endTime ? '✓ Set' : 'End'}
                   </button>
                 </div>
               </div>
 
-              {/* Lunch Start Time */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Lunch Start</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
@@ -888,20 +847,18 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   <button
                     onClick={handleLunchStartClick}
                     disabled={!startTime || !!lunchStartTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      !startTime || lunchStartTime
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!startTime || lunchStartTime
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                    }`}
+                      }`}
                   >
                     {lunchStartTime ? '✓ Set' : 'Start'}
                   </button>
                 </div>
               </div>
 
-              {/* Lunch End Time */}
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Lunch End</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
@@ -913,11 +870,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   <button
                     onClick={handleLunchEndClick}
                     disabled={!lunchStartTime || !!lunchEndTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      !lunchStartTime || lunchEndTime
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!lunchStartTime || lunchEndTime
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                    }`}
+                      }`}
                   >
                     {lunchEndTime ? '✓ Set' : 'End'}
                   </button>
@@ -925,7 +881,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               </div>
             </div>
 
-            {/* Selected Booking Details */}
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-xs text-gray-600">
                 Selected Booking: <span className="font-medium text-gray-900">{selectedBooking.location}</span>
@@ -940,7 +895,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               )}
             </div>
 
-            {/* Payment Details */}
             {hourlyRate !== null && (
               <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 p-3 rounded">
                 <h5 className="text-xs font-semibold text-blue-900 mb-2">Payment Details</h5>
@@ -972,7 +926,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           </div>
         )}
 
-        {/* Info message when no booking selected */}
         {!selectedBooking && bookings.length > 0 && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-700">
@@ -983,7 +936,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
       </div>
 
-      {/* Signature Modal */}
       {showSignatureModal && timesheetId && (
         <SignatureModal
           timesheetId={timesheetId}
@@ -1045,7 +997,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
-      // If manager signature and ID are provided, approve the timesheet
       if (managerSignature.trim() && managerId.trim()) {
         const approveResponse = await fetch('/api/timesheet/approve-timesheet', {
           method: 'POST',
@@ -1086,7 +1037,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         )}
 
         <div className="space-y-4">
-          {/* Staff Signature */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Staff Signature <span className="text-red-500">*</span>
@@ -1101,7 +1051,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
             />
           </div>
 
-          {/* Manager Signature (Optional) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Manager Signature <span className="text-gray-400">(Optional)</span>
@@ -1116,7 +1065,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
             />
           </div>
 
-          {/* Manager ID (Optional) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Manager ID <span className="text-gray-400">(Optional)</span>

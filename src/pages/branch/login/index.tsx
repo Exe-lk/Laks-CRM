@@ -51,7 +51,6 @@ const BranchLoginPage = () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Store authentication data
                     localStorage.setItem('token', data.accessToken);
                     localStorage.setItem('profile', JSON.stringify(data.profile));
                     
@@ -63,7 +62,6 @@ const BranchLoginPage = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
 
-                    // Redirect to branch dashboard or appointment creation
                     router.push('/branch/home');
                 } else {
                     await Swal.fire({
