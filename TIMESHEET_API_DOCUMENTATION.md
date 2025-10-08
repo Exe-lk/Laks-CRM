@@ -175,16 +175,39 @@ Gets locum's timesheet with weekly view capability.
 }
 ```
 
-### 4. Submit Timesheet
+### 4. Upload Signature
+
+#### `POST /api/timesheet/upload-signature`
+Uploads a signature image to Supabase storage.
+
+**Request Body:**
+- `timesheetId`: string (required) - The timesheet ID
+- `signatureType`: string (required) - Either "staff" or "manager"
+- `signature`: File (required) - Image file (PNG, JPG, etc.)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "signatureUrl": "https://supabase-url/signatures/timesheet_123_staff_signature_1234567890.png",
+    "fileName": "timesheet_123_staff_signature_1234567890.png",
+    "filePath": "timesheet-signatures/timesheet_123_staff_signature_1234567890.png"
+  },
+  "message": "Signature uploaded successfully"
+}
+```
+
+### 5. Submit Timesheet
 
 #### `POST /api/timesheet/submit-timesheet`
-Submits timesheet with locum's digital signature.
+Submits timesheet with locum's signature image URL.
 
 **Request Body:**
 ```json
 {
   "timesheetId": "string",
-  "staffSignature": "base64_encoded_signature"
+  "staffSignatureUrl": "https://supabase-url/signatures/timesheet_123_staff_signature_1234567890.png"
 }
 ```
 
@@ -207,7 +230,7 @@ Submits timesheet with locum's digital signature.
 }
 ```
 
-### 5. Approve Timesheet
+### 6. Approve Timesheet
 
 #### `POST /api/timesheet/approve-timesheet`
 Manager approves or rejects a submitted timesheet.
@@ -216,7 +239,7 @@ Manager approves or rejects a submitted timesheet.
 ```json
 {
   "timesheetId": "string",
-  "managerSignature": "base64_encoded_signature",
+  "managerSignatureUrl": "https://supabase-url/signatures/timesheet_123_manager_signature_1234567890.png",
   "managerId": "string",
   "action": "approve" | "reject"
 }
@@ -242,7 +265,7 @@ Manager approves or rejects a submitted timesheet.
 }
 ```
 
-### 6. Get Pending Timesheets
+### 7. Get Pending Timesheets
 
 #### `GET /api/timesheet/get-pending-timesheets`
 Gets all submitted timesheets awaiting manager approval.
@@ -283,7 +306,7 @@ Gets all submitted timesheets awaiting manager approval.
 }
 ```
 
-### 7. List Timesheets
+### 8. List Timesheets
 
 #### `GET /api/timesheet/list-timesheets`
 Lists timesheets for locums or admins.
@@ -323,7 +346,7 @@ Lists timesheets for locums or admins.
 }
 ```
 
-### 8. Get Timesheet Details
+### 9. Get Timesheet Details
 
 #### `GET /api/timesheet/get-timesheet-details`
 Gets detailed information for a specific timesheet.
@@ -386,7 +409,7 @@ Gets detailed information for a specific timesheet.
 }
 ```
 
-### 9. Get Weekly Payouts
+### 10. Get Weekly Payouts
 
 #### `GET /api/timesheet/get-weekly-payouts`
 Gets locked timesheets for payout processing (admin use).
@@ -471,11 +494,13 @@ Common HTTP status codes:
 1. **Accept job booking** → Job automatically added to timesheet
 2. **Update job times** → `PUT /api/timesheet/update-job-times`
 3. **View timesheet** → `GET /api/timesheet/get-locum-timesheet` (weekly view)
-4. **Submit timesheet** → `POST /api/timesheet/submit-timesheet`
+4. **Upload signature** → `POST /api/timesheet/upload-signature` (signatureType: "staff")
+5. **Submit timesheet** → `POST /api/timesheet/submit-timesheet` (with signature URL)
 
 ### Manager Workflow
 1. **View pending timesheets** → `GET /api/timesheet/get-pending-timesheets`
-2. **Approve/reject timesheet** → `POST /api/timesheet/approve-timesheet`
+2. **Upload signature** → `POST /api/timesheet/upload-signature` (signatureType: "manager")
+3. **Approve/reject timesheet** → `POST /api/timesheet/approve-timesheet` (with signature URL)
 
 ### Admin Workflow
 1. **View all timesheets** → `GET /api/timesheet/list-timesheets`
@@ -490,7 +515,7 @@ Common HTTP status codes:
 - ✅ **No practice management** - Practices don't create or manage timesheets
 - ✅ **Job-based tracking** - Each job is tracked individually
 - ✅ **Automatic calculations** - Hours and pay calculated automatically
-- ✅ **Digital signatures** - Staff and manager signatures
+- ✅ **Image-based signatures** - Staff and manager signatures stored as images in Supabase
 - ✅ **Comprehensive reporting** - Detailed breakdowns and summaries
 - ✅ **Branch support** - Corporate practices can specify branches for appointments
 
@@ -502,3 +527,24 @@ The system now supports corporate practices with multiple branches:
 - **Branch information** - All timesheet jobs include branch details when applicable
 - **Automatic inclusion** - Branch information is automatically included in timesheet data when appointments are created with a branch_id
 - **Backward compatibility** - Existing appointments without branch information continue to work normally
+
+## Signature Image Upload
+
+The system now supports image-based signatures stored in Supabase storage:
+
+- **Image upload** - Signatures are uploaded as image files (PNG, JPG, etc.) to Supabase storage
+- **Secure storage** - Signature images are stored in a dedicated "signatures" bucket in Supabase
+- **URL-based** - Timesheets store URLs to signature images instead of base64 encoded data
+- **File validation** - Only image files are accepted for signature uploads
+- **Size limits** - Signature images are limited to 5MB maximum
+- **Unique naming** - Each signature file gets a unique name based on timesheet ID, type, and timestamp
+
+### Signature Upload Workflow
+
+1. **Upload signature** - Use `/api/timesheet/upload-signature` to upload signature image
+2. **Get URL** - Receive the public URL of the uploaded signature image
+3. **Submit/Approve** - Use the signature URL when submitting or approving timesheets
+
+### Supabase Storage Setup
+
+Ensure you have a "signatures" bucket in your Supabase storage with appropriate permissions for file uploads.
