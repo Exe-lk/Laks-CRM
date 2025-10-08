@@ -181,9 +181,10 @@ Gets locum's timesheet with weekly view capability.
 Uploads a signature image to Supabase storage.
 
 **Request Body:**
-- `timesheetId`: string (required) - The timesheet ID
-- `signatureType`: string (required) - Either "staff" or "manager"
-- `signature`: File (required) - Image file (PNG, JPG, etc.)
+- Form data (multipart/form-data):
+  - `timesheetId`: string (required) - The timesheet ID
+  - `signatureType`: string (required) - Either "staff" or "manager"
+  - `signature`: File (required) - Image file (PNG, JPG, GIF, WEBP)
 
 **Response:**
 ```json
@@ -207,7 +208,7 @@ Submits timesheet with locum's signature image URL.
 ```json
 {
   "timesheetId": "string",
-  "staffSignatureUrl": "https://supabase-url/signatures/timesheet_123_staff_signature_1234567890.png"
+  "staffSignature": "https://supabase-url/signatures/timesheet_123_staff_signature_1234567890.png"
 }
 ```
 
@@ -239,7 +240,7 @@ Manager approves or rejects a submitted timesheet.
 ```json
 {
   "timesheetId": "string",
-  "managerSignatureUrl": "https://supabase-url/signatures/timesheet_123_manager_signature_1234567890.png",
+  "managerSignature": "https://supabase-url/signatures/timesheet_123_manager_signature_1234567890.png",
   "managerId": "string",
   "action": "approve" | "reject"
 }
@@ -530,9 +531,9 @@ The system now supports corporate practices with multiple branches:
 
 ## Signature Image Upload
 
-The system now supports image-based signatures stored in Supabase storage:
+The system supports image-based signatures stored in Supabase storage:
 
-- **Image upload** - Signatures are uploaded as image files (PNG, JPG, etc.) to Supabase storage
+- **Image upload** - Signatures are uploaded as image files (PNG, JPG, GIF, WEBP) to Supabase storage
 - **Secure storage** - Signature images are stored in a dedicated "signatures" bucket in Supabase
 - **URL-based** - Timesheets store URLs to signature images instead of base64 encoded data
 - **File validation** - Only image files are accepted for signature uploads

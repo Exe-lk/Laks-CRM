@@ -21,11 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, staffSignatureUrl } = req.body;
+    const { timesheetId, staffSignature } = req.body;
 
-    if (!timesheetId || !staffSignatureUrl) {
+    if (!timesheetId || !staffSignature) {
       return res.status(400).json({ 
-        error: "timesheetId and staffSignatureUrl are required" 
+        error: "timesheetId and staffSignature are required" 
       });
     }
 
@@ -72,11 +72,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Update timesheet with staff signature URL and change status to SUBMITTED
+    // Update timesheet with staff signature and change status to SUBMITTED
     const updatedTimesheet = await prisma.timesheet.update({
       where: { id: timesheetId },
       data: {
-        staffSignature: staffSignatureUrl,
+        staffSignature: staffSignature,
         staffSignatureDate: new Date(),
         status: 'SUBMITTED'
       },

@@ -78,7 +78,6 @@ model Practice {
   paymentCards PaymentCard[]
   stripeCustomer StripeCustomer?
   timesheetJobs TimesheetJob[]
-  invoices     Invoice[]
 
   @@map("practices")
 }
@@ -88,7 +87,6 @@ model Booking {
   request_id    String        @unique
   locum_id      String?
   practice_id   String
-  branch_id     String?     @map("branch_id") // Optional branch ID for corporate practices
   booking_date  DateTime
   booking_start_time  String
   booking_end_time    String
@@ -105,7 +103,6 @@ model Booking {
 
   locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
   practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
-  branch        Branch?       @relation(fields: [branch_id], references: [id], onDelete: SetNull)
   timesheetJobs TimesheetJob[]
 }
 
@@ -180,10 +177,8 @@ model Branch {
   updatedAt   DateTime @updatedAt
   
   practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
   timesheetJobs TimesheetJob[]
   appointmentRequests AppointmentRequest[]
-  invoices    Invoice[]
   
   @@map("branches")
 }
@@ -268,54 +263,8 @@ model TimesheetJob {
   booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   practice              Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   branch                Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  invoiceLineItems      InvoiceLineItem[]
   
   @@map("timesheet_jobs")
 }
-
-model Invoice {
-  id                    String   @id @default(cuid())
-  invoiceNumber         String   @unique @map("invoice_number")
-  practiceId            String   @map("practice_id")
-  branchId              String?  @map("branch_id") // Optional for corporate practices
-  invoiceDate           DateTime @map("invoice_date")
-  dueDate               DateTime @map("due_date")
-  subtotal              Float    @default(0)
-  taxRate               Float?   @default(0) @map("tax_rate") // Tax rate as percentage
-  taxAmount             Float?   @default(0) @map("tax_amount")
-  totalAmount           Float    @map("total_amount")
-  status                String   @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
-  notes                 String?
-  createdBy             String   @map("created_by") // Admin identifier
-  paidAt                DateTime? @map("paid_at")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  practice              Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  branch                Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  lineItems             InvoiceLineItem[]
-  
-  @@map("invoices")
-}
-
-model InvoiceLineItem {
-  id                    String   @id @default(cuid())
-  invoiceId             String   @map("invoice_id")
-  timesheetJobId        String   @map("timesheet_job_id")
-  description           String
-  quantity              Float    // Usually hours worked
-  unitPrice             Float    @map("unit_price") // Hourly rate
-  amount                Float    // quantity * unitPrice
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  invoice               Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  timesheetJob          TimesheetJob @relation(fields: [timesheetJobId], references: [id], onDelete: Cascade)
-  
-  @@map("invoice_line_items")
-}
-
-
-
 
 
