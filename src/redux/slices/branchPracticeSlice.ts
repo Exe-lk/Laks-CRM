@@ -8,7 +8,7 @@ export interface Branch {
   telephone?: string;
   email?: string;
   password:string;
-  status: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
+  status: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel' | 'verify';
   practiceId: string;
   createdAt: string;
   updatedAt: string;
@@ -28,7 +28,7 @@ export interface CreateBranchData {
   email?: string;
   password:string;
   practiceId: string;
-  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
+  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel' | 'verify';
 }
 
 export interface UpdateBranchData {
@@ -39,7 +39,7 @@ export interface UpdateBranchData {
   telephone?: string;
   email?: string;
   password?: string;
-  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel';
+  status?: 'active' | 'inactive' | 'approved' | 'pending approval' | 'cancel' | 'verify';
 }
 
 interface BranchState {

@@ -19,7 +19,7 @@ export default async function handler(
       email,
       password,
       practiceId,
-      status = "active"
+      status = "verify"
     } = req.body;
 
     console.log('Branch creation request data:', {

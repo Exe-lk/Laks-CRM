@@ -54,6 +54,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 telephone: true,
                 location: true
               }
+            },
+            branch: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+                location: true
+              }
             }
           }
         }
@@ -100,6 +108,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           telephone: confirmation.request.practice.telephone,
           location: confirmation.request.practice.location
         },
+        branch: confirmation.request.branch ? {
+          id: confirmation.request.branch.id,
+          name: confirmation.request.branch.name,
+          address: confirmation.request.branch.address,
+          location: confirmation.request.branch.location
+        } : null,
         appointment: {
           date: confirmation.request.request_date,
           start_time: confirmation.request.request_start_time,

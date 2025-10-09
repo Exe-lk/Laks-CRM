@@ -64,13 +64,122 @@ const BranchLoginPage = () => {
 
                     router.push('/branch/home');
                 } else {
-                    await Swal.fire({
-                        title: 'Login Failed',
-                        text: data.error || 'Invalid credentials',
-                        icon: 'error',
-                        confirmButtonText: 'Try Again',
-                        confirmButtonColor: '#C3EAE7'
-                    });
+                    console.log('Login error details:', data);
+                    console.log('HTTP Response status:', response.status);
+                    console.log('Data status field:', data.status);
+                    
+                    // Handle different status codes based on data.status
+                    switch (data.status) {
+                        case 'cancel':
+                            await Swal.fire({
+                                title: 'Account Deleted',
+                                text: 'Your branch account has been deleted or rejected by the administrator. Please contact support for assistance.',
+                                icon: 'error',
+                                confirmButtonText: 'Contact Support',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#EF4444'
+                            });
+                            break;
+
+                        case 'verify':
+                            await Swal.fire({
+                                title: 'Email Verification Required',
+                                text: 'Please verify your email. Check your emails',
+                                icon: 'warning',
+                                confirmButtonText: 'Check Email',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#FFA500'
+                            });
+                            break;
+
+                        case 'pending':
+                        case 'pending approval':
+                            await Swal.fire({
+                                title: 'Pending Admin Approval',
+                                text: 'Need admin verification',
+                                icon: 'info',
+                                confirmButtonText: 'Understood',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#3B82F6'
+                            });
+                            break;
+
+                        case 'inactive':
+                            await Swal.fire({
+                                title: 'Account Not Active',
+                                text: 'Your branch account is not active. Please contact your practice administrator.',
+                                icon: 'error',
+                                confirmButtonText: 'Contact Admin',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#DC2626'
+                            });
+                            break;
+
+                        case 'unauthorized':
+                            await Swal.fire({
+                                title: 'Invalid Credentials',
+                                text: 'The email or password you entered is incorrect. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'Try Again',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#EF4444'
+                            });
+                            break;
+
+                        case 'not_found':
+                            await Swal.fire({
+                                title: 'Branch Not Found',
+                                text: 'No branch account found with this email. Please contact your practice administrator.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#DC2626'
+                            });
+                            break;
+
+                        case 'bad_request':
+                            await Swal.fire({
+                                title: 'Invalid Request',
+                                text: data.error || 'Please provide both email and password.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#EF4444'
+                            });
+                            break;
+
+                        case 'unknown':
+                            await Swal.fire({
+                                title: 'Invalid Account Status',
+                                text: 'Your branch account has an invalid status. Please contact your practice administrator.',
+                                icon: 'error',
+                                confirmButtonText: 'Contact Admin',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#DC2626'
+                            });
+                            break;
+
+                        case 'server_error':
+                            await Swal.fire({
+                                title: 'Server Error',
+                                text: 'An error occurred on the server. Please try again later or contact support.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#EF4444'
+                            });
+                            break;
+
+                        default:
+                            await Swal.fire({
+                                title: 'Login Failed',
+                                text: data.error || 'An unexpected error occurred. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'Try Again',
+                                confirmButtonColor: '#C3EAE7',
+                                iconColor: '#EF4444'
+                            });
+                    }
                 }
             } catch (error) {
                 console.error('Login error:', error);

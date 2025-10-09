@@ -58,46 +58,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get or create timesheet for the current month
-    const jobDate = new Date(booking.booking_date);
-    const currentMonth = jobDate.getMonth() + 1; // 1-12
-    const currentYear = jobDate.getFullYear();
-
-    let timesheet = await prisma.timesheet.findUnique({
-      where: {
-        locum_month_year_unique: {
-          locumId: booking.locum_id!,
-          month: currentMonth,
-          year: currentYear
-        }
-      }
-    });
-
-    if (!timesheet) {
-      // Create new timesheet for the month
-      timesheet = await prisma.timesheet.create({
-        data: {
-          locumId: booking.locum_id!,
-          month: currentMonth,
-          year: currentYear,
-          status: 'DRAFT'
-        }
-      });
-    }
-
-    // Check if job already exists in timesheet
+    // Check if job already has a timesheet
     const existingJob = await prisma.timesheetJob.findFirst({
       where: {
-        timesheetId: timesheet.id,
         bookingId: bookingId
+      },
+      include: {
+        timesheet: true
       }
     });
 
     if (existingJob) {
       return res.status(400).json({ 
-        error: "Job already exists in timesheet" 
+        error: "Job already exists in timesheet",
+        data: {
+          timesheetId: existingJob.timesheet.id,
+          timesheetJobId: existingJob.id
+        }
       });
     }
+
+    // Create a new timesheet for this specific job
+    const jobDate = new Date(booking.booking_date);
+    const currentMonth = jobDate.getMonth() + 1; // 1-12
+    const currentYear = jobDate.getFullYear();
+
+    const timesheet = await prisma.timesheet.create({
+      data: {
+        locumId: booking.locum_id!,
+        month: currentMonth,
+        year: currentYear,
+        status: 'DRAFT'
+      }
+    });
 
     // Determine branch ID for corporate practices
     let branchId = null;

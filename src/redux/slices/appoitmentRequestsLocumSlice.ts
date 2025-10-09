@@ -18,6 +18,12 @@ export interface AvailableAppointmentRequest {
     address: string;
     telephone: string;
   };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  } | null;
   applicants_count: number;
   time_until_appointment: number;
   is_urgent: boolean;
@@ -60,6 +66,12 @@ export interface PendingConfirmation {
     telephone: string;
     location: string;
   };
+  branch?: {
+    id: string;
+    name: string;
+    address: string;
+    location: string;
+  } | null;
   appointment: {
     date: Date | string;
     start_time: string;
@@ -143,6 +155,12 @@ export interface ApplicationHistoryItem {
       location: string;
       telephone: string;
     };
+    branch?: {
+      id: string;
+      name: string;
+      address: string;
+      location: string;
+    } | null;
     is_past: boolean;
     status_label: string;
   };

@@ -52,6 +52,12 @@ export default async function handler(
           status: "pending",
         });
 
+      case "verify":
+        return res.status(403).json({
+          error: "Still not approved",
+          status: "verify",
+        });
+
       case "accept":
         break;
 

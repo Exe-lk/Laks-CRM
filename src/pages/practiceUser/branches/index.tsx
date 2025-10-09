@@ -203,9 +203,9 @@ const BranchesPage = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Approved Branches</p>
+                  <p className="text-sm font-medium text-gray-600">Active Branches</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {branches.filter(branch => branch.status === 'approved').length}
+                    {branches.filter(branch => branch.status === 'active').length}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -217,9 +217,9 @@ const BranchesPage = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Approval</p>
+                  <p className="text-sm font-medium text-gray-600">Pending/Verify</p>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {branches.filter(branch => branch.status === 'pending approval').length}
+                    {branches.filter(branch => branch.status === 'pending approval' || branch.status === 'verify').length}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -231,9 +231,9 @@ const BranchesPage = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Cancelled Branches</p>
+                  <p className="text-sm font-medium text-gray-600">Inactive</p>
                   <p className="text-2xl font-bold text-red-600">
-                    {branches.filter(branch => branch.status === 'cancel').length}
+                    {branches.filter(branch => branch.status === 'inactive' || branch.status === 'cancel').length}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -261,11 +261,11 @@ const BranchesPage = () => {
             </h3>
             <div className="text-blue-800 space-y-2">
               <p>• <strong>Create branches</strong> to manage multiple locations for your practice.</p>
-              <p>• <strong>Approved branches</strong> are available for appointment scheduling and locum assignments.</p>
-              <p>• <strong>Pending approval branches</strong> are newly created and awaiting approval.</p>
-              <p>• <strong>Cancelled branches</strong> are no longer active and cannot be used for appointments.</p>
+              <p>• <strong>Email Verification:</strong> New branches must verify their email before admin approval.</p>
+              <p>• <strong>Active branches</strong> are fully approved and available for appointment scheduling.</p>
+              <p>• <strong>Pending approval branches</strong> have verified their email and await admin approval.</p>
+              <p>• <strong>Admin Approval:</strong> Click the checkmark icon to approve pending branches.</p>
               <p>• <strong>Contact information</strong> helps locums and patients reach the specific branch.</p>
-              <p>• You can edit or delete branches as needed to keep your practice information up to date.</p>
             </div>
           </div>
         </div>

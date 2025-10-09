@@ -32,15 +32,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const targetMonth = month ? parseInt(month as string) : currentDate.getMonth() + 1;
     const targetYear = year ? parseInt(year as string) : currentDate.getFullYear();
 
-    // Get or create timesheet for the month
-    let timesheet = await prisma.timesheet.findUnique({
-      where: {
-        locum_month_year_unique: {
-          locumId: locumId as string,
-          month: targetMonth,
-          year: targetYear
-        }
-      },
+    // Build where clause for timesheets
+    let timesheetWhereClause: any = {
+      locumId: locumId as string
+    };
+
+    // Add month/year filter if provided
+    if (month) {
+      timesheetWhereClause.month = targetMonth;
+    }
+    if (year) {
+      timesheetWhereClause.year = targetYear;
+    }
+
+    // Get all timesheets for this locum (filtered by month/year if provided)
+    const timesheets = await prisma.timesheet.findMany({
+      where: timesheetWhereClause,
       include: {
         locumProfile: {
           select: {
@@ -49,52 +56,65 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             contactNumber: true,
             role: true
           }
-        }
-      }
-    });
-
-    if (!timesheet) {
-      // Create new timesheet for the month
-      timesheet = await prisma.timesheet.create({
-        data: {
-          locumId: locumId as string,
-          month: targetMonth,
-          year: targetYear,
-          status: 'DRAFT'
         },
-        include: {
-          locumProfile: {
-            select: {
-              fullName: true,
-              emailAddress: true,
-              contactNumber: true,
-              role: true
+        timesheetJobs: {
+          include: {
+            practice: {
+              select: {
+                name: true,
+                location: true,
+                practiceType: true
+              }
+            },
+            branch: {
+              select: {
+                name: true,
+                location: true
+              }
+            },
+            booking: {
+              select: {
+                booking_start_time: true,
+                booking_end_time: true,
+                location: true,
+                description: true
+              }
             }
           }
         }
-      });
-    }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
 
-    // Get all jobs for the timesheet
-    let whereClause: any = {
-      timesheetId: timesheet.id
-    };
+    // Flatten all jobs from all timesheets
+    let allJobs = timesheets.flatMap(ts => ts.timesheetJobs);
 
-    // If weekStartDate is provided, filter for that week
+    // If weekStartDate is provided, filter jobs for that week
     if (weekStartDate) {
       const weekStart = new Date(weekStartDate as string);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       weekEnd.setHours(23, 59, 59, 999);
 
-      whereClause.jobDate = {
-        gte: weekStart,
-        lte: weekEnd
-      };
+      allJobs = allJobs.filter(job => {
+        const jobDate = new Date(job.jobDate);
+        return jobDate >= weekStart && jobDate <= weekEnd;
+      });
     }
 
-    const timesheetJobs = await prisma.timesheetJob.findMany({
-      where: whereClause,
+    const timesheetJobs = allJobs.sort((a, b) => {
+      return new Date(a.jobDate).getTime() - new Date(b.jobDate).getTime();
+    });
+
+    // For compatibility, we'll keep the old structure but return aggregated data
+    const timesheetJobsQuery = await prisma.timesheetJob.findMany({
+      where: {
+        timesheetId: {
+          in: timesheets.map(ts => ts.id)
+        }
+      },
       include: {
         practice: {
           select: {
@@ -161,38 +181,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     });
 
+    // Calculate aggregated totals from all timesheets
+    const aggregatedTotalHours = timesheets.reduce((sum, ts) => sum + (ts.totalHours || 0), 0);
+    const aggregatedTotalPay = timesheets.reduce((sum, ts) => sum + (ts.totalPay || 0), 0);
+
     // Calculate month summary
     const monthSummary = {
       totalJobs: timesheetJobs.length,
       completedJobs: timesheetJobs.filter(job => job.startTime && job.endTime).length,
-      totalHours: timesheet.totalHours || 0,
-      totalPay: timesheet.totalPay || 0,
+      totalHours: aggregatedTotalHours,
+      totalPay: aggregatedTotalPay,
       totalWeeks: Object.keys(jobsByWeek).length,
       averageHoursPerWeek: Object.keys(jobsByWeek).length > 0 
-        ? (timesheet.totalHours || 0) / Object.keys(jobsByWeek).length 
-        : 0
+        ? aggregatedTotalHours / Object.keys(jobsByWeek).length 
+        : 0,
+      totalTimesheets: timesheets.length
+    };
+
+    // For backward compatibility, return aggregated timesheet data
+    const aggregatedTimesheet = {
+      id: timesheets.length > 0 ? timesheets[0].id : null,
+      locumId: locumId as string,
+      month: targetMonth,
+      year: targetYear,
+      status: 'MULTIPLE', // Indicate multiple timesheets
+      totalHours: aggregatedTotalHours,
+      totalPay: aggregatedTotalPay,
+      timesheets: timesheets.map(ts => ({
+        id: ts.id,
+        status: ts.status,
+        totalHours: ts.totalHours,
+        totalPay: ts.totalPay,
+        staffSignature: ts.staffSignature,
+        staffSignatureDate: ts.staffSignatureDate,
+        managerSignature: ts.managerSignature,
+        managerSignatureDate: ts.managerSignatureDate,
+        submittedAt: ts.submittedAt,
+        createdAt: ts.createdAt,
+        updatedAt: ts.updatedAt,
+        jobCount: ts.timesheetJobs.length
+      })),
+      locumProfile: timesheets.length > 0 ? timesheets[0].locumProfile : null
     };
 
     res.status(200).json({
       success: true,
       data: {
-        timesheet: {
-          id: timesheet.id,
-          locumId: timesheet.locumId,
-          month: timesheet.month,
-          year: timesheet.year,
-          status: timesheet.status,
-          totalHours: timesheet.totalHours,
-          totalPay: timesheet.totalPay,
-          staffSignature: timesheet.staffSignature,
-          staffSignatureDate: timesheet.staffSignatureDate,
-          managerSignature: timesheet.managerSignature,
-          managerSignatureDate: timesheet.managerSignatureDate,
-          submittedAt: timesheet.submittedAt,
-          createdAt: timesheet.createdAt,
-          updatedAt: timesheet.updatedAt,
-          locumProfile: timesheet.locumProfile
-        },
+        timesheet: aggregatedTimesheet,
         allJobs: timesheetJobs,
         jobsByWeek: jobsByWeek,
         weeklySummaries: weeklySummaries,
