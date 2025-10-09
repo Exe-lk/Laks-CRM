@@ -467,7 +467,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
         if (!addJobResponse.ok) {
           const errorData = await addJobResponse.json();
-          throw new Error(errorData.error || 'Failed to add job to timesheet');
+          throw new Error(errorData.error || 'Failed to create timesheet for job');
         }
 
         const addJobData = await addJobResponse.json();
@@ -980,16 +980,13 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
   const uploadSignatureImage = async (signatureDataUrl: string, signatureType: 'staff' | 'manager'): Promise<string> => {
     const token = getAuthToken();
     
-    // Convert data URL to blob
     const blob = await fetch(signatureDataUrl).then(r => r.blob());
     
-    // Create form data
     const formData = new FormData();
     formData.append('signature', blob, `${signatureType}_signature.png`);
     formData.append('timesheetId', timesheetId);
     formData.append('signatureType', signatureType);
 
-    // Upload to server
     const uploadResponse = await fetch('/api/timesheet/upload-signature', {
       method: 'POST',
       headers: {
@@ -1019,13 +1016,10 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     try {
       const token = getAuthToken();
 
-      // Get staff signature as data URL
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
       
-      // Upload staff signature
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
 
-      // Submit timesheet with staff signature
       const submitResponse = await fetch('/api/timesheet/submit-timesheet', {
         method: 'POST',
         headers: {
@@ -1034,7 +1028,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         },
         body: JSON.stringify({
           timesheetId: timesheetId,
-          staffSignatureUrl: staffSignatureUrl
+          staffSignature: staffSignatureUrl
         })
       });
 
@@ -1043,7 +1037,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
-      // If manager signature is provided, upload and approve
       if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
@@ -1154,7 +1147,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
           <div className="text-xs bg-blue-50 p-3 rounded border border-blue-200 mt-2">
             <p className="text-blue-800 font-medium">ℹ️ Important Information:</p>
             <ul className="mt-2 space-y-1 text-blue-700">
-              <li>• By signing, you confirm that all time entries are accurate</li>
+              <li>• <span className="font-medium">Each job has its own separate timesheet</span></li>
+              <li>• By signing, you confirm that the time entries for this job are accurate</li>
               <li>• Manager signature and ID are optional at this stage</li>
               <li>• <span className="font-medium">If both manager signature and ID are provided</span>, the timesheet will be automatically approved and locked</li>
               <li>• If manager fields are left empty, the timesheet will be submitted for approval</li>

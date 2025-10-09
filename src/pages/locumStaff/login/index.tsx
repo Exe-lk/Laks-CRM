@@ -88,35 +88,58 @@ const LoginForm = () => {
 
           router.push('/locumStaff/dashboard');
         } else if ('error' in result && result.error) {
-          let errorMessage = 'Login failed';
-
           console.log('Login error details:', result.error);
 
           if ('data' in result.error && typeof result.error.data === 'object' && result.error.data !== null) {
             const errorData = result.error.data as any;
             console.log('Error data:', errorData);
-            errorMessage = errorData.error || errorMessage;
 
             if (errorData.status === 'pending') {
-              errorMessage = 'Your account is not verified. Please check your email and complete the verification process.';
+              await Swal.fire({
+                title: 'Pending Approval',
+                text: 'Your account is awaiting approval from the administrator. You will receive an email once your profile is approved.',
+                icon: 'info',
+                confirmButtonText: 'Understood',
+                confirmButtonColor: '#C3EAE7',
+                iconColor: '#3B82F6'
+              });
             } else if (errorData.status === 'deleted') {
-              errorMessage = 'Your account has been deleted by the administrator.';
+              await Swal.fire({
+                title: 'Account Deleted',
+                text: 'Your account has been rejected or deleted by the administrator. Please contact support for more information.',
+                icon: 'error',
+                confirmButtonText: 'Contact Support',
+                confirmButtonColor: '#C3EAE7',
+                iconColor: '#DC2626'
+              });
             } else if (errorData.status === 'verify') {
-              errorMessage = 'Your account is still pending approval. Please wait for admin approval.';
-
+              await Swal.fire({
+                title: 'Email Verification Required',
+                text: 'Your account is not verified yet. Please check your email inbox and verify your account to continue.',
+                icon: 'warning',
+                confirmButtonText: 'Check Email',
+                confirmButtonColor: '#C3EAE7',
+                iconColor: '#FFA500'
+              });
+            } else {
+              await Swal.fire({
+                title: 'Login Failed!',
+                text: errorData.error || 'Invalid credentials or account issue',
+                icon: 'error',
+                confirmButtonText: 'Try Again',
+                confirmButtonColor: '#C3EAE7'
+              });
             }
-
-          } else if ('message' in result.error) {
-            errorMessage = result.error.message || errorMessage;
+          } else {
+            const errorMessage = ('message' in result.error) ? result.error.message : 'Login failed';
+            await Swal.fire({
+              title: 'Login Failed!',
+              text: errorMessage || 'An unexpected error occurred. Please try again.',
+              icon: 'error',
+              confirmButtonText: 'Try Again',
+              confirmButtonColor: '#C3EAE7'
+            });
           }
-
-          Swal.fire({
-            title: 'Login Failed!',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Try Again',
-            confirmButtonColor: '#C3EAE7'
-          });
         }
       } catch (error) {
         console.error('Login error:', error);

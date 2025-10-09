@@ -54,31 +54,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Validate that all jobs have complete start/end times
+    // Validate that the job has complete start/end times
     const incompleteJobs = timesheet.timesheetJobs.filter(job => 
       !job.startTime || !job.endTime
     );
 
     if (incompleteJobs.length > 0) {
       return res.status(400).json({ 
-        error: "All jobs must have complete start and end times before submission" 
+        error: "Job must have complete start and end times before submission",
+        incompleteJobsCount: incompleteJobs.length
       });
     }
 
+    // For single-job timesheets, ensure at least one job exists
+    if (timesheet.timesheetJobs.length === 0) {
+      return res.status(400).json({ 
+        error: "Timesheet must have at least one job" 
+      });
+    }
+
+    // Calculate and update total hours and pay from the job(s)
+    const totalHours = timesheet.timesheetJobs.reduce((sum, job) => sum + (job.totalHours || 0), 0);
+    const totalPay = timesheet.timesheetJobs.reduce((sum, job) => sum + (job.totalPay || 0), 0);
+
     // Validate that total hours is greater than 0
-    if (!timesheet.totalHours || timesheet.totalHours <= 0) {
+    if (totalHours <= 0) {
       return res.status(400).json({ 
         error: "Total hours must be greater than 0" 
       });
     }
 
-    // Update timesheet with staff signature and change status to SUBMITTED
+    // Update timesheet with staff signature, totals, and change status to SUBMITTED
     const updatedTimesheet = await prisma.timesheet.update({
       where: { id: timesheetId },
       data: {
         staffSignature: staffSignature,
         staffSignatureDate: new Date(),
-        status: 'SUBMITTED'
+        totalHours: totalHours,
+        totalPay: totalPay,
+        status: 'SUBMITTED',
+        submittedAt: new Date()
       },
       include: {
         timesheetJobs: {

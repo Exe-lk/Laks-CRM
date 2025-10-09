@@ -25,7 +25,7 @@ export default function VerifyEmail() {
           if (user?.user?.email_confirmed_at) {
             if (user?.user?.email) {
               try {
-                // Update branch status to verify
+                // Update branch status to pending approval
                 const response = await fetch('/api/branch/confirm-email', {
                   method: 'PUT',
                   headers: {
@@ -33,7 +33,7 @@ export default function VerifyEmail() {
                   },
                   body: JSON.stringify({ 
                     email: user.user.email, 
-                    status: 'active' 
+                    status: 'pending approval' 
                   }),
                 });
 

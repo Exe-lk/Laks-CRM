@@ -460,6 +460,11 @@ const WaitingList = () => {
                                                             <div className="text-sm font-medium text-gray-900">
                                                                 {confirmation.practice.name}
                                                             </div>
+                                                            {confirmation.branch && (
+                                                                <div className="text-sm font-medium text-blue-600 mt-1">
+                                                                    Branch: {confirmation.branch.name}
+                                                                </div>
+                                                            )}
                                                             <div className="text-sm text-gray-500 flex items-center mt-1">
                                                                 <FaMapMarkerAlt className="mr-1 text-gray-400" />
                                                                 {confirmation.practice.location}
@@ -606,6 +611,11 @@ const WaitingList = () => {
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {application.request.practice.name}
                                                         </div>
+                                                        {application.request.branch && (
+                                                            <div className="text-sm font-medium text-blue-600 mt-1">
+                                                                Branch: {application.request.branch.name}
+                                                            </div>
+                                                        )}
                                                         <div className="text-sm text-gray-500 flex items-center mt-1">
                                                             <FaMapMarkerAlt className="mr-1 text-gray-400" />
                                                             {application.request.practice.location}
@@ -741,6 +751,9 @@ const WaitingList = () => {
                                                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                                             <div>
                                                                 <div className="text-gray-900 font-medium">{req.practice.name}</div>
+                                                                {req.branch && (
+                                                                    <div className="text-blue-600 font-medium text-sm">Branch: {req.branch.name}</div>
+                                                                )}
                                                                 <div className="text-gray-500 text-sm">{req.practice.telephone}</div>
                                                             </div>
                                                         </td>

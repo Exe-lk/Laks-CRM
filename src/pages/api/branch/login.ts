@@ -7,7 +7,10 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+    return res.status(405).json({ 
+      error: `Method ${req.method} Not Allowed`,
+      status: "method_not_allowed"
+    });
   }
 
   try {
@@ -16,6 +19,7 @@ export default async function handler(
     if (!email || !password) {
       return res.status(400).json({
         error: "Email and password are required",
+        status: "bad_request",
       });
     }
 
@@ -28,6 +32,7 @@ export default async function handler(
     if (authError) {
       return res.status(401).json({
         error: "Invalid email or password",
+        status: "unauthorized",
       });
     }
 
@@ -46,16 +51,52 @@ export default async function handler(
       }
     });
 
+    console.log("Branch:", branch);
+
     if (!branch) {
       return res.status(404).json({
         error: "Branch not found",
+        status: "not_found",
       });
     }
 
-    if (branch.status !== "active") {
-      return res.status(403).json({
-        error: "Branch account is not active",
-      });
+    // Check branch status and handle accordingly
+    switch (branch.status) {
+      case "delete":
+      case "cancel":
+        return res.status(403).json({
+          error: "Branch account has been deleted or rejected by admin",
+          status: "deleted",
+        });
+
+      case "verify":
+        return res.status(403).json({
+          error: "Please verify your email. Check your emails",
+          status: "verify",
+        });
+
+      case "pending":
+      case "pending approval":
+        return res.status(403).json({
+          error: "Need admin verification",
+          status: "pending",
+        });
+
+      case "inactive":
+        return res.status(403).json({
+          error: "Branch account is not active. Please contact your practice administrator.",
+          status: "inactive",
+        });
+
+      case "active":
+        // Allow login to proceed
+        break;
+
+      default:
+        return res.status(403).json({
+          error: "Branch account status is invalid",
+          status: "unknown",
+        });
     }
 
     // Create a profile object for the branch
@@ -85,6 +126,7 @@ export default async function handler(
     console.error("Branch Login Error:", error);
     return res.status(500).json({
       error: "Internal server error",
+      status: "server_error",
       details: error.message,
     });
   }
