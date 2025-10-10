@@ -79,16 +79,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const enhancedBookings = bookings.map(booking => {
       const now = new Date();
       
-      const bookingDateTime = new Date(booking.booking_date);
-      const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
-      bookingDateTime.setHours(hours, minutes, 0, 0);
+      // Use start time for calculating time until booking (for cancellation logic)
+      const bookingStartDateTime = new Date(booking.booking_date);
+      const [startHours, startMinutes] = booking.booking_start_time.split(':').map(Number);
+      bookingStartDateTime.setHours(startHours, startMinutes, 0, 0);
       
-      const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+      // Use end time to determine if booking is past
+      const bookingEndDateTime = new Date(booking.booking_date);
+      const [endHours, endMinutes] = booking.booking_end_time.split(':').map(Number);
+      bookingEndDateTime.setHours(endHours, endMinutes, 0, 0);
+      
+      const timeDiffHours = (bookingStartDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
       
       return {
         ...booking,
-        is_past: bookingDateTime < now,
-        is_upcoming: bookingDateTime > now,
+        is_past: bookingEndDateTime < now,
+        is_upcoming: bookingEndDateTime > now,
         can_cancel: timeDiffHours > 48 && booking.status === 'CONFIRMED',
         time_until_booking: Math.max(0, Math.floor(timeDiffHours))
       };
