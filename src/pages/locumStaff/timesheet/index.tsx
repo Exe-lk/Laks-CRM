@@ -326,7 +326,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         const year = bookingDate.getFullYear();
 
         const response = await fetch(
-          `/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
+          `https://laks-crm.netlify.app/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -487,7 +487,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       let tsId = timesheetId;
 
       if (!jobId) {
-        const addJobResponse = await fetch('/api/timesheet/add-job-to-timesheet', {
+        const addJobResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/add-job-to-timesheet', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -515,7 +515,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         }
       }
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -564,7 +564,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -629,7 +629,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -676,7 +676,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1051,7 +1051,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     formData.append('timesheetId', timesheetId);
     formData.append('signatureType', signatureType);
 
-    const uploadResponse = await fetch('/api/timesheet/upload-signature', {
+    const uploadResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/upload-signature', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1084,7 +1084,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
       
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
 
-      const submitResponse = await fetch('/api/timesheet/submit-timesheet', {
+      const submitResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/submit-timesheet', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1105,7 +1105,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
 
-        const approveResponse = await fetch('/api/timesheet/approve-timesheet', {
+        const approveResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/approve-timesheet', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

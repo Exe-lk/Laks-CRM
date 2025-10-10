@@ -113,7 +113,7 @@ export const fetchTimesheets = createAsyncThunk(
       ...(params.weekEndDate && { weekEndDate: params.weekEndDate }),
     });
 
-    const response = await fetch(`/api/timesheet/list-timesheets?${queryParams}`, {
+    const response = await fetch(`https://laks-crm.netlify.app/api/timesheet/list-timesheets?${queryParams}`, {
       headers: {
         'Authorization': `Bearer ${params.token}`,
         'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export const createTimesheet = createAsyncThunk(
     hourlyRate?: number;
     token: string;
   }) => {
-    const response = await fetch('/api/timesheet/create', {
+    const response = await fetch('https://laks-crm.netlify.app/api/timesheet/create', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${params.token}`,
@@ -175,7 +175,7 @@ export const clockInOut = createAsyncThunk(
     notes?: string;
     token: string;
   }) => {
-    const response = await fetch('/api/timesheet/clock-in-out', {
+    const response = await fetch('https://laks-crm.netlify.app/api/timesheet/clock-in-out', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${params.token}`,
@@ -212,7 +212,7 @@ export const updateTimesheetEntry = createAsyncThunk(
     notes?: string;
     token: string;
   }) => {
-    const response = await fetch('/api/timesheet/update-entry', {
+    const response = await fetch('https://laks-crm.netlify.app/api/timesheet/update-entry', {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${params.token}`,
@@ -244,7 +244,7 @@ export const submitTimesheet = createAsyncThunk(
     staffSignature?: string;
     token: string;
   }) => {
-    const response = await fetch('/api/timesheet/submit', {
+    const response = await fetch('https://laks-crm.netlify.app/api/timesheet/submit', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${params.token}`,
@@ -272,7 +272,7 @@ export const approveTimesheet = createAsyncThunk(
     managerSignature?: string;
     token: string;
   }) => {
-    const response = await fetch('/api/timesheet/approve', {
+    const response = await fetch('https://laks-crm.netlify.app/api/timesheet/approve', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${params.token}`,
