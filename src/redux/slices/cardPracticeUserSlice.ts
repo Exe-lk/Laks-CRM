@@ -51,7 +51,7 @@ export interface ErrorResponse {
 export const cardPracticeUserApiSlice = createApi({
   reducerPath: 'cardPracticeUserApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: '/api/',
+    baseUrl: 'https://laks-crm.netlify.app/api/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;

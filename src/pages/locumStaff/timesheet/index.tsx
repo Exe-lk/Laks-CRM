@@ -293,10 +293,25 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   useEffect(() => {
     const fetchTimesheetJob = async () => {
-      if (!selectedBooking || !selectedDate) return;
+      if (!selectedBooking || !selectedDate) {
+        // Reset all time tracking state when no booking is selected
+        setStartTime('');
+        setEndTime('');
+        setLunchStartTime('');
+        setLunchEndTime('');
+        setTimesheetJobId(null);
+        setTimesheetId(null);
+        setHourlyRate(null);
+        setTotalHours(null);
+        setTotalPay(null);
+        setError(null);
+        setSuccess(null);
+        return;
+      }
 
       setIsLoading(true);
       setError(null);
+      setSuccess(null);
 
       try {
         const token = getAuthToken();
@@ -311,7 +326,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         const year = bookingDate.getFullYear();
 
         const response = await fetch(
-          `/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
+          `https://laks-crm.netlify.app/api/timesheet/get-locum-timesheet?locumId=${locumId}&month=${month}&year=${year}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -338,25 +353,34 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
             if (existingJob.startTime) {
               const startDate = new Date(existingJob.startTime);
               setStartTime(startDate.toTimeString().substring(0, 5));
+            } else {
+              setStartTime('');
             }
 
             if (existingJob.endTime) {
               const endDate = new Date(existingJob.endTime);
               setEndTime(endDate.toTimeString().substring(0, 5));
+            } else {
+              setEndTime('');
             }
 
             if (existingJob.lunchStartTime) {
               const lunchStart = new Date(existingJob.lunchStartTime);
               setLunchStartTime(lunchStart.toTimeString().substring(0, 5));
+            } else {
+              setLunchStartTime('');
             }
 
             if (existingJob.lunchEndTime) {
               const lunchEnd = new Date(existingJob.lunchEndTime);
               setLunchEndTime(lunchEnd.toTimeString().substring(0, 5));
+            } else {
+              setLunchEndTime('');
             }
 
-            setSuccess('Previous time entries loaded successfully!');
+            setSuccess('Previous time entries loaded for this booking!');
           } else {
+            // No existing timesheet job found for this booking
             setStartTime('');
             setEndTime('');
             setLunchStartTime('');
@@ -366,23 +390,32 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
             setHourlyRate(null);
             setTotalHours(null);
             setTotalPay(null);
+            setSuccess('Ready to track time for this booking');
           }
         } else {
+          // Reset on error
           setStartTime('');
           setEndTime('');
           setLunchStartTime('');
           setLunchEndTime('');
           setTimesheetJobId(null);
           setTimesheetId(null);
+          setHourlyRate(null);
+          setTotalHours(null);
+          setTotalPay(null);
         }
       } catch (err) {
         console.error('Error fetching timesheet job:', err);
+        // Reset on error
         setStartTime('');
         setEndTime('');
         setLunchStartTime('');
         setLunchEndTime('');
         setTimesheetJobId(null);
         setTimesheetId(null);
+        setHourlyRate(null);
+        setTotalHours(null);
+        setTotalPay(null);
       } finally {
         setIsLoading(false);
       }
@@ -454,7 +487,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       let tsId = timesheetId;
 
       if (!jobId) {
-        const addJobResponse = await fetch('/api/timesheet/add-job-to-timesheet', {
+        const addJobResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/add-job-to-timesheet', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -482,7 +515,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         }
       }
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -531,7 +564,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -596,7 +629,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -643,7 +676,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         now.getSeconds()
       );
 
-      const updateResponse = await fetch('/api/timesheet/update-job-times', {
+      const updateResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/update-job-times', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -703,10 +736,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                 return (
                   <div
                     key={booking.id}
-                    className={`p-4 border rounded-lg transition-colors ${selectedBooking?.id === booking.id
-                        ? 'border-[#C3EAE7] bg-[#C3EAE7]/10'
+                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${selectedBooking?.id === booking.id
+                        ? 'border-[#C3EAE7] bg-[#C3EAE7]/20 shadow-md ring-2 ring-[#C3EAE7]/30'
                         : hasStarted
-                          ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer'
+                          ? 'border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300 cursor-pointer'
                           : 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
                       }`}
                     onClick={() => {
@@ -717,7 +750,14 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{booking.location}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900">{booking.location}</h4>
+                          {selectedBooking?.id === booking.id && (
+                            <div className="text-xs bg-[#C3EAE7] text-black px-2 py-1 rounded-full font-medium">
+                              ✓ Selected
+                            </div>
+                          )}
+                        </div>
                         <div className="mt-1 text-sm text-gray-600">
                           <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
                           {booking.description && (
@@ -755,6 +795,171 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                         </span>
                       </div>
                     </div>
+
+                    {/* Time Tracking Section - Show inside selected booking */}
+                    {selectedBooking?.id === booking.id && (
+                      <div className="mt-4 pt-4 border-t border-[#C3EAE7] bg-white rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className="text-sm font-semibold text-gray-900">Time Tracking</h5>
+                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                            📍 Active
+                          </div>
+                        </div>
+
+                        {isLoading && (
+                          <div className="mb-3 flex items-center text-blue-600">
+                            <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                            <span className="text-sm">Loading timesheet data...</span>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={startTime}
+                                readOnly
+                                placeholder="--:--"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                              />
+                              <button
+                                onClick={handleStartClick}
+                                disabled={!!startTime}
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${startTime
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                              >
+                                {startTime ? '✓ Set' : 'Start'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={endTime}
+                                readOnly
+                                placeholder="--:--"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                              />
+                              <button
+                                onClick={handleEndClick}
+                                disabled={!startTime || !!endTime}
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || endTime
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                              >
+                                {endTime ? '✓ Set' : 'End'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={lunchStartTime}
+                                readOnly
+                                placeholder="--:--"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                              />
+                              <button
+                                onClick={handleLunchStartClick}
+                                disabled={!startTime || !!lunchStartTime}
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || lunchStartTime
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                              >
+                                {lunchStartTime ? '✓ Set' : 'Start'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={lunchEndTime}
+                                readOnly
+                                placeholder="--:--"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                              />
+                              <button
+                                onClick={handleLunchEndClick}
+                                disabled={!lunchStartTime || !!lunchEndTime}
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!lunchStartTime || lunchEndTime
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                              >
+                                {lunchEndTime ? '✓ Set' : 'End'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Booking Details */}
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full"></div>
+                            <p className="text-xs font-medium text-gray-900">Current Booking</p>
+                          </div>
+                          <p className="text-xs text-gray-700 mb-1">
+                            <span className="font-medium">Scheduled:</span> {booking.booking_start_time} - {booking.booking_end_time}
+                          </p>
+                          <p className="text-xs text-gray-700">
+                            <span className="font-medium">Date:</span> {new Date(booking.booking_date as any).toLocaleDateString()}
+                          </p>
+                          {timesheetJobId && (
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <p className="text-xs text-green-600 flex items-center gap-1">
+                                <span>✓</span>
+                                <span>Timesheet job created - ID: {timesheetJobId.substring(0, 8)}...</span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Payment Details */}
+                        {hourlyRate !== null && (
+                          <div className="mt-3 pt-3 border-t border-gray-200 bg-blue-50 p-2 rounded">
+                            <h6 className="text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-blue-700">Hourly Rate:</span>
+                                <span className="font-medium text-blue-900">£{hourlyRate.toFixed(2)}/hour</span>
+                              </div>
+                              {totalHours !== null && (
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-blue-700">Total Hours:</span>
+                                  <span className="font-medium text-blue-900">{totalHours.toFixed(2)} hours</span>
+                                </div>
+                              )}
+                              {totalPay !== null && (
+                                <div className="flex justify-between text-xs pt-1 border-t border-blue-200">
+                                  <span className="text-blue-700 font-semibold">Total Pay:</span>
+                                  <span className="font-bold text-green-700">£{totalPay.toFixed(2)}</span>
+                                </div>
+                              )}
+                              {totalHours === null && (
+                                <p className="text-xs text-blue-600 italic mt-1">
+                                  ⏳ Total hours and pay will be calculated when end time is recorded
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -778,160 +983,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           </div>
         )}
 
-        {selectedBooking && (
-          <div className="mt-6 p-4 bg-[#C3EAE7]/10 rounded-lg border border-[#C3EAE7]">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Time Tracking</h4>
-
-            {isLoading && (
-              <div className="mb-3 flex items-center text-blue-600">
-                <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
-                <span className="text-sm">Processing...</span>
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={startTime}
-                    readOnly
-                    placeholder="--:--"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
-                  />
-                  <button
-                    onClick={handleStartClick}
-                    disabled={!!startTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${startTime
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                      }`}
-                  >
-                    {startTime ? '✓ Set' : 'Start'}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={endTime}
-                    readOnly
-                    placeholder="--:--"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
-                  />
-                  <button
-                    onClick={handleEndClick}
-                    disabled={!startTime || !!endTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!startTime || endTime
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                      }`}
-                  >
-                    {endTime ? '✓ Set' : 'End'}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={lunchStartTime}
-                    readOnly
-                    placeholder="--:--"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
-                  />
-                  <button
-                    onClick={handleLunchStartClick}
-                    disabled={!startTime || !!lunchStartTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!startTime || lunchStartTime
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                      }`}
-                  >
-                    {lunchStartTime ? '✓ Set' : 'Start'}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={lunchEndTime}
-                    readOnly
-                    placeholder="--:--"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white"
-                  />
-                  <button
-                    onClick={handleLunchEndClick}
-                    disabled={!lunchStartTime || !!lunchEndTime}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${!lunchStartTime || lunchEndTime
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                      }`}
-                  >
-                    {lunchEndTime ? '✓ Set' : 'End'}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-600">
-                Selected Booking: <span className="font-medium text-gray-900">{selectedBooking.location}</span>
-              </p>
-              <p className="text-xs text-gray-600">
-                Scheduled: {selectedBooking.booking_start_time} - {selectedBooking.booking_end_time}
-              </p>
-              {timesheetJobId && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✓ Timesheet job created - ID: {timesheetJobId.substring(0, 8)}...
-                </p>
-              )}
-            </div>
-
-            {hourlyRate !== null && (
-              <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 p-3 rounded">
-                <h5 className="text-xs font-semibold text-blue-900 mb-2">Payment Details</h5>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-700">Hourly Rate:</span>
-                    <span className="font-medium text-blue-900">£{hourlyRate.toFixed(2)}/hour</span>
-                  </div>
-                  {totalHours !== null && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-700">Total Hours:</span>
-                      <span className="font-medium text-blue-900">{totalHours.toFixed(2)} hours</span>
-                    </div>
-                  )}
-                  {totalPay !== null && (
-                    <div className="flex justify-between text-xs pt-2 border-t border-blue-200">
-                      <span className="text-blue-700 font-semibold">Total Pay:</span>
-                      <span className="font-bold text-green-700 text-sm">£{totalPay.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {totalHours === null && (
-                    <p className="text-xs text-blue-600 italic mt-1">
-                      ⏳ Total hours and pay will be calculated when end time is recorded
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {!selectedBooking && bookings.length > 0 && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-700">
-              ℹ️ Select a booking that has started to track your time
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-blue-600">ℹ️</div>
+              <h4 className="text-sm font-medium text-blue-900">No Booking Selected</h4>
+            </div>
+            <p className="text-sm text-blue-700 mb-2">
+              Click on any booking that has started (showing "In Progress" status) to begin time tracking.
             </p>
+            <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+              <strong>Tip:</strong> Only bookings that have passed their start time can be selected for time tracking.
+            </div>
           </div>
         )}
 
@@ -987,7 +1051,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     formData.append('timesheetId', timesheetId);
     formData.append('signatureType', signatureType);
 
-    const uploadResponse = await fetch('/api/timesheet/upload-signature', {
+    const uploadResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/upload-signature', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1020,7 +1084,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
       
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
 
-      const submitResponse = await fetch('/api/timesheet/submit-timesheet', {
+      const submitResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/submit-timesheet', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1041,7 +1105,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
 
-        const approveResponse = await fetch('/api/timesheet/approve-timesheet', {
+        const approveResponse = await fetch('https://laks-crm.netlify.app/api/timesheet/approve-timesheet', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

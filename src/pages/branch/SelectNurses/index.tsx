@@ -284,7 +284,7 @@ const CreateAppointmentPage = () => {
     const fetchBranches = async (practiceId: string) => {
         setLoadingBranches(true);
         try {
-            const response = await fetch(`/api/branch/practice-branches?practiceId=${practiceId}`);
+            const response = await fetch(`https://laks-crm.netlify.app/api/branch/practice-branches?practiceId=${practiceId}`);
             if (response.ok) {
                 const data = await response.json();
                 setBranches(data.branches || []);

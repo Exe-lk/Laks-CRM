@@ -72,7 +72,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
   const [cancelBooking] = useCancelBookingMutation();
 
-  const bookings = bookingsResponse?.data || [];
+  // Filter to show only today or future bookings (exclude past bookings where end time has passed)
+  const allBookings = bookingsResponse?.data || [];
+  const bookings = allBookings.filter((booking: Booking) => !booking.is_past);
   const error = fetchError ? 'Failed to fetch bookings' : null;
 
   const handleCancelBooking = async (booking: Booking) => {
@@ -413,9 +415,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
         <div className="px-6 py-4 bg-gray-50 border-t">
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div>
-              Total: {bookings.length} bookings | 
-              Upcoming: {bookings.filter((b: Booking) => b.is_upcoming && b.status !== 'CANCELLED').length} | 
-              Past: {bookings.filter((b: Booking) => b.is_past).length} | 
+              Total: {bookings.length} upcoming bookings | 
+              Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
               Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
             </div>
             <button

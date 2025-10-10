@@ -40,7 +40,7 @@ const BranchLoginPage = () => {
         onSubmit: async (values) => {
             setIsLoading(true);
             try {
-                const response = await fetch('/api/branch/login', {
+                const response = await fetch('https://laks-crm.netlify.app/api/branch/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

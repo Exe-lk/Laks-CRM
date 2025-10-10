@@ -8,7 +8,7 @@ export interface PaymentStatusResponse {
 export const PracticeUserPaymentApiSlice = createApi({
   reducerPath: 'PracticeUserPaymentApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: '/api/',
+    baseUrl: 'https://laks-crm.netlify.app/api/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;

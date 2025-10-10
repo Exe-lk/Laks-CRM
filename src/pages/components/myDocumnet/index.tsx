@@ -162,7 +162,7 @@ const MyDocument = () => {
 
         try {
             console.log(formData)
-            const response = await fetch('/api/locum-profile/document', {
+            const response = await fetch('https://laks-crm.netlify.app/api/locum-profile/document', {
                 method: 'POST',
                 body: formData,
             });

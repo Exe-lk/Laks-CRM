@@ -181,7 +181,7 @@ export interface ErrorResponse {
 export const appointmentRequestsLocumApiSlice = createApi({
   reducerPath: 'appointmentRequestsLocumApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api/appointment',
+    baseUrl: 'https://laks-crm.netlify.app/api/appointment',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {

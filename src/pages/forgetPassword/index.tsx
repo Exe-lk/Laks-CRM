@@ -22,7 +22,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch('/api/locum-profile/password-reset', {
+      const response = await fetch('https://laks-crm.netlify.app/api/locum-profile/password-reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
