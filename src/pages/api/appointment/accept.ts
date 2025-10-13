@@ -49,19 +49,9 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
                     locum_id,
                     booking_date:request.request_date,
                     status:"CONFIRMED",
-                    OR: [
-                        {
-                            AND:[
-                                {booking_start_time:{lte:request.request_start_time}},
-                                {booking_end_time:{lte:request.request_start_time}}
-                            ]
-                        },
-                        {
-                            AND:[
-                                {booking_start_time:{lte: request.request_end_time}},
-                                {booking_end_time:{lte:request.request_end_time}}
-                            ]
-                        }
+                    AND: [
+                        {booking_start_time:{lt:request.request_end_time}},
+                        {booking_end_time:{gt:request.request_start_time}}
                     ]
                 }
             });
@@ -100,10 +90,12 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
             message:"Applied to the Booking successfully. Practice User will be notified"
         });
     } catch (error) {
-        console.error("Apply error",error);
+        console.error("Apply error:", error);
         if(error instanceof Error){
+            console.error("Error message:", error.message);
             return res.status(400).json({error:error.message})
         }
+        console.error("Unknown error type:", error);
         res.status(500).json({error:"Failed to apply"})
     }
 }

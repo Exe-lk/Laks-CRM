@@ -103,6 +103,8 @@ const PracticeRegisterForm = () => {
             if (!values.address) errors.address = 'Address is required';
             if (!values.confirmPassword) errors.confirmPassword = 'Please confirm your password';
             else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+            if (!values.practiceType) errors.practiceType = 'Practice type is required';
+            if (!values.location) errors.location = 'Location is required';            
             return errors;
         },
         onSubmit: async (values) => {
@@ -438,6 +440,7 @@ const PracticeRegisterForm = () => {
                                     } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
                                 required
                             >
+                                <option value="">Select your practice type</option>
                                 <option value="Private">Private Practice</option>
                                 <option value="Corporate">Corporate Practice</option>
                             </select>
