@@ -59,7 +59,7 @@ const initialState: BranchState = {
 export const fetchBranches = createAsyncThunk(
   'branches/fetchBranches',
   async (practiceId: string) => {
-    const response = await fetch(`api/branch/get-all?practiceId=${practiceId}`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/get-all?practiceId=${practiceId}`);
     if (!response.ok) {
       throw new Error('Failed to fetch branches');
     }
