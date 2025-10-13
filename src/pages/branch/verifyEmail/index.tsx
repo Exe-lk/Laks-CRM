@@ -26,7 +26,7 @@ export default function VerifyEmail() {
             if (user?.user?.email) {
               try {
                 // Update branch status to pending approval
-                const response = await fetch('https://laks-crm.netlify.app/api/branch/confirm-email', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/confirm-email`, {
                   method: 'PUT',
                   headers: {
                     'Content-Type': 'application/json',

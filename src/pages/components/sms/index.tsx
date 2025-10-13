@@ -11,7 +11,7 @@ export default function SmsTestPage() {
     setStatus(null);
 
     try {
-      const res = await fetch("https://laks-crm.netlify.app/api/sms/send-sms", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/sms/send-sms`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to, body }),

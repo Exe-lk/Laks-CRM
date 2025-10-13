@@ -40,7 +40,6 @@ const WaitingList = () => {
 
     useEffect(() => {
         const profileStr = localStorage.getItem('profile');
-        console.log("profile", profileStr)
         const locumIdStr = localStorage.getItem('locumId');
 
         if (profileStr) {
@@ -79,7 +78,6 @@ const WaitingList = () => {
         { locum_id: profile?.id },
         { skip: !profile?.id }
     );
-    console.log(availableRequestsData)
 
     const [acceptAppointment] = useAcceptAppointmentMutation();
 
@@ -266,7 +264,6 @@ const WaitingList = () => {
         }
     };
 
-    console.log(pendingConfirmationsData)
 
     const formatTimeLeft = (expiresAt: string | Date) => {
         const expiry = new Date(expiresAt);

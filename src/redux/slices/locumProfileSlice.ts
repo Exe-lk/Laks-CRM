@@ -55,7 +55,7 @@ export interface ErrorResponse {
 export const locumProfileApiSlice = createApi({
   reducerPath: 'locumProfileApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'https://laks-crm.netlify.app/api/',
+    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/`,
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;

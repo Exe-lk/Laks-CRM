@@ -29,7 +29,7 @@ const initialValues = {
     address: '',
     location: '',
     gdcRegistration: '',
-    practiceType: 'Private'
+    practiceType: 'Select your practice type'
 };
 
 const PracticeRegisterForm = () => {

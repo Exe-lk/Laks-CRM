@@ -178,7 +178,7 @@ export interface SelectApplicantResponse {
 export const appointmentApiSlice = createApi({
   reducerPath: 'appointmentApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://laks-crm.netlify.app/api/appointment',
+    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/appointment`,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {
