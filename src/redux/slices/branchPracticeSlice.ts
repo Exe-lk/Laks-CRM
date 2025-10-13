@@ -59,7 +59,7 @@ const initialState: BranchState = {
 export const fetchBranches = createAsyncThunk(
   'branches/fetchBranches',
   async (practiceId: string) => {
-    const response = await fetch(`https://laks-crm.netlify.app/api/branch/get-all?practiceId=${practiceId}`);
+    const response = await fetch(`api/branch/get-all?practiceId=${practiceId}`);
     if (!response.ok) {
       throw new Error('Failed to fetch branches');
     }
@@ -71,7 +71,7 @@ export const fetchBranches = createAsyncThunk(
 export const createBranch = createAsyncThunk(
   'branches/createBranch',
   async (branchData: CreateBranchData) => {
-    const response = await fetch('https://laks-crm.netlify.app/api/branch/create', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export const createBranch = createAsyncThunk(
 export const updateBranch = createAsyncThunk(
   'branches/updateBranch',
   async (branchData: UpdateBranchData) => {
-    const response = await fetch('https://laks-crm.netlify.app/api/branch/update', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/update`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export const updateBranch = createAsyncThunk(
 export const deleteBranch = createAsyncThunk(
   'branches/deleteBranch',
   async (branchId: string) => {
-    const response = await fetch('https://laks-crm.netlify.app/api/branch/delete', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/delete`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

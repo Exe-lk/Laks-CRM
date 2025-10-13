@@ -49,9 +49,19 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
                     locum_id,
                     booking_date:request.request_date,
                     status:"CONFIRMED",
-                    AND: [
-                        {booking_start_time:{lt:request.request_end_time}},
-                        {booking_end_time:{gt:request.request_start_time}}
+                    OR: [
+                        {
+                            AND:[
+                                {booking_start_time:{lte:request.request_start_time}},
+                                {booking_end_time:{lte:request.request_start_time}}
+                            ]
+                        },
+                        {
+                            AND:[
+                                {booking_start_time:{lte: request.request_end_time}},
+                                {booking_end_time:{lte:request.request_end_time}}
+                            ]
+                        }
                     ]
                 }
             });
@@ -80,6 +90,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
             });
 
             cancelAutoCancellation(request_id);
+            
             
             return application
         });
