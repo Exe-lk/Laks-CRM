@@ -355,7 +355,7 @@ const PracticeRegisterForm = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                Address *
+                                Select your location from map *
                             </label>
                             <div className="relative">
                                 <textarea
@@ -367,6 +367,7 @@ const PracticeRegisterForm = () => {
                                         } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none resize-none h-20 hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                                     placeholder="Enter your complete address or click the map icon to select location"
                                     required
+                                    readOnly
                                 />
                                 <button
                                     type="button"
