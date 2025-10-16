@@ -315,13 +315,18 @@ const NavBar = () => {
           {isLoggedIn && (
             <>
               {profile?.practiceType === 'Corporate' ? (
-                <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
-                    }`}
+                <><li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''}`}
                   onClick={() => router.push('/practiceUser/branches')}
                 >
                   Branches
-                </li>
+                </li><li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''}`}
+                  onClick={() => router.push('/practiceUser/myBookings')}
+                >
+                    My Bookings
+                  </li></>
+                
               ) : (
                 <>
                   <li
