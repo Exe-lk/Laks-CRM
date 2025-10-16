@@ -62,6 +62,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   onBookingCancelled
 }) => {
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<string>('all');
   
   const {
     data: bookingsResponse,
@@ -72,9 +73,21 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
   const [cancelBooking] = useCancelBookingMutation();
 
-  // Filter to show only today or future bookings (exclude past bookings where end time has passed)
   const allBookings = bookingsResponse?.data || [];
-  const bookings = allBookings.filter((booking: Booking) => !booking.is_past);
+  const upcomingBookings = allBookings.filter((booking: Booking) => !booking.is_past);
+  
+  const branchStrings = upcomingBookings
+    .filter((booking: Booking) => booking.branch)
+    .map((booking: Booking) => JSON.stringify({ id: booking.branch!.id, name: booking.branch!.name }));
+  const uniqueBranchStrings = Array.from(new Set<string>(branchStrings));
+  const branches = uniqueBranchStrings.map((item) => JSON.parse(item) as { id: string; name: string });
+
+  const bookings = selectedBranch === 'all' 
+    ? upcomingBookings 
+    : upcomingBookings.filter((booking: Booking) => booking.branch?.id === selectedBranch);
+  
+  const hasBranches = bookings.some((booking: Booking) => booking.branch);
+  
   const error = fetchError ? 'Failed to fetch bookings' : null;
 
   const handleCancelBooking = async (booking: Booking) => {
@@ -242,20 +255,58 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="px-6 py-4 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] border-b">
-        <div className="flex items-center gap-3">
-          <FiCalendar className="text-2xl text-gray-700" />
-          <h2 className="text-2xl font-bold text-gray-800">Your Bookings</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <FiCalendar className="text-2xl text-gray-700" />
+              <h2 className="text-2xl font-bold text-gray-800">Your Bookings</h2>
+            </div>
+            <p className="text-gray-600 mt-1">
+              Manage your bookings • You can cancel confirmed bookings more than 48 hours before the appointment start time
+            </p>
+          </div>
+          
+          {/* Branch Filter */}
+          {branches.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label htmlFor="branch-filter" className="text-sm font-medium text-gray-700">
+                Filter by Branch:
+              </label>
+              <select
+                id="branch-filter"
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] bg-white text-sm"
+              >
+                <option value="all">All Branches</option>
+                {branches.map((branch: any) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
-        <p className="text-gray-600 mt-1">
-          Manage your bookings • You can cancel confirmed bookings more than 48 hours before the appointment start time
-        </p>
       </div>
 
       {bookings.length === 0 ? (
         <div className="p-12 text-center">
           <FiCalendar className="text-6xl text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-500 mb-2">No Bookings Found</h3>
-          <p className="text-gray-400">You don't have any bookings yet.</p>
+          <p className="text-gray-400">
+            {selectedBranch !== 'all' 
+              ? 'No bookings found for the selected branch. Try selecting a different branch or view all bookings.'
+              : 'You don\'t have any bookings yet.'}
+          </p>
+          {selectedBranch !== 'all' && (
+            <button
+              onClick={() => setSelectedBranch('all')}
+              className="mt-4 px-4 py-2 bg-[#C3EAE7] text-black rounded-md hover:bg-[#A9DBD9] transition-colors"
+            >
+              View All Bookings
+            </button>
+          )}
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -265,6 +316,11 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Date & Time
                 </th>
+                {hasBranches && (
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Branch
+                  </th>
+                )}
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Location
                 </th>
@@ -300,6 +356,22 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                       </div>
                     </div>
                   </td>
+                  {hasBranches && (
+                    <td className="px-6 py-4">
+                      <div className="text-sm">
+                        {booking.branch ? (
+                          <div>
+                            <div className="font-medium text-blue-600">{booking.branch.name}</div>
+                            {booking.branch.location && (
+                              <div className="text-xs text-gray-500">{booking.branch.location}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">No branch assigned</span>
+                        )}
+                      </div>
+                    </td>
+                  )}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-sm text-gray-900">
                       <FiMapPin className="text-[#C3EAE7]" />
@@ -318,9 +390,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         {userType === 'locum' ? (
                           <div>
                             <div className="font-medium text-gray-900">{booking.practice?.name}</div>
-                            {booking.branch && (
-                              <div className="text-xs text-blue-600 font-medium">Branch: {booking.branch.name}</div>
-                            )}
                             {booking.practice?.location && (
                               <div className="text-xs text-gray-500">{booking.practice.location}</div>
                             )}
@@ -415,9 +484,19 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
         <div className="px-6 py-4 bg-gray-50 border-t">
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div>
-              Total: {bookings.length} upcoming bookings | 
-              Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
-              Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
+              {selectedBranch !== 'all' ? (
+                <>
+                  Showing: {bookings.length} of {upcomingBookings.length} bookings | 
+                  Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
+                  Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
+                </>
+              ) : (
+                <>
+                  Total: {bookings.length} upcoming bookings | 
+                  Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
+                  Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
+                </>
+              )}
             </div>
             <button
               onClick={() => refetchBookings()}

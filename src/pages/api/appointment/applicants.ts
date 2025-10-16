@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
+import { getSpecialityDisplayName } from "@/lib/enums";
 
 const prisma = new PrismaClient();
 
@@ -107,11 +108,23 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         }
        });
 
+       // Convert specialty numbers to display names
+       const applicantsWithDisplayNames = applicants.map(applicant => ({
+           ...applicant,
+           locumProfile: {
+               ...applicant.locumProfile,
+               specialties: applicant.locumProfile.specialties.map(specialty => ({
+                   ...specialty,
+                   speciality: getSpecialityDisplayName(specialty.speciality)
+               }))
+           }
+       }));
+
        res.status(200).json({
         success:true,
         data:{
             job:request,
-            applicants:applicants,
+            applicants:applicantsWithDisplayNames,
             total_applicants:applicants.length,
             active_selection:activeConfirmation,
             can_select_applicant:request.status === "PENDING" && !activeConfirmation
