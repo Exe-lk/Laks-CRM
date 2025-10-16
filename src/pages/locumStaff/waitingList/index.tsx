@@ -56,18 +56,6 @@ const WaitingList = () => {
         return () => clearInterval(timer);
     }, []);
 
-    useEffect(() => {
-        if (!profile?.id) return;
-        
-        if (activeTab === 'pending-confirmations') {
-            refetchConfirmations();
-        } else if (activeTab === 'pending-requests') {
-            refetchHistory();
-        } else if (activeTab === 'request-appoitment') {
-            refetch();
-        }
-    }, [activeTab, profile?.id]);
-
     const {
         data: pendingConfirmationsData,
         isLoading: isLoadingConfirmations,
@@ -201,6 +189,19 @@ const WaitingList = () => {
             refetchOnMountOrArgChange: true,
         }
     );
+
+    // Refetch data when switching tabs
+    useEffect(() => {
+        if (!profile?.id) return;
+        
+        if (activeTab === 'pending-confirmations') {
+            refetchConfirmations();
+        } else if (activeTab === 'pending-requests') {
+            refetchHistory();
+        } else if (activeTab === 'request-appoitment') {
+            refetch();
+        }
+    }, [activeTab, profile?.id, refetchConfirmations, refetchHistory, refetch]);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 
