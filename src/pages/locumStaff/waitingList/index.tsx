@@ -350,36 +350,36 @@ const WaitingList = () => {
                         }
                     </p>
 
-                    <div className="mt-6 flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-lg">
+                    <div className="mt-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-lg sm:max-w-3xl">
                         <button
                             onClick={() => setActiveTab('request-appoitment')}
-                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'request-appoitment'
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'request-appoitment'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
-                            <FaHistory className="mr-2" />
-                            Request Appoitment
+                            <FaHistory className="mr-1 sm:mr-2" />
+                            <span className="whitespace-nowrap">Request Appoitment</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('pending-requests')}
-                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-requests'
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-requests'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
-                            <FaHistory className="mr-2" />
-                            Pending Requests
+                            <FaHistory className="mr-1 sm:mr-2" />
+                            <span className="whitespace-nowrap">Pending Requests</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('pending-confirmations')}
-                            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-confirmations'
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-confirmations'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
-                            <FaExclamationTriangle className="mr-2" />
-                            Pending Confirmations
+                            <FaExclamationTriangle className="mr-1 sm:mr-2" />
+                            <span className="whitespace-nowrap">Pending Confirmations</span>
                         </button>
                     </div>
 
@@ -433,7 +433,8 @@ const WaitingList = () => {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            <div className="overflow-x-auto">
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
@@ -575,6 +576,127 @@ const WaitingList = () => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden">
+                                {pendingConfirmations.map((confirmation) => {
+                                    const timeLeft = formatTimeLeft(confirmation.expires_at);
+                                    const isLoading = loadingStates[confirmation.confirmation_id];
+
+                                    return (
+                                        <div
+                                            key={confirmation.confirmation_id}
+                                            className={`p-4 border-b border-gray-200 ${timeLeft.expired ? 'bg-red-50' : ''}`}
+                                        >
+                                            <div className="space-y-3">
+                                                {/* Practice Details */}
+                                                <div>
+                                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                                                        {confirmation.practice.name}
+                                                    </h3>
+                                                    {confirmation.branch && (
+                                                        <div className="text-sm font-medium text-blue-600 mb-1">
+                                                            Branch: {confirmation.branch.name}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-sm text-gray-500 flex items-center">
+                                                        <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                        {confirmation.practice.location}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500 flex items-center">
+                                                        <FaPhoneAlt className="mr-1 text-gray-400" />
+                                                        {confirmation.practice.telephone}
+                                                    </div>
+                                                </div>
+
+                                                {/* Appointment Details */}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900 flex items-center">
+                                                        <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                        {formatDateTime(confirmation.appointment.date)}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500 mt-1">
+                                                        {confirmation.appointment.start_time} - {confirmation.appointment.end_time}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500 mt-1">
+                                                        📍 {confirmation.appointment.location}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 mt-1">
+                                                        Confirmation #{confirmation.confirmation_number}
+                                                    </div>
+                                                </div>
+
+                                                {/* Time Left */}
+                                                <div>
+                                                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${timeLeft.expired
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : timeLeft.isUrgent
+                                                            ? 'bg-orange-100 text-orange-800'
+                                                            : 'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        <FaClock className="mr-1" />
+                                                        {timeLeft.display}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Expires: {formatDateTime(confirmation.expires_at)}
+                                                    </div>
+                                                </div>
+
+                                                {/* Status */}
+                                                <div>
+                                                    {timeLeft.expired ? (
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                            <FaTimes className="mr-1" />
+                                                            Expired
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            <FaClock className="mr-1" />
+                                                            Pending Response
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Actions */}
+                                                {!timeLeft.expired ? (
+                                                    <div className="flex flex-col space-y-2 pt-2">
+                                                        <button
+                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM')}
+                                                            disabled={isLoading}
+                                                            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                                                        >
+                                                            {isLoading ? (
+                                                                <FaSpinner className="animate-spin mr-1" />
+                                                            ) : (
+                                                                <FaCheck className="mr-1" />
+                                                            )}
+                                                            Accept
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT')}
+                                                            disabled={isLoading}
+                                                            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                                        >
+                                                            {isLoading ? (
+                                                                <FaSpinner className="animate-spin mr-1" />
+                                                            ) : (
+                                                                <FaTimes className="mr-1" />
+                                                            )}
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-red-600 text-sm pt-2">
+                                                        <FaTimes className="inline mr-1" />
+                                                        Auto-rejected
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )
                 ) : activeTab === 'pending-requests' ? (
@@ -588,7 +710,8 @@ const WaitingList = () => {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            <div className="overflow-x-auto">
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
@@ -687,6 +810,78 @@ const WaitingList = () => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden">
+                                {filteredApplicationHistory.map((application) => (
+                                    <div
+                                        key={application.response_id}
+                                        className={`p-4 border-b border-gray-200 ${application.request.is_past ? 'bg-gray-50' : ''}`}
+                                    >
+                                        <div className="space-y-3">
+                                            {/* Practice Details */}
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                                                    {application.request.practice.name}
+                                                </h3>
+                                                {application.request.branch && (
+                                                    <div className="text-sm font-medium text-blue-600 mb-1">
+                                                        Branch: {application.request.branch.name}
+                                                    </div>
+                                                )}
+                                                <div className="text-sm text-gray-500 flex items-center">
+                                                    <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                    {application.request.practice.location}
+                                                </div>
+                                                <div className="text-sm text-gray-500 flex items-center">
+                                                    <FaPhoneAlt className="mr-1 text-gray-400" />
+                                                    {application.request.practice.telephone}
+                                                </div>
+                                            </div>
+
+                                            {/* Appointment Details */}
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-900 flex items-center">
+                                                    <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                    {formatDateTime(application.request.request_date)}
+                                                </div>
+                                                <div className="text-sm text-gray-500 mt-1">
+                                                    {application.request.request_start_time} - {application.request.request_end_time}
+                                                </div>
+                                                <div className="text-sm text-gray-500 mt-1">
+                                                    📍 {application.request.location}
+                                                </div>
+                                                <div className="text-xs text-gray-400 mt-1">
+                                                    Role: {application.request.required_role}
+                                                </div>
+                                            </div>
+
+                                            {/* Applied Date */}
+                                            <div>
+                                                <div className="text-xs font-medium text-gray-500 uppercase">Applied Date</div>
+                                                <div className="text-sm text-gray-900">
+                                                    {formatDateTime(application.responded_at)}
+                                                </div>
+                                            </div>
+
+                                            {/* Status */}
+                                            <div>
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.status === 'ACCEPTED'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {application.request.status_label}
+                                                </span>
+                                                {application.request.is_past && (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 ml-2">
+                                                        Past Event
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )
                 ) : (
@@ -700,11 +895,11 @@ const WaitingList = () => {
                                     Available Appointment Requests
                                 </h1> */}
                     </div><div className="w-full px-2 sm:px-6 md:px-12 mb-12">
-                            <div className="bg-[#C3EAE7] px-2 sm:px-4 py-6 w-full rounded-none mb-4">
-                                <div className="flex justify-between items-center">
+                            <div className="bg-[#C3EAE7] px-2 sm:px-4 py-4 sm:py-6 w-full rounded-none mb-4">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                                     <div>
-                                        <h2 className="text-2xl font-bold text-black">Available Requests</h2>
-                                        <p className="text-gray-700 mt-1">
+                                        <h2 className="text-xl sm:text-2xl font-bold text-black">Available Requests</h2>
+                                        <p className="text-gray-700 mt-1 text-sm sm:text-base">
                                             {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
                                             {distanceFilter !== 999999 && (
                                                 <span className="text-sm text-gray-500 ml-1">
@@ -713,16 +908,16 @@ const WaitingList = () => {
                                             )}
                                         </p>
                                     </div>
-                                    <div className="flex items-center space-x-4">
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
                                         <div className="flex items-center space-x-2">
-                                            <label htmlFor="distance-filter" className="text-sm font-medium text-gray-700">
+                                            <label htmlFor="distance-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                                 Distance:
                                             </label>
                                             <select
                                                 id="distance-filter"
                                                 value={distanceFilter}
                                                 onChange={(e) => setDistanceFilter(Number(e.target.value))}
-                                                className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             >
                                                 <option value={15}>Within 15 km</option>
                                                 <option value={40}>Within 40 km</option>
@@ -733,7 +928,7 @@ const WaitingList = () => {
                                         </div>
                                         <button
                                             onClick={() => refetch()}
-                                            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all"
+                                            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm sm:text-base"
                                         >
                                             Refresh
                                         </button>
@@ -741,7 +936,8 @@ const WaitingList = () => {
                                 </div>
                             </div>
                             <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
-                                <div className="overflow-x-auto">
+                                {/* Desktop Table View */}
+                                <div className="hidden md:block overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
                                         <thead className="bg-[#C3EAE7]/20">
                                             <tr>
@@ -826,6 +1022,91 @@ const WaitingList = () => {
                                             )}
                                         </tbody>
                                     </table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="md:hidden">
+                                    {requests.length > 0 ? (
+                                        requests.map((req) => (
+                                            <div key={req.request_id} className="p-4 border-b border-gray-200 hover:bg-[#C3EAE7]/10 transition-all">
+                                                <div className="space-y-3">
+                                                    {/* Practice Info */}
+                                                    <div>
+                                                        <h3 className="text-base font-semibold text-gray-900">{req.practice.name}</h3>
+                                                        {req.branch && (
+                                                            <div className="text-blue-600 font-medium text-sm mt-1">Branch: {req.branch.name}</div>
+                                                        )}
+                                                        <div className="text-gray-500 text-sm mt-1">{req.practice.telephone}</div>
+                                                    </div>
+
+                                                    {/* Date and Time */}
+                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                        <div>
+                                                            <div className="text-xs font-medium text-gray-500 uppercase">Request Date</div>
+                                                            <div className="text-gray-700 flex items-center mt-1">
+                                                                {req.is_urgent && <FaExclamationTriangle className="text-red-500 mr-1 text-xs" />}
+                                                                {formatDate(req.request_date)}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-xs font-medium text-gray-500 uppercase">Distance</div>
+                                                            <div className="text-gray-700 mt-1">
+                                                                {req.distance !== null ? (
+                                                                    <span className="flex items-center">
+                                                                        <FaMapMarkerAlt className="mr-1 text-gray-400" />
+                                                                        {req.distance} km
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-gray-400">N/A</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Time Range */}
+                                                    <div>
+                                                        <div className="text-xs font-medium text-gray-500 uppercase">Time</div>
+                                                        <div className="text-gray-700 text-sm mt-1">
+                                                            {formatTime(req.request_start_time)} - {formatTime(req.request_end_time)}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Location */}
+                                                    <div>
+                                                        <div className="text-xs font-medium text-gray-500 uppercase">Location</div>
+                                                        <div className="text-gray-700 text-sm mt-1">{req.location}</div>
+                                                    </div>
+
+                                                    {/* Action Button */}
+                                                    <button
+                                                        onClick={() => handleAccept(req.request_id)}
+                                                        disabled={loadingStates[req.request_id]}
+                                                        className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all mt-3"
+                                                    >
+                                                        {loadingStates[req.request_id] ? (
+                                                            <>
+                                                                <FaSpinner className="animate-spin mr-2" />
+                                                                Processing...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FaCheck className="mr-2" />
+                                                                Accept
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-gray-500 py-8">
+                                            <div className="flex flex-col items-center">
+                                                <FaClock className="text-4xl mb-4 text-gray-300" />
+                                                <p className="text-lg font-medium">No available appointments</p>
+                                                <p className="text-sm">Check back later for new opportunities</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div></>

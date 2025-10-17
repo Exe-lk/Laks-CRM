@@ -51,8 +51,6 @@ export const GoogleMapModal: FC<GoogleMapModalProps> = ({ open, onClose, onSelec
     }
   };
 
-  if (!isLoaded) return <div>Loading...</div>;
-
   if (!open) return null;
   return (
     <div style={{
