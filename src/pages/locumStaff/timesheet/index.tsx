@@ -1044,31 +1044,51 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     managerSignatureRef.current?.clear();
   };
 
-  const uploadSignatureImage = async (signatureDataUrl: string, signatureType: 'staff' | 'manager'): Promise<string> => {
+  const uploadSignatureImage = async (
+    signatureDataUrl: string, 
+    signatureType: 'staff' | 'manager',
+    maxRetries: number = 2
+  ): Promise<string> => {
     const token = getAuthToken();
-    
     const blob = await fetch(signatureDataUrl).then(r => r.blob());
     
-    const formData = new FormData();
-    formData.append('signature', blob, `${signatureType}_signature.png`);
-    formData.append('timesheetId', timesheetId);
-    formData.append('signatureType', signatureType);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const formData = new FormData();
+        formData.append('signature', blob, `${signatureType}_signature.png`);
+        formData.append('timesheetId', timesheetId);
+        formData.append('signatureType', signatureType);
 
-    const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/upload-signature`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData
-    });
+        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/upload-signature`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData
+        });
 
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json();
-      throw new Error(errorData.error || 'Failed to upload signature');
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          if (attempt === maxRetries) {
+            throw new Error(errorData.error || 'Failed to upload signature');
+          }
+          console.warn(`Upload attempt ${attempt} failed, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        }
+
+        const uploadData = await uploadResponse.json();
+        return uploadData.data.signatureUrl;
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        console.warn(`Upload attempt ${attempt} failed with exception, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
     }
-
-    const uploadData = await uploadResponse.json();
-    return uploadData.data.signatureUrl;
+    
+    throw new Error('Failed to upload signature after multiple attempts');
   };
 
   const handleSubmit = async () => {
@@ -1083,9 +1103,12 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     try {
       const token = getAuthToken();
 
+      console.log('Starting signature upload process...');
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
       
+      console.log('Uploading staff signature...');
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
+      console.log('✓ Staff signature uploaded successfully');
 
       const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/submit-timesheet`, {
         method: 'POST',
@@ -1105,8 +1128,10 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
       }
 
       if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
+        console.log('Uploading manager signature...');
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
+        console.log('✓ Manager signature uploaded successfully');
 
         const approveResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/approve-timesheet`, {
           method: 'POST',
@@ -1124,12 +1149,16 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
 
         if (!approveResponse.ok) {
           console.error('Failed to add manager signature and approve');
+          setError('⚠️ Timesheet submitted but manager approval failed. Please contact support.');
+          // Don't throw here - staff signature is already saved
         }
       }
 
+      console.log('✓ Timesheet submission complete');
       onSubmit();
     } catch (err: any) {
-      setError(err.message || 'Failed to submit timesheet');
+      console.error('Timesheet submission error:', err);
+      setError(err.message || 'Failed to submit timesheet. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
