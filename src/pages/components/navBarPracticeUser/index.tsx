@@ -343,13 +343,13 @@ const NavBar = () => {
                   >
                     My Bookings
                   </li>
-                  <li
+                  {/* <li
                     className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
                       }`}
                     onClick={() => router.push('/practiceUser/Rating')}
                   >
                     Rating
-                  </li>
+                  </li> */}
                   <li
                     className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
                       }`}
@@ -466,13 +466,13 @@ const NavBar = () => {
                         >
                           My Bookings
                         </li>
-                        <li
+                        {/* <li
                           className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/Rating') ? 'bg-[#C3EAE7] text-black' : ''
                             }`}
                           onClick={() => { router.push('/practiceUser/Rating'); closeMobileMenu(); }}
                         >
                           Rating
-                        </li>
+                        </li> */}
                         <li
                           className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
                             }`}

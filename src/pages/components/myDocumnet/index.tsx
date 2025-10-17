@@ -131,8 +131,13 @@ const MyDocument = () => {
     const onSubmit = async (values: FormValues, { resetForm }: { resetForm: () => void }) => {
         Swal.fire({
             title: 'Uploading documents...',
+            text: 'Please wait while we upload your files. This may take a moment.',
             icon: 'info',
-            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
         console.log(values);
         const documents = values.documents;
@@ -169,23 +174,46 @@ const MyDocument = () => {
             console.log(response)
             const result = await response.json();
             console.log(result);
+            
             if (result.status === 200) {
-            Swal.fire({
-                title: 'Documents uploaded successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK',
-            });
-            resetForm();
+                if (result.partialSuccess && result.failedDocuments?.length > 0) {
+                    // Partial success - some files uploaded, some failed
+                    Swal.fire({
+                        title: 'Partial Upload Success',
+                        html: `
+                            <p>${result.message}</p>
+                            <br/>
+                            <p><strong>Successfully uploaded:</strong> ${result.uploadedDocuments.length} document(s)</p>
+                            <p><strong>Failed:</strong> ${result.failedDocuments.join(', ')}</p>
+                            <br/>
+                            <p>Please try uploading the failed documents again.</p>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                    });
+                } else {
+                    // Full success
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'All documents uploaded successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                    });
+                    resetForm();
+                }
             } else {
                 Swal.fire({
                     title: 'Upload failed!',
+                    text: result.error || 'An error occurred during upload. Please try again.',
                     icon: 'error',
                     confirmButtonText: 'OK',
                 });
             }
         } catch (error) {
+            console.error('Upload error:', error);
             Swal.fire({
                 title: 'Upload failed!',
+                text: 'An unexpected error occurred. Please check your connection and try again.',
                 icon: 'error',
                 confirmButtonText: 'OK',
             });

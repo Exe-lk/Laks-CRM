@@ -14,6 +14,52 @@ export const config = {
   },
 };
 
+// Helper function to add delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to retry upload with exponential backoff
+async function uploadSignatureWithRetry(
+  filePath: string,
+  fileBuffer: Buffer,
+  mimetype: string,
+  maxRetries: number = 3
+): Promise<{ success: boolean; publicUrl?: string; error?: any }> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('signatures')
+        .upload(filePath, fileBuffer, {
+          contentType: mimetype || 'image/png',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error(`Upload attempt ${attempt} failed:`, uploadError);
+        if (attempt === maxRetries) {
+          return { success: false, error: uploadError };
+        }
+        // Wait before retrying (exponential backoff)
+        await delay(1000 * attempt);
+        continue;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('signatures')
+        .getPublicUrl(filePath);
+
+      return { success: true, publicUrl };
+    } catch (error) {
+      console.error(`Upload attempt ${attempt} exception:`, error);
+      if (attempt === maxRetries) {
+        return { success: false, error };
+      }
+      await delay(1000 * attempt);
+    }
+  }
+  return { success: false, error: "Max retries exceeded" };
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -79,26 +125,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const fileName = `timesheet_${timesheetId}_${signatureType}_signature_${Date.now()}${fileExt}`;
     const filePath = `timesheet-signatures/${fileName}`;
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('signatures')
-      .upload(filePath, fileBuffer, {
-        contentType: signatureFile.mimetype || 'image/png',
-        upsert: true,
-      });
+    console.log(`Uploading ${signatureType} signature for timesheet ${timesheetId}...`);
 
-    if (uploadError) {
-      console.error('Supabase upload error:', uploadError);
-      return res.status(500).json({ error: "Failed to upload signature to storage" });
-    }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('signatures')
-      .getPublicUrl(filePath);
+    // Upload to Supabase Storage with retry logic
+    const uploadResult = await uploadSignatureWithRetry(
+      filePath,
+      fileBuffer,
+      signatureFile.mimetype || 'image/png',
+      3
+    );
 
     // Clean up temporary file
     fs.unlinkSync(signatureFile.filepath);
+
+    if (!uploadResult.success || !uploadResult.publicUrl) {
+      console.error('Failed to upload signature after retries:', uploadResult.error);
+      return res.status(500).json({ 
+        error: "Failed to upload signature to storage",
+        details: uploadResult.error 
+      });
+    }
+
+    console.log(`✓ Successfully uploaded ${signatureType} signature`);
+    const publicUrl = uploadResult.publicUrl;
 
     res.status(200).json({
       success: true,
