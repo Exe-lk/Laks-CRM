@@ -37,49 +37,6 @@ async function fileToBuffer(file: UploadedFile): Promise<Buffer> {
   return buffer;
 }
 
-// Helper function to add delay between uploads
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Helper function to retry upload with exponential backoff
-async function uploadWithRetry(
-  filePath: string,
-  fileBuffer: Buffer,
-  mimetype: string,
-  maxRetries: number = 3
-): Promise<{ success: boolean; url?: string; error?: any }> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("document")
-        .upload(filePath, fileBuffer, {
-          contentType: mimetype,
-          cacheControl: "3600",
-        });
-
-      if (uploadError) {
-        if (attempt === maxRetries) {
-          return { success: false, error: uploadError };
-        }
-        // Wait before retrying (exponential backoff)
-        await delay(1000 * attempt);
-        continue;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from("document")
-        .getPublicUrl(filePath);
-
-      return { success: true, url: urlData.publicUrl };
-    } catch (error) {
-      if (attempt === maxRetries) {
-        return { success: false, error };
-      }
-      await delay(1000 * attempt);
-    }
-  }
-  return { success: false, error: "Max retries exceeded" };
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -124,7 +81,6 @@ export default async function handler(
     }
 
     const updateData: any = {};
-    const failedUploads: string[] = [];
     const documentFields = [
       "gdcImage",
       "indemnityInsuranceImage",
@@ -139,18 +95,11 @@ export default async function handler(
       "NIUTRnumber",
     ];
 
-    let fileIndex = 0;
     for (const fieldName of documentFields) {
       const file = files[fieldName]?.[0] as UploadedFile;
 
       if (file) {
         try {
-          // Add a delay between uploads (except for the first one)
-          if (fileIndex > 0) {
-            await delay(800); // 800ms delay between each upload
-          }
-          fileIndex++;
-
           const fileBuffer = await fileToBuffer(file);
 
           const fileExtension =
@@ -158,25 +107,26 @@ export default async function handler(
           const fileName = `${locumId}_${fieldName}_${Date.now()}.${fileExtension}`;
           const filePath = `${locumId}/${fileName}`;
 
-          console.log(`Uploading ${fieldName} (attempt ${fileIndex})...`);
-          
-          const uploadResult = await uploadWithRetry(
-            filePath,
-            fileBuffer,
-            file.mimetype,
-            3
-          );
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage
+              .from("document")
+              .upload(filePath, fileBuffer, {
+                contentType: file.mimetype,
+                cacheControl: "3600",
+              });
 
-          if (uploadResult.success && uploadResult.url) {
-            updateData[fieldName] = uploadResult.url;
-            console.log(`✓ Successfully uploaded ${fieldName}`);
-          } else {
-            console.error(`✗ Failed to upload ${fieldName}:`, uploadResult.error);
-            failedUploads.push(fieldName);
+          if (uploadError) {
+            console.error(`Error uploading ${fieldName}:`, uploadError);
+            continue;
           }
+
+          const { data: urlData } = supabase.storage
+            .from("document")
+            .getPublicUrl(filePath);
+
+          updateData[fieldName] = urlData.publicUrl;
         } catch (error) {
           console.error(`Error processing ${fieldName}:`, error);
-          failedUploads.push(fieldName);
         }
       }
     }
@@ -187,24 +137,16 @@ export default async function handler(
         data: updateData,
       });
 
-      const responseMessage = 
-        failedUploads.length > 0
-          ? `${Object.keys(updateData).length} documents uploaded successfully. ${failedUploads.length} failed.`
-          : "All documents uploaded successfully";
-
       return res.status(200).json({
-        message: responseMessage,
+        message: "Documents uploaded successfully",
         profile: updatedProfile,
         uploadedDocuments: Object.keys(updateData),
-        failedDocuments: failedUploads,
         status: 200,
-        partialSuccess: failedUploads.length > 0,
       });
     } else {
-      return res.status(400).json({ 
-        error: "No valid documents were uploaded",
-        failedDocuments: failedUploads,
-      });
+      return res
+        .status(400)
+        .json({ error: "No valid documents were uploaded" });
     }
   } catch (error) {
     console.error("Document upload error:", error);

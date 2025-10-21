@@ -51,11 +51,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           gte: new Date()
         },
         NOT: {
-          responses: {
-            some: {
-              locum_id: locum_id as string
+          OR: [
+            {
+              responses: {
+                some: {
+                  locum_id: locum_id as string
+                }
+              }
+            },
+            {
+              ignoredBy: {
+                some: {
+                  locum_id: locum_id as string
+                }
+              }
             }
-          }
+          ]
         }
       },
       include: {
