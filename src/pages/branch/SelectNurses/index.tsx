@@ -236,15 +236,6 @@ const CreateAppointmentPage = () => {
         }
     }, [profile, isBranchUser]);
 
-    const isUrgentAppointment = (dateStr: string): boolean => {
-        if (!dateStr) return false;
-        const appointmentDate = new Date(dateStr);
-        const now = new Date();
-        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        return appointmentDate <= twentyFourHoursFromNow;
-    };
-
-    const isUrgent = isUrgentAppointment(formik.values.request_date);
 
     const isFormValid = () => {
         const values = formik.values;
@@ -368,31 +359,6 @@ const CreateAppointmentPage = () => {
             return;
         }
 
-        if (isUrgent) {
-            const confirmResult = await Swal.fire({
-                icon: 'warning',
-                title: 'Urgent Appointment Request',
-                html: `
-                    <div class="text-left">
-                        <p class="mb-3">This appointment is within 24 hours. Please note:</p>
-                        <ul class="list-disc pl-5 space-y-2">
-                            <li>If no locum applies within <strong>15 minutes</strong>, this request will be automatically cancelled</li>
-                            <li>You may need to contact locums directly for urgent placements</li>
-                            <li>Consider extending the time frame if possible</li>
-                        </ul>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Create Urgent Request',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#EF4444',
-                cancelButtonColor: '#6B7280',
-            });
-
-            if (!confirmResult.isConfirmed) {
-                return;
-            }
-        }
 
         try {
             console.log('Submitting appointment request with values:', values);
@@ -540,9 +506,7 @@ const CreateAppointmentPage = () => {
                            hover:border-[#C3EAE7]/50 group-hover:shadow-md
                            ${formik.touched.request_date && formik.errors.request_date
                                             ? 'border-red-300 focus:border-red-400 bg-red-50'
-                                            : isUrgent
-                                                ? 'border-orange-300 focus:border-orange-400 bg-orange-50'
-                                                : 'border-gray-200 focus:border-[#C3EAE7]'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
                                         }`}
                                     required
                                 />
@@ -552,17 +516,6 @@ const CreateAppointmentPage = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <p className="text-sm text-red-700">{formik.errors.request_date}</p>
-                                    </div>
-                                )}
-                                {isUrgent && !(formik.touched.request_date && formik.errors.request_date) && (
-                                    <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                                        <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                        </svg>
-                                        <div className="text-sm">
-                                            <p className="font-semibold text-orange-800">Urgent Request</p>
-                                            <p className="text-orange-700">This appointment is within 24 hours. It will auto-cancel in 15 minutes if no one confirms.</p>
-                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -744,12 +697,10 @@ const CreateAppointmentPage = () => {
                                     className={`px-5 py-2 font-bold rounded-xl transition-all duration-200 
                                         ${isCreatingAppointment || !formik.isValid || !formik.values.practice_id
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : isUrgent
-                                                ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                                : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                            : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                         }`}
                                 >
-                                    {isCreatingAppointment ? 'Creating...' : isUrgent ? 'Create Urgent Request' : 'Create Request'}
+                                    {isCreatingAppointment ? 'Creating...' : 'Create Request'}
                                 </button>
                             </div>
                         </form>

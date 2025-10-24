@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from "../../components/navBar/nav";
-import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, FaSpinner, FaHistory, FaExclamationTriangle } from "react-icons/fa";
-import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
+import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, FaSpinner, FaHistory, FaExclamationTriangle, FaEyeSlash } from "react-icons/fa";
+import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery, useIgnoreAppointmentMutation, useCheckIgnoredQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 
@@ -80,6 +80,7 @@ const WaitingList = () => {
     );
 
     const [acceptAppointment] = useAcceptAppointmentMutation();
+    const [ignoreAppointment] = useIgnoreAppointmentMutation();
 
     const handleAccept = async (requestId: string) => {
         if (!profile?.id) return;
@@ -118,6 +119,52 @@ const WaitingList = () => {
             await Swal.fire({
                 title: 'Error!',
                 text: error.message || 'Failed to accept appointment. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#EF4444'
+            });
+        } finally {
+            setLoadingStates(prev => ({ ...prev, [requestId]: false }));
+        }
+    };
+
+    const handleIgnore = async (requestId: string) => {
+        if (!profile?.id) return;
+
+        const result = await Swal.fire({
+            title: 'Ignore Appointment',
+            text: 'Are you sure you want to ignore this appointment? You won\'t see it in your available requests anymore.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Ignore',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#DC2626',
+            cancelButtonColor: '#6B7280'
+        });
+
+        if (!result.isConfirmed) return;
+
+        setLoadingStates(prev => ({ ...prev, [requestId]: true }));
+
+        try {
+            await ignoreAppointment({
+                request_id: requestId,
+                locum_id: profile.id,
+            }).unwrap();
+
+            await Swal.fire({
+                title: 'Success!',
+                text: 'Appointment ignored successfully. It will no longer appear in your available requests.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10B981'
+            });
+
+            refetch();
+        } catch (error: any) {
+            await Swal.fire({
+                title: 'Error!',
+                text: error.message || 'Failed to ignore appointment. Please try again.',
                 icon: 'error',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#EF4444'
@@ -989,23 +1036,42 @@ const WaitingList = () => {
                                                             )}
                                                         </td>
                                                         <td className="px-4 sm:px-6 py-4 text-center">
-                                                            <button
-                                                                onClick={() => handleAccept(req.request_id)}
-                                                                disabled={loadingStates[req.request_id]}
-                                                                className="flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
-                                                            >
-                                                                {loadingStates[req.request_id] ? (
-                                                                    <>
-                                                                        <FaSpinner className="animate-spin mr-2" />
-                                                                        Processing...
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <FaCheck className="mr-2" />
-                                                                        Accept
-                                                                    </>
-                                                                )}
-                                                            </button>
+                                                            <div className="flex flex-col space-y-2">
+                                                                <button
+                                                                    onClick={() => handleAccept(req.request_id)}
+                                                                    disabled={loadingStates[req.request_id]}
+                                                                    className="flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
+                                                                >
+                                                                    {loadingStates[req.request_id] ? (
+                                                                        <>
+                                                                            <FaSpinner className="animate-spin mr-2" />
+                                                                            Processing...
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <FaCheck className="mr-2" />
+                                                                            Accept
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleIgnore(req.request_id)}
+                                                                    disabled={loadingStates[req.request_id]}
+                                                                    className="flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
+                                                                >
+                                                                    {loadingStates[req.request_id] ? (
+                                                                        <>
+                                                                            <FaSpinner className="animate-spin mr-2" />
+                                                                            Processing...
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <FaEyeSlash className="mr-2" />
+                                                                            Ignore
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -1077,24 +1143,43 @@ const WaitingList = () => {
                                                         <div className="text-gray-700 text-sm mt-1">{req.location}</div>
                                                     </div>
 
-                                                    {/* Action Button */}
-                                                    <button
-                                                        onClick={() => handleAccept(req.request_id)}
-                                                        disabled={loadingStates[req.request_id]}
-                                                        className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all mt-3"
-                                                    >
-                                                        {loadingStates[req.request_id] ? (
-                                                            <>
-                                                                <FaSpinner className="animate-spin mr-2" />
-                                                                Processing...
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <FaCheck className="mr-2" />
-                                                                Accept
-                                                            </>
-                                                        )}
-                                                    </button>
+                                                    {/* Action Buttons */}
+                                                    <div className="flex flex-col space-y-2 mt-3">
+                                                        <button
+                                                            onClick={() => handleAccept(req.request_id)}
+                                                            disabled={loadingStates[req.request_id]}
+                                                            className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
+                                                        >
+                                                            {loadingStates[req.request_id] ? (
+                                                                <>
+                                                                    <FaSpinner className="animate-spin mr-2" />
+                                                                    Processing...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <FaCheck className="mr-2" />
+                                                                    Accept
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleIgnore(req.request_id)}
+                                                            disabled={loadingStates[req.request_id]}
+                                                            className="w-full flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
+                                                        >
+                                                            {loadingStates[req.request_id] ? (
+                                                                <>
+                                                                    <FaSpinner className="animate-spin mr-2" />
+                                                                    Processing...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <FaEyeSlash className="mr-2" />
+                                                                    Ignore
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))
