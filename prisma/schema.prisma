@@ -43,6 +43,7 @@ model LocumProfile {
   appointmentResponses    AppointmentResponse[]
   appointmentConfirmations AppointmentConfirmation[]
   timesheets              Timesheet[]
+  ignoredAppointments     IgnoredAppointment[]
 
   @@map("locum_profiles")
 }
@@ -128,6 +129,7 @@ model AppointmentRequest {
   responses               AppointmentResponse[]
   confirmations           AppointmentConfirmation[]
   booking                 Booking?
+  ignoredBy               IgnoredAppointment[]
 
   @@map("appointment_requests")
 }
@@ -314,4 +316,20 @@ model InvoiceLineItem {
   timesheetJob          TimesheetJob @relation(fields: [timesheetJobId], references: [id], onDelete: Cascade)
   
   @@map("invoice_line_items")
+}
+
+model IgnoredAppointment {
+  id            String              @id @default(cuid())
+  request_id    String              @map("request_id")
+  locum_id      String              @map("locum_id")
+  ignored_at    DateTime            @default(now()) @map("ignored_at")
+  reason        String?             // Optional reason for ignoring
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  request       AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  locumProfile  LocumProfile        @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+  
+  @@unique([request_id, locum_id], name: "ignored_appointment_unique")
+  @@map("ignored_appointments")
 }

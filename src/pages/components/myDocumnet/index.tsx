@@ -8,6 +8,9 @@ import Footer from "../footer/index";
 import { useRouter } from 'next/navigation';
 import { useDocumentUploadMutation } from '@/redux/slices/locumProfileSlice';
 import Swal from 'sweetalert2';
+import { uploadService, UploadProgress as UploadProgressType, UploadResult, UploadError } from '@/services/uploadService';
+import UploadProgress from '@/components/UploadProgress';
+import { calculateUploadSummary, getRetryableErrors, formatFileSize } from '@/utils/uploadHelpers';
 
 interface DocumentType {
     id: string;
@@ -70,6 +73,12 @@ const MyDocument = () => {
     const [locumId, setLocumId] = useState<string>('');
     const [canvasWidth, setCanvasWidth] = useState(500);
     const containerRef = useRef<HTMLDivElement>(null);
+    
+    // Upload state management
+    const [uploadProgress, setUploadProgress] = useState<Map<string, UploadProgressType>>(new Map());
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [uploadResults, setUploadResults] = useState<UploadResult[]>([]);
+    const [uploadErrors, setUploadErrors] = useState<UploadError[]>([]);
 
     const initialValues: FormValues = {
         documents: documentTypes.reduce((acc, doc) => {
@@ -129,22 +138,14 @@ const MyDocument = () => {
     };
 
     const onSubmit = async (values: FormValues, { resetForm }: { resetForm: () => void }) => {
-        Swal.fire({
-            title: 'Uploading documents...',
-            text: 'Please wait while we upload your files. This may take a moment.',
-            icon: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-        console.log(values);
-        const documents = values.documents;
-        const formData = new FormData();
-        formData.append('locumId', locumId);
-        console.log(formData);
+        if (isUploading) return; // Prevent multiple submissions
+        
+        setIsUploading(true);
+        setUploadResults([]);
+        setUploadErrors([]);
+        setUploadProgress(new Map());
 
+        const documents = values.documents;
         const fieldMap: Record<string, string> = {
             gdcNumber: 'gdcImage',
             indemnityInsurance: 'indemnityInsuranceImage',
@@ -154,70 +155,159 @@ const MyDocument = () => {
             referenceLetters2: 'referenceletter2',
             cv: 'cv',
             id: 'idImage',
-            bankDetails : 'bankDetails',
+            bankDetails: 'bankDetails',
             shareCode: 'shareCode',
-            niUtr : 'NIUTRnumber'
+            niUtr: 'NIUTRnumber'
         };
 
-        Object.entries(documents).forEach(([key, value]) => {
-            if (value.file && fieldMap[key]) {
-                formData.append(fieldMap[key], value.file);
-            }
-        });
+        // Prepare files for upload
+        const filesToUpload = Object.entries(documents)
+            .filter(([key, value]) => value.file && fieldMap[key])
+            .map(([key, value]) => ({
+                file: value.file!,
+                fileId: `${key}_${Date.now()}`,
+                fieldName: fieldMap[key]
+            }));
+
+        if (filesToUpload.length === 0) {
+            Swal.fire({
+                title: 'No files to upload!',
+                text: 'Please select at least one document to upload.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
+            setIsUploading(false);
+            return;
+        }
 
         try {
-            console.log(formData)
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/locum-profile/document`, {
-                method: 'POST',
-                body: formData,
-            });
-            console.log(response)
-            const result = await response.json();
-            console.log(result);
-            
-            if (result.status === 200) {
-                if (result.partialSuccess && result.failedDocuments?.length > 0) {
-                    // Partial success - some files uploaded, some failed
-                    Swal.fire({
-                        title: 'Partial Upload Success',
-                        html: `
-                            <p>${result.message}</p>
-                            <br/>
-                            <p><strong>Successfully uploaded:</strong> ${result.uploadedDocuments.length} document(s)</p>
-                            <p><strong>Failed:</strong> ${result.failedDocuments.join(', ')}</p>
-                            <br/>
-                            <p>Please try uploading the failed documents again.</p>
-                        `,
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                    });
-                } else {
-                    // Full success
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'All documents uploaded successfully!',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                    });
-                    resetForm();
+            // Upload files individually with progress tracking
+            const results = await uploadService.uploadFiles(filesToUpload, locumId, {
+                maxRetries: 3,
+                retryDelay: 2000,
+                timeout: 60000,
+                onProgress: (progress) => {
+                    setUploadProgress(prev => new Map(prev.set(progress.fileId, progress)));
+                },
+                onComplete: (result) => {
+                    setUploadResults(prev => [...prev, result]);
+                },
+                onError: (error) => {
+                    setUploadErrors(prev => [...prev, error]);
                 }
+            });
+
+            // Show results with detailed summary
+            const summary = calculateUploadSummary(results, uploadErrors);
+            const retryableErrors = getRetryableErrors(uploadErrors);
+
+            if (summary.failedUploads === 0) {
+                Swal.fire({
+                    title: 'All documents uploaded successfully!',
+                    text: `${summary.successfulUploads} file(s) uploaded successfully.`,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                });
+                resetForm();
+            } else if (summary.successfulUploads > 0) {
+                const retryMessage = retryableErrors.length > 0 
+                    ? `\n\n${retryableErrors.length} failed upload(s) can be retried.`
+                    : '';
+                
+                Swal.fire({
+                    title: 'Partial upload completed',
+                    text: `${summary.successfulUploads} file(s) uploaded successfully, ${summary.failedUploads} failed.${retryMessage}`,
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                });
             } else {
+                const retryMessage = retryableErrors.length > 0 
+                    ? '\n\nSome uploads can be retried. Please check the upload results below.'
+                    : '\n\nPlease check your connection and try again.';
+                
                 Swal.fire({
                     title: 'Upload failed!',
-                    text: result.error || 'An error occurred during upload. Please try again.',
+                    text: `All ${summary.totalFiles} file(s) failed to upload.${retryMessage}`,
                     icon: 'error',
                     confirmButtonText: 'OK',
                 });
             }
+
         } catch (error) {
             console.error('Upload error:', error);
             Swal.fire({
                 title: 'Upload failed!',
-                text: 'An unexpected error occurred. Please check your connection and try again.',
+                text: 'An unexpected error occurred. Please try again.',
                 icon: 'error',
                 confirmButtonText: 'OK',
             });
+        } finally {
+            setIsUploading(false);
         }
+    };
+
+    const handleCancelUpload = (fileId: string) => {
+        uploadService.cancelUpload(fileId);
+        setUploadProgress(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(fileId);
+            return newMap;
+        });
+    };
+
+    const handleRetryUpload = async (fileId: string) => {
+        // Find the file in upload errors and retry
+        const error = uploadErrors.find(e => e.fileId === fileId);
+        if (!error) return;
+
+        // Remove from errors
+        setUploadErrors(prev => prev.filter(e => e.fileId !== fileId));
+        
+        // Find the original file data from form values
+        // This is a simplified retry - in a real implementation, you'd need to store the original file data
+        console.log('Retrying upload for:', fileId);
+        
+        // For now, show a message that retry functionality needs the original file data
+        Swal.fire({
+            title: 'Retry Not Available',
+            text: 'To retry this upload, please select the file again and submit the form.',
+            icon: 'info',
+            confirmButtonText: 'OK',
+        });
+    };
+
+    const handleRetryAllFailed = async () => {
+        const retryableErrors = getRetryableErrors(uploadErrors);
+        
+        if (retryableErrors.length === 0) {
+            Swal.fire({
+                title: 'No Retryable Uploads',
+                text: 'None of the failed uploads can be retried automatically.',
+                icon: 'info',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Retry Failed Uploads',
+            text: `Retry ${retryableErrors.length} failed upload(s)?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Retry',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Clear the errors and show message
+                setUploadErrors([]);
+                Swal.fire({
+                    title: 'Please Resubmit',
+                    text: 'To retry failed uploads, please select the files again and submit the form.',
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                });
+            }
+        });
     };
 
     useEffect(() => {
@@ -479,12 +569,114 @@ const MyDocument = () => {
                                         )}
                                     </div>
 
+                                    {/* Upload Progress Section */}
+                                    {isUploading && (
+                                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
+                                            <h3 className="text-xl font-bold text-black mb-4">Uploading Documents...</h3>
+                                            <div className="space-y-4">
+                                                {Array.from(uploadProgress.values()).map((progress) => (
+                                                    <UploadProgress
+                                                        key={progress.fileId}
+                                                        progress={progress}
+                                                        onCancel={() => handleCancelUpload(progress.fileId)}
+                                                        onRetry={() => handleRetryUpload(progress.fileId)}
+                                                    />
+                                                ))}
+                                            </div>
+                                            
+                                            {uploadProgress.size === 0 && (
+                                                <div className="text-center py-4">
+                                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                                    <p className="text-gray-600 mt-2">Preparing uploads...</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Upload Results Summary */}
+                                    {(uploadResults.length > 0 || uploadErrors.length > 0) && !isUploading && (
+                                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h3 className="text-xl font-bold text-black">Upload Results</h3>
+                                                {getRetryableErrors(uploadErrors).length > 0 && (
+                                                    <button
+                                                        onClick={handleRetryAllFailed}
+                                                        className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors"
+                                                    >
+                                                        Retry Failed ({getRetryableErrors(uploadErrors).length})
+                                                    </button>
+                                                )}
+                                            </div>
+                                            
+                                            {uploadResults.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-green-600 font-semibold mb-2">
+                                                        ✅ Successfully Uploaded ({uploadResults.length})
+                                                    </h4>
+                                                    <div className="space-y-2">
+                                                        {uploadResults.map((result) => (
+                                                            <div key={result.fileId} className="text-sm text-green-700 bg-green-50 p-3 rounded border border-green-200 flex items-center justify-between">
+                                                                <div>
+                                                                    <div className="font-medium">{result.fileName}</div>
+                                                                    {result.retryCount > 0 && (
+                                                                        <div className="text-xs text-green-600">
+                                                                            Retried {result.retryCount} time(s)
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <span className="text-green-500">✓</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {uploadErrors.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-red-600 font-semibold mb-2">
+                                                        ❌ Failed Uploads ({uploadErrors.length})
+                                                    </h4>
+                                                    <div className="space-y-2">
+                                                        {uploadErrors.map((error) => (
+                                                            <div key={error.fileId} className="text-sm text-red-700 bg-red-50 p-3 rounded border border-red-200">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div>
+                                                                        <div className="font-medium">{error.fileName}</div>
+                                                                        <div className="text-xs text-red-600 mt-1">{error.error}</div>
+                                                                        {error.retryCount > 0 && (
+                                                                            <div className="text-xs text-red-500 mt-1">
+                                                                                Retried {error.retryCount} time(s)
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {error.willRetry && (
+                                                                        <button
+                                                                            onClick={() => handleRetryUpload(error.fileId)}
+                                                                            className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200 transition-colors"
+                                                                        >
+                                                                            Retry
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="text-center">
                                         <button
                                             type="submit"
-                                            className="bg-black text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors"
+                                            disabled={isUploading}
+                                            className={`px-8 py-4 rounded-lg text-lg font-semibold transition-colors ${
+                                                isUploading 
+                                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                                                    : 'bg-black text-white hover:bg-gray-800'
+                                            }`}
                                         >
-                                            Submit All Documents
+                                            {isUploading ? 'Uploading...' : 'Submit All Documents'}
                                         </button>
                                     </div>
                                 </Form>

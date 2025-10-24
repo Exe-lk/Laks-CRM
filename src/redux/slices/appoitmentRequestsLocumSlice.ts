@@ -178,6 +178,29 @@ export interface ErrorResponse {
   status?: string;
 }
 
+export interface IgnoreAppointmentData {
+  request_id: string;
+  locum_id: string;
+  reason?: string;
+}
+
+export interface IgnoreAppointmentResponse {
+  success: boolean;
+  data: {
+    request_id: string;
+    locum_id: string;
+    reason?: string;
+    ignored_at: Date | string;
+  };
+  message: string;
+}
+
+export interface CheckIgnoredResponse {
+  success: boolean;
+  isIgnored: boolean;
+  data: any | null;
+}
+
 export const appointmentRequestsLocumApiSlice = createApi({
   reducerPath: 'appointmentRequestsLocumApi',
   baseQuery: fetchBaseQuery({
@@ -190,7 +213,7 @@ export const appointmentRequestsLocumApiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['AvailableRequests', 'PendingConfirmations', 'ApplicationHistory'],
+  tagTypes: ['AvailableRequests', 'PendingConfirmations', 'ApplicationHistory', 'IgnoredAppointments'],
   endpoints: (builder) => ({
     getAvailableRequests: builder.query<AvailableRequestsResponse, { locum_id: string }>({
       query: ({ locum_id }) => ({
@@ -239,6 +262,26 @@ export const appointmentRequestsLocumApiSlice = createApi({
       }),
       providesTags: ['ApplicationHistory'],
     }),
+
+    ignoreAppointment: builder.mutation<IgnoreAppointmentResponse, IgnoreAppointmentData>({
+      query: (ignoreData) => ({
+        url: 'ignore',
+        method: 'POST',
+        body: ignoreData,
+      }),
+      invalidatesTags: ['AvailableRequests', 'IgnoredAppointments'],
+    }),
+
+    checkIgnored: builder.query<CheckIgnoredResponse, { request_id: string; locum_id: string }>({
+      query: ({ request_id, locum_id }) => ({
+        url: 'check-ignored',
+        params: {
+          request_id,
+          locum_id,
+        },
+      }),
+      providesTags: ['IgnoredAppointments'],
+    }),
   }),
 });
 
@@ -248,4 +291,6 @@ export const {
   useGetPendingConfirmationsQuery,
   useConfirmAppointmentMutation,
   useGetApplicationHistoryQuery,
+  useIgnoreAppointmentMutation,
+  useCheckIgnoredQuery,
 } = appointmentRequestsLocumApiSlice;

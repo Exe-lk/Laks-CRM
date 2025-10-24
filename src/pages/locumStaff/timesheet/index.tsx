@@ -4,6 +4,8 @@ import { RootState, AppDispatch } from '@/redux/store';
 import { useGetBookingsQuery, Booking } from '../../../redux/slices/bookingPracticeSlice';
 import NavBar from "../../components/navBar/nav";
 import SignatureCanvas from 'react-signature-canvas';
+import { uploadService, UploadProgress as UploadProgressType } from '@/services/uploadService';
+import UploadProgress from '@/components/UploadProgress';
 
 interface LocumTimesheetProps { }
 
@@ -118,59 +120,57 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   const daysOfWeek = getDaysOfWeek(currentWeekStart);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <NavBar />
-      <div className="max-w-7xl mx-auto pt-16 sm:pt-12">
-        <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 md:mb-8 gap-3 sm:gap-4">
+      <div className="max-w-7xl mx-auto pt-12">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">My Bookings</h1>
-              <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+              <p className="text-gray-600 mt-1">
                 Week of {formatDate(currentWeekStart)} - {formatDate(getWeekEnd(currentWeekStart))}
               </p>
             </div>
-            <div className="flex space-x-2 sm:space-x-4">
+            <div className="flex space-x-4">
               <button
                 onClick={() => navigateWeek('prev')}
-                className="flex-1 sm:flex-none px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
+                className="px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
               >
-                <span className="hidden sm:inline">← Previous Week</span>
-                <span className="sm:hidden">← Prev</span>
+                ← Previous Week
               </button>
               <button
                 onClick={() => navigateWeek('next')}
-                className="flex-1 sm:flex-none px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
+                className="px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
               >
-                <span className="hidden sm:inline">Next Week →</span>
-                <span className="sm:hidden">Next →</span>
+                Next Week →
               </button>
             </div>
           </div>
 
 
           {bookingsData?.data && (
-            <div className="bg-[#C3EAE7]/20 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="bg-[#C3EAE7]/20 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-center">
-                <div className="w-full">
-                  <h3 className="text-base sm:text-lg font-semibold text-blue-900">
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900">
                     Weekly Bookings Summary
                   </h3>
-                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="mt-2 grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-600">Total Bookings</p>
-                      <p className="text-lg sm:text-xl font-bold text-black">
+                      <p className="text-sm text-gray-600">Total Bookings</p>
+                      <p className="text-xl font-bold text-black">
                         {bookingsData.data.length}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-600">Confirmed Bookings</p>
-                      <p className="text-lg sm:text-xl font-bold text-black">
+                      <p className="text-sm text-gray-600">Confirmed Bookings</p>
+                      <p className="text-xl font-bold text-black">
                         {bookingsData.data.filter((booking: Booking) => booking.status === 'CONFIRMED').length}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-600">This Week</p>
-                      <p className="text-lg sm:text-xl font-bold text-black">
+                      <p className="text-sm text-gray-600">This Week</p>
+                      <p className="text-xl font-bold text-black">
                         {getDaysOfWeek(currentWeekStart).reduce((count, day) => {
                           return count + getBookingsForDate(day).length;
                         }, 0)}
@@ -182,13 +182,12 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
             </div>
           )}
 
-          <div className="bg-[#C3EAE7]/10 rounded-lg p-2 sm:p-3 md:p-4 mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4">Weekly Calendar</h3>
-            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div className="bg-[#C3EAE7]/10 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold mb-4">Weekly Calendar</h3>
+            <div className="grid grid-cols-7 gap-2">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="text-center font-medium text-gray-700 py-1 sm:py-2 text-xs sm:text-sm">
-                  <span className="hidden sm:inline">{day}</span>
-                  <span className="sm:hidden">{day.charAt(0)}</span>
+                <div key={day} className="text-center font-medium text-gray-700 py-2">
+                  {day}
                 </div>
               ))}
               {daysOfWeek.map((date, index) => {
@@ -201,26 +200,26 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                     key={index}
                     onClick={() => handleDateClick(date)}
                     className={`
-                      p-1 sm:p-2 md:p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md min-h-[60px] sm:min-h-[80px]
+                      p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md
                       ${isToday ? 'border-[#C3EAE7] bg-[#C3EAE7]/20' : 'border-gray-200 bg-white'}
                       ${hasBookings ? 'bg-blue-50 border-blue-200' : ''}
                     `}
                   >
                     <div className="text-center">
-                      <div className={`text-xs sm:text-sm font-medium ${isToday ? 'text-black' : 'text-gray-900'}`}>
+                      <div className={`text-sm font-medium ${isToday ? 'text-black' : 'text-gray-900'}`}>
                         {date.getDate()}
                       </div>
 
                       {hasBookings && (
-                        <div className="mt-0.5 sm:mt-1 text-xs space-y-0.5 sm:space-y-1">
-                          <div className="text-blue-600 font-medium text-[10px] sm:text-xs">
-                            {bookings.length} {bookings.length > 1 ? 'Bookings' : 'Booking'}
+                        <div className="mt-1 text-xs space-y-1">
+                          <div className="text-blue-600 font-medium">
+                            {bookings.length} Booking{bookings.length > 1 ? 's' : ''}
                           </div>
-                          <div className="text-blue-500 text-[9px] sm:text-xs hidden sm:block">
-                            Click to view
+                          <div className="text-blue-500">
+                            Click to view details
                           </div>
                           {bookings.map((booking, idx) => (
-                            <div key={idx} className="text-[9px] sm:text-xs text-gray-600 truncate hidden md:block">
+                            <div key={idx} className="text-xs text-gray-600 truncate">
                               {booking.booking_start_time} - {booking.location}
                             </div>
                           ))}
@@ -717,10 +716,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-3 sm:mb-4 sticky top-0 bg-white pb-2 border-b">
-          <h3 className="text-base sm:text-lg font-semibold">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2 border-b">
+          <h3 className="text-lg font-semibold">
             Bookings for {selectedDate ? new Date(selectedDate).toLocaleDateString() : ''}
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
@@ -739,7 +738,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                 return (
                   <div
                     key={booking.id}
-                    className={`p-2 sm:p-3 md:p-4 border-2 rounded-lg transition-all duration-200 ${selectedBooking?.id === booking.id
+                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${selectedBooking?.id === booking.id
                         ? 'border-[#C3EAE7] bg-[#C3EAE7]/20 shadow-md ring-2 ring-[#C3EAE7]/30'
                         : hasStarted
                           ? 'border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300 cursor-pointer'
@@ -751,30 +750,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                       }
                     }}
                   >
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                          <h4 className="font-medium text-sm sm:text-base text-gray-900">{booking.location}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900">{booking.location}</h4>
                           {selectedBooking?.id === booking.id && (
-                            <div className="text-[10px] sm:text-xs bg-[#C3EAE7] text-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
+                            <div className="text-xs bg-[#C3EAE7] text-black px-2 py-1 rounded-full font-medium">
                               ✓ Selected
                             </div>
                           )}
                         </div>
-                        <div className="mt-1 text-xs sm:text-sm text-gray-600">
+                        <div className="mt-1 text-sm text-gray-600">
                           <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
                           {booking.description && (
                             <p className="mt-1">{booking.description}</p>
                           )}
                         </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs ${booking.status === 'CONFIRMED'
+                        <div className="mt-2 flex items-center space-x-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${booking.status === 'CONFIRMED'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-yellow-100 text-yellow-800'
                             }`}>
                             {booking.status}
                           </span>
-                          <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs ${isCompleted
+                          <span className={`px-2 py-1 rounded-full text-xs ${isCompleted
                               ? 'bg-gray-100 text-gray-700'
                               : hasStarted
                                 ? 'bg-blue-100 text-blue-700'
@@ -782,18 +781,18 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             }`}>
                             {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '🔒 Not Started'}
                           </span>
-                          <span className="text-[10px] sm:text-xs text-gray-500">
+                          <span className="text-xs text-gray-500">
                             Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                           </span>
                         </div>
                         {!hasStarted && (
-                          <div className="mt-2 text-[10px] sm:text-xs text-orange-600 font-medium">
+                          <div className="mt-2 text-xs text-orange-600 font-medium">
                             ℹ️ Can only select after job start time
                           </div>
                         )}
                       </div>
-                      <div className="text-left sm:text-right">
-                        <span className="text-xs sm:text-sm font-medium text-gray-900">
+                      <div className="text-right">
+                        <span className="text-sm font-medium text-gray-900">
                           Rate TBD
                         </span>
                       </div>
@@ -801,36 +800,36 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
                     {/* Time Tracking Section - Show inside selected booking */}
                     {selectedBooking?.id === booking.id && (
-                      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#C3EAE7] bg-white rounded-lg p-2 sm:p-3">
-                        <div className="flex items-center justify-between mb-2 sm:mb-3">
-                          <h5 className="text-xs sm:text-sm font-semibold text-gray-900">Time Tracking</h5>
-                          <div className="text-[10px] sm:text-xs text-blue-600 bg-blue-50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                      <div className="mt-4 pt-4 border-t border-[#C3EAE7] bg-white rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className="text-sm font-semibold text-gray-900">Time Tracking</h5>
+                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                             📍 Active
                           </div>
                         </div>
 
                         {isLoading && (
-                          <div className="mb-2 sm:mb-3 flex items-center text-blue-600">
-                            <div className="animate-spin inline-block w-3 h-3 sm:w-4 sm:h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
-                            <span className="text-xs sm:text-sm">Loading timesheet data...</span>
+                          <div className="mb-3 flex items-center text-blue-600">
+                            <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                            <span className="text-sm">Loading timesheet data...</span>
                           </div>
                         )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                            <div className="flex items-center space-x-1 sm:space-x-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                            <div className="flex items-center space-x-2">
                               <input
                                 type="text"
                                 value={startTime}
                                 readOnly
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
                               <button
                                 onClick={handleStartClick}
                                 disabled={!!startTime}
-                                className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${startTime
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${startTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                   }`}
@@ -841,19 +840,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
 
                           <div>
-                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">End Time</label>
-                            <div className="flex items-center space-x-1 sm:space-x-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                            <div className="flex items-center space-x-2">
                               <input
                                 type="text"
                                 value={endTime}
                                 readOnly
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
                               <button
                                 onClick={handleEndClick}
                                 disabled={!startTime || !!endTime}
-                                className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${!startTime || endTime
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || endTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                   }`}
@@ -864,19 +863,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
 
                           <div>
-                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Break Start</label>
-                            <div className="flex items-center space-x-1 sm:space-x-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
+                            <div className="flex items-center space-x-2">
                               <input
                                 type="text"
                                 value={lunchStartTime}
                                 readOnly
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
                               <button
                                 onClick={handleLunchStartClick}
                                 disabled={!startTime || !!lunchStartTime}
-                                className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${!startTime || lunchStartTime
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || lunchStartTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                   }`}
@@ -887,19 +886,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
 
                           <div>
-                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Break End</label>
-                            <div className="flex items-center space-x-1 sm:space-x-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
+                            <div className="flex items-center space-x-2">
                               <input
                                 type="text"
                                 value={lunchEndTime}
                                 readOnly
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white"
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
                               <button
                                 onClick={handleLunchEndClick}
                                 disabled={!lunchStartTime || !!lunchEndTime}
-                                className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${!lunchStartTime || lunchEndTime
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!lunchStartTime || lunchEndTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                   }`}
@@ -911,20 +910,20 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                         </div>
 
                         {/* Booking Details */}
-                        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200">
-                          <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#C3EAE7] rounded-full"></div>
-                            <p className="text-[10px] sm:text-xs font-medium text-gray-900">Current Booking</p>
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full"></div>
+                            <p className="text-xs font-medium text-gray-900">Current Booking</p>
                           </div>
-                          <p className="text-[10px] sm:text-xs text-gray-700 mb-1">
+                          <p className="text-xs text-gray-700 mb-1">
                             <span className="font-medium">Scheduled:</span> {booking.booking_start_time} - {booking.booking_end_time}
                           </p>
-                          <p className="text-[10px] sm:text-xs text-gray-700">
+                          <p className="text-xs text-gray-700">
                             <span className="font-medium">Date:</span> {new Date(booking.booking_date as any).toLocaleDateString()}
                           </p>
                           {timesheetJobId && (
-                            <div className="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-gray-200">
-                              <p className="text-[10px] sm:text-xs text-green-600 flex items-center gap-1">
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <p className="text-xs text-green-600 flex items-center gap-1">
                                 <span>✓</span>
                                 <span>Timesheet job created - ID: {timesheetJobId.substring(0, 8)}...</span>
                               </p>
@@ -934,27 +933,27 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
                         {/* Payment Details */}
                         {hourlyRate !== null && (
-                          <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200 bg-blue-50 p-1.5 sm:p-2 rounded">
-                            <h6 className="text-[10px] sm:text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
-                            <div className="space-y-0.5 sm:space-y-1">
-                              <div className="flex justify-between text-[10px] sm:text-xs">
+                          <div className="mt-3 pt-3 border-t border-gray-200 bg-blue-50 p-2 rounded">
+                            <h6 className="text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs">
                                 <span className="text-blue-700">Hourly Rate:</span>
                                 <span className="font-medium text-blue-900">£{hourlyRate.toFixed(2)}/hour</span>
                               </div>
                               {totalHours !== null && (
-                                <div className="flex justify-between text-[10px] sm:text-xs">
+                                <div className="flex justify-between text-xs">
                                   <span className="text-blue-700">Total Hours:</span>
                                   <span className="font-medium text-blue-900">{totalHours.toFixed(2)} hours</span>
                                 </div>
                               )}
                               {totalPay !== null && (
-                                <div className="flex justify-between text-[10px] sm:text-xs pt-1 border-t border-blue-200">
+                                <div className="flex justify-between text-xs pt-1 border-t border-blue-200">
                                   <span className="text-blue-700 font-semibold">Total Pay:</span>
                                   <span className="font-bold text-green-700">£{totalPay.toFixed(2)}</span>
                                 </div>
                               )}
                               {totalHours === null && (
-                                <p className="text-[10px] sm:text-xs text-blue-600 italic mt-1">
+                                <p className="text-xs text-blue-600 italic mt-1">
                                   ⏳ Total hours and pay will be calculated when end time is recorded
                                 </p>
                               )}
@@ -975,28 +974,28 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         </div>
 
         {error && (
-          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-xs sm:text-sm text-red-700">❌ {error}</p>
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">❌ {error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-xs sm:text-sm text-green-700">✅ {success}</p>
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-700">✅ {success}</p>
           </div>
         )}
 
 
         {!selectedBooking && bookings.length > 0 && (
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-1 sm:gap-2 mb-1.5 sm:mb-2">
-              <div className="text-blue-600 text-sm sm:text-base">ℹ️</div>
-              <h4 className="text-xs sm:text-sm font-medium text-blue-900">No Booking Selected</h4>
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-blue-600">ℹ️</div>
+              <h4 className="text-sm font-medium text-blue-900">No Booking Selected</h4>
             </div>
-            <p className="text-xs sm:text-sm text-blue-700 mb-1.5 sm:mb-2">
+            <p className="text-sm text-blue-700 mb-2">
               Click on any booking that has started (showing "In Progress" status) to begin time tracking.
             </p>
-            <div className="text-[10px] sm:text-xs text-blue-600 bg-blue-100 p-1.5 sm:p-2 rounded">
+            <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
               <strong>Tip:</strong> Only bookings that have passed their start time can be selected for time tracking.
             </div>
           </div>
@@ -1031,6 +1030,10 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
   const [managerId, setManagerId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Upload state management
+  const [uploadProgress, setUploadProgress] = useState<Map<string, UploadProgressType>>(new Map());
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const getAuthToken = () => {
     return localStorage.getItem('token') || '';
@@ -1044,51 +1047,27 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     managerSignatureRef.current?.clear();
   };
 
-  const uploadSignatureImage = async (
-    signatureDataUrl: string, 
-    signatureType: 'staff' | 'manager',
-    maxRetries: number = 2
-  ): Promise<string> => {
-    const token = getAuthToken();
+  const uploadSignatureImage = async (signatureDataUrl: string, signatureType: 'staff' | 'manager'): Promise<string> => {
     const blob = await fetch(signatureDataUrl).then(r => r.blob());
+    const file = new File([blob], `${signatureType}_signature.png`, { type: 'image/png' });
     
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const formData = new FormData();
-        formData.append('signature', blob, `${signatureType}_signature.png`);
-        formData.append('timesheetId', timesheetId);
-        formData.append('signatureType', signatureType);
-
-        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/upload-signature`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData
-        });
-
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          if (attempt === maxRetries) {
-            throw new Error(errorData.error || 'Failed to upload signature');
-          }
-          console.warn(`Upload attempt ${attempt} failed, retrying...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-          continue;
+    const fileId = `${signatureType}_signature_${Date.now()}`;
+    const filePath = `${timesheetId}/signature_${signatureType}`;
+    
+    try {
+      const result = await uploadService.uploadFile(file, fileId, timesheetId, `signature_${signatureType}`, {
+        maxRetries: 3,
+        retryDelay: 2000,
+        timeout: 30000,
+        onProgress: (progress) => {
+          setUploadProgress(prev => new Map(prev.set(progress.fileId, progress)));
         }
-
-        const uploadData = await uploadResponse.json();
-        return uploadData.data.signatureUrl;
-      } catch (error) {
-        if (attempt === maxRetries) {
-          throw error;
-        }
-        console.warn(`Upload attempt ${attempt} failed with exception, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-      }
+      });
+      
+      return result.url;
+    } catch (error) {
+      throw new Error(`Failed to upload ${signatureType} signature: ${(error as Error).message}`);
     }
-    
-    throw new Error('Failed to upload signature after multiple attempts');
   };
 
   const handleSubmit = async () => {
@@ -1097,18 +1076,20 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
       return;
     }
 
+    if (isUploading) return; // Prevent multiple submissions
+
     setIsLoading(true);
+    setIsUploading(true);
     setError(null);
+    setUploadProgress(new Map());
 
     try {
       const token = getAuthToken();
 
-      console.log('Starting signature upload process...');
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
       
-      console.log('Uploading staff signature...');
+      // Upload staff signature with progress tracking
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
-      console.log('✓ Staff signature uploaded successfully');
 
       const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/submit-timesheet`, {
         method: 'POST',
@@ -1127,11 +1108,10 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
+      // Handle manager signature if provided
       if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
-        console.log('Uploading manager signature...');
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
-        console.log('✓ Manager signature uploaded successfully');
 
         const approveResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/approve-timesheet`, {
           method: 'POST',
@@ -1149,41 +1129,38 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
 
         if (!approveResponse.ok) {
           console.error('Failed to add manager signature and approve');
-          setError('⚠️ Timesheet submitted but manager approval failed. Please contact support.');
-          // Don't throw here - staff signature is already saved
         }
       }
 
-      console.log('✓ Timesheet submission complete');
       onSubmit();
     } catch (err: any) {
-      console.error('Timesheet submission error:', err);
-      setError(err.message || 'Failed to submit timesheet. Please check your connection and try again.');
+      setError(err.message || 'Failed to submit timesheet');
     } finally {
       setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4">
-      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Submit Timesheet</h3>
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <h3 className="text-lg font-semibold mb-4">Submit Timesheet</h3>
 
         {error && (
-          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-xs sm:text-sm text-red-700">❌ {error}</p>
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-700">❌ {error}</p>
           </div>
         )}
 
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-4">
           <div>
-            <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-              <label className="block text-xs sm:text-sm font-medium text-gray-700">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Staff Signature <span className="text-red-500">*</span>
               </label>
               <button
                 onClick={clearStaffSignature}
-                className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-blue-600 hover:text-blue-800"
                 disabled={isLoading}
               >
                 Clear
@@ -1193,22 +1170,22 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
               <SignatureCanvas
                 ref={staffSignatureRef}
                 canvasProps={{
-                  className: 'w-full h-32 sm:h-40 cursor-crosshair',
+                  className: 'w-full h-40 cursor-crosshair',
                 }}
                 backgroundColor="rgb(255, 255, 255)"
               />
             </div>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Draw your signature above</p>
+            <p className="text-xs text-gray-500 mt-1">Draw your signature above</p>
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-              <label className="block text-xs sm:text-sm font-medium text-gray-700">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Manager Signature <span className="text-gray-400">(Optional)</span>
               </label>
               <button
                 onClick={clearManagerSignature}
-                className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-blue-600 hover:text-blue-800"
                 disabled={isLoading}
               >
                 Clear
@@ -1218,16 +1195,16 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
               <SignatureCanvas
                 ref={managerSignatureRef}
                 canvasProps={{
-                  className: 'w-full h-32 sm:h-40 cursor-crosshair',
+                  className: 'w-full h-40 cursor-crosshair',
                 }}
                 backgroundColor="rgb(255, 255, 255)"
               />
             </div>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Manager can draw signature above</p>
+            <p className="text-xs text-gray-500 mt-1">Manager can draw signature above</p>
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Manager ID <span className="text-gray-400">(Optional)</span>
             </label>
             <input
@@ -1235,14 +1212,14 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
               value={managerId}
               onChange={(e) => setManagerId(e.target.value)}
               placeholder="Manager's ID"
-              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
               disabled={isLoading}
             />
           </div>
 
-          <div className="text-[10px] sm:text-xs bg-blue-50 p-2 sm:p-3 rounded border border-blue-200 mt-2">
-            <p className="text-blue-800 font-medium text-xs sm:text-sm">ℹ️ Important Information:</p>
-            <ul className="mt-1.5 sm:mt-2 space-y-0.5 sm:space-y-1 text-blue-700">
+          <div className="text-xs bg-blue-50 p-3 rounded border border-blue-200 mt-2">
+            <p className="text-blue-800 font-medium">ℹ️ Important Information:</p>
+            <ul className="mt-2 space-y-1 text-blue-700">
               <li>• <span className="font-medium">Each job has its own separate timesheet</span></li>
               <li>• By signing, you confirm that the time entries for this job are accurate</li>
               <li>• Manager signature and ID are optional at this stage</li>
@@ -1251,22 +1228,56 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
               <li>• Signatures will be saved as images</li>
             </ul>
           </div>
+
+          {/* Upload Progress Section */}
+          {isUploading && (
+            <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mt-4">
+              <h4 className="text-lg font-bold text-black mb-3">Uploading Signatures...</h4>
+              <div className="space-y-3">
+                {Array.from(uploadProgress.values()).map((progress) => (
+                  <UploadProgress
+                    key={progress.fileId}
+                    progress={progress}
+                    onCancel={() => {
+                      uploadService.cancelUpload(progress.fileId);
+                      setUploadProgress(prev => {
+                        const newMap = new Map(prev);
+                        newMap.delete(progress.fileId);
+                        return newMap;
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {uploadProgress.size === 0 && (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  <p className="text-gray-600 mt-2 text-sm">Preparing signature uploads...</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6">
+        <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             disabled={isLoading}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-[#C3EAE7] text-black font-medium rounded-lg hover:bg-[#A9DBD9] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            className={`px-4 py-2 font-medium rounded-lg transition-colors ${
+              isUploading 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+            }`}
+            disabled={isLoading || isUploading}
           >
-            {isLoading ? 'Submitting...' : 'Submit Timesheet'}
+            {isUploading ? 'Uploading...' : isLoading ? 'Submitting...' : 'Submit Timesheet'}
           </button>
         </div>
       </div>
