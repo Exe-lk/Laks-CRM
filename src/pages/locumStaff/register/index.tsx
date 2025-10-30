@@ -413,7 +413,6 @@ const SignUpForm = () => {
                                     name="contactNumberDigits"
                                     value={formik.values.contactNumberDigits}
                                     onChange={(e) => {
-                                        // Only allow digits, max 10
                                         const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                                         formik.setFieldValue('contactNumberDigits', val);
                                     }}
@@ -478,7 +477,6 @@ const SignUpForm = () => {
                                 Address *
                             </label>
                             <div className="relative">
-                                {/* Location textarea (editable) */}
                                 <textarea
                                     name="location"
                                     value={formik.values.location}
@@ -586,12 +584,6 @@ const SignUpForm = () => {
                                     )}
                                 </div>
                             )}
-
-                            {/* {formik.values.gdcRegistration === "no" && (
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    <p className="text-sm text-gray-600">No name required - we understand you're not yet registered.</p>
-                                </div>
-                            )} */}
                         </div>
 
                         <div className="border-t pt-6 mt-8">

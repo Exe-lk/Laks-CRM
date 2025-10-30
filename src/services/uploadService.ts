@@ -321,8 +321,18 @@ export class UploadService {
     // Create FormData for the signature upload API call
     const formData = new FormData();
     formData.append('signature', file);
-    formData.append('timesheetId', filePath.split('/')[0]); // Extract timesheetId from filePath
-    formData.append('signatureType', filePath.split('/')[1].split('_')[0]); // Extract signatureType from filePath
+    // Extract identifiers
+    const timesheetId = filePath.split('/')[0];
+    // Derive signatureType from file name pattern like "staff_signature.png" or "manager_signature.png"
+    const derivedSignatureType = (file.name || '')
+      .split('_')
+      .shift() || '';
+    const signatureType = (derivedSignatureType === 'staff' || derivedSignatureType === 'manager')
+      ? derivedSignatureType
+      : 'staff';
+
+    formData.append('timesheetId', timesheetId);
+    formData.append('signatureType', signatureType);
 
     // Get auth token
     const token = localStorage.getItem('token') || '';
