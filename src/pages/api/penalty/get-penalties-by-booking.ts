@@ -31,7 +31,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const penalties = await prisma.cancellationPenalty.findMany({
       where: { bookingId: booking_id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        booking: {
+          select: {
+            id: true,
+            bookingUniqueid: true,
+            booking_date: true,
+            booking_start_time: true,
+            booking_end_time: true,
+            location: true,
+            status: true
+          }
+        },
+        chargedLocum: {
+          select: {
+            id: true,
+            fullName: true,
+            emailAddress: true,
+            contactNumber: true,
+            hourlyPayRate: true,
+            location: true
+          }
+        },
+        chargedPractice: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            telephone: true,
+            address: true,
+            location: true,
+            paymentCards: {
+              where: {
+                status: 'active'
+              },
+              select: {
+                id: true,
+                cardHolderName: true,
+                lastFourDigits: true,
+                cardType: true,
+                isDefault: true
+              }
+            },
+            stripeCustomer: {
+              select: {
+                stripeCustomerId: true,
+                email: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
     });
 
     res.status(200).json({

@@ -9,41 +9,48 @@ datasource db {
 }
 
 model LocumProfile {
-  id                      String      @id @default(cuid())
-  fullName                String
-  address                 String
-  dateOfBirth             DateTime    @map("dob")
-  emailAddress            String      @unique @map("email_address")
-  contactNumber           String      @unique @map("contact_number")
-  gdcNumber               String?      @map("gdc_number")
-  location                String
-  employeeType            String      @map("employee_type")
-  software                String?
-  gdcImage                String?     @map("gdc_image")
-  indemnityInsuranceImage String?     @map("indemnity_insurance_image")
-  hepatitisBImage         String?     @map("hepatitis_b_image")
-  dbsImage                String?     @map("dbs_image")
-  referenceletter1        String?     @map("referenceletter1")
-  referenceletter2        String?     @map("referenceletter2")
-  bankDetails             String?
-  shareCode               String?
-  NIUTRnumber            String?
-  cv                      String?
-  status                  String?
-  role                    String?
-  ratings                 Json?
-  averageRating           Float?      
-  hourlyPayRate           Float?
-  totalRatings            Int?              
-  idImage                 String?     @map("id_image")
-  createdAt               DateTime    @default(now()) @map("created_at")
-  updatedAt               DateTime    @updatedAt @map("updated_at")
-  specialties             Specialty[]
-  bookings                Booking[]
-  appointmentResponses    AppointmentResponse[]
+  id                       String                    @id @default(cuid())
+  fullName                 String
+  address                  String
+  dateOfBirth              DateTime                  @map("dob")
+  emailAddress             String                    @unique @map("email_address")
+  contactNumber            String                    @unique @map("contact_number")
+  gdcNumber                String?                   @map("gdc_number")
+  location                 String
+  employeeType             String                    @map("employee_type")
+  software                 String?
+  gdcImage                 String?                   @map("gdc_image")
+  indemnityInsuranceImage  String?                   @map("indemnity_insurance_image")
+  hepatitisBImage          String?                   @map("hepatitis_b_image")
+  dbsImage                 String?                   @map("dbs_image")
+  referenceletter1         String?                   @map("referenceletter1")
+  referenceletter2         String?                   @map("referenceletter2")
+  bankDetails              String?
+  shareCode                String?
+  NIUTRnumber              String?
+  cv                       String?
+  status                   String?
+  role                     String?
+  ratings                  Json?
+  averageRating            Float?
+  hourlyPayRate            Float?
+  totalRatings             Int?
+  idImage                  String?                   @map("id_image")
+  autoSendPayslips         Boolean?                  @default(false) @map("auto_send_payslips") // Toggle for automatic payslip sending
+  payslipFrequency         String?                   @map("payslip_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
+  payslipDayOfWeek         Int?                      @map("payslip_day_of_week") // 0-6 for weekly (0 = Sunday)
+  payslipDayOfMonth        Int?                      @map("payslip_day_of_month") // 1-31 for monthly
+  lastPayslipSentAt        DateTime?                 @map("last_payslip_sent_at")
+  createdAt                DateTime                  @default(now()) @map("created_at")
+  updatedAt                DateTime                  @updatedAt @map("updated_at")
+  specialties              Specialty[]
+  bookings                 Booking[]
+  appointmentResponses     AppointmentResponse[]
   appointmentConfirmations AppointmentConfirmation[]
-  timesheets              Timesheet[]
-  ignoredAppointments     IgnoredAppointment[]
+  timesheets               Timesheet[]
+  ignoredAppointments      IgnoredAppointment[]
+  payslips                 Payslip[]
+  cancellationPenalties    CancellationPenalty[]
 
   @@map("locum_profiles")
 }
@@ -61,285 +68,333 @@ model Specialty {
 }
 
 model Practice {
-  id           String   @id @default(cuid())
-  name         String
-  telephone    String   @unique
-  email        String   @unique
-  dob          DateTime
-  GDCnumber    String
-  address      String?
-  location     String?
-  status       String
-  practiceType String   @default("Private") // Private or Corporate
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  bookings     Booking[]
+  id                  String               @id @default(cuid())
+  name                String
+  telephone           String               @unique
+  email               String               @unique
+  dob                 DateTime
+  GDCnumber           String
+  address             String?
+  location            String?
+  status              String
+  practiceType        String               @default("Private") // Private or Corporate
+  autoSendInvoices    Boolean?             @default(false) @map("auto_send_invoices") // Toggle for automatic invoice sending
+  invoiceFrequency    String?              @map("invoice_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
+  invoiceDayOfWeek    Int?                 @map("invoice_day_of_week") // 0-6 for weekly (0 = Sunday)
+  invoiceDayOfMonth   Int?                 @map("invoice_day_of_month") // 1-31 for monthly
+  lastInvoiceSentAt   DateTime?            @map("last_invoice_sent_at")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  bookings            Booking[]
   appointmentRequests AppointmentRequest[]
-  branches     Branch[]
-  paymentCards PaymentCard[]
-  stripeCustomer StripeCustomer?
-  timesheetJobs TimesheetJob[]
-  invoices     Invoice[]
+  branches            Branch[]
+  paymentCards        PaymentCard[]
+  stripeCustomer      StripeCustomer?
+  timesheetJobs       TimesheetJob[]
+  invoices            Invoice[]
+  cancellationPenalties CancellationPenalty[]
 
   @@map("practices")
 }
 
 model Booking {
-  id            String      @id @default(cuid())
-  request_id    String        @unique
-  locum_id      String?
-  practice_id   String
-  branch_id     String?     // Optional branch ID for corporate practices
-  booking_date  DateTime
-  booking_start_time  String
-  booking_end_time    String
-  bookingUniqueid String 
-  status        String
-  location      String
-  description   String?
-  accept_time   DateTime?
-  cancel_by     String?
-  cancel_time   DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  request       AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  id                 String             @id @default(cuid())
+  request_id         String             @unique
+  locum_id           String?
+  practice_id        String
+  branch_id          String? // Optional branch ID for corporate practices
+  booking_date       DateTime
+  booking_start_time String
+  booking_end_time   String
+  bookingUniqueid    String
+  status             String
+  location           String
+  description        String?
+  accept_time        DateTime?
+  cancel_by          String?
+  cancel_time        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  request            AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
 
-  locumProfile  LocumProfile?  @relation(fields: [locum_id], references: [id], onDelete: Cascade)
-  practice      Practice      @relation(fields: [practice_id], references: [id], onDelete: Cascade)
-  branch        Branch?       @relation(fields: [branch_id], references: [id], onDelete: SetNull)
-  timesheetJobs TimesheetJob[]
+  locumProfile          LocumProfile?         @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+  practice              Practice              @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+  branch                Branch?               @relation(fields: [branch_id], references: [id], onDelete: SetNull)
+  timesheetJobs         TimesheetJob[]
+  cancellationPenalties CancellationPenalty[]
 }
 
 model AppointmentRequest {
-  request_id              String      @id @default(cuid())
-  practice_id             String
-  branch_id               String?     // Optional branch ID for corporate practices
-  request_date            DateTime
-  request_start_time      String
-  request_end_time        String
-  location                String
-  address                 String      // Address for the appointment location
-  required_role           String      // Role required for this appointment (e.g., "Nurse", "Hygienist")
-  status                  String      @default("PENDING") // PENDING, CONFIRMED, CANCELLED
-  createdAt               DateTime    @default(now())
-  updatedAt               DateTime    @updatedAt
-  
-  practice                Practice    @relation(fields: [practice_id], references: [id], onDelete: Cascade)
-  branch                  Branch?     @relation(fields: [branch_id], references: [id], onDelete: SetNull)
-  responses               AppointmentResponse[]
-  confirmations           AppointmentConfirmation[]
-  booking                 Booking?
-  ignoredBy               IgnoredAppointment[]
+  request_id         String   @id @default(cuid())
+  practice_id        String
+  branch_id          String? // Optional branch ID for corporate practices
+  request_date       DateTime
+  request_start_time String
+  request_end_time   String
+  location           String
+  address            String // Address for the appointment location
+  required_role      String // Role required for this appointment (e.g., "Nurse", "Hygienist")
+  status             String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  practice      Practice                  @relation(fields: [practice_id], references: [id], onDelete: Cascade)
+  branch        Branch?                   @relation(fields: [branch_id], references: [id], onDelete: SetNull)
+  responses     AppointmentResponse[]
+  confirmations AppointmentConfirmation[]
+  booking       Booking?
+  ignoredBy     IgnoredAppointment[]
 
   @@map("appointment_requests")
 }
 
 model AppointmentResponse {
-  response_id       String              @id @default(cuid())
-  request_id        String
-  locum_id          String
-  status            String              // ACCEPTED, REJECTED
-  responded_at      DateTime            @default(now())
-  
-  request           AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
-  locumProfile      LocumProfile        @relation(fields: [locum_id], references: [id], onDelete: Cascade)
-  
+  response_id  String   @id @default(cuid())
+  request_id   String
+  locum_id     String
+  status       String // ACCEPTED, REJECTED
+  responded_at DateTime @default(now())
+
+  request      AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  locumProfile LocumProfile       @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+
   @@unique([request_id, locum_id], name: "request_locum_unique")
   @@map("appointment_responses")
 }
 
 model AppointmentConfirmation {
-  confirmation_id         String              @id @default(cuid())
-  request_id              String
-  chosen_locum_id         String
-  practice_confirmed_at   DateTime            @default(now())
-  locum_confirmed_at      DateTime?
-  expires_at              DateTime?    
-  status                  String              @default("PRACTICE_CONFIRMED") // PRACTICE_CONFIRMED, LOCUM_CONFIRMED, LOCUM_REJECTED
-  rejection_reason        String?
-  confirmation_number     Int
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
-  
-  request                 AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
-  chosenLocum             LocumProfile        @relation(fields: [chosen_locum_id], references: [id], onDelete: Cascade)
-  
- 
+  confirmation_id       String    @id @default(cuid())
+  request_id            String
+  chosen_locum_id       String
+  practice_confirmed_at DateTime  @default(now())
+  locum_confirmed_at    DateTime?
+  expires_at            DateTime?
+  status                String    @default("PRACTICE_CONFIRMED") // PRACTICE_CONFIRMED, LOCUM_CONFIRMED, LOCUM_REJECTED
+  rejection_reason      String?
+  confirmation_number   Int
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  request     AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  chosenLocum LocumProfile       @relation(fields: [chosen_locum_id], references: [id], onDelete: Cascade)
+
   @@map("appointment_confirmations")
 }
 
 model Branch {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  location    String
-  telephone   String?
-  email       String?  @unique
-  password    String?
-  practiceId  String   @map("practice_id")
-  status      String   @default("active") // active, inactive
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  practice    Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
-  timesheetJobs TimesheetJob[]
+  id         String   @id @default(cuid())
+  name       String
+  address    String
+  location   String
+  telephone  String?
+  email      String?  @unique
+  password   String?
+  practiceId String   @map("practice_id")
+  status     String   @default("active") // active, inactive
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  practice            Practice             @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  bookings            Booking[]
+  timesheetJobs       TimesheetJob[]
   appointmentRequests AppointmentRequest[]
-  invoices    Invoice[]
-  
+  invoices            Invoice[]
+
   @@map("branches")
 }
 
 model PaymentCard {
-  id              String   @id @default(cuid())
-  practiceId      String   @map("practice_id")
-  cardHolderName  String   @map("card_holder_name")
-  cardNumber      String   @map("card_number") // Encrypted
-  lastFourDigits  String   @map("last_four_digits") // For display purposes
-  expiryMonth     String   @map("expiry_month") // Encrypted
-  expiryYear      String   @map("expiry_year") // Encrypted
-  cvv             String   // Encrypted
-  cardType        String   @map("card_type") // VISA, MASTERCARD, AMEX, DISCOVER, etc.
-  isDefault       Boolean  @default(false) @map("is_default")
-  status          String   @default("active") // active, inactive
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  practice        Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  
+  id             String   @id @default(cuid())
+  practiceId     String   @map("practice_id")
+  cardHolderName String   @map("card_holder_name")
+  cardNumber     String   @map("card_number") // Encrypted
+  lastFourDigits String   @map("last_four_digits") // For display purposes
+  expiryMonth    String   @map("expiry_month") // Encrypted
+  expiryYear     String   @map("expiry_year") // Encrypted
+  cvv            String // Encrypted
+  cardType       String   @map("card_type") // VISA, MASTERCARD, AMEX, DISCOVER, etc.
+  isDefault      Boolean  @default(false) @map("is_default")
+  status         String   @default("active") // active, inactive
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+
   @@map("payment_cards")
 }
 
 model StripeCustomer {
-  id                String   @id @default(cuid())
-  practiceId        String   @unique @map("practice_id")
-  stripeCustomerId  String   @unique @map("stripe_customer_id")
-  email             String
-  name              String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  practice          Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  
+  id               String   @id @default(cuid())
+  practiceId       String   @unique @map("practice_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  email            String
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+
   @@map("stripe_customers")
 }
 
 model Timesheet {
-  id                    String   @id @default(cuid())
-  locumId               String   @map("locum_id")
-  month                 Int      // 1-12
-  year                  Int      // e.g., 2024
-  status                String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, LOCKED
-  totalHours            Float?   @map("total_hours")
-  totalPay              Float?   @map("total_pay")
-  staffSignature        String?  @map("staff_signature") // URL to signature image in Supabase storage
-  staffSignatureDate    DateTime? @map("staff_signature_date")
-  managerSignature      String?  @map("manager_signature") // URL to signature image in Supabase storage
-  managerSignatureDate  DateTime? @map("manager_signature_date")
-  managerId             String?  @map("manager_id") // ID of the practice manager who approved
-  submittedAt           DateTime? @map("submitted_at")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  locumProfile          LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
-  timesheetJobs         TimesheetJob[]
-  
+  id                   String    @id @default(cuid())
+  locumId              String    @map("locum_id")
+  month                Int // 1-12
+  year                 Int // e.g., 2024
+  status               String    @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, LOCKED
+  totalHours           Float?    @map("total_hours")
+  totalPay             Float?    @map("total_pay")
+  staffSignature       String?   @map("staff_signature") // URL to signature image in Supabase storage
+  staffSignatureDate   DateTime? @map("staff_signature_date")
+  managerSignature     String?   @map("manager_signature") // URL to signature image in Supabase storage
+  managerSignatureDate DateTime? @map("manager_signature_date")
+  managerId            String?   @map("manager_id") // ID of the practice manager who approved
+  submittedAt          DateTime? @map("submitted_at")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  locumProfile  LocumProfile   @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  timesheetJobs TimesheetJob[]
+
+  @@unique([locumId, month, year], name: "locum_month_year_unique")
   @@map("timesheets")
 }
 
 model TimesheetJob {
-  id                    String   @id @default(cuid())
-  timesheetId           String   @map("timesheet_id")
-  bookingId             String   @map("booking_id") // Reference to the booking
-  practiceId            String   @map("practice_id")
-  branchId              String?  @map("branch_id") // Optional for corporate practices
-  jobDate               DateTime @map("job_date")
-  startTime             DateTime? @map("start_time")
-  endTime               DateTime? @map("end_time")
-  lunchStartTime        DateTime? @map("lunch_start_time")
-  lunchEndTime          DateTime? @map("lunch_end_time")
-  totalHours            Float?   @map("total_hours")
-  hourlyRate            Float?   @map("hourly_rate")
-  totalPay              Float?   @map("total_pay")
-  notes                 String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  timesheet             Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
-  booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  practice              Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  branch                Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  invoiceLineItems      InvoiceLineItem[]
-  
+  id             String    @id @default(cuid())
+  timesheetId    String    @map("timesheet_id")
+  bookingId      String    @map("booking_id") // Reference to the booking
+  practiceId     String    @map("practice_id")
+  branchId       String?   @map("branch_id") // Optional for corporate practices
+  jobDate        DateTime  @map("job_date")
+  startTime      DateTime? @map("start_time")
+  endTime        DateTime? @map("end_time")
+  lunchStartTime DateTime? @map("lunch_start_time")
+  lunchEndTime   DateTime? @map("lunch_end_time")
+  totalHours     Float?    @map("total_hours")
+  hourlyRate     Float?    @map("hourly_rate")
+  totalPay       Float?    @map("total_pay")
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  timesheet        Timesheet         @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  booking          Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  practice         Practice          @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  branch           Branch?           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  invoiceLineItems InvoiceLineItem[]
+
   @@map("timesheet_jobs")
 }
 
-
-
 model Invoice {
-  id                    String   @id @default(cuid())
-  invoiceNumber         String   @unique @map("invoice_number")
-  practiceId            String   @map("practice_id")
-  branchId              String?  @map("branch_id") // Optional for corporate practices
-  invoiceDate           DateTime @map("invoice_date")
-  dueDate               DateTime @map("due_date")
-  subtotal              Float    @default(0)
-  taxRate               Float?   @default(0) @map("tax_rate") // Tax rate as percentage
-  taxAmount             Float?   @default(0) @map("tax_amount")
-  totalAmount           Float    @map("total_amount")
-  status                String   @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
-  notes                 String?
-  createdBy             String   @map("created_by") // Admin identifier
-  paidAt                DateTime? @map("paid_at")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  practice              Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  branch                Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  lineItems             InvoiceLineItem[]
-  
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique @map("invoice_number")
+  practiceId    String    @map("practice_id")
+  branchId      String?   @map("branch_id") // Optional for corporate practices
+  invoiceDate   DateTime  @map("invoice_date")
+  dueDate       DateTime  @map("due_date")
+  subtotal      Float     @default(0)
+  taxRate       Float?    @default(0) @map("tax_rate") // Tax rate as percentage
+  taxAmount     Float?    @default(0) @map("tax_amount")
+  totalAmount   Float     @map("total_amount")
+  status        String    @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
+  notes         String?
+  createdBy     String    @map("created_by") // Admin identifier
+  paidAt        DateTime? @map("paid_at")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  practice  Practice          @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  branch    Branch?           @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  lineItems InvoiceLineItem[]
+
   @@map("invoices")
 }
 
 model InvoiceLineItem {
-  id                    String   @id @default(cuid())
-  invoiceId             String   @map("invoice_id")
-  timesheetJobId        String   @map("timesheet_job_id")
-  description           String
-  quantity              Float    // Usually hours worked
-  unitPrice             Float    @map("unit_price") // Hourly rate
-  amount                Float    // quantity * unitPrice
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  invoice               Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  timesheetJob          TimesheetJob @relation(fields: [timesheetJobId], references: [id], onDelete: Cascade)
-  
+  id             String   @id @default(cuid())
+  invoiceId      String   @map("invoice_id")
+  timesheetJobId String   @map("timesheet_job_id")
+  description    String
+  quantity       Float // Usually hours worked
+  unitPrice      Float    @map("unit_price") // Hourly rate
+  amount         Float // quantity * unitPrice
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  timesheetJob TimesheetJob @relation(fields: [timesheetJobId], references: [id], onDelete: Cascade)
+
   @@map("invoice_line_items")
 }
 
+model Payslip {
+  id            String    @id @default(cuid())
+  payslipNumber String    @unique @map("payslip_number")
+  locumId       String    @map("locum_id")
+  startDate     DateTime  @map("start_date") // Period start date
+  endDate       DateTime  @map("end_date") // Period end date
+  payslipDate   DateTime  @map("payslip_date")
+  grossPay      Float     @default(0) @map("gross_pay")
+  deductions    Float?    @default(0)
+  netPay        Float     @map("net_pay")
+  totalHours    Float?    @map("total_hours")
+  status        String    @default("DRAFT") // DRAFT, SENT, PAID
+  notes         String?
+  createdBy     String    @map("created_by") // Admin identifier
+  paidAt        DateTime? @map("paid_at")
+  sentAt        DateTime? @map("sent_at")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  locumProfile LocumProfile      @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  lineItems    PayslipLineItem[]
+
+  @@map("payslips")
+}
+
+model PayslipLineItem {
+  id             String   @id @default(cuid())
+  payslipId      String   @map("payslip_id")
+  timesheetJobId String   @map("timesheet_job_id")
+  description    String
+  hours          Float // Hours worked
+  hourlyRate     Float    @map("hourly_rate")
+  amount         Float // hours * hourlyRate
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  payslip Payslip @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+
+  @@map("payslip_line_items")
+}
+
 model IgnoredAppointment {
-  id            String              @id @default(cuid())
-  request_id    String              @map("request_id")
-  locum_id      String              @map("locum_id")
-  ignored_at    DateTime            @default(now()) @map("ignored_at")
-  reason        String?             // Optional reason for ignoring
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  
-  request       AppointmentRequest  @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
-  locumProfile  LocumProfile        @relation(fields: [locum_id], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  request_id String   @map("request_id")
+  locum_id   String   @map("locum_id")
+  ignored_at DateTime @default(now()) @map("ignored_at")
+  reason     String? // Optional reason for ignoring
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  request      AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
+  locumProfile LocumProfile       @relation(fields: [locum_id], references: [id], onDelete: Cascade)
+
   @@unique([request_id, locum_id], name: "ignored_appointment_unique")
   @@map("ignored_appointments")
 }
-
 model CancellationPenalty {
   id                    String   @id @default(cuid())
   bookingId             String   @map("booking_id")
   cancelledBy           String   @map("cancelled_by") // "locum" or "practice" or "branch"
-  cancelledPartyId      String   @map("cancelled_party_id") // ID of the locum or practice who gets charged
-  cancelledPartyName    String   @map("cancelled_party_name") // Name for display
+  
+  // Relations - one of these will be set based on cancelledPartyType
+  chargedLocumId        String?  @map("charged_locum_id") // Set if locum is charged
+  chargedPracticeId     String?  @map("charged_practice_id") // Set if practice is charged
+  
   cancelledPartyType    String   @map("cancelled_party_type") // "locum" or "practice"
   appointmentStartTime  DateTime @map("appointment_start_time")
   cancellationTime      DateTime @map("cancellation_time")
@@ -358,6 +413,11 @@ model CancellationPenalty {
   notes                 String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+  
+  // Relations
+  booking               Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  chargedLocum          LocumProfile?   @relation(fields: [chargedLocumId], references: [id], onDelete: Cascade)
+  chargedPractice       Practice?       @relation(fields: [chargedPracticeId], references: [id], onDelete: Cascade)
   
   @@map("cancellation_penalties")
 }

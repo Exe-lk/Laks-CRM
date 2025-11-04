@@ -90,8 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (timeDiffHours <= 48) {
         // Penalty applies
-        let cancelledPartyId: string;
-        let cancelledPartyName: string;
+        let chargedLocumId: string | null = null;
+        let chargedPracticeId: string | null = null;
         let cancelledPartyType: string;
         let penaltyHours: number;
         let hourlyRate: number;
@@ -105,8 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             throw new Error("Locum hourly rate not set");
           }
 
-          cancelledPartyId = booking.locum_id;
-          cancelledPartyName = booking.locumProfile.fullName;
+          chargedLocumId = booking.locum_id;
           cancelledPartyType = 'locum';
           hourlyRate = booking.locumProfile.hourlyPayRate;
           
@@ -127,8 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               throw new Error("Locum hourly rate not set for penalty calculation");
             }
 
-            cancelledPartyId = booking.practice_id;
-            cancelledPartyName = booking.practice.name;
+            chargedPracticeId = booking.practice_id;
             cancelledPartyType = 'practice';
             hourlyRate = booking.locumProfile.hourlyPayRate; // Charged at locum's rate
             penaltyHours = 6;
@@ -148,8 +146,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             data: {
               bookingId: booking_id,
               cancelledBy: user_type,
-              cancelledPartyId: cancelledPartyId!,
-              cancelledPartyName: cancelledPartyName!,
+              chargedLocumId: chargedLocumId,
+              chargedPracticeId: chargedPracticeId,
               cancelledPartyType: cancelledPartyType!,
               appointmentStartTime: bookingDateTime,
               cancellationTime: now,
