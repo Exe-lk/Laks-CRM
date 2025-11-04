@@ -23,7 +23,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { booking_id, user_id, user_type, cancellation_reason } = req.body;
+    const { 
+      booking_id, 
+      user_id, 
+      user_type, 
+      cancellation_reason,
+      hours_until_booking,
+      penalty_hours,
+      penalty_amount,
+      hourly_rate
+    } = req.body;
 
     if (!booking_id || !user_id || !user_type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -77,89 +86,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("You can only cancel your branch's bookings");
       }
 
-      // Calculate time difference
+      // Use penalty calculation from frontend
       const now = new Date();
       const bookingDateTime = new Date(booking.booking_date);
       const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
       bookingDateTime.setHours(hours, minutes, 0, 0);
-      
-      const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-      // Check if penalty should be applied
       let penaltyData = null;
       
-      if (timeDiffHours <= 48) {
-        // Penalty applies
+      // Check if penalty should be applied (penalty_amount > 0 means there's a penalty)
+      if (penalty_amount && penalty_amount > 0) {
         let chargedLocumId: string | null = null;
         let chargedPracticeId: string | null = null;
         let cancelledPartyType: string;
-        let penaltyHours: number;
-        let hourlyRate: number;
 
         if (user_type === 'locum') {
           // Locum is cancelling - locum gets charged
-          if (!booking.locumProfile || !booking.locum_id) {
-            throw new Error("Locum profile not found for booking");
+          if (!booking.locum_id) {
+            throw new Error("Locum ID not found for booking");
           }
-          if (!booking.locumProfile.hourlyPayRate) {
-            throw new Error("Locum hourly rate not set");
-          }
-
           chargedLocumId = booking.locum_id;
           cancelledPartyType = 'locum';
-          hourlyRate = booking.locumProfile.hourlyPayRate;
-          
-          // Locum: 3 hours if within 48hrs, 6 hours if within 24hrs
-          if (timeDiffHours <= 24) {
-            penaltyHours = 6;
-          } else {
-            penaltyHours = 3;
-          }
         } else {
           // Practice or Branch is cancelling - practice gets charged
-          // Only charge if within 24 hours
-          if (timeDiffHours <= 24) {
-            if (!booking.locumProfile || !booking.locum_id) {
-              throw new Error("Locum profile not found for booking");
-            }
-            if (!booking.locumProfile.hourlyPayRate) {
-              throw new Error("Locum hourly rate not set for penalty calculation");
-            }
+          chargedPracticeId = booking.practice_id;
+          cancelledPartyType = 'practice';
+        }
 
-            chargedPracticeId = booking.practice_id;
-            cancelledPartyType = 'practice';
-            hourlyRate = booking.locumProfile.hourlyPayRate; // Charged at locum's rate
-            penaltyHours = 6;
-          } else {
-            // Practice cancelling between 24-48 hours - no penalty
-            penaltyData = null;
+        // Create penalty record with frontend-calculated values
+        penaltyData = await tx.cancellationPenalty.create({
+          data: {
+            bookingId: booking_id,
+            cancelledBy: user_type,
+            chargedLocumId: chargedLocumId,
+            chargedPracticeId: chargedPracticeId,
+            cancelledPartyType: cancelledPartyType,
+            appointmentStartTime: bookingDateTime,
+            cancellationTime: now,
+            hoursBeforeAppointment: hours_until_booking,
+            penaltyHours: penalty_hours,
+            hourlyRate: hourly_rate,
+            penaltyAmount: penalty_amount,
+            status: 'PENDING',
+            reason: cancellation_reason || `Cancelled by ${user_type}`
           }
-        }
-
-        // Create penalty record if applicable
-        if ((user_type === 'locum' && timeDiffHours <= 48) || 
-            (user_type !== 'locum' && timeDiffHours <= 24)) {
-          
-          const penaltyAmount = penaltyHours! * hourlyRate!;
-          
-          penaltyData = await tx.cancellationPenalty.create({
-            data: {
-              bookingId: booking_id,
-              cancelledBy: user_type,
-              chargedLocumId: chargedLocumId,
-              chargedPracticeId: chargedPracticeId,
-              cancelledPartyType: cancelledPartyType!,
-              appointmentStartTime: bookingDateTime,
-              cancellationTime: now,
-              hoursBeforeAppointment: timeDiffHours,
-              penaltyHours: penaltyHours!,
-              hourlyRate: hourlyRate!,
-              penaltyAmount: penaltyAmount,
-              status: 'PENDING',
-              reason: cancellation_reason || `Cancelled by ${user_type}`
-            }
-          });
-        }
+        });
       }
 
       // Cancel the booking

@@ -86,7 +86,7 @@ const MyBookingsPage = () => {
               {userType === 'branch' ? 'Branch Bookings' : 'Practice Bookings'}
             </h1>
             <p className="text-gray-600">
-              View and manage your {userType === 'branch' ? 'branch' : 'practice'}'s confirmed bookings. You can cancel bookings up to 48 hours in advance.
+              View and manage your {userType === 'branch' ? 'branch' : 'practice'}'s confirmed bookings. You can cancel bookings at any time (penalties may apply within 48 hours).
             </p>
           </div>
 

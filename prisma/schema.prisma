@@ -418,6 +418,26 @@ model CancellationPenalty {
   booking               Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   chargedLocum          LocumProfile?   @relation(fields: [chargedLocumId], references: [id], onDelete: Cascade)
   chargedPractice       Practice?       @relation(fields: [chargedPracticeId], references: [id], onDelete: Cascade)
+  paymentLogs            PenaltyPaymentLog[]
   
   @@map("cancellation_penalties")
+}
+
+model PenaltyPaymentLog {
+  id                    String   @id @default(cuid())
+  penaltyId             String   @map("penalty_id")
+  action                String   // "CHARGED", "CHARGE_FAILED", "DISMISSED"
+  amount                Float?   // Amount charged (if applicable)
+  stripeChargeId        String?  @map("stripe_charge_id")
+  stripePaymentIntent   String?  @map("stripe_payment_intent")
+  performedBy           String   @map("performed_by") // Admin ID who performed the action
+  performedByName       String?  @map("performed_by_name") // Admin name for display
+  notes                 String?
+  errorMessage          String?  @map("error_message") // If charge failed
+  metadata              Json?    // Additional payment metadata
+  createdAt             DateTime @default(now())
+  
+  penalty               CancellationPenalty @relation(fields: [penaltyId], references: [id], onDelete: Cascade)
+  
+  @@map("penalty_payment_logs")
 }

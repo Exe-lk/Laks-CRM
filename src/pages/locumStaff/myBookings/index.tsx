@@ -76,7 +76,7 @@ const MyBookingsPage = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
             <p className="text-gray-600">
-              View and manage your confirmed bookings. You can cancel bookings up to 48 hours in advance.
+              View and manage your confirmed bookings. You can cancel bookings at any time (penalties may apply within 48 hours).
             </p>
           </div>
 
@@ -91,10 +91,10 @@ const MyBookingsPage = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-2">Booking Information</h3>
             <div className="text-blue-800 space-y-2">
-              <p>• <strong>Confirmed bookings</strong> can be cancelled up to 48 hours before the appointment time.</p>
+              <p>• <strong>Confirmed bookings</strong> can be cancelled at any time.</p>
+              <p>• <strong>Cancellation penalties:</strong> Within 24 hours = 6 hours pay, Within 48 hours = 3 hours pay, Over 48 hours = No penalty.</p>
               <p>• <strong>Cancelled bookings</strong> will be made available for other locums to apply.</p>
               <p>• <strong>Contact details</strong> for practices are shown for confirmed bookings.</p>
-              <p>• If you need to cancel within 48 hours due to emergency, please contact the practice directly.</p>
             </div>
           </div>
         </div>

@@ -51,7 +51,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        if (selectedDate < today) {
+        if (selectedDate <= today) {
             errors.request_date = 'Cannot select a past date';
         }
 
@@ -254,7 +254,6 @@ const CreateAppointmentPage = () => {
     }, [formik.isValid, formik.errors, formik.values, formik.touched]);
 
     const openAppointmentModal = async () => {
-        // Check if payment details are added
         if (cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',

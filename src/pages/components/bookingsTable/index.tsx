@@ -8,6 +8,7 @@ interface LocumProfile {
   contactNumber: string;
   emailAddress: string;
   role: string;
+  hourlyPayRate?: number;
 }
 
 interface Practice {
@@ -23,6 +24,27 @@ interface Branch {
   address: string;
   location: string;
   telephone?: string;
+}
+
+interface CancellationPenalty {
+  id: string;
+  cancelledBy: string;
+  cancelledPartyType: string;
+  penaltyAmount: number;
+  penaltyHours: number;
+  hourlyRate: number;
+  hoursBeforeAppointment: number;
+  status: string;
+  reason?: string;
+  cancellationTime: string;
+  chargedLocumId?: string;
+  chargedPracticeId?: string;
+  chargedLocum?: {
+    fullName: string;
+  };
+  chargedPractice?: {
+    name: string;
+  };
 }
 
 interface Booking {
@@ -44,6 +66,7 @@ interface Booking {
   locumProfile?: LocumProfile;
   practice?: Practice;
   branch?: Branch;
+  cancellationPenalties?: CancellationPenalty[];
   is_past: boolean;
   is_upcoming: boolean;
   can_cancel: boolean;
@@ -63,6 +86,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 }) => {
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
+  const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   
   const {
     data: bookingsResponse,
@@ -94,7 +118,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     if (!booking.can_cancel) {
       await Swal.fire({
         title: 'Cannot Cancel',
-        text: 'This booking can only be cancelled more than 48 hours before the appointment start time or is not in a confirmed status.',
+        text: 'This booking is not in a confirmed status and cannot be cancelled.',
         icon: 'warning',
         confirmButtonText: 'OK',
         confirmButtonColor: '#C3EAE7'
@@ -102,9 +126,33 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       return;
     }
 
+    const now = new Date();
+    const bookingDateTime = new Date(booking.booking_date);
+    const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
+    bookingDateTime.setHours(hours, minutes, 0, 0);
+    const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    let penaltyHours = 0;
+    let penaltyAmount = 0;
+    let penaltyMessage = '';
+
+    if (hoursUntilBooking <= 48 && booking.locumProfile?.hourlyPayRate) {
+      const hourlyRate = booking.locumProfile.hourlyPayRate;
+      
+      if (hoursUntilBooking <= 24) {
+        penaltyHours = 6;
+        penaltyAmount = hourlyRate * 6;
+        penaltyMessage = `\n\n⚠️ Cancellation Penalty: £${penaltyAmount.toFixed(2)}\nCancelling within 24 hours incurs a penalty of 6 hours (${penaltyHours} × £${hourlyRate}/hr).`;
+      } else {
+        penaltyHours = 3;
+        penaltyAmount = hourlyRate * 3;
+        penaltyMessage = `\n\n⚠️ Cancellation Penalty: £${penaltyAmount.toFixed(2)}\nCancelling within 48 hours incurs a penalty of 3 hours (${penaltyHours} × £${hourlyRate}/hr).`;
+      }
+    }
+
     const { value: cancellationReason } = await Swal.fire({
       title: 'Cancel Booking',
-      text: `Are you sure you want to cancel this booking scheduled for ${formatDate(booking.booking_date)}?`,
+      html: `Are you sure you want to cancel this booking scheduled for ${formatDate(booking.booking_date)}?${penaltyMessage}`,
       input: 'textarea',
       inputPlaceholder: 'Please provide a reason for cancellation (optional)',
       icon: 'warning',
@@ -126,19 +174,21 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
 
         const token = localStorage.getItem('token');
         console.log('Token before cancel request:', token);
-        console.log('Cancel request data:', {
+        
+        const cancelData = {
           booking_id: booking.id,
           user_id: userId,
           user_type: userType,
-          cancellation_reason: cancellationReason
-        });
+          cancellation_reason: cancellationReason,
+          hours_until_booking: hoursUntilBooking,
+          penalty_hours: penaltyHours,
+          penalty_amount: penaltyAmount,
+          hourly_rate: booking.locumProfile?.hourlyPayRate || 0
+        };
+        
+        console.log('Cancel request data:', cancelData);
 
-        const result = await cancelBooking({
-          booking_id: booking.id,
-          user_id: userId,
-          user_type: userType,
-          cancellation_reason: cancellationReason
-        }).unwrap();
+        const result = await cancelBooking(cancelData).unwrap();
 
         await Swal.fire({
           title: 'Booking Cancelled',
@@ -217,6 +267,43 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days} days`;
   };
 
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getPenaltyStatusBadge = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'CHARGED':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'DISMISSED':
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const getCancelledByText = (cancelledBy: string) => {
+    switch (cancelledBy) {
+      case 'locum':
+        return 'Locum Staff';
+      case 'practice':
+        return 'Practice';
+      case 'branch':
+        return 'Branch';
+      default:
+        return cancelledBy;
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -262,11 +349,10 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               <h2 className="text-2xl font-bold text-gray-800">Your Bookings</h2>
             </div>
             <p className="text-gray-600 mt-1">
-              Manage your bookings • You can cancel confirmed bookings more than 48 hours before the appointment start time
+              Manage your bookings • You can cancel confirmed bookings at any time (penalties may apply within 48 hours)
             </p>
           </div>
           
-          {/* Branch Filter */}
           {branches.length > 0 && (
             <div className="flex items-center gap-2">
               <label htmlFor="branch-filter" className="text-sm font-medium text-gray-700">
@@ -343,7 +429,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {bookings.map((booking: Booking) => (
-                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
+                <React.Fragment key={booking.id}>
+                <tr className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
@@ -462,9 +549,19 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         </button>
                       )}
                       {booking.status === 'CANCELLED' && (
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-md">
-                          Cancelled
-                        </span>
+                        <>
+                          <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-md">
+                            Cancelled
+                          </span>
+                          {booking.cancellationPenalties && booking.cancellationPenalties.length > 0 && (
+                            <button
+                              onClick={() => setExpandedBooking(expandedBooking === booking.id ? null : booking.id)}
+                              className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-md hover:bg-orange-200 transition-colors"
+                            >
+                              {expandedBooking === booking.id ? 'Hide Penalty' : 'View Penalty'}
+                            </button>
+                          )}
+                        </>
                       )}
                       {booking.is_past && (
                         <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-md">
@@ -474,6 +571,71 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     </div>
                   </td>
                 </tr>
+                
+                {booking.status === 'CANCELLED' && booking.cancellationPenalties && booking.cancellationPenalties.length > 0 && expandedBooking === booking.id && (
+                  <tr className="bg-orange-50">
+                    <td colSpan={hasBranches ? 8 : 7} className="px-6 py-4">
+                      <div className="border-l-4 border-orange-400 pl-4">
+                        <h4 className="text-sm font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                          <FiAlertCircle className="text-orange-600" />
+                          Cancellation Penalty Details
+                        </h4>
+                        {booking.cancellationPenalties.map((penalty) => (
+                          <div key={penalty.id} className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-2">
+                              <div>
+                                <span className="font-medium text-gray-700">Cancelled By:</span>
+                                <span className="ml-2 text-gray-900">{getCancelledByText(penalty.cancelledBy)}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Cancellation Time:</span>
+                                <span className="ml-2 text-gray-900">{formatDateTime(penalty.cancellationTime)}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Hours Before Appointment:</span>
+                                <span className="ml-2 text-gray-900">{penalty.hoursBeforeAppointment.toFixed(1)} hours</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Penalty Status:</span>
+                                <span className={`ml-2 px-2 py-1 rounded text-xs font-medium border ${getPenaltyStatusBadge(penalty.status)}`}>
+                                  {penalty.status}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div>
+                                <span className="font-medium text-gray-700">Charged To:</span>
+                                <span className="ml-2 text-gray-900">
+                                  {penalty.chargedLocum?.fullName || penalty.chargedPractice?.name || 'N/A'}
+                                  {' '}({penalty.cancelledPartyType === 'locum' ? 'Locum' : 'Practice'})
+                                </span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Hourly Rate:</span>
+                                <span className="ml-2 text-gray-900">£{penalty.hourlyRate.toFixed(2)}/hr</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Penalty Hours:</span>
+                                <span className="ml-2 text-gray-900">{penalty.penaltyHours} hours</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-red-700 text-base">Penalty Amount:</span>
+                                <span className="ml-2 text-red-900 font-bold text-base">£{penalty.penaltyAmount.toFixed(2)}</span>
+                              </div>
+                            </div>
+                            {penalty.reason && (
+                              <div className="col-span-2 mt-2">
+                                <span className="font-medium text-gray-700">Cancellation Reason:</span>
+                                <p className="mt-1 text-gray-900 bg-white p-2 rounded border border-orange-200">{penalty.reason}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
