@@ -50,7 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             fullName: true,
             contactNumber: true,
             emailAddress: true,
-            role: true
+            role: true,
+            hourlyPayRate: true
           }
         },
         practice: {
@@ -69,6 +70,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             location: true,
             telephone: true
           }
+        },
+        cancellationPenalties: {
+          select: {
+            id: true,
+            cancelledBy: true,
+            cancelledPartyType: true,
+            penaltyAmount: true,
+            penaltyHours: true,
+            hourlyRate: true,
+            hoursBeforeAppointment: true,
+            status: true,
+            reason: true,
+            cancellationTime: true,
+            chargedLocumId: true,
+            chargedPracticeId: true,
+            chargedLocum: {
+              select: {
+                fullName: true
+              }
+            },
+            chargedPractice: {
+              select: {
+                name: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
         }
       },
       orderBy: {
@@ -95,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ...booking,
         is_past: bookingEndDateTime < now,
         is_upcoming: bookingEndDateTime > now,
-        can_cancel: timeDiffHours > 48 && booking.status === 'CONFIRMED',
+        can_cancel: booking.status === 'CONFIRMED', // Allow cancellation any time
         time_until_booking: Math.max(0, Math.floor(timeDiffHours))
       };
     });

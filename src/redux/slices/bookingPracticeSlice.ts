@@ -82,7 +82,16 @@ export const bookingApiSlice = createApi({
 
     cancelBooking: builder.mutation<
       { success: boolean; message: string; data: any }, 
-      { booking_id: string; user_id: string; user_type: 'locum' | 'practice' | 'branch'; cancellation_reason?: string }
+      { 
+        booking_id: string; 
+        user_id: string; 
+        user_type: 'locum' | 'practice' | 'branch'; 
+        cancellation_reason?: string;
+        hours_until_booking: number;
+        penalty_hours: number;
+        penalty_amount: number;
+        hourly_rate: number;
+      }
     >({
       query: (cancelData) => ({
         url: 'cancel-booking',

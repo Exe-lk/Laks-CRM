@@ -23,7 +23,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { booking_id, user_id, user_type, cancellation_reason } = req.body;
+    const { 
+      booking_id, 
+      user_id, 
+      user_type, 
+      cancellation_reason,
+      hours_until_booking,
+      penalty_hours,
+      penalty_amount,
+      hourly_rate
+    } = req.body;
 
     if (!booking_id || !user_id || !user_type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -37,9 +46,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const booking = await tx.booking.findUnique({
         where: { id: booking_id },
         include: {
-          locumProfile: { select: { fullName: true } },
-          practice: { select: { name: true } },
-          branch: { select: { name: true } }
+          locumProfile: { 
+            select: { 
+              id: true,
+              fullName: true,
+              hourlyPayRate: true 
+            } 
+          },
+          practice: { 
+            select: { 
+              id: true,
+              name: true 
+            } 
+          },
+          branch: { 
+            select: { 
+              id: true,
+              name: true 
+            } 
+          }
         }
       });
 
@@ -61,17 +86,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new Error("You can only cancel your branch's bookings");
       }
 
+      // Use penalty calculation from frontend
       const now = new Date();
       const bookingDateTime = new Date(booking.booking_date);
       const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
       bookingDateTime.setHours(hours, minutes, 0, 0);
-      
-      const timeDiffHours = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-      if (timeDiffHours <= 48) {
-        throw new Error("Bookings can only be cancelled more than 48 hours in advance");
+      let penaltyData = null;
+      
+      // Check if penalty should be applied (penalty_amount > 0 means there's a penalty)
+      if (penalty_amount && penalty_amount > 0) {
+        let chargedLocumId: string | null = null;
+        let chargedPracticeId: string | null = null;
+        let cancelledPartyType: string;
+
+        if (user_type === 'locum') {
+          // Locum is cancelling - locum gets charged
+          if (!booking.locum_id) {
+            throw new Error("Locum ID not found for booking");
+          }
+          chargedLocumId = booking.locum_id;
+          cancelledPartyType = 'locum';
+        } else {
+          // Practice or Branch is cancelling - practice gets charged
+          chargedPracticeId = booking.practice_id;
+          cancelledPartyType = 'practice';
+        }
+
+        // Create penalty record with frontend-calculated values
+        penaltyData = await tx.cancellationPenalty.create({
+          data: {
+            bookingId: booking_id,
+            cancelledBy: user_type,
+            chargedLocumId: chargedLocumId,
+            chargedPracticeId: chargedPracticeId,
+            cancelledPartyType: cancelledPartyType,
+            appointmentStartTime: bookingDateTime,
+            cancellationTime: now,
+            hoursBeforeAppointment: hours_until_booking,
+            penaltyHours: penalty_hours,
+            hourlyRate: hourly_rate,
+            penaltyAmount: penalty_amount,
+            status: 'PENDING',
+            reason: cancellation_reason || `Cancelled by ${user_type}`
+          }
+        });
       }
 
+      // Cancel the booking
       const cancelledBooking = await tx.booking.update({
         where: { id: booking_id },
         data: {
@@ -82,6 +144,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
 
+      // Update appointment request status
       await tx.appointmentRequest.update({
         where: { request_id: booking.request_id },
         data: {
@@ -90,13 +153,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
 
-      return cancelledBooking;
+      return {
+        booking: cancelledBooking,
+        penalty: penaltyData
+      };
     });
+
+    const responseMessage = result.penalty 
+      ? `Booking cancelled successfully. A penalty of £${result.penalty.penaltyAmount.toFixed(2)} has been recorded and is pending admin review.`
+      : "Booking cancelled successfully. The appointment is now available for other locums to apply.";
 
     res.status(200).json({
       success: true,
-      message: "Booking cancelled successfully. The appointment is now available for other locums to apply.",
-      data: result
+      message: responseMessage,
+      data: result.booking,
+      penalty: result.penalty
     });
 
   } catch (error) {
