@@ -333,3 +333,31 @@ model IgnoredAppointment {
   @@unique([request_id, locum_id], name: "ignored_appointment_unique")
   @@map("ignored_appointments")
 }
+
+model CancellationPenalty {
+  id                    String   @id @default(cuid())
+  bookingId             String   @map("booking_id")
+  cancelledBy           String   @map("cancelled_by") // "locum" or "practice" or "branch"
+  cancelledPartyId      String   @map("cancelled_party_id") // ID of the locum or practice who gets charged
+  cancelledPartyName    String   @map("cancelled_party_name") // Name for display
+  cancelledPartyType    String   @map("cancelled_party_type") // "locum" or "practice"
+  appointmentStartTime  DateTime @map("appointment_start_time")
+  cancellationTime      DateTime @map("cancellation_time")
+  hoursBeforeAppointment Float   @map("hours_before_appointment")
+  penaltyHours          Float    @map("penalty_hours") // 3 or 6 hours
+  hourlyRate            Float    @map("hourly_rate")
+  penaltyAmount         Float    @map("penalty_amount") // penaltyHours * hourlyRate
+  status                String   @default("PENDING") // PENDING, CHARGED, DISMISSED
+  reason                String?  // Cancellation reason
+  chargedAt             DateTime? @map("charged_at")
+  chargedBy             String?  @map("charged_by") // Admin ID who processed the charge
+  dismissedAt           DateTime? @map("dismissed_at")
+  dismissedBy           String?  @map("dismissed_by") // Admin ID who dismissed
+  dismissalReason       String?  @map("dismissal_reason")
+  stripeChargeId        String?  @map("stripe_charge_id") // Reference to Stripe charge
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("cancellation_penalties")
+}
