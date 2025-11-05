@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { FiX, FiUser, FiMapPin, FiPhone, FiMail, FiClock, FiCheck, FiLoader, FiStar, FiFilter } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { useGetApplicantsQuery, useSelectApplicantMutation, Applicant, JobDetails } from '@/redux/slices/appointmentPracticeSlice';
+import { sendSMS } from '@/redux/slices/smsSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
 
 interface ApplicantsModalProps {
   isOpen: boolean;
@@ -21,6 +24,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
   
   const { 
     data: applicantsData, 
@@ -212,10 +216,29 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
 
       setSelectingApplicant(locumId);
 
+      const applicant = applicants.find(app => app.locumProfile.id === locumId);
+      
+      if (!applicant) {
+        throw new Error('Applicant not found');
+      }
+
       const response = await selectApplicant({
         request_id: requestId,
         locum_id: locumId
       }).unwrap();
+
+      if (jobDetails?.request_date && jobDetails?.request_start_time && jobDetails?.request_end_time) {
+        const practiceName = jobDetails.practice?.name || 'the practice';
+        const appointmentDate = formatDate(jobDetails.request_date);
+        const startTime = formatTime(jobDetails.request_start_time);
+        const endTime = formatTime(jobDetails.request_end_time);
+        const appointmentLocation = jobDetails.location || 'the specified location';
+        
+        dispatch(sendSMS({
+          to: applicant.locumProfile.contactNumber,
+          body: `You have been selected for the appointment from ${practiceName} on ${appointmentDate} at ${startTime} - ${endTime} at ${appointmentLocation}. Please login to your account to view the details.`,
+        }));
+      }
 
       await Swal.fire({
         title: 'Success!',
