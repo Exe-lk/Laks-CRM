@@ -55,7 +55,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        if (selectedDate < today) {
+        if (selectedDate <= today) {
             errors.request_date = 'Cannot select a past date';
         }
 
