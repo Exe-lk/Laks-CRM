@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
             } catch (dbError) {
-                console.error("Failed to save customer to database:", dbError);
+                console.error("Failed to save practice customer to database:", dbError);
                 // Don't fail the request if DB save fails, customer still created in Stripe
             }
         }
@@ -87,3 +87,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: error?.message || String(error) });
     }
 }
+

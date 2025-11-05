@@ -161,7 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  amount: Math.round(job.totalPay * 100),
+                  amount: Math.round((job.totalPay || 0) * 100),
                   currency: 'gbp',
                   description: `Booking ${job.booking.bookingUniqueid} - ${approved.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''} - ${chargeEntity}`,
                   metadata: {
@@ -174,9 +174,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     branch_name: job.branch?.name || null,
                     total_hours: job.totalHours,
                     hourly_rate: job.hourlyRate,
-                    charged_entity: chargeEntity
+                    charged_entity: chargeEntity // 'practice', 'branch', or 'locum'
                   },
-                  practice_id: job.practiceId,
                   customer_id: stripeCustomer.stripeCustomerId,
                   confirm: true
                 })
@@ -190,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     bookingId: job.bookingId,
                     timesheetJobId: job.id,
                     practiceId: job.practiceId,
-                    amount: job.totalPay,
+                    amount: job.totalPay || 0,
                     currency: 'gbp',
                     stripeChargeId: paymentData.id,
                     stripePaymentIntent: paymentData.payment_intent || paymentData.id,
@@ -217,7 +216,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     bookingId: job.bookingId,
                     timesheetJobId: job.id,
                     practiceId: job.practiceId,
-                    amount: job.totalPay,
+                    amount: job.totalPay || 0,
                     currency: 'gbp',
                     paymentStatus: 'FAILED',
                     paymentMethod: 'AUTO',
@@ -242,7 +241,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   bookingId: job.bookingId,
                   timesheetJobId: job.id,
                   practiceId: job.practiceId,
-                  amount: job.totalPay,
+                  amount: job.totalPay || 0,
                   currency: 'gbp',
                   paymentStatus: 'FAILED',
                   paymentMethod: 'AUTO',
@@ -267,7 +266,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 bookingId: job.bookingId,
                 timesheetJobId: job.id,
                 practiceId: job.practiceId,
-                amount: job.totalPay ?? 0,
+                amount: job.totalPay || 0,
                 currency: 'gbp',
                 paymentStatus: 'FAILED',
                 paymentMethod: 'AUTO',

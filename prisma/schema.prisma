@@ -53,7 +53,6 @@ model LocumProfile {
   payslips                 Payslip[]
   cancellationPenalties    CancellationPenalty[]
   stripeCustomer           LocumStripeCustomer?
-  paymentCards             LocumPaymentCard[]
 
   @@map("locum_profiles")
 }
@@ -92,7 +91,6 @@ model Practice {
   bookings            Booking[]
   appointmentRequests AppointmentRequest[]
   branches            Branch[]
-  paymentCards        PaymentCard[]
   stripeCustomer      StripeCustomer?
   timesheetJobs       TimesheetJob[]
   invoices            Invoice[]
@@ -207,30 +205,11 @@ model Branch {
   appointmentRequests AppointmentRequest[]
   invoices            Invoice[]
   stripeCustomer      BranchStripeCustomer?
-  paymentCards        BranchPaymentCard[]
 
   @@map("branches")
 }
 
-model PaymentCard {
-  id             String   @id @default(cuid())
-  practiceId     String   @map("practice_id")
-  cardHolderName String   @map("card_holder_name")
-  cardNumber     String   @map("card_number") // Encrypted
-  lastFourDigits String   @map("last_four_digits") // For display purposes
-  expiryMonth    String   @map("expiry_month") // Encrypted
-  expiryYear     String   @map("expiry_year") // Encrypted
-  cvv            String // Encrypted
-  cardType       String   @map("card_type") // VISA, MASTERCARD, AMEX, DISCOVER, etc.
-  isDefault      Boolean  @default(false) @map("is_default")
-  status         String   @default("active") // active, inactive
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 
-  practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  
-  @@map("payment_cards")
-}
 
 model StripeCustomer {
   id               String   @id @default(cuid())
@@ -274,45 +253,6 @@ model BranchStripeCustomer {
   @@map("branch_stripe_customers")
 }
 
-model LocumPaymentCard {
-  id             String   @id @default(cuid())
-  locumId        String   @map("locum_id")
-  cardHolderName String   @map("card_holder_name")
-  cardNumber     String   @map("card_number") // Encrypted
-  lastFourDigits String   @map("last_four_digits")
-  expiryMonth    String   @map("expiry_month") // Encrypted
-  expiryYear     String   @map("expiry_year") // Encrypted
-  cvv            String   // Encrypted
-  cardType       String   @map("card_type")
-  isDefault      Boolean  @default(false) @map("is_default")
-  status         String   @default("active")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  locumProfile LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
-  
-  @@map("locum_payment_cards")
-}
-
-model BranchPaymentCard {
-  id             String   @id @default(cuid())
-  branchId       String   @map("branch_id")
-  cardHolderName String   @map("card_holder_name")
-  cardNumber     String   @map("card_number") // Encrypted
-  lastFourDigits String   @map("last_four_digits")
-  expiryMonth    String   @map("expiry_month") // Encrypted
-  expiryYear     String   @map("expiry_year") // Encrypted
-  cvv            String   // Encrypted
-  cardType       String   @map("card_type")
-  isDefault      Boolean  @default(false) @map("is_default")
-  status         String   @default("active")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  
-  @@map("branch_payment_cards")
-}
 
 model Timesheet {
   id                   String    @id @default(cuid())

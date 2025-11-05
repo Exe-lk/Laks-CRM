@@ -13,13 +13,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: "Amount is required" });
         }
 
-        // Enhanced payment processing with customer support
+        // Universal payment processing - supports Practice, Branch, and Locum
         const { 
             amount, 
             currency, 
             description, 
             metadata, 
-            practice_id, 
             customer_id, 
             payment_method_id, 
             confirm, 
@@ -33,15 +32,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured" });
         }
 
-        // Prepare enhanced payload for payment intent
+        if (!customer_id) {
+            return res.status(400).json({ error: "customer_id is required" });
+        }
+
+        // Prepare universal payload for payment intent
+        // Metadata can contain: practice_id, branch_id, locum_id, charged_entity, etc.
+        // All entity-specific info should be in metadata, not hardcoded
         const paymentPayload = {
             amount,
             currency,
             description,
-            metadata: {
-                ...metadata,
-                practice_id: practice_id || metadata?.practice_id
-            },
+            metadata: metadata || {}, // Pass through all metadata as-is (practice_id, branch_id, locum_id, etc.)
             customer_id,
             payment_method_id,
             confirm,
