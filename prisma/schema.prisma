@@ -43,6 +43,7 @@ model LocumProfile {
   lastPayslipSentAt        DateTime?                 @map("last_payslip_sent_at")
   createdAt                DateTime                  @default(now()) @map("created_at")
   updatedAt                DateTime                  @updatedAt @map("updated_at")
+  paymentMode              String?                   @default("MANUAL") @map("payment_mode")
   specialties              Specialty[]
   bookings                 Booking[]
   appointmentResponses     AppointmentResponse[]
@@ -85,6 +86,7 @@ model Practice {
   lastInvoiceSentAt   DateTime?            @map("last_invoice_sent_at")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  paymentMode         String?                   @default("MANUAL") @map("payment_mode")
   bookings            Booking[]
   appointmentRequests AppointmentRequest[]
   branches            Branch[]
@@ -113,6 +115,7 @@ model Booking {
   accept_time        DateTime?
   cancel_by          String?
   cancel_time        DateTime?
+  completed_at       DateTime?          @map("completed_at") // When admin approved the timesheet
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   request            AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
@@ -122,6 +125,7 @@ model Booking {
   branch                Branch?               @relation(fields: [branch_id], references: [id], onDelete: SetNull)
   timesheetJobs         TimesheetJob[]
   cancellationPenalties CancellationPenalty[]
+  bookingPayments       BookingPayment[]
 }
 
 model AppointmentRequest {
@@ -423,21 +427,46 @@ model CancellationPenalty {
   @@map("cancellation_penalties")
 }
 
+
 model PenaltyPaymentLog {
   id                    String   @id @default(cuid())
   penaltyId             String   @map("penalty_id")
-  action                String   // "CHARGED", "CHARGE_FAILED", "DISMISSED"
-  amount                Float?   // Amount charged (if applicable)
+  action                String   
+  amount                Float?   
   stripeChargeId        String?  @map("stripe_charge_id")
   stripePaymentIntent   String?  @map("stripe_payment_intent")
-  performedBy           String   @map("performed_by") // Admin ID who performed the action
-  performedByName       String?  @map("performed_by_name") // Admin name for display
+  performedBy           String   @map("performed_by") 
+  performedByName       String?  @map("performed_by_name")
   notes                 String?
-  errorMessage          String?  @map("error_message") // If charge failed
-  metadata              Json?    // Additional payment metadata
+  errorMessage          String?  @map("error_message") 
+  metadata              Json?    
   createdAt             DateTime @default(now())
   
   penalty               CancellationPenalty @relation(fields: [penaltyId], references: [id], onDelete: Cascade)
   
   @@map("penalty_payment_logs")
+}
+
+model BookingPayment {
+  id                    String   @id @default(cuid())
+  bookingId             String   @map("booking_id")
+  timesheetJobId        String   @map("timesheet_job_id") // Link to the timesheet job
+  practiceId            String   @map("practice_id")
+  amount                Float    // Total amount charged
+  currency              String   @default("gbp")
+  stripeChargeId        String?  @map("stripe_charge_id")
+  stripePaymentIntent   String?  @map("stripe_payment_intent")
+  paymentStatus         String   @map("payment_status") // "SUCCESS", "FAILED", "PENDING"
+  paymentMethod         String   @map("payment_method") // "AUTO" or "MANUAL"
+  chargedAt             DateTime? @map("charged_at")
+  chargedBy             String?  @map("charged_by") // Admin ID if manually charged
+  errorMessage          String?  @map("error_message") // If payment failed
+  metadata              Json?   
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  booking               Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  @@map("booking_payments")
 }

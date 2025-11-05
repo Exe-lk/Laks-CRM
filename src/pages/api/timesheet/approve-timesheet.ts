@@ -41,7 +41,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: {
         timesheetJobs: {
           include: {
-            practice: true
+            practice: {
+              select: {
+                id: true,
+                name: true,
+                location: true,
+                paymentMode: true
+              }
+            },
+            booking: {
+              select: {
+                id: true,
+                status: true,
+                bookingUniqueid: true
+              }
+            }
           }
         },
         locumProfile: {
@@ -68,42 +82,248 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let newStatus;
 
     if (action === 'approve') {
-      // Approve and lock the timesheet
-      updatedTimesheet = await prisma.timesheet.update({
-        where: { id: timesheetId },
-        data: {
-          managerSignature: managerSignature,
-          managerSignatureDate: new Date(),
-          managerId: managerId,
-          status: 'LOCKED',
-          submittedAt: new Date()
-        },
-        include: {
-          timesheetJobs: {
-            include: {
-              practice: {
-                select: {
-                  name: true,
-                  location: true
-                }
-              },
-              branch: {
-                select: {
-                  name: true,
-                  location: true
+      // Use transaction to ensure all operations succeed or fail together
+      const result = await prisma.$transaction(async (tx) => {
+        // Approve and lock the timesheet
+        const approved = await tx.timesheet.update({
+          where: { id: timesheetId },
+          data: {
+            managerSignature: managerSignature,
+            managerSignatureDate: new Date(),
+            managerId: managerId,
+            status: 'LOCKED',
+            submittedAt: new Date()
+          },
+          include: {
+            timesheetJobs: {
+              include: {
+                practice: {
+                  select: {
+                    id: true,
+                    name: true,
+                    location: true,
+                    paymentMode: true
+                  }
+                },
+                branch: {
+                  select: {
+                    id: true,
+                    name: true,
+                    location: true
+                  }
+                },
+                booking: {
+                  select: {
+                    id: true,
+                    status: true,
+                    bookingUniqueid: true,
+                    practice_id: true,
+                    branch_id: true
+                  }
                 }
               }
+            },
+            locumProfile: {
+              select: {
+                fullName: true,
+                emailAddress: true
+              }
             }
-          },
-          locumProfile: {
-            select: {
-              fullName: true,
-              emailAddress: true
+          }
+        });
+
+        const now = new Date();
+        const paymentResults: any[] = [];
+
+        // Process each job in the timesheet
+        for (const job of approved.timesheetJobs) {
+          // Mark booking as COMPLETED
+          await tx.booking.update({
+            where: { id: job.bookingId },
+            data: {
+              status: 'COMPLETED',
+              completed_at: now
+            }
+          });
+
+          // Check if practice has AUTO payment mode
+          if (job.practice.paymentMode === 'AUTO' && job.totalPay && job.totalPay > 0) {
+            // Get practice's Stripe customer
+            const stripeCustomer = await tx.stripeCustomer.findUnique({
+              where: { practiceId: job.practiceId }
+            });
+
+            if (stripeCustomer) {
+              try {
+                // Call payment API to charge the booking
+                const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    amount: Math.round(job.totalPay * 100), // Convert to cents
+                    currency: 'gbp',
+                    description: `Booking ${job.booking.bookingUniqueid} - ${approved.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''}`,
+                    metadata: {
+                      booking_id: job.bookingId,
+                      timesheet_job_id: job.id,
+                      timesheet_id: approved.id,
+                      locum_name: approved.locumProfile.fullName,
+                      practice_id: job.practiceId,
+                      branch_id: job.branchId || null,
+                      branch_name: job.branch?.name || null,
+                      total_hours: job.totalHours,
+                      hourly_rate: job.hourlyRate
+                    },
+                    practice_id: job.practiceId,
+                    customer_id: stripeCustomer.stripeCustomerId,
+                    confirm: true // Auto-confirm the payment
+                  })
+                });
+
+                const paymentData = await paymentResponse.json();
+
+                if (paymentResponse.ok && paymentData.id) {
+                  // Payment successful - log it
+                  await tx.bookingPayment.create({
+                    data: {
+                      bookingId: job.bookingId,
+                      timesheetJobId: job.id,
+                      practiceId: job.practiceId,
+                      amount: job.totalPay,
+                      currency: 'gbp',
+                      stripeChargeId: paymentData.id,
+                      stripePaymentIntent: paymentData.payment_intent || paymentData.id,
+                      paymentStatus: 'SUCCESS',
+                      paymentMethod: 'AUTO',
+                      chargedAt: now,
+                      chargedBy: managerId,
+                      metadata: {
+                        total_hours: job.totalHours,
+                        hourly_rate: job.hourlyRate,
+                        booking_uniqueid: job.booking.bookingUniqueid,
+                        locum_name: approved.locumProfile.fullName,
+                        branch_id: job.branchId || null,
+                        branch_name: job.branch?.name || null
+                      },
+                      notes: `Auto-charged on timesheet approval`
+                    }
+                  });
+
+                  paymentResults.push({
+                    bookingId: job.bookingId,
+                    status: 'SUCCESS',
+                    amount: job.totalPay,
+                    chargeId: paymentData.id
+                  });
+                } else {
+                  // Payment failed - log the failure
+                  await tx.bookingPayment.create({
+                    data: {
+                      bookingId: job.bookingId,
+                      timesheetJobId: job.id,
+                      practiceId: job.practiceId,
+                      amount: job.totalPay,
+                      currency: 'gbp',
+                      paymentStatus: 'FAILED',
+                      paymentMethod: 'AUTO',
+                      errorMessage: paymentData.error || 'Payment failed',
+                      metadata: {
+                        total_hours: job.totalHours,
+                        hourly_rate: job.hourlyRate,
+                        booking_uniqueid: job.booking.bookingUniqueid,
+                        locum_name: approved.locumProfile.fullName,
+                        branch_id: job.branchId || null,
+                        branch_name: job.branch?.name || null
+                      },
+                      notes: `Auto-charge failed on timesheet approval`
+                    }
+                  });
+
+                  paymentResults.push({
+                    bookingId: job.bookingId,
+                    status: 'FAILED',
+                    amount: job.totalPay,
+                    error: paymentData.error || 'Payment failed'
+                  });
+                }
+              } catch (paymentError: any) {
+                // Log payment error
+                await tx.bookingPayment.create({
+                  data: {
+                    bookingId: job.bookingId,
+                    timesheetJobId: job.id,
+                    practiceId: job.practiceId,
+                    amount: job.totalPay,
+                    currency: 'gbp',
+                    paymentStatus: 'FAILED',
+                    paymentMethod: 'AUTO',
+                    errorMessage: paymentError.message || 'Payment processing error',
+                    metadata: {
+                      total_hours: job.totalHours,
+                      hourly_rate: job.hourlyRate,
+                      booking_uniqueid: job.booking.bookingUniqueid,
+                      locum_name: approved.locumProfile.fullName,
+                      branch_id: job.branchId || null,
+                      branch_name: job.branch?.name || null
+                    },
+                    notes: `Auto-charge error on timesheet approval`
+                  }
+                });
+
+                paymentResults.push({
+                  bookingId: job.bookingId,
+                  status: 'ERROR',
+                  amount: job.totalPay,
+                  error: paymentError.message
+                });
+              }
+            } else {
+              // No Stripe customer found - log as pending
+              await tx.bookingPayment.create({
+                data: {
+                  bookingId: job.bookingId,
+                  timesheetJobId: job.id,
+                  practiceId: job.practiceId,
+                  amount: job.totalPay,
+                  currency: 'gbp',
+                  paymentStatus: 'FAILED',
+                  paymentMethod: 'AUTO',
+                  errorMessage: 'No Stripe customer found for practice',
+                  metadata: {
+                    total_hours: job.totalHours,
+                    hourly_rate: job.hourlyRate,
+                    booking_uniqueid: job.booking.bookingUniqueid,
+                    locum_name: approved.locumProfile.fullName,
+                    branch_id: job.branchId || null,
+                    branch_name: job.branch?.name || null
+                  },
+                  notes: `Stripe customer not found`
+                }
+              });
+
+              paymentResults.push({
+                bookingId: job.bookingId,
+                status: 'FAILED',
+                amount: job.totalPay,
+                error: 'No Stripe customer found'
+              });
             }
           }
         }
+
+        return { timesheet: approved, payments: paymentResults };
       });
+
+      updatedTimesheet = result.timesheet;
       newStatus = 'LOCKED';
+
+      // Check if any payments failed
+      const failedPayments = result.payments.filter((p: any) => p.status !== 'SUCCESS');
+      if (failedPayments.length > 0) {
+        console.warn(`Some automatic payments failed:`, failedPayments);
+      }
     } else {
       // Reject and return to DRAFT status
       updatedTimesheet = await prisma.timesheet.update({
