@@ -534,7 +534,7 @@ model BookingPayment {
   chargedAt             DateTime? @map("charged_at")
   chargedBy             String?  @map("charged_by") // Admin ID if manually charged
   errorMessage          String?  @map("error_message") // If payment failed
-  metadata              Json?   
+  metadata              Json?      // Additional payment metadata (hours, rate, etc)
   notes                 String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
