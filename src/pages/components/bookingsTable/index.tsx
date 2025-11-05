@@ -259,12 +259,42 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     }
   };
 
-  const getTimeUntilText = (hours: number) => {
+  const calculateTimeUntil = (booking: Booking) => {
+    const now = new Date();
+    const bookingDateTime = new Date(booking.booking_date);
+    const [hours, minutes] = booking.booking_start_time.split(':').map(Number);
+    bookingDateTime.setHours(hours, minutes, 0, 0);
+    
+    const hoursUntil = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursUntil;
+  };
+
+  const getTimeUntilText = (booking: Booking) => {
+    const hours = calculateTimeUntil(booking);
+    
     if (hours <= 0) return 'Started/Past';
-    if (hours < 24) return `${hours} hours`;
+    
+    if (hours < 1) {
+      const minutes = Math.round(hours * 60);
+      return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    
+    if (hours < 24) {
+      const wholeHours = Math.floor(hours);
+      const minutes = Math.round((hours - wholeHours) * 60);
+      if (minutes > 0) {
+        return `${wholeHours}h ${minutes}m`;
+      }
+      return `${wholeHours} hour${wholeHours !== 1 ? 's' : ''}`;
+    }
+    
     const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days} days`;
+    const remainingHours = Math.floor(hours % 24);
+    
+    if (remainingHours > 0) {
+      return `${days}d ${remainingHours}h`;
+    }
+    return `${days} day${days !== 1 ? 's' : ''}`;
   };
 
   const formatDateTime = (dateString: string) => {
@@ -529,8 +559,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm">
-                      <div className={`font-medium ${booking.is_past ? 'text-gray-500' : booking.time_until_booking <= 48 ? 'text-red-600' : 'text-green-600'}`}>
-                        {getTimeUntilText(booking.time_until_booking)}
+                      <div className={`font-medium ${calculateTimeUntil(booking) <= 0 ? 'text-gray-500' : calculateTimeUntil(booking) <= 48 ? 'text-red-600' : 'text-green-600'}`}>
+                        {getTimeUntilText(booking)}
                       </div>
                       {booking.is_upcoming && !booking.can_cancel && booking.status === 'CONFIRMED' && (
                         <div className="text-xs text-red-500 mt-1">Cannot cancel</div>

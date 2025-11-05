@@ -43,12 +43,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Locum profile not found or employee type not specified" });
     }
 
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
     const availableJobs = await prisma.appointmentRequest.findMany({
       where: {
         status: 'PENDING',
         required_role: locumProfile.employeeType, 
         request_date: {
-          gte: new Date()
+          gte: currentDate
         },
         NOT: {
           OR: [
@@ -105,6 +108,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Found appointment requests:', availableJobs.length);
     console.log('First few requests:', availableJobs.slice(0, 2));
 
+    const now = new Date();
+    const futureJobs = availableJobs.filter(job => {
+      const appointmentDateTime = new Date(job.request_date);
+      const [hours, minutes] = job.request_start_time.split(':');
+      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      return appointmentDateTime > now;
+    });
+
+    console.log('Jobs with future start times:', futureJobs.length);
+
     const locumBookings = await prisma.booking.findMany({
       where: {
         locum_id: locum_id as string,
@@ -120,7 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    const availableNonConflictingJobs = availableJobs.filter(job => {
+    const availableNonConflictingJobs = futureJobs.filter(job => {
       return !locumBookings.some(booking => {
         const jobDate = job.request_date.toDateString();
         const bookingDate = booking.booking_date.toDateString();
