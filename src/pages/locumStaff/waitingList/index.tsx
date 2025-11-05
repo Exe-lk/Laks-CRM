@@ -4,6 +4,9 @@ import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, F
 import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery, useIgnoreAppointmentMutation, useCheckIgnoredQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
+import { sendSMS } from '@/redux/slices/smsSlice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
 
 type RequestWithDistance = any & {
     distance: number | null;
@@ -11,6 +14,7 @@ type RequestWithDistance = any & {
 
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
+    const dispatch = useDispatch<AppDispatch>();
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
     const [currentTime, setCurrentTime] = useState(new Date());
     const [activeTab, setActiveTab] = useState<'pending-requests' | 'request-appoitment' | 'pending-confirmations'>('request-appoitment');
@@ -237,7 +241,6 @@ const WaitingList = () => {
         }
     );
 
-    // Refetch data when switching tabs
     useEffect(() => {
         if (!profile?.id) return;
         
@@ -252,7 +255,7 @@ const WaitingList = () => {
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 
-    const handleConfirmation = async (confirmationId: string, action: 'CONFIRM' | 'REJECT') => {
+    const handleConfirmation = async (confirmationId: string, action: 'CONFIRM' | 'REJECT', confirmation?: any) => {
         if (!profile?.id) return;
 
         let rejectionReason = '';
@@ -309,6 +312,17 @@ const WaitingList = () => {
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#10B981'
             });
+
+            if (action === 'CONFIRM' && confirmation) {
+                try {
+                    await dispatch(sendSMS({
+                        to: confirmation.practice.telephone,
+                        body: `Good news! ${profile.fullName || 'A locum staff'} has accepted your appointment request from ${confirmation.practice.name} on ${formatDate(confirmation.appointment.date)} at ${formatTime(confirmation.appointment.start_time)} - ${formatTime(confirmation.appointment.end_time)} at ${confirmation.appointment.location}. Please login to your account to view the details.`,
+                    })).unwrap();
+                } catch (smsError) {
+                    console.error('Failed to send SMS notification:', smsError);
+                }
+            }
 
             refetchConfirmations();
         } catch (error: any) {
@@ -585,7 +599,7 @@ const WaitingList = () => {
                                                         {!timeLeft.expired ? (
                                                             <div className="flex space-x-2">
                                                                 <button
-                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM')}
+                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
                                                                     disabled={isLoading}
                                                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                                                                 >
@@ -598,7 +612,7 @@ const WaitingList = () => {
                                                                 </button>
 
                                                                 <button
-                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT')}
+                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
                                                                     disabled={isLoading}
                                                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
                                                                 >
@@ -708,7 +722,7 @@ const WaitingList = () => {
                                                 {!timeLeft.expired ? (
                                                     <div className="flex flex-col space-y-2 pt-2">
                                                         <button
-                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM')}
+                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
                                                             disabled={isLoading}
                                                             className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
                                                         >
@@ -721,7 +735,7 @@ const WaitingList = () => {
                                                         </button>
 
                                                         <button
-                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT')}
+                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
                                                             disabled={isLoading}
                                                             className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
                                                         >
@@ -983,7 +997,6 @@ const WaitingList = () => {
                                 </div>
                             </div>
                             <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
-                                {/* Desktop Table View */}
                                 <div className="hidden md:block overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
                                         <thead className="bg-[#C3EAE7]/20">
