@@ -422,7 +422,7 @@ const CreateAppointmentPage = () => {
 
     if (!profile) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-32">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C3EAE7] mx-auto mb-4"></div>
                     <p className="text-gray-600">Loading...</p>
@@ -435,8 +435,8 @@ const CreateAppointmentPage = () => {
         <div className="min-h-screen bg-white flex flex-col">
             <NavBar />
 
-            <div className="flex-1 w-full">
-                <div className="text-center mb-8 pt-12">
+            <div className="flex-1 w-full pt-32">
+                <div className="text-center mb-8 pt-24">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />

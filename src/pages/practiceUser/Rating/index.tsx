@@ -129,7 +129,7 @@ const RatingPage: React.FC = () => {
   const locums = (locumsData?.data || []).filter(locum => locum.role?.toLowerCase() !== 'admin');
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-32">
       <NavBarPracticeUser />
       {isLoading && (
       <div className="flex justify-center items-center min-h-screen">

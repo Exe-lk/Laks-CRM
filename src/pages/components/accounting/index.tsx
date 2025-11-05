@@ -7,7 +7,7 @@ const Accounting = () => {
   return (
     <>
       <NavBar />
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-white pt-32">
         <section className="py-16 lg:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12 lg:mb-16">

@@ -397,11 +397,11 @@ const WaitingList = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pt-32">
             <NavBar />
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointment Requests</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-12">Appointment Requests</h1>
                     <p className="text-gray-600">
                         {activeTab === 'request-appoitment'
                             ? 'Appointments confirmed by practices waiting for your response'
