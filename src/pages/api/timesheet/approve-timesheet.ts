@@ -109,7 +109,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   select: {
                     id: true,
                     name: true,
-                    location: true
+                    location: true,
+                    paymentMode: true
                   }
                 },
                 booking: {
@@ -146,14 +147,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
           });
 
-          // Check if practice has AUTO payment mode
-          if (job.practice.paymentMode === 'AUTO' && job.totalPay && job.totalPay > 0) {
-            // Get practice's Stripe customer
-            const stripeCustomer = await tx.stripeCustomer.findUnique({
+          // Determine who to charge: branch (if AUTO) or practice (if AUTO)
+          let shouldCharge = false;
+          let chargeEntity: 'branch' | 'practice' | null = null;
+          let stripeCustomer: any = null;
+
+          // Priority 1: Check if branch has AUTO payment mode
+          if (job.branchId && job.branch?.paymentMode === 'AUTO' && job.totalPay && job.totalPay > 0) {
+            shouldCharge = true;
+            chargeEntity = 'branch';
+            stripeCustomer = await tx.branchStripeCustomer.findUnique({
+              where: { branchId: job.branchId }
+            });
+          }
+          // Priority 2: Fall back to practice if no branch or branch not AUTO
+          else if (job.practice.paymentMode === 'AUTO' && job.totalPay && job.totalPay > 0) {
+            shouldCharge = true;
+            chargeEntity = 'practice';
+            stripeCustomer = await tx.stripeCustomer.findUnique({
               where: { practiceId: job.practiceId }
             });
+          }
 
-            if (stripeCustomer) {
+          if (shouldCharge && stripeCustomer) {
               try {
                 // Call payment API to charge the booking
                 const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`, {
@@ -164,7 +180,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   body: JSON.stringify({
                     amount: Math.round(job.totalPay * 100), // Convert to cents
                     currency: 'gbp',
-                    description: `Booking ${job.booking.bookingUniqueid} - ${approved.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''}`,
+                    description: `Booking ${job.booking.bookingUniqueid} - ${approved.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''} - Charged to ${chargeEntity}`,
                     metadata: {
                       booking_id: job.bookingId,
                       timesheet_job_id: job.id,
@@ -205,9 +221,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         booking_uniqueid: job.booking.bookingUniqueid,
                         locum_name: approved.locumProfile.fullName,
                         branch_id: job.branchId || null,
-                        branch_name: job.branch?.name || null
+                        branch_name: job.branch?.name || null,
+                        charged_entity: chargeEntity
                       },
-                      notes: `Auto-charged on timesheet approval`
+                      notes: `Auto-charged ${chargeEntity} on timesheet approval`
                     }
                   });
 
@@ -279,7 +296,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   error: paymentError.message
                 });
               }
-            } else {
+            } else if (shouldCharge && !stripeCustomer) {
               // No Stripe customer found - log as pending
               await tx.bookingPayment.create({
                 data: {
@@ -290,16 +307,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   currency: 'gbp',
                   paymentStatus: 'FAILED',
                   paymentMethod: 'AUTO',
-                  errorMessage: 'No Stripe customer found for practice',
+                  errorMessage: `No Stripe customer found for ${chargeEntity}`,
                   metadata: {
                     total_hours: job.totalHours,
                     hourly_rate: job.hourlyRate,
                     booking_uniqueid: job.booking.bookingUniqueid,
                     locum_name: approved.locumProfile.fullName,
                     branch_id: job.branchId || null,
-                    branch_name: job.branch?.name || null
+                    branch_name: job.branch?.name || null,
+                    charged_entity: chargeEntity
                   },
-                  notes: `Stripe customer not found`
+                  notes: `Stripe customer not found for ${chargeEntity}`
                 }
               });
 
@@ -307,7 +325,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 bookingId: job.bookingId,
                 status: 'FAILED',
                 amount: job.totalPay,
-                error: 'No Stripe customer found'
+                error: `No Stripe customer found for ${chargeEntity}`
               });
             }
           }

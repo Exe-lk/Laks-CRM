@@ -52,6 +52,8 @@ model LocumProfile {
   ignoredAppointments      IgnoredAppointment[]
   payslips                 Payslip[]
   cancellationPenalties    CancellationPenalty[]
+  stripeCustomer           LocumStripeCustomer?
+  paymentCards             LocumPaymentCard[]
 
   @@map("locum_profiles")
 }
@@ -161,7 +163,7 @@ model AppointmentResponse {
 
   request      AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
   locumProfile LocumProfile       @relation(fields: [locum_id], references: [id], onDelete: Cascade)
-
+  
   @@unique([request_id, locum_id], name: "request_locum_unique")
   @@map("appointment_responses")
 }
@@ -181,28 +183,31 @@ model AppointmentConfirmation {
 
   request     AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
   chosenLocum LocumProfile       @relation(fields: [chosen_locum_id], references: [id], onDelete: Cascade)
-
+ 
   @@map("appointment_confirmations")
 }
 
 model Branch {
-  id         String   @id @default(cuid())
-  name       String
-  address    String
-  location   String
-  telephone  String?
-  email      String?  @unique
-  password   String?
-  practiceId String   @map("practice_id")
-  status     String   @default("active") // active, inactive
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  location    String
+  telephone   String?
+  email       String?  @unique
+  password    String?
+  practiceId  String   @map("practice_id")
+  status      String   @default("active") // active, inactive
+  paymentMode String?  @default("MANUAL") @map("payment_mode") // AUTO or MANUAL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  practice            Practice             @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  practice            Practice               @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   bookings            Booking[]
   timesheetJobs       TimesheetJob[]
   appointmentRequests AppointmentRequest[]
   invoices            Invoice[]
+  stripeCustomer      BranchStripeCustomer?
+  paymentCards        BranchPaymentCard[]
 
   @@map("branches")
 }
@@ -223,7 +228,7 @@ model PaymentCard {
   updatedAt      DateTime @updatedAt
 
   practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
+  
   @@map("payment_cards")
 }
 
@@ -237,8 +242,76 @@ model StripeCustomer {
   updatedAt        DateTime @updatedAt
 
   practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
+  
   @@map("stripe_customers")
+}
+
+model LocumStripeCustomer {
+  id               String   @id @default(cuid())
+  locumId          String   @unique @map("locum_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  email            String
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  locumProfile LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  
+  @@map("locum_stripe_customers")
+}
+
+model BranchStripeCustomer {
+  id               String   @id @default(cuid())
+  branchId         String   @unique @map("branch_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  email            String
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  @@map("branch_stripe_customers")
+}
+
+model LocumPaymentCard {
+  id             String   @id @default(cuid())
+  locumId        String   @map("locum_id")
+  cardHolderName String   @map("card_holder_name")
+  cardNumber     String   @map("card_number") // Encrypted
+  lastFourDigits String   @map("last_four_digits")
+  expiryMonth    String   @map("expiry_month") // Encrypted
+  expiryYear     String   @map("expiry_year") // Encrypted
+  cvv            String   // Encrypted
+  cardType       String   @map("card_type")
+  isDefault      Boolean  @default(false) @map("is_default")
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  locumProfile LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  
+  @@map("locum_payment_cards")
+}
+
+model BranchPaymentCard {
+  id             String   @id @default(cuid())
+  branchId       String   @map("branch_id")
+  cardHolderName String   @map("card_holder_name")
+  cardNumber     String   @map("card_number") // Encrypted
+  lastFourDigits String   @map("last_four_digits")
+  expiryMonth    String   @map("expiry_month") // Encrypted
+  expiryYear     String   @map("expiry_year") // Encrypted
+  cvv            String   // Encrypted
+  cardType       String   @map("card_type")
+  isDefault      Boolean  @default(false) @map("is_default")
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  @@map("branch_payment_cards")
 }
 
 model Timesheet {
