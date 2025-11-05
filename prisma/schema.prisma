@@ -43,6 +43,7 @@ model LocumProfile {
   lastPayslipSentAt        DateTime?                 @map("last_payslip_sent_at")
   createdAt                DateTime                  @default(now()) @map("created_at")
   updatedAt                DateTime                  @updatedAt @map("updated_at")
+  paymentMode              String?                   @default("MANUAL") @map("payment_mode")
   specialties              Specialty[]
   bookings                 Booking[]
   appointmentResponses     AppointmentResponse[]
@@ -51,6 +52,8 @@ model LocumProfile {
   ignoredAppointments      IgnoredAppointment[]
   payslips                 Payslip[]
   cancellationPenalties    CancellationPenalty[]
+  stripeCustomer           LocumStripeCustomer?
+  paymentCards             LocumPaymentCard[]
 
   @@map("locum_profiles")
 }
@@ -85,6 +88,7 @@ model Practice {
   lastInvoiceSentAt   DateTime?            @map("last_invoice_sent_at")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  paymentMode         String?                   @default("MANUAL") @map("payment_mode")
   bookings            Booking[]
   appointmentRequests AppointmentRequest[]
   branches            Branch[]
@@ -113,6 +117,7 @@ model Booking {
   accept_time        DateTime?
   cancel_by          String?
   cancel_time        DateTime?
+  completed_at       DateTime?          @map("completed_at") // When admin approved the timesheet
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   request            AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
@@ -122,6 +127,7 @@ model Booking {
   branch                Branch?               @relation(fields: [branch_id], references: [id], onDelete: SetNull)
   timesheetJobs         TimesheetJob[]
   cancellationPenalties CancellationPenalty[]
+  bookingPayments       BookingPayment[]
 }
 
 model AppointmentRequest {
@@ -157,7 +163,7 @@ model AppointmentResponse {
 
   request      AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
   locumProfile LocumProfile       @relation(fields: [locum_id], references: [id], onDelete: Cascade)
-
+  
   @@unique([request_id, locum_id], name: "request_locum_unique")
   @@map("appointment_responses")
 }
@@ -177,28 +183,31 @@ model AppointmentConfirmation {
 
   request     AppointmentRequest @relation(fields: [request_id], references: [request_id], onDelete: Cascade)
   chosenLocum LocumProfile       @relation(fields: [chosen_locum_id], references: [id], onDelete: Cascade)
-
+ 
   @@map("appointment_confirmations")
 }
 
 model Branch {
-  id         String   @id @default(cuid())
-  name       String
-  address    String
-  location   String
-  telephone  String?
-  email      String?  @unique
-  password   String?
-  practiceId String   @map("practice_id")
-  status     String   @default("active") // active, inactive
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  location    String
+  telephone   String?
+  email       String?  @unique
+  password    String?
+  practiceId  String   @map("practice_id")
+  status      String   @default("active") // active, inactive
+  paymentMode String?  @default("MANUAL") @map("payment_mode") // AUTO or MANUAL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  practice            Practice             @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  practice            Practice               @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   bookings            Booking[]
   timesheetJobs       TimesheetJob[]
   appointmentRequests AppointmentRequest[]
   invoices            Invoice[]
+  stripeCustomer      BranchStripeCustomer?
+  paymentCards        BranchPaymentCard[]
 
   @@map("branches")
 }
@@ -219,7 +228,7 @@ model PaymentCard {
   updatedAt      DateTime @updatedAt
 
   practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
+  
   @@map("payment_cards")
 }
 
@@ -233,8 +242,76 @@ model StripeCustomer {
   updatedAt        DateTime @updatedAt
 
   practice Practice @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
+  
   @@map("stripe_customers")
+}
+
+model LocumStripeCustomer {
+  id               String   @id @default(cuid())
+  locumId          String   @unique @map("locum_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  email            String
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  locumProfile LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  
+  @@map("locum_stripe_customers")
+}
+
+model BranchStripeCustomer {
+  id               String   @id @default(cuid())
+  branchId         String   @unique @map("branch_id")
+  stripeCustomerId String   @unique @map("stripe_customer_id")
+  email            String
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  @@map("branch_stripe_customers")
+}
+
+model LocumPaymentCard {
+  id             String   @id @default(cuid())
+  locumId        String   @map("locum_id")
+  cardHolderName String   @map("card_holder_name")
+  cardNumber     String   @map("card_number") // Encrypted
+  lastFourDigits String   @map("last_four_digits")
+  expiryMonth    String   @map("expiry_month") // Encrypted
+  expiryYear     String   @map("expiry_year") // Encrypted
+  cvv            String   // Encrypted
+  cardType       String   @map("card_type")
+  isDefault      Boolean  @default(false) @map("is_default")
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  locumProfile LocumProfile @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  
+  @@map("locum_payment_cards")
+}
+
+model BranchPaymentCard {
+  id             String   @id @default(cuid())
+  branchId       String   @map("branch_id")
+  cardHolderName String   @map("card_holder_name")
+  cardNumber     String   @map("card_number") // Encrypted
+  lastFourDigits String   @map("last_four_digits")
+  expiryMonth    String   @map("expiry_month") // Encrypted
+  expiryYear     String   @map("expiry_year") // Encrypted
+  cvv            String   // Encrypted
+  cardType       String   @map("card_type")
+  isDefault      Boolean  @default(false) @map("is_default")
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  
+  @@map("branch_payment_cards")
 }
 
 model Timesheet {
@@ -423,21 +500,46 @@ model CancellationPenalty {
   @@map("cancellation_penalties")
 }
 
+
 model PenaltyPaymentLog {
   id                    String   @id @default(cuid())
   penaltyId             String   @map("penalty_id")
-  action                String   // "CHARGED", "CHARGE_FAILED", "DISMISSED"
-  amount                Float?   // Amount charged (if applicable)
+  action                String   
+  amount                Float?   
   stripeChargeId        String?  @map("stripe_charge_id")
   stripePaymentIntent   String?  @map("stripe_payment_intent")
-  performedBy           String   @map("performed_by") // Admin ID who performed the action
-  performedByName       String?  @map("performed_by_name") // Admin name for display
+  performedBy           String   @map("performed_by") 
+  performedByName       String?  @map("performed_by_name")
   notes                 String?
-  errorMessage          String?  @map("error_message") // If charge failed
-  metadata              Json?    // Additional payment metadata
+  errorMessage          String?  @map("error_message") 
+  metadata              Json?    
   createdAt             DateTime @default(now())
   
   penalty               CancellationPenalty @relation(fields: [penaltyId], references: [id], onDelete: Cascade)
   
   @@map("penalty_payment_logs")
+}
+
+model BookingPayment {
+  id                    String   @id @default(cuid())
+  bookingId             String   @map("booking_id")
+  timesheetJobId        String   @map("timesheet_job_id") // Link to the timesheet job
+  practiceId            String   @map("practice_id")
+  amount                Float    // Total amount charged
+  currency              String   @default("gbp")
+  stripeChargeId        String?  @map("stripe_charge_id")
+  stripePaymentIntent   String?  @map("stripe_payment_intent")
+  paymentStatus         String   @map("payment_status") // "SUCCESS", "FAILED", "PENDING"
+  paymentMethod         String   @map("payment_method") // "AUTO" or "MANUAL"
+  chargedAt             DateTime? @map("charged_at")
+  chargedBy             String?  @map("charged_by") // Admin ID if manually charged
+  errorMessage          String?  @map("error_message") // If payment failed
+  metadata              Json?      // Additional payment metadata (hours, rate, etc)
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  booking               Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  
+  @@map("booking_payments")
 }
