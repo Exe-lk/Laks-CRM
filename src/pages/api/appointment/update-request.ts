@@ -76,17 +76,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const updateData: any = {};
       let newRequestDate = existingRequest.request_date;
+      let newStartTime = existingRequest.request_start_time;
       
       if (request_date) {
         const requestDate = new Date(request_date);
-        if (requestDate < new Date()) {
-          throw new Error("Request date must be in the future");
-        }
         updateData.request_date = requestDate;
         newRequestDate = requestDate;
       }
-      if (request_start_time) updateData.request_start_time = request_start_time;
+      if (request_start_time) {
+        updateData.request_start_time = request_start_time;
+        newStartTime = request_start_time;
+      }
       if (request_end_time) updateData.request_end_time = request_end_time;
+      
+      if (request_date || request_start_time) {
+        const appointmentDateTime = new Date(newRequestDate);
+        const [hours, minutes] = newStartTime.split(':');
+        appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        
+        if (appointmentDateTime <= new Date()) {
+          throw new Error("Appointment date and time must be in the future");
+        }
+      }
       if (location) updateData.location = location;
       if (required_role) updateData.required_role = required_role;
 
