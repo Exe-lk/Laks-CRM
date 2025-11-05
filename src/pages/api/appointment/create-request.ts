@@ -52,8 +52,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const requestDate = new Date(request_date);
-    if (requestDate < new Date()) {
-      return res.status(400).json({ error: "Request date must be in the future" });
+    
+    const appointmentDateTime = new Date(requestDate);
+    const [hours, minutes] = request_start_time.split(':');
+    appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
+    if (appointmentDateTime <= new Date()) {
+      return res.status(400).json({ error: "Appointment date and time must be in the future" });
     }
 
     const appointmentRequest = await prisma.appointmentRequest.create({
