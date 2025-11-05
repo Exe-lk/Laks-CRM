@@ -73,6 +73,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    const now = new Date();
+    
     const enhancedHistory = applicationHistory.map(application => {
       let statusLabel = '';
       
@@ -101,11 +103,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         statusLabel = 'Cancelled';
       }
 
+      const appointmentDateTime = new Date(application.request.request_date);
+      const [hours, minutes] = application.request.request_start_time.split(':');
+      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const isPast = appointmentDateTime < now;
+
       return {
         ...application,
         request: {
           ...application.request,
-          is_past: application.request.request_date < new Date(),
+          is_past: isPast,
           status_label: statusLabel
         }
       };
