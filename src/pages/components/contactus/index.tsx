@@ -5,7 +5,7 @@ const ContactUs = () => {
   return (
     <>
       <NavBar />
-      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#C3EAE7]/20 py-6 sm:py-8 md:py-12 px-4 sm:px-6 md:px-8 lg:px-16">
+      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-[#C3EAE7]/20 py-6 sm:py-8 md:py-12 px-4 sm:px-6 md:px-8 lg:px-16 pt-32">
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 sm:mb-4">
             Get in Touch

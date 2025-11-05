@@ -122,11 +122,11 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <NavBar />
-      <div className="max-w-7xl mx-auto pt-12">
+      <div className="max-w-7xl mx-auto pt-32 pb-12">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+              <h1 className="text-3xl font-bold text-gray-900 pt-12">My Bookings</h1>
               <p className="text-gray-600 mt-1">
                 Week of {formatDate(currentWeekStart)} - {formatDate(getWeekEnd(currentWeekStart))}
               </p>
@@ -464,25 +464,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     return localStorage.getItem('token') || '';
   };
 
+  const handleSetStartTimeNow = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0, 5);
+    setStartTime(timeString);
+  };
+
   const handleStartClick = async () => {
-    if (!selectedBooking) return;
+    if (!selectedBooking || !startTime) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const token = getAuthToken();
-      const now = new Date();
-      const timeString = now.toTimeString().substring(0, 5);
+      const [hours, minutes] = startTime.split(':').map(Number);
 
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
         bookingDate.getMonth(),
         bookingDate.getDate(),
-        now.getHours(),
-        now.getMinutes(),
-        now.getSeconds()
+        hours,
+        minutes,
+        0
       );
 
       let jobId = timesheetJobId;
@@ -536,7 +541,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
       const updateData = await updateResponse.json();
 
-      setStartTime(timeString);
       setSuccess('Start time recorded successfully!');
     } catch (err: any) {
       setError(err.message || 'Failed to record start time');
@@ -545,25 +549,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     }
   };
 
+  const handleSetEndTimeNow = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0, 5);
+    setEndTime(timeString);
+  };
+
   const handleEndClick = async () => {
-    if (!timesheetJobId || !selectedBooking) return;
+    if (!timesheetJobId || !selectedBooking || !endTime) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const token = getAuthToken();
-      const now = new Date();
-      const timeString = now.toTimeString().substring(0, 5);
+      const [hours, minutes] = endTime.split(':').map(Number);
 
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
         bookingDate.getMonth(),
         bookingDate.getDate(),
-        now.getHours(),
-        now.getMinutes(),
-        now.getSeconds()
+        hours,
+        minutes,
+        0
       );
 
       const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/update-job-times`, {
@@ -591,8 +600,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         setHourlyRate(updateData.data.job.hourlyRate || null);
       }
 
-      setEndTime(timeString);
-
       const hoursText = updateData.data?.job?.totalHours
         ? ` Total Hours: ${updateData.data.job.totalHours.toFixed(2)}h`
         : '';
@@ -610,25 +617,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     }
   };
 
+  const handleSetLunchStartTimeNow = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0, 5);
+    setLunchStartTime(timeString);
+  };
+
   const handleLunchStartClick = async () => {
-    if (!timesheetJobId || !selectedBooking) return;
+    if (!timesheetJobId || !selectedBooking || !lunchStartTime) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const token = getAuthToken();
-      const now = new Date();
-      const timeString = now.toTimeString().substring(0, 5);
+      const [hours, minutes] = lunchStartTime.split(':').map(Number);
 
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
         bookingDate.getMonth(),
         bookingDate.getDate(),
-        now.getHours(),
-        now.getMinutes(),
-        now.getSeconds()
+        hours,
+        minutes,
+        0
       );
 
       const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/update-job-times`, {
@@ -648,7 +660,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         throw new Error(errorData.error || 'Failed to set lunch start time');
       }
 
-      setLunchStartTime(timeString);
       setSuccess('Lunch start time recorded successfully!');
     } catch (err: any) {
       setError(err.message || 'Failed to record lunch start time');
@@ -657,25 +668,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     }
   };
 
+  const handleSetLunchEndTimeNow = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().substring(0, 5);
+    setLunchEndTime(timeString);
+  };
+
   const handleLunchEndClick = async () => {
-    if (!timesheetJobId || !selectedBooking) return;
+    if (!timesheetJobId || !selectedBooking || !lunchEndTime) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
       const token = getAuthToken();
-      const now = new Date();
-      const timeString = now.toTimeString().substring(0, 5);
+      const [hours, minutes] = lunchEndTime.split(':').map(Number);
 
       const bookingDate = new Date(selectedBooking.booking_date as any);
       const combinedDateTime = new Date(
         bookingDate.getFullYear(),
         bookingDate.getMonth(),
         bookingDate.getDate(),
-        now.getHours(),
-        now.getMinutes(),
-        now.getSeconds()
+        hours,
+        minutes,
+        0
       );
 
       const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/update-job-times`, {
@@ -706,7 +722,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         }
       }
 
-      setLunchEndTime(timeString);
       setSuccess('Lunch end time recorded successfully! Totals updated.');
     } catch (err: any) {
       setError(err.message || 'Failed to record lunch end time');
@@ -818,92 +833,147 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <input
-                                type="text"
+                                type="time"
                                 value={startTime}
-                                readOnly
+                                onChange={(e) => setStartTime(e.target.value)}
                                 placeholder="--:--"
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
                               <button
+                                onClick={handleSetStartTimeNow}
+                                disabled={timesheetJobId !== null}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  timesheetJobId !== null
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                }`}
+                                title="Set to current time"
+                              >
+                                Now
+                              </button>
+                              <button
                                 onClick={handleStartClick}
-                                disabled={!!startTime}
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${startTime
+                                disabled={!startTime || timesheetJobId !== null}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !startTime || timesheetJobId !== null
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                  }`}
+                                }`}
                               >
-                                {startTime ? '✓ Set' : 'Start'}
+                                {timesheetJobId !== null ? '✓ Set' : 'Set'}
                               </button>
                             </div>
                           </div>
 
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <input
-                                type="text"
+                                type="time"
                                 value={endTime}
-                                readOnly
+                                onChange={(e) => setEndTime(e.target.value)}
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                                disabled={!timesheetJobId}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
+                                onClick={handleSetEndTimeNow}
+                                disabled={!timesheetJobId}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                }`}
+                                title="Set to current time"
+                              >
+                                Now
+                              </button>
+                              <button
                                 onClick={handleEndClick}
-                                disabled={!startTime || !!endTime}
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || endTime
+                                disabled={!timesheetJobId || !endTime}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId || !endTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                  }`}
+                                }`}
                               >
-                                {endTime ? '✓ Set' : 'End'}
+                                Set
                               </button>
                             </div>
                           </div>
 
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <input
-                                type="text"
+                                type="time"
                                 value={lunchStartTime}
-                                readOnly
+                                onChange={(e) => setLunchStartTime(e.target.value)}
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                                disabled={!timesheetJobId}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
+                                onClick={handleSetLunchStartTimeNow}
+                                disabled={!timesheetJobId}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                }`}
+                                title="Set to current time"
+                              >
+                                Now
+                              </button>
+                              <button
                                 onClick={handleLunchStartClick}
-                                disabled={!startTime || !!lunchStartTime}
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!startTime || lunchStartTime
+                                disabled={!timesheetJobId || !lunchStartTime}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId || !lunchStartTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                  }`}
+                                }`}
                               >
-                                {lunchStartTime ? '✓ Set' : 'Start'}
+                                Set
                               </button>
                             </div>
                           </div>
 
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <input
-                                type="text"
+                                type="time"
                                 value={lunchEndTime}
-                                readOnly
+                                onChange={(e) => setLunchEndTime(e.target.value)}
                                 placeholder="--:--"
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
+                                disabled={!timesheetJobId}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
+                                onClick={handleSetLunchEndTimeNow}
+                                disabled={!timesheetJobId}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                }`}
+                                title="Set to current time"
+                              >
+                                Now
+                              </button>
+                              <button
                                 onClick={handleLunchEndClick}
-                                disabled={!lunchStartTime || !!lunchEndTime}
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${!lunchStartTime || lunchEndTime
+                                disabled={!timesheetJobId || !lunchEndTime}
+                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                  !timesheetJobId || !lunchEndTime
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                  }`}
+                                }`}
                               >
-                                {lunchEndTime ? '✓ Set' : 'End'}
+                                Set
                               </button>
                             </div>
                           </div>
@@ -931,7 +1001,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           )}
                         </div>
 
-                        {/* Payment Details */}
                         {hourlyRate !== null && (
                           <div className="mt-3 pt-3 border-t border-gray-200 bg-blue-50 p-2 rounded">
                             <h6 className="text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
@@ -1088,7 +1157,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
 
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
       
-      // Upload staff signature with progress tracking
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
 
       const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/submit-timesheet`, {
@@ -1108,7 +1176,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
-      // Handle manager signature if provided
       if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');

@@ -65,7 +65,7 @@ const Home = () => {
     <>
       <NavBarPracticeUser />
 
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-white pt-32">
 
         <section className="py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-[#C3EAE7]/20">
           <div className="max-w-7xl mx-auto px-4">

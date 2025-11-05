@@ -104,7 +104,7 @@ const LocumStaffRequestList = () => {
         return (
             <div className="min-h-screen bg-white flex flex-col">
                 <NavBar />
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center pt-32">
                     <div className="text-center">
                         <FaSpinner className="animate-spin text-4xl text-gray-500 mb-4 mx-auto" />
                         <p className="text-gray-600">Loading available appointments...</p>
@@ -118,7 +118,7 @@ const LocumStaffRequestList = () => {
         return (
             <div className="min-h-screen bg-white flex flex-col">
                 <NavBar />
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center pt-32">
                     <div className="text-center">
                         <FaExclamationTriangle className="text-4xl text-red-500 mb-4 mx-auto" />
                         <p className="text-red-600">Failed to load appointments</p>
@@ -138,7 +138,7 @@ const LocumStaffRequestList = () => {
         <div className="min-h-screen bg-white flex flex-col">
             <NavBar />
 
-            <div className="text-center mb-8 pt-12 px-4">
+            <div className="text-center mb-8 pt-32 px-4">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

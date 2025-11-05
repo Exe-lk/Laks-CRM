@@ -246,7 +246,7 @@ const BranchNavBar = () => {
   };
 
   return (
-    <nav className="w-full border-b border-gray-300 bg-white">
+    <nav className="fixed top-0 left-0 right-0 w-full border-b border-gray-300 bg-white shadow-md z-50">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
         <div className="flex flex-col items-start ml-4">
           <div className="flex items-center space-x-1 sm:space-x-2">
@@ -344,13 +344,6 @@ const BranchNavBar = () => {
                 onClick={() => router.push('/branch/myBookings')}
               >
                 My Bookings
-              </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/Rating') ? 'bg-[#C3EAE7] text-black' : ''
-                  }`}
-                onClick={() => router.push('/branch/Rating')}
-              >
-                Rating
               </li>
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/payment') ? 'bg-[#C3EAE7] text-black' : ''
@@ -452,13 +445,6 @@ const BranchNavBar = () => {
                       onClick={() => { router.push('/branch/myBookings'); closeMobileMenu(); }}
                     >
                       My Bookings
-                    </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/Rating') ? 'bg-[#C3EAE7] text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/branch/Rating'); closeMobileMenu(); }}
-                    >
-                      Rating
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/payment') ? 'bg-[#C3EAE7] text-black' : ''

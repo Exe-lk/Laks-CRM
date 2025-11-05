@@ -59,18 +59,18 @@ const PaymentPage = () => {
     <div className="min-h-screen bg-gray-50">
       <NavBarPracticeUser />
       
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 pt-32">
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Methods</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-24">Payment Methods</h1>
               <p className="text-gray-600">
                 Manage your payment cards for booking appointments
               </p>
             </div>
             <button
               onClick={() => setIsAddCardModalOpen(true)}
-              className="px-6 py-3 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#B8E0DD] transition-colors font-medium"
+              className="px-6 py-3 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#B8E0DD] transition-colors font-medium mt-12"
             >
               Add New Card
             </button>

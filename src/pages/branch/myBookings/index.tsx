@@ -79,10 +79,10 @@ const MyBookingsPage = () => {
     <div className="min-h-screen bg-white flex flex-col">
       <NavBarPracticeUser />
       
-      <div className="flex-1 flex flex-col py-8">
+      <div className="flex-1 flex flex-col py-8 pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-24">
               {userType === 'branch' ? 'Branch Bookings' : 'Practice Bookings'}
             </h1>
             <p className="text-gray-600">

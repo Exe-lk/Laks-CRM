@@ -381,8 +381,8 @@ const CreateAppointmentPage = () => {
     return (
         <div className="min-h-screen bg-white flex flex-col">
             <NavBar />
-            <div className="flex-1 w-full">
-                <div className="text-center mb-8 pt-12">
+            <div className="flex-1 w-full pt-32">
+                <div className="text-center mb-8 pt-24">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />

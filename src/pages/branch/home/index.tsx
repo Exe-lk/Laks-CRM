@@ -14,7 +14,7 @@ const Home = () => {
     <>
       <NavBar />
 
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-white pt-32">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[#C3EAE7]/5"></div>
           <div className="absolute top-20 left-10 w-72 h-72 bg-[#C3EAE7]/20 rounded-full blur-3xl"></div>
