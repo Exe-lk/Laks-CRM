@@ -155,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
           }
 
-          if (shouldCharge && stripeCustomer) {
+          if (shouldCharge && stripeCustomer && job.totalPay !== null) {
             try {
               const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`, {
                 method: 'POST',
@@ -267,7 +267,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 bookingId: job.bookingId,
                 timesheetJobId: job.id,
                 practiceId: job.practiceId,
-                amount: job.totalPay,
+                amount: job.totalPay ?? 0,
                 currency: 'gbp',
                 paymentStatus: 'FAILED',
                 paymentMethod: 'AUTO',

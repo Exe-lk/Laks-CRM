@@ -21,6 +21,11 @@ export interface EncryptedCardData {
   cvv: string;
 }
 
+export interface ValidationResult {
+  isValid: boolean;
+  error?: string;
+}
+
 /**
  * Encrypts sensitive card data
  */
@@ -64,11 +69,14 @@ export function maskCardNumber(cardNumber: string): string {
 /**
  * Validates card number using Luhn algorithm
  */
-export function validateCardNumber(cardNumber: string): boolean {
+export function validateCardNumber(cardNumber: string): ValidationResult {
   const cleanCardNumber = cardNumber.replace(/\s/g, '');
   
   if (!/^\d{13,19}$/.test(cleanCardNumber)) {
-    return false;
+    return {
+      isValid: false,
+      error: 'Card number must be between 13 and 19 digits'
+    };
   }
 
   let sum = 0;
@@ -88,7 +96,11 @@ export function validateCardNumber(cardNumber: string): boolean {
     isEven = !isEven;
   }
 
-  return sum % 10 === 0;
+  const isValid = sum % 10 === 0;
+  return {
+    isValid,
+    error: isValid ? undefined : 'Invalid card number (failed Luhn check)'
+  };
 }
 
 /**
@@ -113,7 +125,7 @@ export function detectCardType(cardNumber: string): 'VISA' | 'MASTERCARD' | 'AME
 /**
  * Validates expiry date
  */
-export function validateExpiryDate(month: string, year: string): boolean {
+export function validateExpiryDate(month: string, year: string): ValidationResult {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
@@ -121,30 +133,62 @@ export function validateExpiryDate(month: string, year: string): boolean {
   const expMonth = parseInt(month);
   const expYear = parseInt(year);
 
+  if (isNaN(expMonth) || isNaN(expYear)) {
+    return {
+      isValid: false,
+      error: 'Invalid month or year format'
+    };
+  }
+
   if (expMonth < 1 || expMonth > 12) {
-    return false;
+    return {
+      isValid: false,
+      error: 'Month must be between 1 and 12'
+    };
   }
 
   // For 2-digit year, assume 20xx
   const fullYear = expYear < 100 ? 2000 + expYear : expYear;
 
   if (fullYear < currentYear) {
-    return false;
+    return {
+      isValid: false,
+      error: 'Card has expired'
+    };
   }
 
   if (fullYear === currentYear && expMonth < currentMonth) {
-    return false;
+    return {
+      isValid: false,
+      error: 'Card has expired'
+    };
   }
 
-  return true;
+  return { isValid: true };
 }
 
 /**
  * Validates CVV
  */
-export function validateCVV(cvv: string, cardType: string): boolean {
-  if (cardType === 'AMEX') {
-    return /^\d{4}$/.test(cvv);
+export function validateCVV(cvv: string, cardType?: string): ValidationResult {
+  if (!cvv) {
+    return {
+      isValid: false,
+      error: 'CVV is required'
+    };
   }
-  return /^\d{3}$/.test(cvv);
+
+  if (cardType === 'AMEX') {
+    const isValid = /^\d{4}$/.test(cvv);
+    return {
+      isValid,
+      error: isValid ? undefined : 'AMEX CVV must be 4 digits'
+    };
+  }
+  
+  const isValid = /^\d{3}$/.test(cvv);
+  return {
+    isValid,
+    error: isValid ? undefined : 'CVV must be 3 digits'
+  };
 }

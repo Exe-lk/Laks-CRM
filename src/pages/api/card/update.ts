@@ -77,24 +77,30 @@ export default async function handler(
       const cleanCardNumber = cardNumber.replace(/\s/g, '');
 
       // Validate card data
-      if (!validateCardNumber(cleanCardNumber)) {
+      const cardValidation = validateCardNumber(cleanCardNumber);
+      if (!cardValidation.isValid) {
         return res.status(400).json({
           error: "Invalid card number",
+          details: cardValidation.error
         });
       }
 
-      if (!validateExpiryDate(expiryMonth, expiryYear)) {
+      const expiryValidation = validateExpiryDate(expiryMonth, expiryYear);
+      if (!expiryValidation.isValid) {
         return res.status(400).json({
           error: "Invalid expiry date",
+          details: expiryValidation.error
         });
       }
 
       // Auto-detect card type if not provided
       const detectedCardType = cardType || detectCardType(cleanCardNumber);
 
-      if (!validateCVV(cvv, detectedCardType)) {
+      const cvvValidation = validateCVV(cvv, detectedCardType);
+      if (!cvvValidation.isValid) {
         return res.status(400).json({
           error: "Invalid CVV",
+          details: cvvValidation.error
         });
       }
 
