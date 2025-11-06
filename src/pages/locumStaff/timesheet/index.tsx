@@ -296,7 +296,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   useEffect(() => {
     const fetchTimesheetJob = async () => {
       if (!selectedBooking || !selectedDate) {
-        // Reset all time tracking state when no booking is selected
         setStartTime('');
         setEndTime('');
         setLunchStartTime('');

@@ -168,6 +168,7 @@ const CreateAppointmentPage = () => {
     } = useCheckBranchHasPaymentMethodsQuery(profile?.id || '', {
         skip: !profile?.id
     });
+    console.log(cardStatusData)
 
     const {
         data: practiceRequestsData,

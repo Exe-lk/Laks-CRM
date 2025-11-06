@@ -22,7 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             customer_id, 
             payment_method_id, 
             confirm, 
-            save_payment_method 
+            save_payment_method,
+            off_session 
         } = body;
 
         const SUPABASE_FUNCTION_URL = process.env.SUPABASE_FUNCTION_URL;
@@ -47,7 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             customer_id,
             payment_method_id,
             confirm,
-            save_payment_method
+            save_payment_method,
+            off_session // For automatic charges, use customer's default payment method
         };
 
         const resp = await fetch(SUPABASE_FUNCTION_URL, {

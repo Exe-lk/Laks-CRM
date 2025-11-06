@@ -31,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: { practiceId: entityId as string }
                 });
                 if (!practiceCustomer) {
-                    return res.status(404).json({ error: "Practice customer not found" });
+                    // Return empty array instead of error if customer doesn't exist yet
+                    return res.status(200).json({ data: [] });
                 }
                 stripeCustomerId = practiceCustomer.stripeCustomerId;
                 break;
@@ -41,7 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: { branchId: entityId as string }
                 });
                 if (!branchCustomer) {
-                    return res.status(404).json({ error: "Branch customer not found" });
+                    // Return empty array instead of error if customer doesn't exist yet
+                    return res.status(200).json({ data: [] });
                 }
                 stripeCustomerId = branchCustomer.stripeCustomerId;
                 break;
@@ -51,7 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     where: { locumId: entityId as string }
                 });
                 if (!locumCustomer) {
-                    return res.status(404).json({ error: "Locum customer not found" });
+                    // Return empty array instead of error if customer doesn't exist yet
+                    return res.status(200).json({ data: [] });
                 }
                 stripeCustomerId = locumCustomer.stripeCustomerId;
                 break;
@@ -81,12 +84,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         const json = await resp.json().catch(() => ({}));
+        
+        // If successful and has payment methods, return them
         if (json.success && json.payment_methods) {
             return res.status(200).json({
                 data: json.payment_methods
             });
         }
         
+        // If successful but no payment methods, return empty array
+        if (json.success && !json.payment_methods) {
+            return res.status(200).json({ data: [] });
+        }
+        
+        // If there's an error from Supabase, return it
         return res.status(resp.status).json(json);
     } catch (error: any) {
         return res.status(500).json({ error: error?.message || String(error) });

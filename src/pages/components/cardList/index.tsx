@@ -1,18 +1,26 @@
 import React from 'react';
-import { PaymentCard } from '../../../redux/slices/cardPracticeUserSlice';
-import { useDeleteCardMutation } from '../../../redux/slices/cardPracticeUserSlice';
+import { PaymentCard as PracticePaymentCard } from '../../../redux/slices/cardPracticeUserSlice';
+import { PaymentCard as LocumPaymentCard } from '../../../redux/slices/locumCardSlice';
+import { useDeleteCardMutation as useDeletePracticeCardMutation } from '../../../redux/slices/cardPracticeUserSlice';
+import { useDeleteCardMutation as useDeleteLocumCardMutation } from '../../../redux/slices/locumCardSlice';
 import Swal from 'sweetalert2';
+
+type PaymentCard = PracticePaymentCard | LocumPaymentCard;
 
 interface CardListProps {
   cards: PaymentCard[];
   onEdit?: (card: PaymentCard) => void;
   onAddNew?: () => void;
+  cardType?: 'practice' | 'locum';
 }
 
-const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew }) => {
-  const [deleteCard, { isLoading: isDeleting }] = useDeleteCardMutation();
+const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardType = 'practice' }) => {
+  const [deletePracticeCard, { isLoading: isDeletingPractice }] = useDeletePracticeCardMutation();
+  const [deleteLocumCard, { isLoading: isDeletingLocum }] = useDeleteLocumCardMutation();
+  
+  const isDeleting = cardType === 'locum' ? isDeletingLocum : isDeletingPractice;
 
-  const handleDeleteCard = async (cardId: string, cardNumber: string) => {
+  const handleDeleteCard = async (card: PaymentCard, cardNumber: string) => {
     const result = await Swal.fire({
       title: 'Delete Card',
       text: `Are you sure you want to delete card ending in ${cardNumber}?`,
@@ -26,7 +34,12 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew }) => 
 
     if (result.isConfirmed) {
       try {
-        await deleteCard(cardId).unwrap();
+        // Practice cards need both id and practiceId, locum cards only need id
+        if (cardType === 'practice' && 'practiceId' in card) {
+          await deletePracticeCard({ id: card.id, practiceId: card.practiceId }).unwrap();
+        } else {
+          await deleteLocumCard(card.id).unwrap();
+        }
         
         await Swal.fire({
           title: 'Deleted!',
@@ -139,7 +152,7 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew }) => 
               </div>
 
               <div className="flex items-center space-x-2">
-                {onEdit && (
+                {/* {onEdit && (
                   <button
                     onClick={() => onEdit(card)}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -149,9 +162,9 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew }) => 
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                )}
+                )} */}
                 <button
-                  onClick={() => handleDeleteCard(card.id, card.lastFourDigits)}
+                  onClick={() => handleDeleteCard(card, card.lastFourDigits)}
                   disabled={isDeleting}
                   className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
                   title="Delete card"
