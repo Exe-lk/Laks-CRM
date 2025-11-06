@@ -427,36 +427,42 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
   const hasBookingStarted = (booking: Booking): boolean => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
+    
+    // Create a Date object for the booking start time in local timezone
+    const bookingDateObj = new Date(booking.booking_date as any);
+    const [startHour, startMinute] = booking.booking_start_time.split(':').map(Number);
+    const bookingStartDateTime = new Date(
+      bookingDateObj.getFullYear(),
+      bookingDateObj.getMonth(),
+      bookingDateObj.getDate(),
+      startHour,
+      startMinute,
+      0,
+      0
+    );
 
-    if (bookingDate < today) return true;
-
-    if (bookingDate === today) {
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      const [startHour, startMinute] = booking.booking_start_time.split(':').map(Number);
-      const bookingStartTime = startHour * 60 + startMinute;
-      return currentTime >= bookingStartTime;
-    }
-
-    return false;
+    // Compare the booking start datetime with current time
+    return now >= bookingStartDateTime;
   };
 
   const isBookingCompleted = (booking: Booking): boolean => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const bookingDate = new Date(booking.booking_date as any).toISOString().split('T')[0];
+    
+    // Create a Date object for the booking end time in local timezone
+    const bookingDateObj = new Date(booking.booking_date as any);
+    const [endHour, endMinute] = booking.booking_end_time.split(':').map(Number);
+    const bookingEndDateTime = new Date(
+      bookingDateObj.getFullYear(),
+      bookingDateObj.getMonth(),
+      bookingDateObj.getDate(),
+      endHour,
+      endMinute,
+      0,
+      0
+    );
 
-    if (bookingDate < today) return true;
-
-    if (bookingDate === today) {
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      const [endHour, endMinute] = booking.booking_end_time.split(':').map(Number);
-      const bookingEndTime = endHour * 60 + endMinute;
-      return currentTime >= bookingEndTime;
-    }
-
-    return false;
+    // Compare the booking end datetime with current time
+    return now >= bookingEndDateTime;
   };
 
   const getAuthToken = () => {
