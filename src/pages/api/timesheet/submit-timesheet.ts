@@ -507,11 +507,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const paymentData = await paymentResponse.json();
             console.log(`[STEP 5.5] Payment API response data:`, JSON.stringify(paymentData, null, 2));
 
-            if (paymentResponse.ok && paymentData.id) {
-              console.log(`[STEP 6] Payment successful! Charge ID: ${paymentData.id}`);
+            // Check for payment_intent in the response (the actual structure from edge function)
+            const paymentIntent = paymentData.payment_intent || paymentData;
+            const paymentIntentId = paymentIntent?.id;
+            const paymentStatus = paymentIntent?.status;
+
+            if (paymentResponse.ok && paymentIntentId && paymentStatus === 'succeeded') {
+              console.log(`[STEP 6] Payment successful! Payment Intent ID: ${paymentIntentId}`);
+              
               // Extract receipt URL from Stripe response
-              const receiptUrl = paymentData.receipt_url || paymentData.charges?.data?.[0]?.receipt_url || '';
+              // Receipt URL is typically in latest_charge.receipt_url or charges.data[0].receipt_url
+              const chargeId = paymentIntent.latest_charge;
+              const receiptUrl = paymentIntent.charges?.data?.[0]?.receipt_url || 
+                                (chargeId ? `https://dashboard.stripe.com/test/payments/${chargeId}` : '') || '';
               console.log(`[STEP 6.1] Receipt URL: ${receiptUrl || 'NOT FOUND'}`);
+              console.log(`[STEP 6.1.1] Charge ID: ${chargeId || 'NOT FOUND'}`);
               
               console.log(`[STEP 6.2] Creating booking payment record`);
               await tx.bookingPayment.create({
@@ -521,8 +531,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   practiceId: job.practiceId,
                   amount: job.totalPay || 0,
                   currency: 'gbp',
-                  stripeChargeId: paymentData.id,
-                  stripePaymentIntent: paymentData.payment_intent || paymentData.id,
+                  stripeChargeId: chargeId || paymentIntentId,
+                  stripePaymentIntent: paymentIntentId,
                   paymentStatus: 'SUCCESS',
                   paymentMethod: 'AUTO',
                   chargedAt: now,
@@ -555,7 +565,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               paymentResults.push({ 
                 bookingId: job.bookingId, 
                 status: 'SUCCESS', 
-                chargeId: paymentData.id,
+                chargeId: chargeId || paymentIntentId,
                 receiptUrl: receiptUrl,
                 recipientEmail: recipientEmail,
                 recipientName: recipientName,
@@ -570,7 +580,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               });
             } else {
               console.log(`[STEP 7] Payment failed! Response not OK or missing ID`);
-              console.log(`[STEP 7.1] Response OK: ${paymentResponse.ok}, Has ID: ${!!paymentData.id}`);
+              const paymentIntent = paymentData.payment_intent || paymentData;
+              const paymentIntentId = paymentIntent?.id;
+              const paymentStatus = paymentIntent?.status;
+              console.log(`[STEP 7.1] Response OK: ${paymentResponse.ok}, Has Payment Intent ID: ${!!paymentIntentId}, Status: ${paymentStatus}`);
               console.log(`[STEP 7.2] Error details:`, paymentData);
               
               await tx.bookingPayment.create({
