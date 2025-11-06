@@ -20,7 +20,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured for customer management" });
         }
 
-        // For create_customer action, verify practice exists
+        // For create_customer action, verify practice exists and get email/name
+        let practiceEmail = email;
+        let practiceName = name;
+        
         if (action === "create_customer" && practice_id) {
             const practice = await prisma.practice.findUnique({
                 where: { id: practice_id }
@@ -45,6 +48,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
             }
+
+            // Use practice data if email/name not provided
+            if (!practiceEmail) {
+                practiceEmail = practice.email || `practice-${practice_id}@default.com`;
+            }
+            if (!practiceName) {
+                practiceName = practice.name || `Practice ${practice_id}`;
+            }
         }
 
         const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
@@ -56,8 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             body: JSON.stringify({
                 action,
                 practice_id,
-                email,
-                name,
+                email: practiceEmail,
+                name: practiceName,
                 payment_method_id,
                 customer_id
             })

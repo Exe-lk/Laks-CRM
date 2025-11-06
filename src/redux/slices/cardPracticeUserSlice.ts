@@ -60,16 +60,73 @@ export const cardPracticeUserApiSlice = createApi({
   tagTypes: ['PaymentCard'],
   endpoints: (builder) => ({
     getPracticeCards: builder.query<CardsResponse, string>({
-      query: (practiceId) => `card/practice-cards?practiceId=${practiceId}`,
+      query: (practiceId) => `payments/list-payment-methods?practice_id=${practiceId}`,
+      transformResponse: (response: any) => ({
+        cards: response.data || [],
+        count: response.data?.length || 0
+      }),
       providesTags: ['PaymentCard'],
     }),
     
     createCard: builder.mutation<CreateCardResponse, CreateCardRequest>({
-      query: (cardData) => ({
-        url: 'card/create',
-        method: 'POST',
-        body: cardData,
-      }),
+      queryFn: async (cardData, _queryApi, _extraOptions, fetchWithBQ) => {
+        try {
+          // Step 1: Create or get customer
+          const customerResponse = await fetchWithBQ({
+            url: 'practice-card/customer-management',
+            method: 'POST',
+            body: {
+              action: 'create_customer',
+              practice_id: cardData.practiceId,
+            },
+          });
+
+          if (customerResponse.error) {
+            return { error: customerResponse.error as any };
+          }
+
+          const customerData = customerResponse.data as any;
+          const customerId = customerData.customer?.id;
+
+          if (!customerId) {
+            return { 
+              error: { 
+                status: 500, 
+                data: { error: 'Failed to get customer ID' } 
+              } as any 
+            };
+          }
+
+          // Step 2: Attach payment method to customer
+          // Using Stripe's test payment method for development
+          // In production, this should be replaced with Stripe.js tokenization
+          const testPaymentMethodId = 'pm_card_visa';
+          
+          const cardResponse = await fetchWithBQ({
+            url: 'practice-card/customer-management',
+            method: 'POST',
+            body: {
+              action: 'attach_payment_method',
+              customer_id: customerId,
+              practice_id: cardData.practiceId,
+              payment_method_id: testPaymentMethodId,
+            },
+          });
+
+          if (cardResponse.error) {
+            return { error: cardResponse.error as any };
+          }
+
+          return { data: cardResponse.data as CreateCardResponse };
+        } catch (error: any) {
+          return { 
+            error: { 
+              status: 500, 
+              data: { error: error.message || 'An error occurred' } 
+            } as any 
+          };
+        }
+      },
       invalidatesTags: ['PaymentCard'],
     }),
     
@@ -91,11 +148,14 @@ export const cardPracticeUserApiSlice = createApi({
     }),
     
     checkPracticeHasCards: builder.query<{ hasCards: boolean; count: number }, string>({
-      query: (practiceId) => `card/practice-cards?practiceId=${practiceId}`,
-      transformResponse: (response: CardsResponse) => ({
-        hasCards: response.count > 0,
-        count: response.count
-      }),
+      query: (practiceId) => `payments/list-payment-methods?practice_id=${practiceId}`,
+      transformResponse: (response: any) => {
+        const count = response.data?.length || 0;
+        return {
+          hasCards: count > 0,
+          count
+        };
+      },
       providesTags: ['PaymentCard'],
     }),
   }),
