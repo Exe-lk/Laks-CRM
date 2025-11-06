@@ -419,10 +419,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
           
           try {
+            // Get default payment method for the customer (if set)
+            let defaultPaymentMethodId: string | undefined = undefined;
+            try {
+              const customerDetailsResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/get-customer-details?${chargeEntity}_id=${chargeEntity === 'branch' ? job.branchId : job.practiceId}`,
+                { method: 'GET' }
+              );
+              if (customerDetailsResponse.ok) {
+                const customerDetails = await customerDetailsResponse.json();
+                if (customerDetails.default_payment_method) {
+                  defaultPaymentMethodId = customerDetails.default_payment_method;
+                }
+              }
+            } catch (pmError) {
+              // If we can't get default payment method, continue without it
+              // Stripe will use customer's default or first available card
+              console.warn('Could not fetch default payment method, using Stripe default:', pmError);
+            }
+
             const paymentUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`;
             console.log(`[STEP 5.2] Calling payment API: ${paymentUrl}`);
             
-            const paymentPayload = {
+            const paymentPayload: any = {
               amount: Math.round((job.totalPay || 0) * 100),
               currency: 'gbp',
               description: `Booking ${job.booking.bookingUniqueid} - ${updatedTimesheet.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''} - ${chargeEntity}`,
@@ -442,6 +461,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               confirm: true,
               off_session: true // Enable automatic charging using customer's default payment method
             };
+
+            // Include payment method ID if available
+            if (defaultPaymentMethodId) {
+              paymentPayload.payment_method_id = defaultPaymentMethodId;
+            }
             
             console.log(`[STEP 5.3] Payment payload:`, JSON.stringify(paymentPayload, null, 2));
             
