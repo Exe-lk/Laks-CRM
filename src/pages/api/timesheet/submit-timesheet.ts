@@ -84,56 +84,249 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Update timesheet with staff signature, totals, and change status to SUBMITTED
-    const updatedTimesheet = await prisma.timesheet.update({
-      where: { id: timesheetId },
-      data: {
-        staffSignature: staffSignature,
-        staffSignatureDate: new Date(),
-        totalHours: totalHours,
-        totalPay: totalPay,
-        status: 'SUBMITTED',
-        submittedAt: new Date()
-      },
-      include: {
-        timesheetJobs: {
-          include: {
-            practice: {
-              select: {
-                name: true,
-                location: true
-              }
-            },
-            branch: {
-              select: {
-                name: true,
-                location: true
+    // Use transaction for atomicity - update timesheet, complete booking, and charge payment
+    const result = await prisma.$transaction(async (tx) => {
+      // Update timesheet with staff signature, totals, and change status to SUBMITTED
+      const updatedTimesheet = await tx.timesheet.update({
+        where: { id: timesheetId },
+        data: {
+          staffSignature: staffSignature,
+          staffSignatureDate: new Date(),
+          totalHours: totalHours,
+          totalPay: totalPay,
+          status: 'SUBMITTED',
+          submittedAt: new Date()
+        },
+        include: {
+          timesheetJobs: {
+            include: {
+              practice: {
+                select: {
+                  id: true,
+                  name: true,
+                  location: true,
+                  paymentMode: true
+                }
+              },
+              branch: {
+                select: {
+                  id: true,
+                  name: true,
+                  location: true,
+                  paymentMode: true
+                }
+              },
+              booking: {
+                select: {
+                  id: true,
+                  status: true,
+                  bookingUniqueid: true,
+                  practice_id: true,
+                  branch_id: true
+                }
               }
             }
-          }
-        },
-        locumProfile: {
-          select: {
-            fullName: true,
-            emailAddress: true
+          },
+          locumProfile: {
+            select: {
+              fullName: true,
+              emailAddress: true
+            }
           }
         }
+      });
+
+      const now = new Date();
+      const paymentResults: any[] = [];
+
+      // Process each job - complete booking and charge payment
+      for (const job of updatedTimesheet.timesheetJobs) {
+        // Mark booking as COMPLETED
+        await tx.booking.update({
+          where: { id: job.bookingId },
+          data: {
+            status: 'COMPLETED',
+            completed_at: now
+          }
+        });
+
+        let shouldCharge = false;
+        let chargeEntity: 'branch' | 'practice' | null = null;
+        let stripeCustomer: any = null;
+
+        if (job.totalPay && job.totalPay > 0) {
+          // If booking created by BRANCH → charge branch
+          if (job.branchId && job.branch?.paymentMode === 'AUTO') {
+            shouldCharge = true;
+            chargeEntity = 'branch';
+            stripeCustomer = await tx.branchStripeCustomer.findUnique({
+              where: { branchId: job.branchId }
+            });
+          }
+          // If booking created by PRACTICE (no branch) → charge practice
+          else if (!job.branchId && job.practice.paymentMode === 'AUTO') {
+            shouldCharge = true;
+            chargeEntity = 'practice';
+            stripeCustomer = await tx.stripeCustomer.findUnique({
+              where: { practiceId: job.practiceId }
+            });
+          }
+        }
+
+        if (shouldCharge && stripeCustomer && job.totalPay !== null) {
+          try {
+            const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                amount: Math.round((job.totalPay || 0) * 100),
+                currency: 'gbp',
+                description: `Booking ${job.booking.bookingUniqueid} - ${updatedTimesheet.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''} - ${chargeEntity}`,
+                metadata: {
+                  booking_id: job.bookingId,
+                  timesheet_job_id: job.id,
+                  timesheet_id: updatedTimesheet.id,
+                  locum_name: updatedTimesheet.locumProfile.fullName,
+                  practice_id: job.practiceId,
+                  branch_id: job.branchId || null,
+                  branch_name: job.branch?.name || null,
+                  total_hours: job.totalHours,
+                  hourly_rate: job.hourlyRate,
+                  charged_entity: chargeEntity
+                },
+                customer_id: stripeCustomer.stripeCustomerId,
+                confirm: true
+              })
+            });
+
+            const paymentData = await paymentResponse.json();
+
+            if (paymentResponse.ok && paymentData.id) {
+              await tx.bookingPayment.create({
+                data: {
+                  bookingId: job.bookingId,
+                  timesheetJobId: job.id,
+                  practiceId: job.practiceId,
+                  amount: job.totalPay || 0,
+                  currency: 'gbp',
+                  stripeChargeId: paymentData.id,
+                  stripePaymentIntent: paymentData.payment_intent || paymentData.id,
+                  paymentStatus: 'SUCCESS',
+                  paymentMethod: 'AUTO',
+                  chargedAt: now,
+                  chargedBy: user.id, // Locum user who submitted
+                  metadata: {
+                    total_hours: job.totalHours,
+                    hourly_rate: job.hourlyRate,
+                    booking_uniqueid: job.booking.bookingUniqueid,
+                    locum_name: updatedTimesheet.locumProfile.fullName,
+                    branch_id: job.branchId || null,
+                    branch_name: job.branch?.name || null,
+                    charged_entity: chargeEntity
+                  },
+                  notes: `Auto-charged ${chargeEntity} on timesheet submission`
+                }
+              });
+              paymentResults.push({ bookingId: job.bookingId, status: 'SUCCESS', chargeId: paymentData.id });
+            } else {
+              await tx.bookingPayment.create({
+                data: {
+                  bookingId: job.bookingId,
+                  timesheetJobId: job.id,
+                  practiceId: job.practiceId,
+                  amount: job.totalPay || 0,
+                  currency: 'gbp',
+                  paymentStatus: 'FAILED',
+                  paymentMethod: 'AUTO',
+                  errorMessage: paymentData.error || 'Payment failed',
+                  metadata: {
+                    total_hours: job.totalHours,
+                    hourly_rate: job.hourlyRate,
+                    booking_uniqueid: job.booking.bookingUniqueid,
+                    locum_name: updatedTimesheet.locumProfile.fullName,
+                    branch_id: job.branchId || null,
+                    branch_name: job.branch?.name || null,
+                    charged_entity: chargeEntity
+                  },
+                  notes: 'Auto-charge failed on timesheet submission'
+                }
+              });
+              paymentResults.push({ bookingId: job.bookingId, status: 'FAILED', error: paymentData.error });
+            }
+          } catch (paymentError: any) {
+            await tx.bookingPayment.create({
+              data: {
+                bookingId: job.bookingId,
+                timesheetJobId: job.id,
+                practiceId: job.practiceId,
+                amount: job.totalPay || 0,
+                currency: 'gbp',
+                paymentStatus: 'FAILED',
+                paymentMethod: 'AUTO',
+                errorMessage: paymentError.message || 'Payment error',
+                metadata: {
+                  total_hours: job.totalHours,
+                  hourly_rate: job.hourlyRate,
+                  booking_uniqueid: job.booking.bookingUniqueid,
+                  locum_name: updatedTimesheet.locumProfile.fullName,
+                  branch_id: job.branchId || null,
+                  branch_name: job.branch?.name || null,
+                  charged_entity: chargeEntity
+                },
+                notes: 'Auto-charge error on timesheet submission'
+              }
+            });
+            paymentResults.push({ bookingId: job.bookingId, status: 'ERROR', error: paymentError.message });
+          }
+        } else if (shouldCharge && !stripeCustomer) {
+          await tx.bookingPayment.create({
+            data: {
+              bookingId: job.bookingId,
+              timesheetJobId: job.id,
+              practiceId: job.practiceId,
+              amount: job.totalPay || 0,
+              currency: 'gbp',
+              paymentStatus: 'FAILED',
+              paymentMethod: 'AUTO',
+              errorMessage: `No Stripe customer for ${chargeEntity}`,
+              metadata: {
+                total_hours: job.totalHours,
+                hourly_rate: job.hourlyRate,
+                booking_uniqueid: job.booking.bookingUniqueid,
+                locum_name: updatedTimesheet.locumProfile.fullName,
+                branch_id: job.branchId || null,
+                branch_name: job.branch?.name || null,
+                charged_entity: chargeEntity
+              },
+              notes: 'No Stripe customer found'
+            }
+          });
+          paymentResults.push({ bookingId: job.bookingId, status: 'FAILED', error: 'No Stripe customer' });
+        }
       }
+
+      return { timesheet: updatedTimesheet, payments: paymentResults };
     });
+
+    const failedPayments = result.payments.filter((p: any) => p.status !== 'SUCCESS');
+    if (failedPayments.length > 0) {
+      console.warn('Some auto-payments failed on timesheet submission:', failedPayments);
+    }
 
     res.status(200).json({
       success: true,
-      message: "Timesheet submitted successfully and is now pending manager approval",
+      message: "Timesheet submitted successfully, booking(s) completed, and payment(s) processed",
       data: {
-        timesheetId: updatedTimesheet.id,
-        status: updatedTimesheet.status,
-        staffSignatureDate: updatedTimesheet.staffSignatureDate,
-        totalHours: updatedTimesheet.totalHours,
-        totalPay: updatedTimesheet.totalPay,
-        month: updatedTimesheet.month,
-        year: updatedTimesheet.year,
-        locumName: updatedTimesheet.locumProfile.fullName,
-        totalJobs: updatedTimesheet.timesheetJobs.length
+        timesheetId: result.timesheet.id,
+        status: result.timesheet.status,
+        staffSignatureDate: result.timesheet.staffSignatureDate,
+        totalHours: result.timesheet.totalHours,
+        totalPay: result.timesheet.totalPay,
+        month: result.timesheet.month,
+        year: result.timesheet.year,
+        locumName: result.timesheet.locumProfile.fullName,
+        totalJobs: result.timesheet.timesheetJobs.length,
+        paymentResults: result.payments
       }
     });
 

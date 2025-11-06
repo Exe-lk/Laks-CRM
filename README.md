@@ -61,10 +61,11 @@ The `metadata` object should contain all relevant entity information:
 - `hourly_rate` (number): Hourly rate
 - `charged_entity` (string): Entity being charged - one of: `"practice"`, `"branch"`, or `"locum"`
 
-#### Auto-Charge Logic (from approve-timesheet.ts)
+#### Auto-Charge Logic (from submit-timesheet.ts)
 
 The system automatically determines which entity to charge based on:
 
+**When Locum Submits Timesheet:**
 1. **Branch Booking** (has `branchId`):
    - If `branch.paymentMode === 'AUTO'` → Charge **Branch**
    - Uses `BranchStripeCustomer.stripeCustomerId`
@@ -75,10 +76,13 @@ The system automatically determines which entity to charge based on:
    - Uses `StripeCustomer.stripeCustomerId`
    - `charged_entity: "practice"`
 
+**From Admin Panel:**
 3. **Locum Penalty** (from admin app):
    - Charge **Locum**
    - Uses `LocumStripeCustomer.stripeCustomerId`
    - `charged_entity: "locum"`
+
+**Note:** Bookings are marked as COMPLETED and payments are automatically processed when the locum submits their timesheet (not when admin approves). Admin approval (approve-timesheet.ts) only locks the timesheet with manager signature.
 
 #### Response
 
@@ -323,9 +327,151 @@ await fetch('/api/payments/delete-payment-method', {
 #### Notes
 
 - **Payment methods are stored in Stripe** - not in your database
-- **Card details are never stored** - only payment method IDs are returned
+- **Card details are now returned** - including brand, last4, expiration date
+
+### Set Default Payment Method Endpoint
+
+**Endpoint:** `POST /api/payments/set-default-payment-method`
+
+Universal endpoint for setting a default payment method for **Practice**, **Branch**, and **Locum** entities. The default payment method will be used when creating payment intents without specifying a payment_method_id.
+
+**Request:**
+```
+POST /api/payments/set-default-payment-method
+```
+
+**Request Body:**
+```json
+{
+  "payment_method_id": "pm_xxxxxxxxxxxxx",
+  "practice_id": "xxx"
+}
+```
+
+**OR:**
+```json
+{
+  "payment_method_id": "pm_xxxxxxxxxxxxx",
+  "branch_id": "xxx"
+}
+```
+
+**OR:**
+```json
+{
+  "payment_method_id": "pm_xxxxxxxxxxxxx",
+  "locum_id": "xxx"
+}
+```
+
+**Required Fields:**
+- `payment_method_id` (string): Stripe payment method ID to set as default
+- One of: `practice_id`, `branch_id`, or `locum_id` (string): Entity ID
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "customer": {
+    "id": "cus_xxxxxxxxxxxxx",
+    "email": "practice@example.com",
+    "name": "Practice Name",
+    "invoice_settings": {
+      "default_payment_method": "pm_xxxxxxxxxxxxx"
+    }
+  }
+}
+```
+
+**Error (400/404):**
+```json
+{
+  "error": "Payment method ID is required"
+}
+```
+
+**Example Usage:**
+```javascript
+// Set default payment method for Practice
+await fetch('/api/payments/set-default-payment-method', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    payment_method_id: 'pm_xxxxxxxxxxxxx',
+    practice_id: 'practice123'
+  })
+});
+```
+
+### Get Customer Details Endpoint
+
+**Endpoint:** `GET /api/payments/get-customer-details`
+
+Universal endpoint for retrieving Stripe customer details including the default payment method for **Practice**, **Branch**, and **Locum** entities.
+
+**Request:**
+```
+GET /api/payments/get-customer-details?practice_id=xxx
+GET /api/payments/get-customer-details?branch_id=xxx
+GET /api/payments/get-customer-details?locum_id=xxx
+```
+
+**Query Parameters:**
+- `practice_id` (string, optional): Practice ID
+- `branch_id` (string, optional): Branch ID
+- `locum_id` (string, optional): Locum ID
+
+**Note:** Only one of `practice_id`, `branch_id`, or `locum_id` is required.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "customer": {
+    "id": "cus_xxxxxxxxxxxxx",
+    "email": "practice@example.com",
+    "name": "Practice Name",
+    "invoice_settings": {
+      "default_payment_method": "pm_xxxxxxxxxxxxx"
+    },
+    "metadata": {
+      "practice_id": "practice123"
+    }
+  },
+  "default_payment_method": "pm_xxxxxxxxxxxxx"
+}
+```
+
+**Error (400/404):**
+```json
+{
+  "error": "One of practice_id, branch_id, or locum_id is required"
+}
+```
+
+**Example Usage:**
+```javascript
+// Get customer details for Practice
+const response = await fetch('/api/payments/get-customer-details?practice_id=practice123');
+const data = await response.json();
+console.log('Default payment method:', data.default_payment_method);
+
+// Get customer details for Branch
+const response = await fetch('/api/payments/get-customer-details?branch_id=branch456');
+const data = await response.json();
+
+// Get customer details for Locum
+const response = await fetch('/api/payments/get-customer-details?locum_id=locum789');
+const data = await response.json();
+```
+
+#### Payment Methods Summary
+
+- **Payment methods are stored in Stripe** - not in your database
+- **Card details are now returned** - including brand, last4, expiration date
 - **Only one entity ID required** - provide either `practice_id`, `branch_id`, or `locum_id`
 - **Customer must exist** - Entity must have a Stripe customer created via customer-management endpoints first
 - **PCI Compliant** - All card data is handled by Stripe, you only get masked card info (last4, brand, expiry)
+- **Default payment method** - Set a default card to be used when no specific payment_method_id is provided in payment intents
 
 

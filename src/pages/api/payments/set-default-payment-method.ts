@@ -2,13 +2,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "GET") {
-        res.setHeader("Allow", ["GET"]);
+    if (req.method !== "POST") {
+        res.setHeader("Allow", ["POST"]);
         return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
 
     try {
-        const { practice_id, branch_id, locum_id } = req.query;
+        const { payment_method_id, practice_id, branch_id, locum_id } = req.body;
+
+        if (!payment_method_id) {
+            return res.status(400).json({ error: "payment_method_id is required" });
+        }
 
         // Determine entity type and ID
         const entityId = practice_id || branch_id || locum_id;
@@ -22,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        // Get Stripe customer based on entity type
         let stripeCustomerId: string | null = null;
 
         switch (entityType) {
@@ -67,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured for customer management" });
         }
 
-        // Get saved payment methods for the entity
+        // Set default payment method for the entity
         const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
             method: "POST",
             headers: {
@@ -75,18 +78,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                action: "list_payment_methods",
-                customer_id: stripeCustomerId
+                action: "set_default_payment_method",
+                customer_id: stripeCustomerId,
+                payment_method_id
             })
         });
 
         const json = await resp.json().catch(() => ({}));
-        if (json.success && json.payment_methods) {
-            return res.status(200).json({
-                data: json.payment_methods
-            });
-        }
-        
         return res.status(resp.status).json(json);
     } catch (error: any) {
         return res.status(500).json({ error: error?.message || String(error) });

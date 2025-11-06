@@ -9,8 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const { practice_id, branch_id, locum_id } = req.query;
-
-        // Determine entity type and ID
         const entityId = practice_id || branch_id || locum_id;
         const entityType = practice_id ? 'practice' : 
                           branch_id ? 'branch' : 
@@ -21,8 +19,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 error: "One of practice_id, branch_id, or locum_id is required" 
             });
         }
-
-        // Get Stripe customer based on entity type
         let stripeCustomerId: string | null = null;
 
         switch (entityType) {
@@ -67,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured for customer management" });
         }
 
-        // Get saved payment methods for the entity
+        // Get customer details including default payment method
         const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
             method: "POST",
             headers: {
@@ -75,18 +71,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                action: "list_payment_methods",
+                action: "get_customer",
                 customer_id: stripeCustomerId
             })
         });
 
         const json = await resp.json().catch(() => ({}));
-        if (json.success && json.payment_methods) {
-            return res.status(200).json({
-                data: json.payment_methods
-            });
-        }
-        
         return res.status(resp.status).json(json);
     } catch (error: any) {
         return res.status(500).json({ error: error?.message || String(error) });
