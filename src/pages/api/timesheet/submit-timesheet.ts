@@ -175,6 +175,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (shouldCharge && stripeCustomer && job.totalPay !== null) {
           try {
+            // Get default payment method for the customer (if set)
+            let defaultPaymentMethodId: string | undefined = undefined;
+            try {
+              const customerDetailsResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/get-customer-details?${chargeEntity}_id=${chargeEntity === 'branch' ? job.branchId : job.practiceId}`,
+                { method: 'GET' }
+              );
+              if (customerDetailsResponse.ok) {
+                const customerDetails = await customerDetailsResponse.json();
+                if (customerDetails.default_payment_method) {
+                  defaultPaymentMethodId = customerDetails.default_payment_method;
+                }
+              }
+            } catch (pmError) {
+              // If we can't get default payment method, continue without it
+              // Stripe will use customer's default or first available card
+              console.warn('Could not fetch default payment method, using Stripe default:', pmError);
+            }
+
             const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -195,6 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   charged_entity: chargeEntity
                 },
                 customer_id: stripeCustomer.stripeCustomerId,
+                payment_method_id: defaultPaymentMethodId, // Use default payment method if set
                 confirm: true
               })
             });
