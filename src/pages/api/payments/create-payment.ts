@@ -40,17 +40,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Prepare universal payload for payment intent
         // Metadata can contain: practice_id, branch_id, locum_id, charged_entity, etc.
         // All entity-specific info should be in metadata, not hardcoded
-        const paymentPayload = {
+        const paymentPayload: any = {
             amount,
             currency,
             description,
             metadata: metadata || {}, // Pass through all metadata as-is (practice_id, branch_id, locum_id, etc.)
-            customer_id,
-            payment_method_id,
+            customer: customer_id, // Edge function expects 'customer' not 'customer_id'
             confirm,
-            save_payment_method,
             off_session // For automatic charges, use customer's default payment method
         };
+
+        // Add payment_method if provided (edge function expects 'payment_method' not 'payment_method_id')
+        if (payment_method_id) {
+            paymentPayload.payment_method = payment_method_id;
+        }
 
         const resp = await fetch(SUPABASE_FUNCTION_URL, {
             method: "POST",

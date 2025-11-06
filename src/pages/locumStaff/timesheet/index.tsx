@@ -6,6 +6,7 @@ import NavBar from "../../components/navBar/nav";
 import SignatureCanvas from 'react-signature-canvas';
 import { uploadService, UploadProgress as UploadProgressType } from '@/services/uploadService';
 import UploadProgress from '@/components/UploadProgress';
+import Swal from 'sweetalert2';
 
 interface LocumTimesheetProps { }
 
@@ -1204,6 +1205,17 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
         }
       }
 
+      // Show success alert and close dialog
+      await Swal.fire({
+        title: 'Success!',
+        text: 'Timesheet submitted successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#10B981'
+      });
+
+      // Close the dialog and call onSubmit callback
+      onClose();
       onSubmit();
     } catch (err: any) {
       setError(err.message || 'Failed to submit timesheet');

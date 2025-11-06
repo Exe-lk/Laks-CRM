@@ -422,24 +422,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Get default payment method for the customer (if set)
             let defaultPaymentMethodId: string | undefined = undefined;
             try {
+              console.log(`[STEP 5.0] Fetching customer details for ${chargeEntity}`);
               const customerDetailsResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/get-customer-details?${chargeEntity}_id=${chargeEntity === 'branch' ? job.branchId : job.practiceId}`,
                 { method: 'GET' }
               );
               if (customerDetailsResponse.ok) {
                 const customerDetails = await customerDetailsResponse.json();
+                console.log(`[STEP 5.0.1] Customer details response:`, customerDetails);
                 if (customerDetails.default_payment_method) {
                   defaultPaymentMethodId = customerDetails.default_payment_method;
+                  console.log(`[STEP 5.0.2] Default payment method found: ${defaultPaymentMethodId}`);
+                } else {
+                  console.log(`[STEP 5.0.3] No default payment method set for customer`);
+                  
+                  // Try to get the first available payment method
+                  try {
+                    const listPMResponse = await fetch(
+                      `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/list-payment-methods?${chargeEntity}_id=${chargeEntity === 'branch' ? job.branchId : job.practiceId}`,
+                      { method: 'GET' }
+                    );
+                    if (listPMResponse.ok) {
+                      const pmList = await listPMResponse.json();
+                      // The API returns { data: [] } format
+                      if (pmList.data && pmList.data.length > 0) {
+                        defaultPaymentMethodId = pmList.data[0].id;
+                        console.log(`[STEP 5.0.4] Using first available payment method: ${defaultPaymentMethodId}`);
+                      } else {
+                        console.log(`[STEP 5.0.5] No payment methods found for customer`);
+                      }
+                    }
+                  } catch (listError) {
+                    console.warn('[STEP 5.0.6] Could not list payment methods:', listError);
+                  }
                 }
               }
             } catch (pmError) {
               // If we can't get default payment method, continue without it
               // Stripe will use customer's default or first available card
-              console.warn('Could not fetch default payment method, using Stripe default:', pmError);
+              console.warn('Could not fetch default payment method:', pmError);
+            }
+
+            // Check if we have a payment method
+            if (!defaultPaymentMethodId) {
+              console.log(`[STEP 5.1] ERROR: No payment method available for customer`);
+              throw new Error(`No payment method found for ${chargeEntity}. Please add a payment method before submitting timesheets.`);
             }
 
             const paymentUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/create-payment`;
             console.log(`[STEP 5.2] Calling payment API: ${paymentUrl}`);
+            console.log(`[STEP 5.2.1] Using payment method: ${defaultPaymentMethodId}`);
             
             const paymentPayload: any = {
               amount: Math.round((job.totalPay || 0) * 100),
@@ -458,14 +490,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 charged_entity: chargeEntity
               },
               customer_id: stripeCustomer.stripeCustomerId,
+              payment_method_id: defaultPaymentMethodId,
               confirm: true,
               off_session: true // Enable automatic charging using customer's default payment method
             };
-
-            // Include payment method ID if available
-            if (defaultPaymentMethodId) {
-              paymentPayload.payment_method_id = defaultPaymentMethodId;
-            }
             
             console.log(`[STEP 5.3] Payment payload:`, JSON.stringify(paymentPayload, null, 2));
             
@@ -644,6 +672,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       console.log(`[STEP 12] Transaction completed. Payment results:`, paymentResults);
       return { timesheet: updatedTimesheet, payments: paymentResults };
+    }, {
+      maxWait: 30000, // Maximum time to wait to get a connection from the pool (30 seconds)
+      timeout: 30000, // Maximum time for the transaction itself (30 seconds)
     });
     
     console.log(`[STEP 13] Transaction result received:`, {
