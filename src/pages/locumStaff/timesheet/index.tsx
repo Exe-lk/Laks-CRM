@@ -471,6 +471,13 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     return localStorage.getItem('token') || '';
   };
 
+  // Helper to convert time string (HH:MM) to minutes for comparison
+  const timeToMinutes = (time: string): number => {
+    if (!time) return -1;
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
   // Validation function to check time order
   const validateTimeOrder = (
     start: string,
@@ -478,13 +485,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     lunchEnd: string,
     end: string
   ): string | null => {
-    // Helper to convert time string (HH:MM) to minutes for comparison
-    const timeToMinutes = (time: string): number => {
-      if (!time) return -1;
-      const [hours, minutes] = time.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-
     const startMinutes = timeToMinutes(start);
     const lunchStartMinutes = timeToMinutes(lunchStart);
     const lunchEndMinutes = timeToMinutes(lunchEnd);
@@ -511,6 +511,40 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     }
 
     return null;
+  };
+
+  // Calculate total hours based on start, end, and lunch break times
+  const calculateTotalHours = (
+    start: string,
+    end: string,
+    lunchStart: string,
+    lunchEnd: string
+  ): number | null => {
+    // Need at least start and end time
+    if (!start || !end) return null;
+
+    const startMinutes = timeToMinutes(start);
+    const endMinutes = timeToMinutes(end);
+
+    if (startMinutes < 0 || endMinutes < 0) return null;
+
+    // Calculate total work time in minutes
+    let totalMinutes = endMinutes - startMinutes;
+
+    // If both lunch start and lunch end are provided, subtract lunch break duration
+    // If only one is provided, ignore it and use the full time between start and end
+    if (lunchStart && lunchEnd) {
+      const lunchStartMinutes = timeToMinutes(lunchStart);
+      const lunchEndMinutes = timeToMinutes(lunchEnd);
+
+      if (lunchStartMinutes >= 0 && lunchEndMinutes >= 0) {
+        const lunchDuration = lunchEndMinutes - lunchStartMinutes;
+        totalMinutes -= lunchDuration;
+      }
+    }
+
+    // Convert minutes to hours (with 2 decimal places)
+    return totalMinutes / 60;
   };
 
   const handleSetStartTimeNow = () => {
@@ -895,6 +929,14 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
                         )}
 
+                        <div className="mb-3 p-2 bg-cyan-50 border border-cyan-200 rounded-lg">
+                          <p className="text-xs text-cyan-800">
+                            <strong>💡 Hours Calculation:</strong> Total hours = End time - Start time. 
+                            If <strong>both</strong> lunch break times are entered, the lunch duration will be deducted. 
+                            If only one lunch time is entered, it will be ignored.
+                          </p>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
@@ -1070,6 +1112,47 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
                         )}
 
+                        {/* Hours Preview Display */}
+                        {(() => {
+                          const calculatedHours = calculateTotalHours(startTime, endTime, lunchStartTime, lunchEndTime);
+                          const hasIncompleteLunchBreak = (lunchStartTime && !lunchEndTime) || (!lunchStartTime && lunchEndTime);
+                          
+                          if (calculatedHours !== null && !timeValidationError) {
+                            return (
+                              <div className="mt-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                                <h6 className="text-xs font-semibold text-purple-900 mb-1">Hours Preview</h6>
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-purple-700">Estimated Total Hours:</span>
+                                    <span className="font-medium text-purple-900">{calculatedHours.toFixed(2)} hours</span>
+                                  </div>
+                                  {lunchStartTime && lunchEndTime && (
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-purple-700">Lunch Break:</span>
+                                      <span className="font-medium text-purple-900">
+                                        {((timeToMinutes(lunchEndTime) - timeToMinutes(lunchStartTime)) / 60).toFixed(2)} hours deducted
+                                      </span>
+                                    </div>
+                                  )}
+                                  {hasIncompleteLunchBreak && (
+                                    <p className="text-xs text-orange-600 italic mt-1 flex items-center gap-1">
+                                      <span>ℹ️</span>
+                                      <span>Only one lunch time entered - lunch break ignored in calculation</span>
+                                    </p>
+                                  )}
+                                  {hourlyRate && (
+                                    <div className="flex justify-between text-xs pt-1 border-t border-purple-200">
+                                      <span className="text-purple-700 font-semibold">Estimated Pay:</span>
+                                      <span className="font-bold text-green-700">£{(calculatedHours * hourlyRate).toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
                         {/* Booking Details */}
                         <div className="mt-3 pt-3 border-t border-gray-200">
                           <div className="flex items-center gap-2 mb-2">
@@ -1166,6 +1249,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       {showSignatureModal && timesheetId && (
         <SignatureModal
           timesheetId={timesheetId}
+          bookingDate={selectedDate}
+          startTime={startTime}
+          endTime={endTime}
+          lunchStartTime={lunchStartTime}
+          lunchEndTime={lunchEndTime}
           onClose={() => setShowSignatureModal(false)}
           onSubmit={() => {
             setShowSignatureModal(false);
@@ -1182,9 +1270,23 @@ interface SignatureModalProps {
   timesheetId: string;
   onClose: () => void;
   onSubmit: () => void;
+  bookingDate?: string;
+  startTime?: string;
+  endTime?: string;
+  lunchStartTime?: string;
+  lunchEndTime?: string;
 }
 
-const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, onSubmit }) => {
+const SignatureModal: React.FC<SignatureModalProps> = ({ 
+  timesheetId, 
+  onClose, 
+  onSubmit, 
+  bookingDate, 
+  startTime, 
+  endTime, 
+  lunchStartTime, 
+  lunchEndTime 
+}) => {
   const staffSignatureRef = useRef<SignatureCanvas>(null);
   const managerSignatureRef = useRef<SignatureCanvas>(null);
   const [managerId, setManagerId] = useState('');
@@ -1314,6 +1416,49 @@ const SignatureModal: React.FC<SignatureModalProps> = ({ timesheetId, onClose, o
     <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">Submit Timesheet</h3>
+
+        {/* Date and Time Information */}
+        {bookingDate && (
+          <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+              <span>📅</span>
+              <span>Timesheet Summary</span>
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-2 rounded border border-blue-100">
+                <p className="text-xs text-gray-600 mb-1">Date</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {new Date(bookingDate).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </p>
+              </div>
+              {startTime && (
+                <div className="bg-white p-2 rounded border border-blue-100">
+                  <p className="text-xs text-gray-600 mb-1">Start Time</p>
+                  <p className="text-sm font-semibold text-gray-900">{startTime}</p>
+                </div>
+              )}
+              {endTime && (
+                <div className="bg-white p-2 rounded border border-blue-100">
+                  <p className="text-xs text-gray-600 mb-1">End Time</p>
+                  <p className="text-sm font-semibold text-gray-900">{endTime}</p>
+                </div>
+              )}
+              {lunchStartTime && lunchEndTime && (
+                <div className="bg-white p-2 rounded border border-blue-100">
+                  <p className="text-xs text-gray-600 mb-1">Lunch Break</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {lunchStartTime} - {lunchEndTime}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">

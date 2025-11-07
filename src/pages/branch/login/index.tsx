@@ -68,7 +68,6 @@ const BranchLoginPage = () => {
                     console.log('HTTP Response status:', response.status);
                     console.log('Data status field:', data.status);
                     
-                    // Handle different status codes based on data.status
                     switch (data.status) {
                         case 'cancel':
                             await Swal.fire({

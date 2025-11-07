@@ -41,12 +41,10 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
 
   const [errors, setErrors] = useState<Partial<CardFormData>>({});
 
-  // Create or get customer on mount
   useEffect(() => {
     const initializeCustomer = async () => {
       if (isOpen && branchId) {
         try {
-          // Ensure email and name are always provided (not undefined)
           const emailToUse = branchEmail && branchEmail.trim() !== '' 
             ? branchEmail 
             : `branch-${branchId}@example.com`;
@@ -106,13 +104,10 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
   };
 
   const formatCardNumber = (value: string): string => {
-    // Remove all spaces and non-digit characters
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
-    // Limit to 19 digits (maximum card number length)
     const truncated = v.substring(0, 19);
     
-    // Split into groups of 4 digits
     const parts = [];
     for (let i = 0, len = truncated.length; i < len; i += 4) {
       parts.push(truncated.substring(i, i + 4));
@@ -153,7 +148,6 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
     }
 
     try {
-      // Show loading
       Swal.fire({
         title: 'Adding Card...',
         html: 'Please wait while we add your payment method',
@@ -162,16 +156,8 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
           Swal.showLoading();
         }
       });
+      const testPaymentMethodId = 'pm_card_visa'; 
 
-      // In production, you would use Stripe.js to create a payment method
-      // For development/testing, we'll use Stripe's test payment method
-      // Test card: pm_card_visa or create via API
-      
-      // Create a test payment method using the card details
-      // Using a test payment method ID (in production, this would come from Stripe.js)
-      const testPaymentMethodId = 'pm_card_visa'; // Stripe's test payment method
-
-      // Attach the payment method to the customer
       console.log('Attaching payment method with:', {
         action: 'attach_payment_method',
         branch_id: branchId,
@@ -188,7 +174,6 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
 
       console.log('Payment method attached successfully:', result);
 
-      // Success!
       await Swal.fire({
         title: 'Success!',
         text: 'Payment method added successfully',
@@ -197,7 +182,6 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
         confirmButtonColor: '#C3EAE7'
       });
 
-      // Reset form
       setFormData({
         cardHolderName: '',
         cardNumber: '',
