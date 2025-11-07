@@ -92,18 +92,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               telephone: true,
               address: true,
               location: true,
-              paymentCards: {
-                where: {
-                  status: 'active'
-                },
-                select: {
-                  id: true,
-                  cardHolderName: true,
-                  lastFourDigits: true,
-                  cardType: true,
-                  isDefault: true
-                }
-              },
               stripeCustomer: {
                 select: {
                   stripeCustomerId: true,
