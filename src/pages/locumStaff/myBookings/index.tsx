@@ -72,12 +72,26 @@ const MyBookingsPage = () => {
       <NavBar />
       
       <div className="flex-1 flex flex-col py-8 pt-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-12">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-12">My Bookings</h1>
-            <p className="text-gray-600">
+             <div className="text-center mb-8 pt-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
+         My Bookings
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               View and manage your confirmed bookings. You can cancel bookings at any time (penalties may apply within 48 hours).
-            </p>
+          </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          </div>
+        </div>
           </div>
 
           <div className="mb-8">

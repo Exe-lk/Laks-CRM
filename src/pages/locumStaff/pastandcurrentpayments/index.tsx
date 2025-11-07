@@ -34,7 +34,7 @@ const PastAndCurrentPaymentsPage = () => {
     <div className="min-h-screen bg-white flex flex-col">
       <NavBar />
       <div className="flex-1 w-full pt-32">
-        <div className="text-center mb-8 pt-12">
+        <div className="text-center mb-8 pt-24">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 10c-4.41 0-8-1.79-8-4V6c0-2.21 3.59-4 8-4s8 1.79 8 4v8c0 2.21-3.59 4-8 4z" />

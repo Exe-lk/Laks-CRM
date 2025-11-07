@@ -347,7 +347,7 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <input
               type="checkbox"
               id="isDefault"
@@ -358,7 +358,7 @@ const AddBranchCardModal: React.FC<AddBranchCardModalProps> = ({
             <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">
               Set as default payment method
             </label>
-          </div>
+          </div> */}
 
           <div className="flex gap-3 pt-4">
             <button

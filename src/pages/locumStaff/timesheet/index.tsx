@@ -121,9 +121,27 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   const daysOfWeek = getDaysOfWeek(currentWeekStart);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 pt-24">
       <NavBar />
       <div className="max-w-7xl mx-auto pt-32 pb-12">
+         <div className="text-center mb-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
+           Timesheets 
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          View your dental appointments, access your timesheet, and mark your attendance.
+          </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+          </div>
+        </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="flex justify-between items-center mb-8">
             <div>

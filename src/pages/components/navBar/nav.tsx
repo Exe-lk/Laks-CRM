@@ -314,7 +314,7 @@ const NavBar = () => {
                   }`}
                 onClick={() => router.push('/locumStaff/waitingList')}
               >
-                Waiting List
+                Appointment Requests
               </li>
               <li
                 className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
@@ -450,7 +450,7 @@ const NavBar = () => {
                         }`}
                       onClick={() => { router.push('/locumStaff/waitingList'); closeMobileMenu(); }}
                     >
-                      Waiting List
+                     Appointment Requests
                     </li>
                     <li
                       className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/pastAppointments') ? 'bg-[#C3EAE7] text-black' : ''
