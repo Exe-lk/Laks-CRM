@@ -250,7 +250,7 @@ const LoginForm = () => {
 
             <div className="bg-[#C3EAE7]/20 rounded-xl p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="flex items-center group cursor-pointer">
+                {/* <label className="flex items-center group cursor-pointer">
                   <div className="relative">
                     <input
                       type="checkbox"
@@ -273,7 +273,7 @@ const LoginForm = () => {
                     </div>
                   </div>
                   <span className="ml-3 text-sm text-gray-700 group-hover:text-black transition-colors font-semibold">Remember me</span>
-                </label>
+                </label> */}
                 <a href="/forgetPassword" className="text-sm text-black font-bold">
                   Forgot password?
                 </a>
