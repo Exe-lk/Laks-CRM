@@ -142,6 +142,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
     </div>
   );
 
+  console.log("status",profile.status);
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-white/30">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-0 relative">
@@ -188,11 +189,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                 {renderViewField(
                   'Status',
                   undefined, 
-                  profile.status === 'Active'
+                  profile.status === 'accept'
                     ? <FaCheckCircle className="text-green-600" />
                     : <FaTimesCircle className="text-red-600" />,
                   (
-                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide ${profile.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide ${profile.status === 'accept' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                       {profile.status}
                     </span>
                   )

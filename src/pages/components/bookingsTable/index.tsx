@@ -106,9 +106,22 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const uniqueBranchStrings = Array.from(new Set<string>(branchStrings));
   const branches = uniqueBranchStrings.map((item) => JSON.parse(item) as { id: string; name: string });
 
-  const bookings = selectedBranch === 'all' 
+  const filteredBookings = selectedBranch === 'all' 
     ? upcomingBookings 
     : upcomingBookings.filter((booking: Booking) => booking.branch?.id === selectedBranch);
+  
+  const bookings = [...filteredBookings].sort((a: Booking, b: Booking) => {
+    const dateA = new Date(a.booking_date);
+    const dateB = new Date(b.booking_date);
+    
+    const [hoursA, minutesA] = a.booking_start_time.split(':').map(Number);
+    const [hoursB, minutesB] = b.booking_start_time.split(':').map(Number);
+    
+    dateA.setHours(hoursA, minutesA, 0, 0);
+    dateB.setHours(hoursB, minutesB, 0, 0);
+    
+    return dateA.getTime() - dateB.getTime();
+  });
   
   const hasBranches = bookings.some((booking: Booking) => booking.branch);
   
@@ -584,12 +597,33 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                             Cancelled
                           </span>
                           {booking.cancellationPenalties && booking.cancellationPenalties.length > 0 && (
-                            <button
-                              onClick={() => setExpandedBooking(expandedBooking === booking.id ? null : booking.id)}
-                              className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-md hover:bg-orange-200 transition-colors"
-                            >
-                              {expandedBooking === booking.id ? 'Hide Penalty' : 'View Penalty'}
-                            </button>
+                            (() => {
+                              // Filter penalties to only show those that apply to the current logged-in user
+                              const userPenalties = booking.cancellationPenalties.filter((penalty: CancellationPenalty) => {
+                                if (userType === 'practice' || userType === 'branch') {
+                                  // Show penalty only if the current practice/branch user is the one charged
+                                  return penalty.chargedPracticeId === userId;
+                                } else if (userType === 'locum') {
+                                  // Show penalty only if the current locum is the one charged
+                                  // This ensures when a locum cancels, only they see their own penalty
+                                  return penalty.chargedLocumId === userId;
+                                }
+                                return false;
+                              });
+
+                              console.log('User Type:', userType, 'User ID:', userId);
+                              console.log('All penalties for booking:', booking.cancellationPenalties);
+                              console.log('Filtered penalties for current user:', userPenalties);
+
+                              return userPenalties.length > 0 ? (
+                                <button
+                                  onClick={() => setExpandedBooking(expandedBooking === booking.id ? null : booking.id)}
+                                  className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-md hover:bg-orange-200 transition-colors"
+                                >
+                                  {expandedBooking === booking.id ? 'Hide Penalty' : 'View Penalty'}
+                                </button>
+                              ) : null;
+                            })()
                           )}
                         </>
                       )}
@@ -610,7 +644,20 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                           <FiAlertCircle className="text-orange-600" />
                           Cancellation Penalty Details
                         </h4>
-                        {booking.cancellationPenalties.map((penalty) => (
+                        {booking.cancellationPenalties
+                          .filter((penalty: CancellationPenalty) => {
+                            // Filter to show only penalties that apply to the current logged-in user
+                            if (userType === 'practice' || userType === 'branch') {
+                              // Show penalty only if the current practice/branch user is the one charged
+                              return penalty.chargedPracticeId === userId;
+                            } else if (userType === 'locum') {
+                              // Show penalty only if the current locum is the one charged
+                              // This ensures when a locum cancels, only they see their own penalty
+                              return penalty.chargedLocumId === userId;
+                            }
+                            return false;
+                          })
+                          .map((penalty) => (
                           <div key={penalty.id} className="grid grid-cols-2 gap-4 text-sm">
                             <div className="space-y-2">
                               <div>
@@ -684,18 +731,18 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                 </>
               ) : (
                 <>
-                  Total: {bookings.length} upcoming bookings | 
+                  Total: {bookings.length} total bookings | 
                   Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
                   Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
                 </>
               )}
             </div>
-            <button
+            {/* <button
               onClick={() => refetchBookings()}
               className="text-[#C3EAE7] hover:text-[#A9DBD9] font-medium"
             >
               Refresh
-            </button>
+            </button> */}
           </div>
         </div>
       )}

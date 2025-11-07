@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiX, FiUser, FiMapPin, FiPhone, FiMail, FiClock, FiCheck, FiLoader, FiStar, FiFilter } from 'react-icons/fi';
+import { FiX, FiUser, FiMapPin, FiPhone, FiMail, FiClock, FiCheck, FiLoader } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { useGetApplicantsQuery, useSelectApplicantMutation, Applicant, JobDetails } from '@/redux/slices/appointmentPracticeSlice';
 import { sendSMS } from '@/redux/slices/smsSlice';
@@ -21,9 +21,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
 }) => {
   const [selectingApplicant, setSelectingApplicant] = useState<string | null>(null);
   const [hasShownAutoSelect, setHasShownAutoSelect] = useState(false);
-  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   
   const { 
@@ -72,13 +69,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   };
 
   const sortedApplicants = [...applicants].sort((a, b) => {
-    const ratingA = a.locumProfile.averageRating || 0;
-    const ratingB = b.locumProfile.averageRating || 0;
-    
-    if (ratingA !== ratingB) {
-      return ratingB - ratingA; 
-    }
-    
     if (jobDetails?.practice?.address && a.locumProfile.address && b.locumProfile.address) {
       const practiceCoords = parseCoordinates(jobDetails.practice.address);
       const locumCoordsA = parseCoordinates(a.locumProfile.address);
@@ -100,63 +90,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
     return 0; 
   });
 
-  const filteredApplicants = ratingFilter === null 
-    ? sortedApplicants 
-    : sortedApplicants.filter(applicant => {
-        const rating = applicant.locumProfile.averageRating || 0;
-        return rating >= ratingFilter;
-      });
-
-  const getFilterTooltip = (rating: number | null) => {
-    if (rating === null) {
-      return `Show all applicants regardless of rating (${applicants.length} total)`;
-    }
-    const count = applicants.filter(applicant => (applicant.locumProfile.averageRating || 0) >= rating).length;
-    return `Show only applicants with ${rating}+ star rating (${count} match${count !== 1 ? 'es' : ''})`;
-  };
-
-  const renderStarRating = (rating: number | undefined) => {
-    if (rating === undefined || rating === null) {
-      return (
-        <div className="flex items-center gap-1 text-gray-400">
-          <FiStar className="text-sm" />
-          <span className="text-xs">No rating</span>
-        </div>
-      );
-    }
-
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(
-          <FiStar key={i} className="text-yellow-400 fill-current text-sm" />
-        );
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(
-          <div key={i} className="relative">
-            <FiStar className="text-gray-300 text-sm" />
-            <div className="absolute inset-0 overflow-hidden w-1/2">
-              <FiStar className="text-yellow-400 fill-current text-sm" />
-            </div>
-          </div>
-        );
-      } else {
-        stars.push(
-          <FiStar key={i} className="text-gray-300 text-sm" />
-        );
-      }
-    }
-
-    return (
-      <div className="flex items-center gap-1">
-        <div className="flex">{stars}</div>
-        <span className="text-xs text-gray-600 ml-1">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
+  const filteredApplicants = sortedApplicants;
 
   React.useEffect(() => {
     if (fetchError) {
@@ -172,7 +106,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   }, [fetchError]);
 
   React.useEffect(() => {
-    if (filteredApplicants.length === 1 && canSelectApplicant && !selectingApplicant && !hasShownAutoSelect && isOpen && ratingFilter === null) {
+    if (filteredApplicants.length === 1 && canSelectApplicant && !selectingApplicant && !hasShownAutoSelect && isOpen) {
       const singleApplicant = filteredApplicants[0];
       setHasShownAutoSelect(true);
       
@@ -191,7 +125,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
         }
       });
     }
-  }, [filteredApplicants, canSelectApplicant, selectingApplicant, hasShownAutoSelect, isOpen, ratingFilter]);
+  }, [filteredApplicants, canSelectApplicant, selectingApplicant, hasShownAutoSelect, isOpen]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -358,19 +292,11 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-800">
-                  {filteredApplicants.length} of {applicants.length} Applicant{applicants.length !== 1 ? 's' : ''}
-                  {ratingFilter && ` (${ratingFilter}+ stars)`}
-                  <span className="text-sm font-normal text-gray-600 block">Sorted by rating (highest first) and distance (closest first)</span>
+                  {filteredApplicants.length} Applicant{applicants.length !== 1 ? 's' : ''}
+                  <span className="text-sm font-normal text-gray-600 block">Sorted by distance (closest first)</span>
                 </h3>
                 <div className="flex gap-2 items-center">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium"
-                  >
-                    <FiFilter className="text-sm" />
-                    Filters
-                  </button>
-                  {filteredApplicants.length === 1 && canSelectApplicant && ratingFilter === null && (
+                  {filteredApplicants.length === 1 && canSelectApplicant && (
                     <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
                       <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
                       Auto-selection available
@@ -383,78 +309,11 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                   )}
                 </div>
               </div>
-
-              {showFilters && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Filter by Minimum Rating</h4>
-                  <p className="text-xs text-gray-500 mb-3">Applicants are automatically sorted by rating (5★ to 1★) and then by distance (closest first)</p>
-                  <div className="flex gap-2 flex-wrap relative">
-                    <div className="relative">
-                      <button
-                        onClick={() => setRatingFilter(null)}
-                        onMouseEnter={() => setHoveredFilter('all')}
-                        onMouseLeave={() => setHoveredFilter(null)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                          ratingFilter === null
-                            ? 'bg-[#C3EAE7] text-black'
-                            : 'bg-white text-gray-600 hover:bg-gray-100 border'
-                        }`}
-                      >
-                        All Ratings
-                      </button>
-                      {hoveredFilter === 'all' && (
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-10">
-                          {getFilterTooltip(null)}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                        </div>
-                      )}
-                    </div>
-                    {[5, 4, 3, 2, 1].map((rating) => (
-                      <div key={rating} className="relative">
-                        <button
-                          onClick={() => setRatingFilter(rating)}
-                          onMouseEnter={() => setHoveredFilter(rating.toString())}
-                          onMouseLeave={() => setHoveredFilter(null)}
-                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
-                            ratingFilter === rating
-                              ? 'bg-[#C3EAE7] text-black'
-                              : 'bg-white text-gray-600 hover:bg-gray-100 border'
-                          }`}
-                        >
-                          <FiStar className="text-yellow-400 fill-current" />
-                          {rating}+
-                        </button>
-                        {hoveredFilter === rating.toString() && (
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-10">
-                            {getFilterTooltip(rating)}
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {filteredApplicants.length === 0 && ratingFilter !== null ? (
-                <div className="text-center py-12">
-                  <FiStar className="text-6xl text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-500 mb-2">No Applicants Match Filter</h3>
-                  <p className="text-gray-400">No applicants have a rating of {ratingFilter}+ stars.</p>
-                  <button
-                    onClick={() => setRatingFilter(null)}
-                    className="mt-4 px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
-                  >
-                    Clear Filter
-                  </button>
-                </div>
-              ) : null}
-
               {filteredApplicants.map((applicant) => (
                 <div
                   key={applicant.response_id}
                   className={`rounded-lg p-6 border transition-shadow ${
-                    filteredApplicants.length === 1 && canSelectApplicant && ratingFilter === null
+                    filteredApplicants.length === 1 && canSelectApplicant
                       ? 'bg-blue-50 border-blue-200 hover:shadow-lg border-2'
                       : 'bg-gray-50 border-gray-200 hover:shadow-md'
                   }`}
@@ -469,10 +328,9 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                           <h4 className="text-lg font-semibold text-gray-900">
                             {applicant.locumProfile.fullName}
                           </h4>
-                          <p className="text-sm text-gray-600 mb-1">
+                          <p className="text-sm text-gray-600">
                             {applicant.locumProfile.employeeType}
                           </p>
-                          {renderStarRating(applicant.locumProfile.averageRating)}
                         </div>
                       </div>
 
