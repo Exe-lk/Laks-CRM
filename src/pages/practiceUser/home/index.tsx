@@ -95,7 +95,7 @@ const Home = () => {
             </div>
 
             <div className="mb-12">
-              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📊 Booking Statistics</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">Booking Statistics</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
 
 
@@ -111,16 +111,16 @@ const Home = () => {
                       <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full font-medium">Total</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{totalBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{totalBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Total Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Total Bookings</p>
                       <button
                         onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
@@ -143,16 +143,16 @@ const Home = () => {
                       <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Future & Ongoing Bookings</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{acceptedBookings-pastBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{acceptedBookings-pastBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Future & Ongoing Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Future & Ongoing Bookings</p>
                       <button
                         onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
@@ -174,16 +174,16 @@ const Home = () => {
                       <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">Cancelled</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{cancelledBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{cancelledBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Cancelled Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Cancelled Bookings</p>
                       <button
                         onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
@@ -200,7 +200,7 @@ const Home = () => {
             </div>
 
             <div className="mb-12">
-              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📋 Activity</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">Activity</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 xl:gap-16">
                 
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
@@ -215,16 +215,16 @@ const Home = () => {
                       <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full font-medium">Pending</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {isLoadingRequests || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{pendingAppointments}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{pendingAppointments}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Pending Appointments</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Pending Appointments</p>
                       <button
-                        onClick={() => router.push('/practiceUser/selectNurses')}
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
                         className="w-full mt-3 text-xs text-yellow-600 hover:text-yellow-700 font-medium transition-colors"
                       >
                         View Details →
@@ -245,16 +245,16 @@ const Home = () => {
                       <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">Cancelled</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {isLoadingRequests || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{cancelledAppointments}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{cancelledAppointments}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Cancelled Appointments</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Cancelled Appointments</p>
                       <button
-                        onClick={() => router.push('/practiceUser/selectNurses')}
+                        onClick={() => router.push('/practiceUser/SelectNurses')}
                         className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
                       >
                         View Details →
@@ -275,14 +275,14 @@ const Home = () => {
                       <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Confirmed</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {isLoadingRequests || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{confirmedAppointments}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{confirmedAppointments}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Confirmed Appointments</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Confirmed Appointments</p>
                       <button
                         onClick={() => router.push('/practiceUser/SelectNurses')}
                         className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
@@ -305,14 +305,14 @@ const Home = () => {
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-medium">All</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {isLoadingRequests || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{totalAppointments}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{totalAppointments}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">All Appointments</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">All Appointments</p>
                       <button
                         onClick={() => router.push('/practiceUser/SelectNurses')}
                         className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
@@ -324,66 +324,6 @@ const Home = () => {
                 </div>
 
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 lg:py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Quick Actions
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Access frequently used features with just one click
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-              <button
-                onClick={() => router.push('/practiceUser/selectNurses')}
-                className="group p-6 bg-gradient-to-br from-[#C3EAE7] to-[#A8D8D4] rounded-2xl hover:from-[#A8D8D4] hover:to-[#8CCCC7] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">View Appointments</h3>
-                  <p className="text-white/80">Check your appointment requests and confirmations</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => router.push('/practiceUser/myBookings')}
-                className="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">My Bookings</h3>
-                  <p className="text-white/80">Manage your current and upcoming bookings</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => router.push('/practiceUser/selectNurses')}
-                className="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">View Appointments</h3>
-                  <p className="text-white/80">Browse your appointments</p>
-                </div>
-              </button>
             </div>
           </div>
         </section>

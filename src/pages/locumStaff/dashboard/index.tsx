@@ -82,32 +82,32 @@ const Home = () => {
         <section className="py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-[#C3EAE7]/20">
           <div className="max-w-7xl mx-auto px-4">
 
-            <div className="mb-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-10 text-white">
+            <div className="mb-12 bg-gradient-to-r from-[#d1eeeb] to-[#c3eae7] rounded-3xl p-10 text-white">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-4">Booking Overview</h3>
+                <h3 className="text-2xl font-bold mb-4 text-black">Booking Overview</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{loadingBookings ? '...' : totalBookings}</div>
-                    <div className="text-blue-100 text-sm">Total</div>
+                    <div className="text-3xl font-bold text-black">{loadingBookings ? '...' : totalBookings}</div>
+                    <div className="text-black text-sm font-semibold">Total</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-300">{loadingBookings ? '...' : acceptedBookings}</div>
-                    <div className="text-blue-100 text-sm">Confirmed</div>
+                    <div className="text-black text-sm font-semibold">Confirmed</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-red-300">{loadingBookings ? '...' : cancelledBookings}</div>
-                    <div className="text-blue-100 text-sm">Cancelled</div>
+                    <div className="text-black text-sm font-semibold">Cancelled</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-gray-300">{loadingBookings ? '...' : pastBookings}</div>
-                    <div className="text-blue-100 text-sm">Past</div>
+                    <div className="text-black text-sm font-semibold">Past</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mb-12">
-              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📊 Booking Statistics</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">Booking Statistics</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
 
 
@@ -123,16 +123,16 @@ const Home = () => {
                       <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full font-medium">Total</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{totalBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{totalBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Total Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Total Bookings</p>
                       <button
                         onClick={() => router.push('/locumStaff/myBookings')}
                         className="w-full mt-3 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
@@ -155,16 +155,16 @@ const Home = () => {
                       <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">Future & Ongoing Bookings</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{acceptedBookings-pastBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{acceptedBookings-pastBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Future & Ongoing Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Future & Ongoing Bookings</p>
                       <button
                         onClick={() => router.push('/locumStaff/myBookings')}
                         className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
@@ -186,16 +186,16 @@ const Home = () => {
                       <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium">Cancelled</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{cancelledBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{cancelledBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Cancelled Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Cancelled Bookings</p>
                       <button
                         onClick={() => router.push('/locumStaff/myBookings')}
                         className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
@@ -212,7 +212,7 @@ const Home = () => {
             </div>
 
             <div className="mb-12">
-              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">📋 Activity & History</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-8 text-center">Activity & History</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
                 <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-400 to-gray-600"></div>
@@ -226,16 +226,16 @@ const Home = () => {
                       <span className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium">Past</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingBookings || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{pastBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{pastBookings}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Past Bookings</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Past Bookings</p>
                       <button
                         onClick={() => router.push('/locumStaff/pastAppointments')}
                         className="w-full mt-3 text-xs text-gray-600 hover:text-gray-700 font-medium transition-colors"
@@ -258,16 +258,16 @@ const Home = () => {
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-medium">Available</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingRequests || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorRequests ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{totalAvailableRequests}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{totalAvailableRequests}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Available Requests</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Available Requests</p>
                       <button
                         onClick={() => router.push('/locumStaff/waitingList')}
                         className="w-full mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
@@ -290,19 +290,19 @@ const Home = () => {
                       <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full font-medium">Pending</span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-baseline">
+                      <div className="flex items-baseline justify-center items-center">
                         {loadingPending || !isLoggedIn ? (
                           <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                         ) : errorPending ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900">{totalPendingConfirmations}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{totalPendingConfirmations}</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">Pending Requirements</p>
+                      <p className="text-sm text-gray-600 font-medium text-center justify-center items-center text-center justify-center items-center ">Pending Requirements</p>
                       <button
                         onClick={() => router.push('/locumStaff/waitingList')}
-                        className="w-full mt-3 text-xs text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                        className="w-full mt-3 text-xs text-orange-600 hover:text-orange-700 font-medium transition-colors text-center justify-center items-center"
                       >
                         View Details →
                       </button>
@@ -313,68 +313,7 @@ const Home = () => {
             </div>
           </div>
         </section>
-
-        <section className="py-16 lg:py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Quick Actions
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Access frequently used features with just one click
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-              <button
-                onClick={() => router.push('/locumStaff/waitingList')}
-                className="group p-6 bg-gradient-to-br from-[#C3EAE7] to-[#A8D8D4] rounded-2xl hover:from-[#A8D8D4] hover:to-[#8CCCC7] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">View Appointments</h3>
-                  <p className="text-white/80">Check your appointment requests and confirmations</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => router.push('/locumStaff/myBookings')}
-                className="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">My Bookings</h3>
-                  <p className="text-white/80">Manage your current and upcoming bookings</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => router.push('/locumStaff/pastAppointments')}
-                className="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
-                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">Past Bookings</h3>
-                  <p className="text-white/80">Browse your past bookings</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        </section>
         <Footer />
-
       </main>
     </>
   );

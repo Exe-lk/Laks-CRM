@@ -377,8 +377,8 @@ const WaitingList = () => {
         return (
             <div className="min-h-screen bg-gray-50">
                 <NavBar />
-                <div className="container mx-auto px-4 py-8">
-                    <div className="flex justify-center items-center h-64">
+                <div className="container mx-auto px-4 py-8 pt-32">
+                    <div className="flex justify-center items-center h-64 pt-32">
                         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
                         <span className="ml-3 text-lg text-gray-600">
                             {activeTab === 'request-appoitment' ? 'Loading request appoitments...' : 'Loading application history...'}

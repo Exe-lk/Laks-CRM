@@ -134,11 +134,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
     </div>
   );
 
+  console.log("status",profile.status);
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-white/30">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-0 relative">
         <div className="flex items-center justify-between px-8 pt-6 pb-2 border-b">
-          <h2 className="text-2xl font-bold text-primary-800">User Details</h2>
+          <h2 className="text-2xl font-bold text-primary-800">Practice Details</h2>
           <div className="flex items-center gap-4">
             {!editMode && (
               <button
@@ -166,7 +168,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                 {renderEditField('GDC Number', 'GDCnumber', <FaIdBadge className="text-primary-700" />)}
                 {renderEditField('Contact', 'telephone', <FaPhone className="text-primary-700" />)}
                 {renderEditField('Address', 'address', <FaMapMarkerAlt className="text-primary-700" />)}
-                {renderEditField('Status', 'status', profile.status === 'Active' ? <FaCheckCircle className="text-green-600" /> : <FaTimesCircle className="text-red-600" />, 'text', true)}
+                {renderEditField('Status', 'status', profile.status === 'accept' ? <FaCheckCircle className="text-green-600" /> : <FaTimesCircle className="text-red-600" />, 'text', true)}
               </>
             ) : (
               <>
@@ -178,11 +180,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                 {renderViewField(
                   'Status',
                   undefined, 
-                  profile.status === 'Active'
+                  profile.status === 'accept'
                     ? <FaCheckCircle className="text-green-600" />
                     : <FaTimesCircle className="text-red-600" />,
                   (
-                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wide ${profile.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold uppercase ${profile.status === 'accept' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                       {profile.status}
                     </span>
                   )
