@@ -72,13 +72,10 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
   };
 
   const formatCardNumber = (value: string): string => {
-    // Remove all spaces and non-digit characters
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
-    // Limit to 19 digits (maximum card number length)
     const truncated = v.substring(0, 19);
     
-    // Split into groups of 4 digits
     const parts = [];
     for (let i = 0, len = truncated.length; i < len; i += 4) {
       parts.push(truncated.substring(i, i + 4));
@@ -108,7 +105,6 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
     }
 
     try {
-      // Show loading
       Swal.fire({
         title: 'Adding Card...',
         html: 'Please wait while we add your payment method',
@@ -117,9 +113,6 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
           Swal.showLoading();
         }
       });
-
-      // In production, you would use Stripe.js to create a payment method
-      // For development/testing, the createCard mutation will use Stripe's test payment method
       
       console.log('Creating card for locum:', {
         locumId,
@@ -140,7 +133,6 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
 
       console.log('Payment method added successfully:', result);
 
-      // Success!
       await Swal.fire({
         title: 'Success!',
         text: result.message || 'Payment method added successfully',
@@ -149,7 +141,6 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
         confirmButtonColor: '#C3EAE7'
       });
 
-      // Reset form
       setFormData({
         cardHolderName: '',
         cardNumber: '',
