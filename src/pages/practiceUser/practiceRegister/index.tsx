@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useAddPracticeProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/practiceProfileSlice';
+import { useRouter } from "next/router";
 
 
 export interface PracticeProfile {
@@ -39,7 +40,7 @@ const PracticeRegisterForm = () => {
     const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
     const [open, setOpen] = useState(false);
     const [addLocumProfile, { isLoading: isAdding }] = useAddPracticeProfileMutation();
-
+    const router = useRouter();
 
     const formatTelephone = (value: string) => {
         return value.replace(/\D/g, '').slice(0, 10);
@@ -135,6 +136,7 @@ const PracticeRegisterForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                     formik.resetForm();
+                    router.push('/');
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
                         ? (response.error.data as ErrorResponse).error
