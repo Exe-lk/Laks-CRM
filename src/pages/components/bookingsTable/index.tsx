@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiCalendar, FiClock, FiMapPin, FiUser, FiX, FiAlertCircle, FiCheck, FiPhone, FiMail } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiMapPin, FiUser, FiX, FiAlertCircle, FiCheck, FiPhone, FiMail, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { useGetBookingsQuery, useCancelBookingMutation } from '../../../redux/slices/bookingPracticeSlice';
 
@@ -88,6 +88,17 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  
   const {
     data: bookingsResponse,
     error: fetchError,
@@ -106,11 +117,48 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const uniqueBranchStrings = Array.from(new Set<string>(branchStrings));
   const branches = uniqueBranchStrings.map((item) => JSON.parse(item) as { id: string; name: string });
 
-  const filteredBookings = selectedBranch === 'all' 
-    ? upcomingBookings 
-    : upcomingBookings.filter((booking: Booking) => booking.branch?.id === selectedBranch);
+  let filteredBookings = upcomingBookings.filter((booking: Booking) => {
+    if (selectedBranch !== 'all' && booking.branch?.id !== selectedBranch) {
+      return false;
+    }
+    
+    if (statusFilter !== 'all' && booking.status.toLowerCase() !== statusFilter.toLowerCase()) {
+      return false;
+    }
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const nameMatch = userType === 'locum' 
+        ? booking.practice?.name?.toLowerCase().includes(query)
+        : booking.locumProfile?.fullName?.toLowerCase().includes(query);
+      const locationMatch = booking.location?.toLowerCase().includes(query);
+      const branchMatch = booking.branch?.name?.toLowerCase().includes(query);
+      
+      if (!nameMatch && !locationMatch && !branchMatch) {
+        return false;
+      }
+    }
+    
+    if (startDate) {
+      const bookingDate = new Date(booking.booking_date);
+      const filterStartDate = new Date(startDate);
+      if (bookingDate < filterStartDate) {
+        return false;
+      }
+    }
+    
+    if (endDate) {
+      const bookingDate = new Date(booking.booking_date);
+      const filterEndDate = new Date(endDate);
+      if (bookingDate > filterEndDate) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
   
-  const bookings = [...filteredBookings].sort((a: Booking, b: Booking) => {
+  const sortedBookings = [...filteredBookings].sort((a: Booking, b: Booking) => {
     const dateA = new Date(a.booking_date);
     const dateB = new Date(b.booking_date);
     
@@ -122,6 +170,15 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     
     return dateA.getTime() - dateB.getTime();
   });
+  
+  const totalPages = Math.ceil(sortedBookings.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const bookings = sortedBookings.slice(startIndex, endIndex);
+  
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, startDate, endDate, selectedBranch, pageSize]);
   
   const hasBranches = bookings.some((booking: Booking) => booking.branch);
   
@@ -145,6 +202,17 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     bookingDateTime.setHours(hours, minutes, 0, 0);
     const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
+    if (hoursUntilBooking <= 0) {
+      await Swal.fire({
+        title: 'Cannot Cancel',
+        text: 'This booking cannot be cancelled because the job has already started.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#C3EAE7'
+      });
+      return;
+    }
+
     let penaltyHours = 0;
     let penaltyAmount = 0;
     let penaltyMessage = '';
@@ -167,7 +235,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       title: 'Cancel Booking',
       html: `Are you sure you want to cancel this booking scheduled for ${formatDate(booking.booking_date)}?${penaltyMessage}`,
       input: 'textarea',
-      inputPlaceholder: 'Please provide a reason for cancellation (optional)',
+      inputPlaceholder: 'Please provide a reason for cancellation (required)',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Cancel Booking',
@@ -175,7 +243,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       confirmButtonColor: '#DC2626',
       cancelButtonColor: '#6B7280',
       inputValidator: (value) => {
-        if (!value && userType === 'practice') {
+        if (!value || value.trim() === '') {
           return 'Please provide a reason for cancellation';
         }
       }
@@ -392,20 +460,68 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               <h2 className="text-2xl font-bold text-gray-800">Your Bookings</h2>
             </div>
             <p className="text-gray-600 mt-1">
-              Manage your bookings • You can cancel confirmed bookings at any time (penalties may apply within 48 hours)
+              Manage your bookings • You can cancel confirmed bookings before they start (penalties may apply within 48 hours, reason required)
             </p>
           </div>
           
-          {branches.length > 0 && (
-            <div className="flex items-center gap-2">
-              <label htmlFor="branch-filter" className="text-sm font-medium text-gray-700">
-                Filter by Branch:
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors shadow-sm border border-gray-300"
+          >
+            <FiFilter />
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+        </div>
+      </div>
+      
+      {/* Filters Section */}
+      {showFilters && (
+        <div className="px-6 py-4 bg-gray-50 border-b">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="col-span-1 md:col-span-2 lg:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search
+              </label>
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={`Search by ${userType === 'locum' ? 'practice' : 'locum'} name, location...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] text-sm"
+                />
+              </div>
+            </div>
+            
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
               </label>
               <select
-                id="branch-filter"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] bg-white text-sm"
+              >
+                <option value="all">All Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            
+            {/* Branch Filter */}
+          {branches.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Branch
+              </label>
+              <select
                 value={selectedBranch}
                 onChange={(e) => setSelectedBranch(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] bg-white text-sm"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] bg-white text-sm"
               >
                 <option value="all">All Branches</option>
                 {branches.map((branch: any) => (
@@ -416,24 +532,82 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               </select>
             </div>
           )}
+            
+            {/* Date Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] text-sm"
+              />
         </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7] text-sm"
+              />
       </div>
+            
+            {/* Clear Filters Button */}
+            {(searchQuery || statusFilter !== 'all' || selectedBranch !== 'all' || startDate || endDate) && (
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                    setSelectedBranch('all');
+                    setStartDate('');
+                    setEndDate('');
+                  }}
+                  className="w-full px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm font-medium"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Filter Summary */}
+          <div className="mt-3 text-sm text-gray-600">
+            Showing {bookings.length} of {sortedBookings.length} bookings
+            {sortedBookings.length !== upcomingBookings.length && ` (${upcomingBookings.length} total)`}
+          </div>
+        </div>
+      )}
 
       {bookings.length === 0 ? (
         <div className="p-12 text-center">
           <FiCalendar className="text-6xl text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-500 mb-2">No Bookings Found</h3>
           <p className="text-gray-400">
-            {selectedBranch !== 'all' 
-              ? 'No bookings found for the selected branch. Try selecting a different branch or view all bookings.'
-              : 'You don\'t have any bookings yet.'}
+            {sortedBookings.length === 0 
+              ? upcomingBookings.length === 0
+                ? 'You don\'t have any upcoming bookings yet.'
+                : 'No bookings match your current filters.'
+              : 'No bookings on this page.'}
           </p>
-          {selectedBranch !== 'all' && (
+          {(searchQuery || statusFilter !== 'all' || selectedBranch !== 'all' || startDate || endDate) && sortedBookings.length === 0 && (
             <button
-              onClick={() => setSelectedBranch('all')}
+              onClick={() => {
+                setSearchQuery('');
+                setStatusFilter('all');
+                setSelectedBranch('all');
+                setStartDate('');
+                setEndDate('');
+              }}
               className="mt-4 px-4 py-2 bg-[#C3EAE7] text-black rounded-md hover:bg-[#A9DBD9] transition-colors"
             >
-              View All Bookings
+              Clear All Filters
             </button>
           )}
         </div>
@@ -719,30 +893,111 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
         </div>
       )}
 
-      {bookings.length > 0 && (
+      {sortedBookings.length > 0 && (
         <div className="px-6 py-4 bg-gray-50 border-t">
-          <div className="flex justify-between items-center text-sm text-gray-600">
-            <div>
-              {selectedBranch !== 'all' ? (
-                <>
-                  Showing: {bookings.length} of {upcomingBookings.length} bookings | 
-                  Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
-                  Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
-                </>
-              ) : (
-                <>
-                  Total: {bookings.length} total bookings | 
-                  Confirmed: {bookings.filter((b: Booking) => b.status === 'CONFIRMED').length} | 
-                  Cancelled: {bookings.filter((b: Booking) => b.status === 'CANCELLED').length}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            {/* Stats */}
+            <div className="text-sm text-gray-600">
+              Showing {startIndex + 1}-{Math.min(endIndex, sortedBookings.length)} of {sortedBookings.length} bookings
+              {sortedBookings.length !== upcomingBookings.length && ` (filtered from ${upcomingBookings.length})`}
+              <span className="mx-2">|</span>
+              Confirmed: {sortedBookings.filter((b: Booking) => b.status === 'CONFIRMED').length}
+              <span className="mx-2">|</span>
+              Cancelled: {sortedBookings.filter((b: Booking) => b.status === 'CANCELLED').length}
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">Per page:</label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#C3EAE7] focus:border-[#C3EAE7]"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Previous page"
+                  >
+                    <FiChevronLeft />
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {currentPage > 3 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentPage(1)}
+                          className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
+                        >
+                          1
+                        </button>
+                        {currentPage > 4 && (
+                          <span className="text-gray-500">...</span>
+                        )}
+                      </>
+                    )}
+                    
+                    {currentPage > 1 && (
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
+                      >
+                        {currentPage - 1}
+                      </button>
+                    )}
+                    
+                    <button
+                      className="px-3 py-1 rounded-md bg-[#C3EAE7] text-gray-800 font-semibold text-sm border-2 border-[#C3EAE7]"
+                    >
+                      {currentPage}
+                    </button>
+                    
+                    {currentPage < totalPages && (
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
+                      >
+                        {currentPage + 1}
+                      </button>
+                    )}
+                    
+                    {currentPage < totalPages - 2 && (
+                      <>
+                        {currentPage < totalPages - 3 && (
+                          <span className="text-gray-500">...</span>
+                        )}
+                        <button
+                          onClick={() => setCurrentPage(totalPages)}
+                          className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
+                        >
+                          {totalPages}
+                        </button>
                 </>
               )}
             </div>
-            {/* <button
-              onClick={() => refetchBookings()}
-              className="text-[#C3EAE7] hover:text-[#A9DBD9] font-medium"
-            >
-              Refresh
-            </button> */}
+                  
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Next page"
+                  >
+                    <FiChevronRight />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

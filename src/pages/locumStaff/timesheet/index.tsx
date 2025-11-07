@@ -894,21 +894,17 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               {bookings.map((booking) => {
                 const hasStarted = hasBookingStarted(booking);
                 const isCompleted = isBookingCompleted(booking);
-                const canSelect = hasStarted;
+                const canSelect = true; // Allow selecting any booking regardless of start time
 
                 return (
                   <div
                     key={booking.id}
                     className={`p-4 border-2 rounded-lg transition-all duration-200 ${selectedBooking?.id === booking.id
                         ? 'border-[#C3EAE7] bg-[#C3EAE7]/20 shadow-md ring-2 ring-[#C3EAE7]/30'
-                        : hasStarted
-                          ? 'border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300 cursor-pointer'
-                          : 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
+                        : 'border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 cursor-pointer'
                       }`}
                     onClick={() => {
-                      if (canSelect) {
-                        onBookingSelect(booking);
-                      }
+                      onBookingSelect(booking);
                     }}
                   >
                     <div className="flex justify-between items-start">
@@ -940,17 +936,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 ? 'bg-blue-100 text-blue-700'
                                 : 'bg-orange-100 text-orange-700'
                             }`}>
-                            {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '🔒 Not Started'}
+                            {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '⏳ Scheduled'}
                           </span>
                           <span className="text-xs text-gray-500">
                             Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                           </span>
                         </div>
-                        {!hasStarted && (
-                          <div className="mt-2 text-xs text-orange-600 font-medium">
-                            Can only select after job start time
-                          </div>
-                        )}
                       </div>
                       <div className="text-right">
                         <span className="text-sm font-medium text-gray-900">
@@ -1291,10 +1282,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               <h4 className="text-sm font-medium text-blue-900">No Booking Selected</h4>
             </div>
             <p className="text-sm text-blue-700 mb-2">
-              Click on any booking that has started (showing "In Progress" status) to begin time tracking.
+              Click on any booking to begin time tracking.
             </p>
             <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-              <strong>Tip:</strong> Only bookings that have passed their start time can be selected for time tracking.
+              <strong>Tip:</strong> You can set start times before or after the scheduled booking start time as needed.
             </div>
           </div>
         )}
