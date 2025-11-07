@@ -126,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ...booking,
         is_past: bookingEndDateTime < now,
         is_upcoming: bookingEndDateTime > now,
-        can_cancel: booking.status === 'CONFIRMED', // Allow cancellation any time
+        can_cancel: booking.status === 'CONFIRMED' && timeDiffHours > 0, // Can only cancel if confirmed and job hasn't started
         time_until_booking: Math.max(0, Math.floor(timeDiffHours))
       };
     });

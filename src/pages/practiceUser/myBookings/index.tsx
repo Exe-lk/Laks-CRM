@@ -76,7 +76,7 @@ const MyBookingsPage = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-24">Practice Bookings</h1>
             <p className="text-gray-600">
-              View and manage your practice's confirmed bookings. You can cancel bookings at any time (penalties may apply within 48 hours).
+              View and manage your practice's confirmed bookings. You can cancel bookings before they start (penalties may apply within 48 hours).
             </p>
           </div>
 
