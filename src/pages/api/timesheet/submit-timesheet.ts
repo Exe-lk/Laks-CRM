@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma';
 import { supabase } from '@/lib/supabase';
 import FormData from 'form-data';
+import http from 'http';
+import https from 'https';
 
 // Helper function to send payment receipt email
 async function sendPaymentReceiptEmail(params: {
@@ -97,7 +99,7 @@ async function sendPaymentReceiptEmail(params: {
       </html>
     `;
 
-    // Use form-data package for multipart/form-data (compatible with server-side)
+    // Send email via our email API endpoint using form-data
     console.log(`[EMAIL STEP 2] Creating form data for email`);
     const formData = new FormData();
     formData.append('to', params.recipientEmail);
@@ -110,26 +112,47 @@ async function sendPaymentReceiptEmail(params: {
     console.log(`[EMAIL STEP 3] Calling email API: ${emailApiUrl}`);
     console.log(`[EMAIL STEP 3.1] NEXT_PUBLIC_SITE_URL: ${process.env.NEXT_PUBLIC_SITE_URL}`);
     
-    const response = await fetch(emailApiUrl, {
-      method: 'POST',
-      headers: formData.getHeaders(),
-      body: formData as any
+    // Use form-data's submit method which properly handles multipart/form-data
+    return new Promise<boolean>((resolve) => {
+      const url = new URL(emailApiUrl);
+      const protocol = url.protocol === 'https:' ? https : http;
+      
+      const request = protocol.request({
+        method: 'POST',
+        hostname: url.hostname,
+        port: url.port,
+        path: url.pathname,
+        headers: formData.getHeaders(),
+      }, (response) => {
+        let data = '';
+        
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        response.on('end', () => {
+          console.log(`[EMAIL STEP 4] Email API response status: ${response.statusCode}`);
+          
+          if (response.statusCode && response.statusCode >= 200 && response.statusCode < 300) {
+            console.log(`[EMAIL STEP 6] Payment receipt email sent successfully to ${params.recipientEmail}`);
+            console.log(`[EMAIL STEP 6.1] Response data:`, data);
+            resolve(true);
+          } else {
+            console.error('[EMAIL STEP 5] Failed to send payment receipt email:', data);
+            console.error('[EMAIL STEP 5.1] Response status:', response.statusCode);
+            console.error('[EMAIL STEP 5.2] Response headers:', response.headers);
+            resolve(false);
+          }
+        });
+      });
+      
+      request.on('error', (error) => {
+        console.error('[EMAIL STEP 7] Error sending payment receipt email:', error);
+        resolve(false);
+      });
+      
+      formData.pipe(request);
     });
-
-    console.log(`[EMAIL STEP 4] Email API response status: ${response.status} ${response.statusText}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[EMAIL STEP 5] Failed to send payment receipt email:', errorText);
-      console.error('[EMAIL STEP 5.1] Response status:', response.status);
-      console.error('[EMAIL STEP 5.2] Response headers:', Object.fromEntries(response.headers.entries()));
-      return false;
-    }
-
-    const responseData = await response.json().catch(() => ({}));
-    console.log(`[EMAIL STEP 6] Payment receipt email sent successfully to ${params.recipientEmail}`);
-    console.log(`[EMAIL STEP 6.1] Response data:`, responseData);
-    return true;
   } catch (error) {
     console.error('[EMAIL STEP 7] Error sending payment receipt email:', error);
     console.error('[EMAIL STEP 7.1] Error details:', error instanceof Error ? {
