@@ -122,7 +122,7 @@ const Home = () => {
                       </div>
                       <p className="text-sm text-gray-600 font-medium">Total Bookings</p>
                       <button
-                        onClick={() => router.push('/locumStaff/myBookings')}
+                        onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
                       >
                         View All →
@@ -154,7 +154,7 @@ const Home = () => {
                       </div>
                       <p className="text-sm text-gray-600 font-medium">Future & Ongoing Bookings</p>
                       <button
-                        onClick={() => router.push('/locumStaff/myBookings')}
+                        onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-green-600 hover:text-green-700 font-medium transition-colors"
                       >
                         View Ongoing →
@@ -185,7 +185,7 @@ const Home = () => {
                       </div>
                       <p className="text-sm text-gray-600 font-medium">Cancelled Bookings</p>
                       <button
-                        onClick={() => router.push('/locumStaff/myBookings')}
+                        onClick={() => router.push('/practiceUser/myBookings')}
                         className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
                       >
                         View Cancelled →
@@ -224,7 +224,7 @@ const Home = () => {
                       </div>
                       <p className="text-sm text-gray-600 font-medium">Pending Appointments</p>
                       <button
-                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        onClick={() => router.push('/practiceUser/selectNurses')}
                         className="w-full mt-3 text-xs text-yellow-600 hover:text-yellow-700 font-medium transition-colors"
                       >
                         View Details →
@@ -254,7 +254,7 @@ const Home = () => {
                       </div>
                       <p className="text-sm text-gray-600 font-medium">Cancelled Appointments</p>
                       <button
-                        onClick={() => router.push('/practiceUser/SelectNurses')}
+                        onClick={() => router.push('/practiceUser/selectNurses')}
                         className="w-full mt-3 text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
                       >
                         View Details →
@@ -341,7 +341,7 @@ const Home = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               <button
-                onClick={() => router.push('/locumStaff/waitingList')}
+                onClick={() => router.push('/practiceUser/selectNurses')}
                 className="group p-6 bg-gradient-to-br from-[#C3EAE7] to-[#A8D8D4] rounded-2xl hover:from-[#A8D8D4] hover:to-[#8CCCC7] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
@@ -356,7 +356,7 @@ const Home = () => {
               </button>
 
               <button
-                onClick={() => router.push('/locumStaff/myBookings')}
+                onClick={() => router.push('/practiceUser/myBookings')}
                 className="group p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
@@ -371,7 +371,7 @@ const Home = () => {
               </button>
 
               <button
-                onClick={() => router.push('/locumStaff/pastAppointments')}
+                onClick={() => router.push('/practiceUser/selectNurses')}
                 className="group p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
@@ -380,8 +380,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-white">Past Bookings</h3>
-                  <p className="text-white/80">Browse your past bookings</p>
+                  <h3 className="text-xl font-bold text-white">View Appointments</h3>
+                  <p className="text-white/80">Browse your appointments</p>
                 </div>
               </button>
             </div>
