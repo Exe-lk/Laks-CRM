@@ -74,12 +74,16 @@ const validateBranchForm = (values: FormValues, isEditing: boolean = false) => {
   if (!isEditing && !values.password?.trim()) {
     errors.password = 'Password is required';
   } else if (values.password?.trim()) {
-    if (values.password.trim().length < 8) {
-      errors.password = 'Password must be at least 8 characters long';
-    } else if (values.password.trim().length > 50) {
-      errors.password = 'Password must be less than 50 characters';
-    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(values.password)) {
-      errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
+    if (values.password.trim().length < 6) {
+      errors.password = 'Password must be at least 6 characters long';
+    } else if (!/[A-Z]/.test(values.password)) {
+      errors.password = 'Password must contain at least one uppercase letter';
+    } else if (!/[a-z]/.test(values.password)) {
+      errors.password = 'Password must contain at least one lowercase letter';
+    } else if (!/[0-9]/.test(values.password)) {
+      errors.password = 'Password must contain at least one number';
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(values.password)) {
+      errors.password = 'Password must contain at least one special character';
     }
   }
 

@@ -293,6 +293,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   const [hourlyRate, setHourlyRate] = useState<number | null>(null);
   const [totalHours, setTotalHours] = useState<number | null>(null);
   const [totalPay, setTotalPay] = useState<number | null>(null);
+  const [timeValidationError, setTimeValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTimesheetJob = async () => {
@@ -470,10 +471,56 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     return localStorage.getItem('token') || '';
   };
 
+  // Validation function to check time order
+  const validateTimeOrder = (
+    start: string,
+    lunchStart: string,
+    lunchEnd: string,
+    end: string
+  ): string | null => {
+    // Helper to convert time string (HH:MM) to minutes for comparison
+    const timeToMinutes = (time: string): number => {
+      if (!time) return -1;
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const startMinutes = timeToMinutes(start);
+    const lunchStartMinutes = timeToMinutes(lunchStart);
+    const lunchEndMinutes = timeToMinutes(lunchEnd);
+    const endMinutes = timeToMinutes(end);
+
+    // Check if start time is before lunch start time
+    if (start && lunchStart && startMinutes >= lunchStartMinutes) {
+      return 'Lunch start time must be after start time';
+    }
+
+    // Check if lunch start time is before lunch end time
+    if (lunchStart && lunchEnd && lunchStartMinutes >= lunchEndMinutes) {
+      return 'Lunch end time must be after lunch start time';
+    }
+
+    // Check if lunch end time is before end time
+    if (lunchEnd && end && lunchEndMinutes >= endMinutes) {
+      return 'End time must be after lunch end time';
+    }
+
+    // Check if start time is before end time (if no lunch break)
+    if (start && end && !lunchStart && !lunchEnd && startMinutes >= endMinutes) {
+      return 'End time must be after start time';
+    }
+
+    return null;
+  };
+
   const handleSetStartTimeNow = () => {
     const now = new Date();
     const timeString = now.toTimeString().substring(0, 5);
     setStartTime(timeString);
+    
+    // Validate time order
+    const validationError = validateTimeOrder(timeString, lunchStartTime, lunchEndTime, endTime);
+    setTimeValidationError(validationError);
   };
 
   const handleStartClick = async () => {
@@ -559,6 +606,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     const now = new Date();
     const timeString = now.toTimeString().substring(0, 5);
     setEndTime(timeString);
+    
+    // Validate time order
+    const validationError = validateTimeOrder(startTime, lunchStartTime, lunchEndTime, timeString);
+    setTimeValidationError(validationError);
   };
 
   const handleEndClick = async () => {
@@ -627,6 +678,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     const now = new Date();
     const timeString = now.toTimeString().substring(0, 5);
     setLunchStartTime(timeString);
+    
+    // Validate time order
+    const validationError = validateTimeOrder(startTime, timeString, lunchEndTime, endTime);
+    setTimeValidationError(validationError);
   };
 
   const handleLunchStartClick = async () => {
@@ -678,6 +733,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
     const now = new Date();
     const timeString = now.toTimeString().substring(0, 5);
     setLunchEndTime(timeString);
+    
+    // Validate time order
+    const validationError = validateTimeOrder(startTime, lunchStartTime, timeString, endTime);
+    setTimeValidationError(validationError);
   };
 
   const handleLunchEndClick = async () => {
@@ -843,7 +902,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <input
                                 type="time"
                                 value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
+                                onChange={(e) => {
+                                  setStartTime(e.target.value);
+                                  const validationError = validateTimeOrder(e.target.value, lunchStartTime, lunchEndTime, endTime);
+                                  setTimeValidationError(validationError);
+                                }}
                                 placeholder="--:--"
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                               />
@@ -861,9 +924,9 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleStartClick}
-                                disabled={!startTime || timesheetJobId !== null}
+                                disabled={!startTime || timesheetJobId !== null || !!timeValidationError}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !startTime || timesheetJobId !== null
+                                  !startTime || timesheetJobId !== null || !!timeValidationError
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
@@ -879,7 +942,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <input
                                 type="time"
                                 value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
+                                onChange={(e) => {
+                                  setEndTime(e.target.value);
+                                  const validationError = validateTimeOrder(startTime, lunchStartTime, lunchEndTime, e.target.value);
+                                  setTimeValidationError(validationError);
+                                }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId}
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
@@ -898,9 +965,9 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleEndClick}
-                                disabled={!timesheetJobId || !endTime}
+                                disabled={!timesheetJobId || !endTime || !!timeValidationError}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !timesheetJobId || !endTime
+                                  !timesheetJobId || !endTime || !!timeValidationError
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
@@ -916,7 +983,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <input
                                 type="time"
                                 value={lunchStartTime}
-                                onChange={(e) => setLunchStartTime(e.target.value)}
+                                onChange={(e) => {
+                                  setLunchStartTime(e.target.value);
+                                  const validationError = validateTimeOrder(startTime, e.target.value, lunchEndTime, endTime);
+                                  setTimeValidationError(validationError);
+                                }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId}
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
@@ -935,9 +1006,9 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleLunchStartClick}
-                                disabled={!timesheetJobId || !lunchStartTime}
+                                disabled={!timesheetJobId || !lunchStartTime || !!timeValidationError}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !timesheetJobId || !lunchStartTime
+                                  !timesheetJobId || !lunchStartTime || !!timeValidationError
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
@@ -953,7 +1024,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <input
                                 type="time"
                                 value={lunchEndTime}
-                                onChange={(e) => setLunchEndTime(e.target.value)}
+                                onChange={(e) => {
+                                  setLunchEndTime(e.target.value);
+                                  const validationError = validateTimeOrder(startTime, lunchStartTime, e.target.value, endTime);
+                                  setTimeValidationError(validationError);
+                                }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId}
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
@@ -972,9 +1047,9 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleLunchEndClick}
-                                disabled={!timesheetJobId || !lunchEndTime}
+                                disabled={!timesheetJobId || !lunchEndTime || !!timeValidationError}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !timesheetJobId || !lunchEndTime
+                                  !timesheetJobId || !lunchEndTime || !!timeValidationError
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
@@ -984,6 +1059,16 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             </div>
                           </div>
                         </div>
+
+                        {/* Validation Error Display */}
+                        {timeValidationError && (
+                          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-xs text-red-700 flex items-center gap-1">
+                              <span>⚠️</span>
+                              <span>{timeValidationError}</span>
+                            </p>
+                          </div>
+                        )}
 
                         {/* Booking Details */}
                         <div className="mt-3 pt-3 border-t border-gray-200">

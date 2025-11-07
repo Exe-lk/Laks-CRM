@@ -140,6 +140,7 @@ const SignUpForm = () => {
     const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
     const [addressLat, setAddressLat] = useState<number | null>(null);
     const [addressLng, setAddressLng] = useState<number | null>(null);
+    const router = useRouter();
 
     const formik = useFormik({
         initialValues,
@@ -216,6 +217,7 @@ const SignUpForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                     formik.resetForm();
+                    router.push('/');
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
                         ? (response.error.data as ErrorResponse).error
@@ -641,11 +643,14 @@ const SignUpForm = () => {
                                             </label>
                                             {formik.values.selectedDentistFields.includes(field) && (
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     placeholder="Enter experience (e.g., 2 years, 6 months)"
                                                     className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                                     onChange={(e) => handleDentistExperienceChange(field, e.target.value)}
                                                     value={formik.values.dentistExperience[field] || ""}
+                                                    min={0}
+                                                    max={100}
+                                                    step={1}
                                                 />
                                             )}
                                         </div>
@@ -674,11 +679,14 @@ const SignUpForm = () => {
                                             </label>
                                             {formik.values.selectedNurseFields.includes(field) && (
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     placeholder="Enter experience (e.g., 2 years, 6 months)"
                                                     className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                                     onChange={(e) => handleNurseExperienceChange(field, e.target.value)}
                                                     value={formik.values.nurseExperience[field] || ""}
+                                                    min={0}
+                                                    max={100}
+                                                    step={1}
                                                 />
                                             )}
                                         </div>
@@ -698,23 +706,29 @@ const SignUpForm = () => {
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-black">Years of Experience</label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             name="receptionistYearsExperience"
                                             placeholder="e.g., 3 years"
                                             value={formik.values.receptionistYearsExperience}
                                             onChange={formik.handleChange}
                                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
+                                            min={0}
+                                            max={100}
+                                            step={1}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-black">Software Experience</label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             name="receptionistSoftwareExperience"
                                             placeholder="e.g., SOE, R4, Dentally"
                                             value={formik.values.receptionistSoftwareExperience}
                                             onChange={formik.handleChange}
                                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
+                                            min={0}
+                                            max={100}
+                                            step={1}
                                         />
                                     </div>
                                 </div>
@@ -730,12 +744,15 @@ const SignUpForm = () => {
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-black">Years of Experience</label>
                                     <input
-                                        type="text"
+                                        type="number"
                                         name="hygienistYearsExperience"
                                         placeholder="Enter years of experience"
                                         value={formik.values.hygienistYearsExperience}
                                         onChange={formik.handleChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
+                                        min={0}
+                                        max={100}
+                                        step={1}
                                     />
                                 </div>
 
@@ -756,11 +773,14 @@ const SignUpForm = () => {
                                                     </label>
                                                     {formik.values.therapistExperience[field] !== undefined && (
                                                         <input
-                                                            type="text"
+                                                            type="number"
                                                             placeholder={`Experience in ${field}`}
                                                             className="w-full px-3 py-2 mt-3 border border-gray-300 rounded-lg focus:border-[#C3EAE7] focus:ring-1 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none"
                                                             value={formik.values.therapistExperience[field]}
                                                             onChange={(e) => handleTherapistExperienceChange(field, e.target.value)}
+                                                            min={0}
+                                                            max={100}
+                                                            step={1}
                                                         />
                                                     )}
                                                 </div>
