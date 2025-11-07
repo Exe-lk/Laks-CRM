@@ -202,7 +202,23 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
           )}
 
           <div className="bg-[#C3EAE7]/10 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Weekly Calendar</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Weekly Calendar</h3>
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-blue-50 border-2 border-blue-200 rounded"></div>
+                  <span className="text-gray-600">Unlocked</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-red-50 border-2 border-red-200 rounded"></div>
+                  <span className="text-gray-600">Locked (Future)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-[#C3EAE7]/20 border-2 border-[#C3EAE7] rounded"></div>
+                  <span className="text-gray-600">Today</span>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-7 gap-2">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                 <div key={day} className="text-center font-medium text-gray-700 py-2">
@@ -213,6 +229,20 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                 const bookings = getBookingsForDate(date);
                 const isToday = date.toDateString() === new Date().toDateString();
                 const hasBookings = bookings.length > 0;
+                const hasLockedBookings = bookings.some(booking => {
+                  const bookingDateObj = new Date(booking.booking_date as any);
+                  const [startHour, startMinute] = booking.booking_start_time.split(':').map(Number);
+                  const bookingStartDateTime = new Date(
+                    bookingDateObj.getFullYear(),
+                    bookingDateObj.getMonth(),
+                    bookingDateObj.getDate(),
+                    startHour,
+                    startMinute,
+                    0,
+                    0
+                  );
+                  return new Date() < bookingStartDateTime; // Locked if start time hasn't arrived yet
+                });
 
                 return (
                   <div
@@ -222,6 +252,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                       p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md
                       ${isToday ? 'border-[#C3EAE7] bg-[#C3EAE7]/20' : 'border-gray-200 bg-white'}
                       ${hasBookings ? 'bg-blue-50 border-blue-200' : ''}
+                      ${hasLockedBookings ? 'border-red-200 bg-red-50' : ''}
                     `}
                   >
                     <div className="text-center">
@@ -234,6 +265,11 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                           <div className="text-blue-600 font-medium">
                             {bookings.length} Booking{bookings.length > 1 ? 's' : ''}
                           </div>
+                          {hasLockedBookings && (
+                            <div className="text-red-600 font-medium text-xs">
+                              🔒 Locked
+                            </div>
+                          )}
                           <div className="text-blue-500">
                             Click to view details
                           </div>
@@ -316,6 +352,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   const [isBreakStartSet, setIsBreakStartSet] = useState(false);
   const [isBreakEndSet, setIsBreakEndSet] = useState(false);
   const [isEndTimeSet, setIsEndTimeSet] = useState(false);
+  const [lockedClickAttempt, setLockedClickAttempt] = useState(false);
 
   useEffect(() => {
     const fetchTimesheetJob = async () => {
@@ -888,23 +925,50 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
           </button>
         </div>
 
+        {lockedClickAttempt && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg animate-pulse">
+            <p className="text-sm text-red-700 flex items-center gap-2">
+              <span>🔒</span>
+              <span><strong>This booking is locked.</strong> Bookings can only be selected after their start time has passed.</span>
+            </p>
+          </div>
+        )}
+
+        {bookings.length > 0 && bookings.every(b => !hasBookingStarted(b)) && (
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-sm text-orange-700 flex items-center gap-2">
+              <span>⚠️</span>
+              <span><strong>All bookings for this date are locked.</strong> Timesheets can only be filled after the job start time.</span>
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
           {bookings.length > 0 ? (
             <div className="space-y-3">
               {bookings.map((booking) => {
                 const hasStarted = hasBookingStarted(booking);
                 const isCompleted = isBookingCompleted(booking);
-                const canSelect = true; // Allow selecting any booking regardless of start time
+                const canSelect = hasStarted; // Unlock bookings only after start time has passed
 
                 return (
                   <div
                     key={booking.id}
-                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${selectedBooking?.id === booking.id
+                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${
+                      !canSelect
+                        ? 'border-gray-300 bg-gray-100 opacity-60 cursor-not-allowed'
+                        : selectedBooking?.id === booking.id
                         ? 'border-[#C3EAE7] bg-[#C3EAE7]/20 shadow-md ring-2 ring-[#C3EAE7]/30'
                         : 'border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 cursor-pointer'
                       }`}
                     onClick={() => {
-                      onBookingSelect(booking);
+                      if (canSelect) {
+                        onBookingSelect(booking);
+                        setLockedClickAttempt(false);
+                      } else {
+                        setLockedClickAttempt(true);
+                        setTimeout(() => setLockedClickAttempt(false), 3000);
+                      }
                     }}
                   >
                     <div className="flex justify-between items-start">
@@ -933,11 +997,16 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           <span className={`px-2 py-1 rounded-full text-xs ${isCompleted
                               ? 'bg-gray-100 text-gray-700'
                               : hasStarted
-                                ? 'bg-blue-100 text-blue-700'
+                                ? 'bg-green-100 text-green-700'
                                 : 'bg-orange-100 text-orange-700'
                             }`}>
-                            {isCompleted ? '✓ Completed' : hasStarted ? '⏰ In Progress' : '⏳ Scheduled'}
+                            {isCompleted ? '✓ Completed' : hasStarted ? '✅ Can Fill' : '⏳ Upcoming'}
                           </span>
+                          {!canSelect && (
+                            <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 flex items-center gap-1">
+                              🔒 Locked (Not Started)
+                            </span>
+                          )}
                           <span className="text-xs text-gray-500">
                             Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                           </span>
@@ -1282,10 +1351,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               <h4 className="text-sm font-medium text-blue-900">No Booking Selected</h4>
             </div>
             <p className="text-sm text-blue-700 mb-2">
-              Click on any booking to begin time tracking.
+              Click on any unlocked booking to begin time tracking.
             </p>
             <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-              <strong>Tip:</strong> You can set start times before or after the scheduled booking start time as needed.
+              <strong>Important:</strong> Bookings are locked until their scheduled start time. Once the start time passes, you can select and fill in your timesheet with your actual work hours.
             </div>
           </div>
         )}
