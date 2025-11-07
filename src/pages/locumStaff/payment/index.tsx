@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import NavBarPracticeUser from '../../components/navBarPracticeUser';
+import NavBar from "../../components/navBar/nav";
 import Footer from '../../components/footer';
-import { useGetPracticeCardsQuery } from '../../../redux/slices/cardPracticeUserSlice';
-import AddCardModal from '../../components/addCardModal';
+import { useGetLocumCardsQuery } from '../../../redux/slices/locumCardSlice';
+import AddLocumCardModal from '../../components/addLocumCardModal';
 import CardList from '../../components/cardList';
 import Swal from 'sweetalert2';
 
@@ -18,7 +18,7 @@ const PaymentPage = () => {
       const parsedProfile = JSON.parse(profileStr);
       setProfile(parsedProfile);
     } else {
-      router.push('/practiceUser/practiceLogin');
+      router.push('/locumStaff/locumLogin');
     }
   }, [router]);
 
@@ -27,7 +27,7 @@ const PaymentPage = () => {
     isLoading: isLoadingCards,
     error: cardsError,
     refetch: refetchCards 
-  } = useGetPracticeCardsQuery(profile?.id || '', {
+  } = useGetLocumCardsQuery(profile?.id || '', {
     skip: !profile?.id
   });
 
@@ -58,7 +58,7 @@ const PaymentPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBarPracticeUser />
+      <NavBar />
       
       <div className="max-w-4xl mx-auto px-4 py-8 pt-32">
         <div className="mb-8">
@@ -66,7 +66,7 @@ const PaymentPage = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2 pt-24">Payment Methods</h1>
               <p className="text-gray-600">
-                Manage your payment cards for booking appointments
+                Manage your payment cards for receiving payments
               </p>
             </div>
             <button
@@ -105,6 +105,7 @@ const PaymentPage = () => {
               cards={cardsData?.cards || []}
               onEdit={handleEditCard}
               onAddNew={() => setIsAddCardModalOpen(true)}
+              cardType="locum"
             />
           )}
         </div>
@@ -121,8 +122,8 @@ const PaymentPage = () => {
                 Why do I need to add a payment card?
               </h3>
               <p className="text-blue-800 mb-3">
-                Adding a payment card is required to book appointments with locum staff. 
-                This ensures secure and reliable payment processing for your dental practice needs.
+                Adding a payment card allows you to receive payments for your locum work. 
+                This ensures secure and reliable payment processing for your services.
               </p>
               <ul className="text-blue-800 space-y-1">
                 <li>• Secure payment processing for appointments</li>
@@ -146,10 +147,12 @@ const PaymentPage = () => {
         </div>
       </div>
 
-      <AddCardModal
+      <AddLocumCardModal
         isOpen={isAddCardModalOpen}
         onClose={() => setIsAddCardModalOpen(false)}
-        practiceId={profile.id}
+        locumId={profile.id}
+        locumEmail={profile.email}
+        locumName={profile.name}
         onSuccess={handleAddCardSuccess}
       />
 

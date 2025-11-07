@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export interface PaymentCard {
   id: string;
-  practiceId: string;
+  locumId: string;
   cardHolderName: string;
   lastFourDigits: string;
   cardType: string;
@@ -12,14 +12,14 @@ export interface PaymentCard {
   expiryDisplay: string;
   createdAt: string;
   updatedAt: string;
-  practice?: {
+  locum?: {
     id: string;
     name: string;
   };
 }
 
 export interface CreateCardRequest {
-  practiceId: string;
+  locumId: string;
   cardHolderName: string;
   cardNumber: string;
   expiryMonth: string;
@@ -27,16 +27,19 @@ export interface CreateCardRequest {
   cvv: string;
   cardType?: string;
   isDefault?: boolean;
+  email?: string;
+  name?: string;
 }
 
 export interface CreateCardResponse {
-  card: PaymentCard;
+  card?: PaymentCard;
   message: string;
+  success?: boolean;
 }
 
 export interface CardsResponse {
   cards: PaymentCard[];
-  practice?: {
+  locum?: {
     id: string;
     name: string;
   };
@@ -48,8 +51,8 @@ export interface ErrorResponse {
   details?: string;
 }
 
-export const cardPracticeUserApiSlice = createApi({
-  reducerPath: 'cardPracticeUserApi',
+export const locumCardApiSlice = createApi({
+  reducerPath: 'locumCardApi',
   baseQuery: fetchBaseQuery({ 
     baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/`,
     prepareHeaders: (headers) => {
@@ -57,10 +60,10 @@ export const cardPracticeUserApiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['PaymentCard'],
+  tagTypes: ['LocumPaymentCard'],
   endpoints: (builder) => ({
-    getPracticeCards: builder.query<CardsResponse, string>({
-      query: (practiceId) => `payments/list-payment-methods?practice_id=${practiceId}`,
+    getLocumCards: builder.query<CardsResponse, string>({
+      query: (locumId) => `payments/list-payment-methods?locum_id=${locumId}`,
       transformResponse: (response: any) => {
         console.log('Raw payment methods response:', response);
         
@@ -71,7 +74,7 @@ export const cardPracticeUserApiSlice = createApi({
           const card = pm.card || {};
           return {
             id: pm.id,
-            practiceId: '', // Will be filled from context if needed
+            locumId: '', // Will be filled from context if needed
             cardHolderName: pm.billing_details?.name || 'N/A',
             lastFourDigits: card.last4 || '****',
             cardType: card.brand || 'card',
@@ -91,19 +94,29 @@ export const cardPracticeUserApiSlice = createApi({
           count: transformedCards.length
         };
       },
-      providesTags: ['PaymentCard'],
+      providesTags: ['LocumPaymentCard'],
     }),
     
     createCard: builder.mutation<CreateCardResponse, CreateCardRequest>({
       queryFn: async (cardData, _queryApi, _extraOptions, fetchWithBQ) => {
         try {
           // Step 1: Create or get customer
+          // Ensure email and name are always provided (not undefined)
+          const emailToUse = cardData.email && cardData.email.trim() !== '' 
+            ? cardData.email 
+            : `locum-${cardData.locumId}@example.com`;
+          const nameToUse = cardData.name && cardData.name.trim() !== '' 
+            ? cardData.name 
+            : `Locum ${cardData.locumId}`;
+
           const customerResponse = await fetchWithBQ({
-            url: 'practice-card/customer-management',
+            url: 'locum-card/customer-management',
             method: 'POST',
             body: {
               action: 'create_customer',
-              practice_id: cardData.practiceId,
+              locum_id: cardData.locumId,
+              email: emailToUse,
+              name: nameToUse,
             },
           });
 
@@ -129,12 +142,12 @@ export const cardPracticeUserApiSlice = createApi({
           const testPaymentMethodId = 'pm_card_visa';
           
           const cardResponse = await fetchWithBQ({
-            url: 'practice-card/customer-management',
+            url: 'locum-card/customer-management',
             method: 'POST',
             body: {
               action: 'attach_payment_method',
               customer_id: customerId,
-              practice_id: cardData.practiceId,
+              locum_id: cardData.locumId,
               payment_method_id: testPaymentMethodId,
             },
           });
@@ -153,7 +166,7 @@ export const cardPracticeUserApiSlice = createApi({
           };
         }
       },
-      invalidatesTags: ['PaymentCard'],
+      invalidatesTags: ['LocumPaymentCard'],
     }),
     
     updateCard: builder.mutation<CreateCardResponse, { id: string; data: Partial<CreateCardRequest> }>({
@@ -162,23 +175,19 @@ export const cardPracticeUserApiSlice = createApi({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ['PaymentCard'],
+      invalidatesTags: ['LocumPaymentCard'],
     }),
     
-    deleteCard: builder.mutation<{ message: string }, { id: string; practiceId: string }>({
-      query: ({ id, practiceId }) => ({
-        url: 'payments/delete-payment-method',
+    deleteCard: builder.mutation<{ message: string }, string>({
+      query: (id) => ({
+        url: `card/delete?id=${id}`,
         method: 'DELETE',
-        body: {
-          payment_method_id: id,
-          practice_id: practiceId,
-        },
       }),
-      invalidatesTags: ['PaymentCard'],
+      invalidatesTags: ['LocumPaymentCard'],
     }),
     
-    checkPracticeHasCards: builder.query<{ hasCards: boolean; count: number }, string>({
-      query: (practiceId) => `payments/list-payment-methods?practice_id=${practiceId}`,
+    checkLocumHasCards: builder.query<{ hasCards: boolean; count: number }, string>({
+      query: (locumId) => `payments/list-payment-methods?locum_id=${locumId}`,
       transformResponse: (response: any) => {
         const count = response.data?.length || 0;
         return {
@@ -186,15 +195,15 @@ export const cardPracticeUserApiSlice = createApi({
           count
         };
       },
-      providesTags: ['PaymentCard'],
+      providesTags: ['LocumPaymentCard'],
     }),
   }),
 });
 
 export const {
-  useGetPracticeCardsQuery,
+  useGetLocumCardsQuery,
   useCreateCardMutation,
   useUpdateCardMutation,
   useDeleteCardMutation,
-  useCheckPracticeHasCardsQuery,
-} = cardPracticeUserApiSlice;
+  useCheckLocumHasCardsQuery,
+} = locumCardApiSlice;

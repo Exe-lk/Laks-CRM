@@ -344,6 +344,13 @@ const NavBar = () => {
               >
                 Past and Current Payments
               </li>
+              <li
+                className={`hover:text-blue-600 text-xs cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                  }`}
+                onClick={() => router.push('/locumStaff/payment')}
+              >
+                Payment
+              </li>
             </>
           )}
           {
@@ -472,6 +479,13 @@ const NavBar = () => {
                       onClick={() => { router.push('/locumStaff/timesheet'); closeMobileMenu(); }}
                     >
                       Timesheet
+                    </li>
+                    <li
+                      className={`hover:text-blue-600  text-xs cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                        }`}
+                      onClick={() => { router.push('/locumStaff/payment'); closeMobileMenu(); }}
+                    >
+                      Payment
                     </li>
                     <li className="flex items-center space-x-2">
                       <button

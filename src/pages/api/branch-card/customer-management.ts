@@ -13,6 +13,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: "Action is required" });
         }
 
+        // Validate required fields for create_customer action
+        if (action === "create_customer") {
+            if (!branch_id || !email || !name) {
+                return res.status(400).json({ 
+                    error: "Missing required fields: branch_id, email, name",
+                    received: { branch_id: !!branch_id, email: !!email, name: !!name }
+                });
+            }
+        }
+
+        // Validate required fields for attach_payment_method action
+        if (action === "attach_payment_method") {
+            if (!customer_id || !payment_method_id) {
+                console.error('Missing required fields for attach_payment_method:', { 
+                    customer_id: !!customer_id, 
+                    payment_method_id: !!payment_method_id 
+                });
+                return res.status(400).json({ 
+                    error: "Missing required fields: customer_id, payment_method_id",
+                    received: { customer_id: !!customer_id, payment_method_id: !!payment_method_id }
+                });
+            }
+            console.log('Attaching payment method:', { customer_id, payment_method_id });
+        }
+
         const SUPABASE_CUSTOMER_FUNCTION_URL = process.env.SUPABASE_CUSTOMER_FUNCTION_URL;
         const CUSTOMER_FUNCTION_SECRET = process.env.CUSTOMER_FUNCTION_SECRET;
 
@@ -47,23 +72,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
+        // Map branch_id to practice_id for Supabase function compatibility
+        const requestBody: any = {
+            action,
+            email,
+            name,
+            payment_method_id,
+            customer_id
+        };
+
+        // The Supabase function uses 'practice_id' as the field name for all entity types
+        if (branch_id) {
+            requestBody.practice_id = branch_id;
+        }
+
+        console.log('Sending request to Supabase function:', requestBody);
+
         const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${CUSTOMER_FUNCTION_SECRET}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                action,
-                branch_id,
-                email,
-                name,
-                payment_method_id,
-                customer_id
-            })
+            body: JSON.stringify(requestBody)
         });
 
         const json = await resp.json().catch(() => ({}));
+        
+        console.log('Supabase function response:', { 
+            status: resp.status, 
+            ok: resp.ok, 
+            data: json 
+        });
 
         // If customer creation was successful, store in database
         if (resp.ok && action === "create_customer" && json.customer && branch_id) {
