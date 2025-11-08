@@ -255,6 +255,19 @@ const NavBar = () => {
             </>
           ) : (
             <>
+              <div className="flex items-center space-x-2 border border-gray-300 rounded-lg p-3 shadow-sm bg-white">
+                <div className="flex flex-col items-end mr-3 text-xs lg:text-sm">
+                  <span className="font-semibold text-gray-700 leading-tight">
+                    {profile?.fullName || 'Practice User'}
+                  </span>
+                  {profile?.emailAddress && (
+                    <span className="text-gray-500">
+                      {profile.emailAddress}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 transition mr-2"
                 title="View Profile"
@@ -326,7 +339,7 @@ const NavBar = () => {
                 >
                     My Bookings
                   </li></>
-                
+
               ) : (
                 <>
                   <li
@@ -432,6 +445,18 @@ const NavBar = () => {
             </div>
 
             <div className="px-4 py-6">
+              {isLoggedIn && (
+                <div className="mb-6">
+                  <p className="text-base font-semibold text-gray-800">
+                    {profile?.fullName || 'Practice User'}
+                  </p>
+                  {profile?.emailAddress && (
+                    <p className="text-sm text-gray-500">
+                      {profile.emailAddress}
+                    </p>
+                  )}
+                </div>
+              )}
               <ul className="space-y-4 text-lg font-medium text-gray-800">
                 <li
                   className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''

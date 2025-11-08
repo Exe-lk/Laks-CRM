@@ -76,6 +76,36 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         return { type: "REJECTED", data:updatedConfirmation}
       }
 
+      // Check for conflicting bookings
+      const conflictingBooking = await tx.booking.findFirst({
+        where: {
+          locum_id: locum_id,
+          booking_date: confirmation.request.request_date,
+          status: "CONFIRMED",
+          AND: [
+            {
+              booking_start_time: {
+                lt: confirmation.request.request_end_time
+              }
+            },
+            {
+              booking_end_time: {
+                gt: confirmation.request.request_start_time
+              }
+            }
+          ]
+        },
+        select: {
+          booking_start_time: true,
+          booking_end_time: true,
+          booking_date: true
+        }
+      });
+
+      if (conflictingBooking) {
+        throw new Error(`You have another booking on this date inside this timeframe (${conflictingBooking.booking_start_time} - ${conflictingBooking.booking_end_time})`);
+      }
+
       const bookingId = generateBookingId({
         practiceId: confirmation.request.practice_id,
         locumId: locum_id,
