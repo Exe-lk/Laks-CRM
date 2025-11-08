@@ -975,11 +975,6 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-gray-900">{booking.location}</h4>
-                          {selectedBooking?.id === booking.id && (
-                            <div className="text-xs bg-[#C3EAE7] text-black px-2 py-1 rounded-full font-medium">
-                              ✓ Selected
-                            </div>
-                          )}
                         </div>
                         <div className="mt-1 text-sm text-gray-600">
                           <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
