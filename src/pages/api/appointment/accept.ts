@@ -49,25 +49,28 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
                     locum_id,
                     booking_date:request.request_date,
                     status:"CONFIRMED",
-                    OR: [
+                    AND: [
                         {
-                            AND:[
-                                {booking_start_time:{lte:request.request_start_time}},
-                                {booking_end_time:{lte:request.request_start_time}}
-                            ]
+                            booking_start_time: {
+                                lt: request.request_end_time
+                            }
                         },
                         {
-                            AND:[
-                                {booking_start_time:{lte: request.request_end_time}},
-                                {booking_end_time:{lte:request.request_end_time}}
-                            ]
+                            booking_end_time: {
+                                gt: request.request_start_time
+                            }
                         }
                     ]
+                },
+                select: {
+                    booking_start_time: true,
+                    booking_end_time: true,
+                    booking_date: true
                 }
             });
 
             if(conflictingBooking){
-                throw new Error("You have a conflicting booking at this time");
+                throw new Error(`You have another booking on this date inside this timeframe (${conflictingBooking.booking_start_time} - ${conflictingBooking.booking_end_time})`);
             }
 
             const application = await tx.appointmentResponse.create({
