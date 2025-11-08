@@ -32,7 +32,7 @@ const quickLinksByRole: Record<UserRole, QuickLink[]> = {
     { label: "Dashboard", href: "/locumStaff/dashboard", description: "Overview of requests and availability." },
     { label: "My Bookings", href: "/locumStaff/myBookings", description: "Review and manage confirmed shifts." },
     { label: "Timesheets", href: "/locumStaff/timesheet", description: "Submit and track your timesheets." },
-    { label: "Payments", href: "/locumStaff/pastandcurrentpayments", description: "See past and upcoming payouts." },
+    { label: "Payments", href: "/locumStaff/payment", description: "Add and manage your payment methods." },
   ],
   practice: [
     { label: "Home", href: "/practiceUser/home", description: "Monitor practice performance and requests." },
