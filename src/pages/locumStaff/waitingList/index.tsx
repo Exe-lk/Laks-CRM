@@ -508,7 +508,6 @@ const WaitingList = () => {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            {/* Desktop Table View */}
                             <div className="hidden md:block overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
@@ -652,7 +651,6 @@ const WaitingList = () => {
                                 </table>
                             </div>
 
-                            {/* Mobile Card View */}
                             <div className="md:hidden">
                                 {pendingConfirmations.map((confirmation) => {
                                     const timeLeft = formatTimeLeft(confirmation.expires_at);
@@ -664,7 +662,6 @@ const WaitingList = () => {
                                             className={`p-4 border-b border-gray-200 ${timeLeft.expired ? 'bg-red-50' : ''}`}
                                         >
                                             <div className="space-y-3">
-                                                {/* Practice Details */}
                                                 <div>
                                                     <h3 className="text-sm font-semibold text-gray-900 mb-1">
                                                         {confirmation.practice.name}
@@ -684,7 +681,6 @@ const WaitingList = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Appointment Details */}
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-900 flex items-center">
                                                         <FaCalendarAlt className="mr-2 text-gray-400" />
@@ -701,7 +697,6 @@ const WaitingList = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Time Left */}
                                                 <div>
                                                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${timeLeft.expired
                                                         ? 'bg-red-100 text-red-800'
@@ -717,7 +712,6 @@ const WaitingList = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Status */}
                                                 <div>
                                                     {timeLeft.expired ? (
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -732,7 +726,6 @@ const WaitingList = () => {
                                                     )}
                                                 </div>
 
-                                                {/* Actions */}
                                                 {!timeLeft.expired ? (
                                                     <div className="flex flex-col space-y-2 pt-2">
                                                         <button
@@ -785,7 +778,6 @@ const WaitingList = () => {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            {/* Desktop Table View */}
                             <div className="hidden md:block overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
@@ -802,9 +794,6 @@ const WaitingList = () => {
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Status
                                             </th>
-                                            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Message
-                                            </th> */}
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
@@ -874,19 +863,12 @@ const WaitingList = () => {
                                                         )}
                                                     </div>
                                                 </td>
-
-                                                {/* <td className="px-6 py-4">
-                                                    <div className="text-sm text-gray-600 max-w-xs truncate">
-                                                        {application.message || 'No message provided'}
-                                                    </div>
-                                                </td> */}
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {/* Mobile Card View */}
                             <div className="md:hidden">
                                 {filteredApplicationHistory.map((application) => (
                                     <div
@@ -894,7 +876,6 @@ const WaitingList = () => {
                                         className={`p-4 border-b border-gray-200 ${application.request.is_past ? 'bg-gray-50' : ''}`}
                                     >
                                         <div className="space-y-3">
-                                            {/* Practice Details */}
                                             <div>
                                                 <h3 className="text-sm font-semibold text-gray-900 mb-1">
                                                     {application.request.practice.name}
@@ -914,7 +895,6 @@ const WaitingList = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Appointment Details */}
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900 flex items-center">
                                                     <FaCalendarAlt className="mr-2 text-gray-400" />
@@ -931,7 +911,6 @@ const WaitingList = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Applied Date */}
                                             <div>
                                                 <div className="text-xs font-medium text-gray-500 uppercase">Applied Date</div>
                                                 <div className="text-sm text-gray-900">
@@ -939,7 +918,6 @@ const WaitingList = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Status */}
                                             <div>
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.status === 'ACCEPTED'
                                                     ? 'bg-green-100 text-green-800'
@@ -961,14 +939,6 @@ const WaitingList = () => {
                     )
                 ) : (
                     <><div className="text-center mb-8 pt-12 px-4">
-                        {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <h1 className="text-2xl sm:text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
-                                    Available Appointment Requests
-                                </h1> */}
                     </div><div className="w-full px-2 sm:px-6 md:px-12 mb-12">
                             <div className="bg-[#C3EAE7] px-2 sm:px-4 py-4 sm:py-6 w-full rounded-none mb-4">
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -1117,13 +1087,11 @@ const WaitingList = () => {
                                     </table>
                                 </div>
 
-                                {/* Mobile Card View */}
                                 <div className="md:hidden">
                                     {requests.length > 0 ? (
                                         requests.map((req) => (
                                             <div key={req.request_id} className="p-4 border-b border-gray-200 hover:bg-[#C3EAE7]/10 transition-all">
                                                 <div className="space-y-3">
-                                                    {/* Practice Info */}
                                                     <div>
                                                         <h3 className="text-base font-semibold text-gray-900">{req.practice.name}</h3>
                                                         {req.branch && (
@@ -1132,7 +1100,6 @@ const WaitingList = () => {
                                                         <div className="text-gray-500 text-sm mt-1">{req.practice.telephone}</div>
                                                     </div>
 
-                                                    {/* Date and Time */}
                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                         <div>
                                                             <div className="text-xs font-medium text-gray-500 uppercase">Request Date</div>
@@ -1156,7 +1123,6 @@ const WaitingList = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Time Range */}
                                                     <div>
                                                         <div className="text-xs font-medium text-gray-500 uppercase">Time</div>
                                                         <div className="text-gray-700 text-sm mt-1">
@@ -1164,13 +1130,11 @@ const WaitingList = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Location */}
                                                     <div>
                                                         <div className="text-xs font-medium text-gray-500 uppercase">Location</div>
                                                         <div className="text-gray-700 text-sm mt-1">{req.location}</div>
                                                     </div>
 
-                                                    {/* Action Buttons */}
                                                     <div className="flex flex-col space-y-2 mt-3">
                                                         <button
                                                             onClick={() => handleAccept(req.request_id)}

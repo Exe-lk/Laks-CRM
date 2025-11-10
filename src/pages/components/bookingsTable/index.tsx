@@ -88,11 +88,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   
-  // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   
-  // Filter states
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>('');
@@ -474,11 +472,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
         </div>
       </div>
       
-      {/* Filters Section */}
       {showFilters && (
         <div className="px-6 py-4 bg-gray-50 border-b">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
             <div className="col-span-1 md:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Search
@@ -495,7 +491,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               </div>
             </div>
             
-            {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
@@ -512,7 +507,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               </select>
             </div>
             
-            {/* Branch Filter */}
           {branches.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -533,7 +527,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             </div>
           )}
             
-            {/* Date Range */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Start Date
@@ -558,7 +551,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
               />
       </div>
             
-            {/* Clear Filters Button */}
             {(searchQuery || statusFilter !== 'all' || selectedBranch !== 'all' || startDate || endDate) && (
               <div className="flex items-end">
                 <button
@@ -577,7 +569,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             )}
           </div>
           
-          {/* Filter Summary */}
           <div className="mt-3 text-sm text-gray-600">
             Showing {bookings.length} of {sortedBookings.length} bookings
             {sortedBookings.length !== upcomingBookings.length && ` (${upcomingBookings.length} total)`}
@@ -772,14 +763,10 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                           </span>
                           {booking.cancellationPenalties && booking.cancellationPenalties.length > 0 && (
                             (() => {
-                              // Filter penalties to only show those that apply to the current logged-in user
                               const userPenalties = booking.cancellationPenalties.filter((penalty: CancellationPenalty) => {
                                 if (userType === 'practice' || userType === 'branch') {
-                                  // Show penalty only if the current practice/branch user is the one charged
                                   return penalty.chargedPracticeId === userId;
                                 } else if (userType === 'locum') {
-                                  // Show penalty only if the current locum is the one charged
-                                  // This ensures when a locum cancels, only they see their own penalty
                                   return penalty.chargedLocumId === userId;
                                 }
                                 return false;
@@ -820,13 +807,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         </h4>
                         {booking.cancellationPenalties
                           .filter((penalty: CancellationPenalty) => {
-                            // Filter to show only penalties that apply to the current logged-in user
                             if (userType === 'practice' || userType === 'branch') {
-                              // Show penalty only if the current practice/branch user is the one charged
                               return penalty.chargedPracticeId === userId;
                             } else if (userType === 'locum') {
-                              // Show penalty only if the current locum is the one charged
-                              // This ensures when a locum cancels, only they see their own penalty
                               return penalty.chargedLocumId === userId;
                             }
                             return false;

@@ -54,13 +54,11 @@ export const cardBranchApiSlice = createApi({
   }),
   tagTypes: ['BranchPaymentMethod'],
   endpoints: (builder) => ({
-    // Get payment methods for branch using existing API
     getBranchPaymentMethods: builder.query<PaymentMethodsResponse, string>({
       query: (branchId) => `payments/list-payment-methods?branch_id=${branchId}`,
       providesTags: ['BranchPaymentMethod'],
     }),
     
-    // Create or manage branch customer
     manageBranchCustomer: builder.mutation<CustomerResponse, CreateCustomerRequest>({
       query: (data) => ({
         url: 'branch-card/customer-management',
@@ -70,7 +68,6 @@ export const cardBranchApiSlice = createApi({
       invalidatesTags: ['BranchPaymentMethod'],
     }),
     
-    // Delete payment method
     deletePaymentMethod: builder.mutation<{ message: string }, DeletePaymentMethodRequest>({
       query: (data) => ({
         url: 'payments/delete-payment-method',
@@ -80,7 +77,6 @@ export const cardBranchApiSlice = createApi({
       invalidatesTags: ['BranchPaymentMethod'],
     }),
     
-    // Check if branch has payment methods
     checkBranchHasPaymentMethods: builder.query<{ hasCards: boolean; count: number }, string>({
       query: (branchId) => `payments/list-payment-methods?branch_id=${branchId}`,
       transformResponse: (response: PaymentMethodsResponse) => ({

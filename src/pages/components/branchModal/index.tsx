@@ -149,7 +149,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
   useEffect(() => {
     if (branch && isOpen) {
-      // Strip +44 prefix from telephone if it exists
       const telephoneDigits = branch.telephone?.startsWith('+44') 
         ? branch.telephone.substring(3) 
         : (branch.telephone || '');
@@ -279,42 +278,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
               )}
             </div>
 
-            {/* <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <FiMapPin className="w-4 h-4 text-[#C3EAE7]" />
-                Coordinates *
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formik.values.location}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Longitude, Latitude (auto-filled from map)"
-                className={`w-full px-4 py-3 border-2 rounded-xl 
-                  focus:ring-2 focus:ring-[#C3EAE7]/30 
-                  transition-all duration-200 outline-none 
-                  hover:border-[#C3EAE7]/50
-                  ${formik.touched.location && formik.errors.location
-                    ? 'border-red-300 focus:border-red-400 bg-red-50'
-                    : 'border-gray-200 focus:border-[#C3EAE7]'
-                  }`}
-                required
-                readOnly
-              />
-              <p className="text-xs text-gray-500">
-                Coordinates are automatically set when you select a location on the map
-              </p>
-              {formik.touched.location && formik.errors.location && (
-                <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                  <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-sm text-red-700">{formik.errors.location}</p>
-                </div>
-              )}
-            </div> */}
-
             <div className="space-y-2 group">
               <label className="block text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <FiPhone className="w-4 h-4 text-[#C3EAE7]" />
@@ -327,7 +290,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   name="telephoneDigits"
                   value={formik.values.telephoneDigits}
                   onChange={(e) => {
-                    // Only allow digits, max 10
                     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                     formik.setFieldValue('telephoneDigits', val);
                   }}

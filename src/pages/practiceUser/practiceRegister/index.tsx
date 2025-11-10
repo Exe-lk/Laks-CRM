@@ -627,11 +627,9 @@ const PracticeRegisterForm = () => {
                         setLocation(loc);
                         setOpen(false);
                         formik.setFieldValue('address', loc.address);
-                        // Log address, lat, lng
                         console.log('Selected Address:', loc.address);
                         console.log('Latitude:', loc.lat);
                         console.log('Longitude:', loc.lng);
-                        // Set location as 'lat,lng' string
                         formik.setFieldValue('location', `${loc.lat},${loc.lng}`);
                     }}
                 />

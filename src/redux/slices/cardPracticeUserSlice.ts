@@ -64,18 +64,16 @@ export const cardPracticeUserApiSlice = createApi({
       transformResponse: (response: any) => {
         console.log('Raw payment methods response:', response);
         
-        // Transform Stripe payment method format to PaymentCard format
         const paymentMethods = response.data || [];
         const transformedCards = paymentMethods.map((pm: any) => {
-          // Stripe payment method structure
           const card = pm.card || {};
           return {
             id: pm.id,
-            practiceId: '', // Will be filled from context if needed
+            practiceId: '',
             cardHolderName: pm.billing_details?.name || 'N/A',
             lastFourDigits: card.last4 || '****',
             cardType: card.brand || 'card',
-            isDefault: false, // Will be updated based on customer default
+            isDefault: false,
             status: 'active',
             maskedCardNumber: `•••• •••• •••• ${card.last4 || '****'}`,
             expiryDisplay: card.exp_month && card.exp_year ? `${card.exp_month}/${card.exp_year}` : 'N/A',
@@ -97,7 +95,6 @@ export const cardPracticeUserApiSlice = createApi({
     createCard: builder.mutation<CreateCardResponse, CreateCardRequest>({
       queryFn: async (cardData, _queryApi, _extraOptions, fetchWithBQ) => {
         try {
-          // Step 1: Create or get customer
           const customerResponse = await fetchWithBQ({
             url: 'practice-card/customer-management',
             method: 'POST',
@@ -123,9 +120,6 @@ export const cardPracticeUserApiSlice = createApi({
             };
           }
 
-          // Step 2: Attach payment method to customer
-          // Using Stripe's test payment method for development
-          // In production, this should be replaced with Stripe.js tokenization
           const testPaymentMethodId = 'pm_card_visa';
           
           const cardResponse = await fetchWithBQ({

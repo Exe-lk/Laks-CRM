@@ -379,7 +379,6 @@ const CreateAppointmentPage = () => {
             return;
         }
 
-        // Check for payment methods before submitting
         if (cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Method Required',
