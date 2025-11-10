@@ -306,19 +306,6 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
             )}
           </div>
 
-          {/* <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isDefault"
-              checked={formData.isDefault}
-              onChange={(e) => handleInputChange('isDefault', e.target.checked)}
-              className="h-4 w-4 text-[#C3EAE7] focus:ring-[#C3EAE7] border-gray-300 rounded"
-            />
-            <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">
-              Set as default payment method
-            </label>
-          </div> */}
-
           <div className="flex gap-3 pt-4">
             <button
               type="button"

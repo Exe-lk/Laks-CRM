@@ -241,7 +241,7 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                     0,
                     0
                   );
-                  return new Date() < bookingStartDateTime; // Locked if start time hasn't arrived yet
+                  return new Date() < bookingStartDateTime;
                 });
 
                 return (
@@ -949,7 +949,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
               {bookings.map((booking) => {
                 const hasStarted = hasBookingStarted(booking);
                 const isCompleted = isBookingCompleted(booking);
-                const canSelect = hasStarted; // Unlock bookings only after start time has passed
+                const canSelect = hasStarted;
 
                 return (
                   <div

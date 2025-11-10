@@ -291,30 +291,6 @@ const BranchLoginPage = () => {
 
                         <div className="bg-[#C3EAE7]/20 rounded-xl p-4 space-y-4">
                             <div className="flex items-center justify-between">
-                                {/* <label className="flex items-center group cursor-pointer">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            name="rememberMe"
-                                            id="rememberMe"
-                                            checked={formik.values.rememberMe}
-                                            onChange={formik.handleChange}
-                                            onBlur={formik.handleBlur}
-                                            className="sr-only"
-                                        />
-                                        <div className={`w-5 h-5 border-2 ${formik.values.rememberMe
-                                            ? 'border-[#C3EAE7] bg-[#C3EAE7]'
-                                            : 'border-gray-300 bg-white'
-                                            } rounded group-hover:border-[#C3EAE7] transition-colors duration-300 flex items-center justify-center`}>
-                                            {formik.values.rememberMe && (
-                                                <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <span className="ml-3 text-sm text-gray-700 group-hover:text-black transition-colors font-semibold">Remember me</span>
-                                </label> */}
                                 <a href="/forgetPassword" className="text-sm text-black font-bold">
                                     Forgot password?
                                 </a>

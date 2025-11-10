@@ -68,13 +68,10 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
   };
 
   const formatCardNumber = (value: string): string => {
-    // Remove all spaces and non-digit characters
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
-    // Limit to 19 digits (maximum card number length)
     const truncated = v.substring(0, 19);
     
-    // Split into groups of 4 digits
     const parts = [];
     for (let i = 0, len = truncated.length; i < len; i += 4) {
       parts.push(truncated.substring(i, i + 4));
@@ -281,19 +278,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
               <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>
             )}
           </div>
-
-          {/* <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isDefault"
-              checked={formData.isDefault}
-              onChange={(e) => handleInputChange('isDefault', e.target.checked)}
-              className="h-4 w-4 text-[#C3EAE7] focus:ring-[#C3EAE7] border-gray-300 rounded"
-            />
-            <label htmlFor="isDefault" className="ml-2 block text-sm text-gray-700">
-              Set as default payment method
-            </label>
-          </div> */}
 
           <div className="flex gap-3 pt-4">
             <button

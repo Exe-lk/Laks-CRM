@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
-// Types
 export interface TimesheetEntry {
   id: string;
   timesheetId: string;
@@ -94,7 +93,6 @@ const initialState: TimesheetState = {
   },
 };
 
-// Async Thunks
 export const fetchTimesheets = createAsyncThunk(
   'timesheet/fetchTimesheets',
   async (params: {
@@ -293,7 +291,6 @@ export const approveTimesheet = createAsyncThunk(
   }
 );
 
-// Slice
 const timesheetSlice = createSlice({
   name: 'timesheet',
   initialState,
@@ -318,7 +315,6 @@ const timesheetSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Timesheets
       .addCase(fetchTimesheets.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -333,7 +329,6 @@ const timesheetSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch timesheets';
       })
       
-      // Create Timesheet
       .addCase(createTimesheet.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -348,14 +343,12 @@ const timesheetSlice = createSlice({
         state.error = action.error.message || 'Failed to create timesheet';
       })
       
-      // Clock In/Out
       .addCase(clockInOut.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(clockInOut.fulfilled, (state, action) => {
         state.loading = false;
-        // Update the relevant timesheet with new totals
         const timesheetId = action.payload.data.timesheetId;
         const timesheetIndex = state.timesheets.findIndex(t => t.id === timesheetId);
         if (timesheetIndex !== -1) {
@@ -368,7 +361,6 @@ const timesheetSlice = createSlice({
         state.error = action.error.message || 'Failed to record clock action';
       })
       
-      // Update Entry
       .addCase(updateTimesheetEntry.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -376,7 +368,6 @@ const timesheetSlice = createSlice({
       .addCase(updateTimesheetEntry.fulfilled, (state, action) => {
         state.loading = false;
         const updatedEntry = action.payload.data.entry;
-        // Update the entry in the current timesheet if it exists
         if (state.currentTimesheet) {
           const entryIndex = state.currentTimesheet.timesheetEntries.findIndex(
             e => e.id === updatedEntry.id
@@ -393,7 +384,6 @@ const timesheetSlice = createSlice({
         state.error = action.error.message || 'Failed to update timesheet entry';
       })
       
-      // Submit Timesheet
       .addCase(submitTimesheet.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -414,7 +404,6 @@ const timesheetSlice = createSlice({
         state.error = action.error.message || 'Failed to submit timesheet';
       })
       
-      // Approve Timesheet
       .addCase(approveTimesheet.pending, (state) => {
         state.loading = true;
         state.error = null;

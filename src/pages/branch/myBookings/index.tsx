@@ -97,17 +97,6 @@ const MyBookingsPage = () => {
               onBookingCancelled={handleBookingCancelled}
             />
           </div>
-
-          {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">Booking Management</h3>
-            <div className="text-blue-800 space-y-2">
-              <p>• <strong>Confirmed bookings</strong> can be cancelled up to 48 hours before the appointment time.</p>
-              <p>• <strong>Cancelled bookings</strong> will be made available for other locums to apply.</p>
-              <p>• <strong>Contact details</strong> for locums are shown for confirmed bookings.</p>
-              <p>• If you need to cancel within 48 hours due to emergency, please contact the locum directly.</p>
-              <p>• When cancelling as a practice, please provide a clear reason for the cancellation.</p>
-            </div>
-          </div> */}
         </div>
       </div>
       

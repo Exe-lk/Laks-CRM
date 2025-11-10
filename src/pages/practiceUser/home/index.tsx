@@ -55,10 +55,6 @@ const Home = () => {
     return bookingDate < today;
   }).length;
 
-  // const totalPendingConfirmations = pendingConfirmations?.data?.pending_confirmations?.length || 0;
-  // const totalApplicationHistory = applicationHistory?.data?.length || 0;
-  // const totalAvailableRequests = availableRequests?.data?.length || 0;
-
   const isLoggedIn = !!profile?.id;
 
   return (
