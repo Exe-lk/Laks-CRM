@@ -7,6 +7,7 @@ import { useGetPendingConfirmationsQuery, useGetApplicationHistoryQuery } from '
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
+import { usePushNotifications } from '@/hooks/useNotifications';
 
 
 const Home = () => {
@@ -72,6 +73,9 @@ const Home = () => {
   const totalAvailableRequests = availableRequests?.data?.length || 0;
 
   const isLoggedIn = !!profile?.id;
+
+  // Initialize push notifications
+  usePushNotifications(profile?.id || null, 'locum');
 
   return (
     <>

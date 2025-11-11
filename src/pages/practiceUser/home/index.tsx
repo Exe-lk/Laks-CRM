@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useGetPracticeRequestsQuery} from '../../../redux/slices/appointmentPracticeSlice';
 import Swal from 'sweetalert2';
 import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
+import { usePushNotifications } from '@/hooks/useNotifications';
 
 const Home = () => {
   const router = useRouter();
@@ -56,6 +57,9 @@ const Home = () => {
   }).length;
 
   const isLoggedIn = !!profile?.id;
+
+  // Initialize push notifications
+  usePushNotifications(profile?.id || null, 'practice');
 
   return (
     <>

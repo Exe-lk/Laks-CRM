@@ -2,6 +2,8 @@ import { supabase } from "@/lib/supabaseclient";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { cancelAutoCancellation } from '@/lib/autoCancelManager';
+import { sendNotificationToUser } from '@/lib/fcmService';
+import { NotificationType } from '@/types/notifications';
 
 const prisma = new PrismaClient();
 
@@ -94,9 +96,33 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
 
             cancelAutoCancellation(request_id);
             
-            
             return application
         });
+
+        // Notify practice about the application (outside transaction to avoid blocking)
+        const practice = await prisma.appointmentRequest.findUnique({
+          where: { request_id },
+          select: { practice_id: true },
+        });
+
+        if (practice) {
+          console.log(`🔔 [Apply] Notifying practice ${practice.practice_id} about new application`);
+          sendNotificationToUser(practice.practice_id, 'practice', {
+            title: 'New Application Received',
+            body: `${result.locumProfile.fullName} applied for your appointment`,
+            data: {
+              type: NotificationType.APPLICATION_RECEIVED,
+              userType: 'practice',
+              request_id,
+              locum_id,
+              url: '/practiceUser/SelectNurses',
+            },
+          }).catch((err) => {
+            console.error('❌ [Apply] Notification error:', err);
+          });
+        } else {
+          console.error('❌ [Apply] Practice not found for request_id:', request_id);
+        }
 
         res.status(201).json({
             success:true,
@@ -111,5 +137,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
         }
         console.error("Unknown error type:", error);
         res.status(500).json({error:"Failed to apply"})
+    } finally {
+        await prisma.$disconnect();
     }
 }

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
 import { scheduleAutoCancellation } from '@/lib/autoCancelManager';
+import { notifyNursesWithinRadius } from '@/lib/notificationHelpers';
 
 const prisma = new PrismaClient();
 
@@ -99,6 +100,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       request_start_time
     );
     console.log(`Scheduled auto-cancellation for appointment request: ${appointmentRequest.request_id}`);
+    
+    // Send notifications to nurses within 30km (don't await to avoid blocking response)
+    console.log(`🔔 [Create] Starting notification process for appointment ${appointmentRequest.request_id}`);
+    notifyNursesWithinRadius(
+      appointmentRequest.location,
+      appointmentRequest.required_role,
+      {
+        request_id: appointmentRequest.request_id,
+        practice_name: appointmentRequest.practice.name,
+        request_date: appointmentRequest.request_date,
+        request_start_time: appointmentRequest.request_start_time,
+      }
+    ).catch((err) => {
+      console.error('❌ [Create] Notification error:', err);
+    });
 
     const message = "Job posted successfully! Locums will be notified. The request will be automatically cancelled if no one applies within the designated time.";
 

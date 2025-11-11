@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { date } from "yup";
 import { cancelAutoCancellation } from '@/lib/autoCancelManager';
 import { generateBookingId } from '@/lib/bookingIdGenerator';
+import { sendNotificationToUser } from '@/lib/fcmService';
+import { NotificationType } from '@/types/notifications';
 
 const prisma = new PrismaClient();
 
@@ -72,6 +74,19 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         });
 
         cancelAutoCancellation(confirmation.request_id);
+
+        // Notify practice of rejection
+        console.log(`🔔 [Reject] Notifying practice ${confirmation.request.practice_id} about rejection`);
+        await sendNotificationToUser(confirmation.request.practice_id, 'practice', {
+          title: 'Appointment Rejected',
+          body: `${confirmation.chosenLocum.fullName} rejected your appointment selection.`,
+          data: {
+            type: NotificationType.APPOINTMENT_REJECTED,
+            userType: 'practice',
+            request_id: confirmation.request_id,
+            url: '/practiceUser/SelectNurses',
+          },
+        }).catch((err) => console.error('❌ [Reject] Notification error:', err));
 
         return { type: "REJECTED", data:updatedConfirmation}
       }
@@ -158,6 +173,19 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
       });
 
       cancelAutoCancellation(confirmation.request_id);
+
+      // Notify practice of confirmation
+      console.log(`🔔 [Confirm] Notifying practice ${confirmation.request.practice_id} about confirmation`);
+      await sendNotificationToUser(confirmation.request.practice_id, 'practice', {
+        title: 'Appointment Confirmed!',
+        body: `${booking.locumProfile.fullName} confirmed the appointment.`,
+        data: {
+          type: NotificationType.APPOINTMENT_CONFIRMED,
+          userType: 'practice',
+          booking_id: booking.id,
+          url: '/practiceUser/myBookings',
+        },
+      }).catch((err) => console.error('❌ [Confirm] Notification error:', err));
 
       return {type:"CONFIRMED", data:booking}
     });
