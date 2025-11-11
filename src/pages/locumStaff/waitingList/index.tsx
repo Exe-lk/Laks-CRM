@@ -12,12 +12,23 @@ type RequestWithDistance = any & {
     distance: number | null;
 };
 
+type TabKey = 'pending-requests' | 'request-appoitment' | 'pending-confirmations';
+
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
     const dispatch = useDispatch<AppDispatch>();
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [activeTab, setActiveTab] = useState<'pending-requests' | 'request-appoitment' | 'pending-confirmations'>('request-appoitment');
+    const [activeTab, setActiveTab] = useState<TabKey>('request-appoitment');
+    const [tabLoading, setTabLoading] = useState<Record<TabKey, boolean>>({
+        'request-appoitment': false,
+        'pending-requests': false,
+        'pending-confirmations': false,
+    });
+    const [tabRefreshCounters, setTabRefreshCounters] = useState<Record<TabKey, number>>({
+        'request-appoitment': 0,
+        'pending-requests': 0,
+        'pending-confirmations': 0,
+    });
     const [distanceFilter, setDistanceFilter] = useState<number>(80);
 
     const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -52,17 +63,18 @@ const WaitingList = () => {
         }
     }, []);
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
+    const handleTabClick = (tab: TabKey) => {
+        setActiveTab(tab);
+        setTabRefreshCounters(prev => ({
+            ...prev,
+            [tab]: prev[tab] + 1,
+        }));
+    };
 
     const {
         data: pendingConfirmationsData,
         isLoading: isLoadingConfirmations,
+        isFetching: isFetchingConfirmations,
         error: confirmationsError,
         refetch: refetchConfirmations
     } = useGetPendingConfirmationsQuery(
@@ -76,6 +88,7 @@ const WaitingList = () => {
     const {
         data: availableRequestsData,
         isLoading: isLoadingRequests,
+        isFetching: isFetchingRequests,
         error: requestsError,
         refetch
     } = useGetAvailableRequestsQuery(
@@ -231,6 +244,7 @@ const WaitingList = () => {
     const {
         data: applicationHistoryData,
         isLoading: isLoadingHistory,
+        isFetching: isFetchingHistory,
         error: historyError,
         refetch: refetchHistory
     } = useGetApplicationHistoryQuery(
@@ -243,15 +257,36 @@ const WaitingList = () => {
 
     useEffect(() => {
         if (!profile?.id) return;
-        
-        if (activeTab === 'pending-confirmations') {
-            refetchConfirmations();
-        } else if (activeTab === 'pending-requests') {
-            refetchHistory();
-        } else if (activeTab === 'request-appoitment') {
-            refetch();
-        }
-    }, [activeTab, profile?.id, refetchConfirmations, refetchHistory, refetch]);
+
+        let isMounted = true;
+        const tabAtInvocation = activeTab;
+
+        const runRefetch = async () => {
+            setTabLoading(prev => ({ ...prev, [tabAtInvocation]: true }));
+
+            try {
+                if (tabAtInvocation === 'pending-confirmations') {
+                    await refetchConfirmations();
+                } else if (tabAtInvocation === 'pending-requests') {
+                    await refetchHistory();
+                } else {
+                    await refetch();
+                }
+            } catch (error) {
+                console.error('Failed to refresh data for tab:', tabAtInvocation, error);
+            } finally {
+                if (isMounted) {
+                    setTabLoading(prev => ({ ...prev, [tabAtInvocation]: false }));
+                }
+            }
+        };
+
+        runRefetch();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [activeTab, profile?.id, tabRefreshCounters, refetchConfirmations, refetchHistory, refetch]);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
 
@@ -337,28 +372,6 @@ const WaitingList = () => {
             setLoadingStates(prev => ({ ...prev, [confirmationId]: false }));
         }
     };
-
-
-    const formatTimeLeft = (expiresAt: string | Date) => {
-        const expiry = new Date(expiresAt);
-        const now = currentTime;
-        const timeLeft = expiry.getTime() - now.getTime();
-
-        if (timeLeft <= 0) {
-            return { expired: true, display: 'Expired' };
-        }
-
-        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        return {
-            expired: false,
-            display: `${hours}h ${minutes}m ${seconds}s`,
-            isUrgent: timeLeft < 3600000
-        };
-    };
-
     const formatDateTime = (date: string | Date) => {
         return new Date(date).toLocaleString('en-US', {
             weekday: 'short',
@@ -370,10 +383,28 @@ const WaitingList = () => {
         });
     };
 
-    const isLoading = activeTab === 'pending-confirmations' ? isLoadingConfirmations : isLoadingHistory;
-    const error = activeTab === 'pending-confirmations' ? confirmationsError : historyError;
+    const tabLoadingStatus: Record<TabKey, boolean> = {
+        'request-appoitment': tabLoading['request-appoitment'] || isLoadingRequests || isFetchingRequests,
+        'pending-requests': tabLoading['pending-requests'] || isLoadingHistory || isFetchingHistory,
+        'pending-confirmations': tabLoading['pending-confirmations'] || isLoadingConfirmations || isFetchingConfirmations,
+    };
 
-    if (isLoading) {
+    const tabErrors: Record<TabKey, typeof requestsError> = {
+        'request-appoitment': requestsError,
+        'pending-requests': historyError,
+        'pending-confirmations': confirmationsError,
+    };
+
+    const loadingMessages: Record<TabKey, string> = {
+        'request-appoitment': 'Refreshing available appointment requests...',
+        'pending-requests': 'Refreshing your pending applications...',
+        'pending-confirmations': 'Refreshing your pending confirmations...',
+    };
+
+    const isContentLoading = tabLoadingStatus[activeTab];
+    const error = tabErrors[activeTab];
+
+    if (isContentLoading) {
         return (
             <div className="min-h-screen bg-gray-50">
                 <NavBar />
@@ -381,7 +412,7 @@ const WaitingList = () => {
                     <div className="flex justify-center items-center h-64 pt-32">
                         <FaSpinner className="animate-spin text-blue-600 text-4xl" />
                         <span className="ml-3 text-lg text-gray-600">
-                            {activeTab === 'request-appoitment' ? 'Loading request appoitments...' : 'Loading application history...'}
+                            {loadingMessages[activeTab]}
                         </span>
                     </div>
                 </div>
@@ -395,6 +426,30 @@ const WaitingList = () => {
     const filteredApplicationHistory = applicationHistory.filter(application =>
         application.status === 'ACCEPTED'
     );
+
+    const tabButtonLoading: Record<TabKey, boolean> = {
+        'request-appoitment': tabLoadingStatus['request-appoitment'],
+        'pending-requests': tabLoadingStatus['pending-requests'],
+        'pending-confirmations': tabLoadingStatus['pending-confirmations'],
+    };
+
+    const tabButtonLabels: Record<TabKey, string> = {
+        'request-appoitment': 'Request Appoitment',
+        'pending-requests': 'Pending Requests',
+        'pending-confirmations': 'Pending Confirmations',
+    };
+
+    const tabButtonLoadingLabels: Record<TabKey, string> = {
+        'request-appoitment': 'Refreshing requests...',
+        'pending-requests': 'Refreshing applications...',
+        'pending-confirmations': 'Refreshing confirmations...',
+    };
+
+    const errorEntityLabels: Record<TabKey, string> = {
+        'request-appoitment': 'appointment requests',
+        'pending-requests': 'application history',
+        'pending-confirmations': 'confirmations',
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 pt-32">
@@ -427,34 +482,67 @@ const WaitingList = () => {
 
                     <div className="mt-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-lg sm:max-w-3xl">
                         <button
-                            onClick={() => setActiveTab('request-appoitment')}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'request-appoitment'
+                            type="button"
+                            onClick={() => handleTabClick('request-appoitment')}
+                            disabled={tabButtonLoading['request-appoitment']}
+                            aria-busy={tabButtonLoading['request-appoitment']}
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'request-appoitment'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                } ${tabButtonLoading['request-appoitment'] ? 'cursor-wait' : ''}`}
                         >
-                            <FaHistory className="mr-1 sm:mr-2" />
-                            <span className="whitespace-nowrap">Request Appoitment</span>
+                            {tabButtonLoading['request-appoitment'] ? (
+                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
+                            ) : (
+                                <FaHistory className="mr-1 sm:mr-2" />
+                            )}
+                            <span className="whitespace-nowrap">
+                                {tabButtonLoading['request-appoitment']
+                                    ? tabButtonLoadingLabels['request-appoitment']
+                                    : tabButtonLabels['request-appoitment']}
+                            </span>
                         </button>
                         <button
-                            onClick={() => setActiveTab('pending-requests')}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-requests'
+                            type="button"
+                            onClick={() => handleTabClick('pending-requests')}
+                            disabled={tabButtonLoading['pending-requests']}
+                            aria-busy={tabButtonLoading['pending-requests']}
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'pending-requests'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                } ${tabButtonLoading['pending-requests'] ? 'cursor-wait' : ''}`}
                         >
-                            <FaHistory className="mr-1 sm:mr-2" />
-                            <span className="whitespace-nowrap">Pending Requests</span>
+                            {tabButtonLoading['pending-requests'] ? (
+                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
+                            ) : (
+                                <FaHistory className="mr-1 sm:mr-2" />
+                            )}
+                            <span className="whitespace-nowrap">
+                                {tabButtonLoading['pending-requests']
+                                    ? tabButtonLoadingLabels['pending-requests']
+                                    : tabButtonLabels['pending-requests']}
+                            </span>
                         </button>
                         <button
-                            onClick={() => setActiveTab('pending-confirmations')}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'pending-confirmations'
+                            type="button"
+                            onClick={() => handleTabClick('pending-confirmations')}
+                            disabled={tabButtonLoading['pending-confirmations']}
+                            aria-busy={tabButtonLoading['pending-confirmations']}
+                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'pending-confirmations'
                                 ? 'bg-white text-blue-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                } ${tabButtonLoading['pending-confirmations'] ? 'cursor-wait' : ''}`}
                         >
-                            <FaExclamationTriangle className="mr-1 sm:mr-2" />
-                            <span className="whitespace-nowrap">Pending Confirmations</span>
+                            {tabButtonLoading['pending-confirmations'] ? (
+                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
+                            ) : (
+                                <FaExclamationTriangle className="mr-1 sm:mr-2" />
+                            )}
+                            <span className="whitespace-nowrap">
+                                {tabButtonLoading['pending-confirmations']
+                                    ? tabButtonLoadingLabels['pending-confirmations']
+                                    : tabButtonLabels['pending-confirmations']}
+                            </span>
                         </button>
                     </div>
 
@@ -491,7 +579,7 @@ const WaitingList = () => {
                         <div className="flex items-center">
                             <FaTimes className="text-red-600 mr-2" />
                             <span className="text-red-800">
-                                Error loading {activeTab === 'pending-confirmations' ? 'confirmations' : 'application history'}. Please try again later.
+                                Error loading {errorEntityLabels[activeTab]}. Please try again later.
                             </span>
                         </div>
                     </div>
@@ -519,9 +607,6 @@ const WaitingList = () => {
                                                 Appointment
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Time Left
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Status
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -531,14 +616,12 @@ const WaitingList = () => {
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {pendingConfirmations.map((confirmation) => {
-                                            const timeLeft = formatTimeLeft(confirmation.expires_at);
                                             const isLoading = loadingStates[confirmation.confirmation_id];
 
                                             return (
                                                 <tr
                                                     key={confirmation.confirmation_id}
-                                                    className={`hover:bg-gray-50 ${timeLeft.expired ? 'bg-red-50' : ''
-                                                        }`}
+                                                    className="hover:bg-gray-50"
                                                 >
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex flex-col">
@@ -580,69 +663,40 @@ const WaitingList = () => {
                                                     </td>
 
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${timeLeft.expired
-                                                            ? 'bg-red-100 text-red-800'
-                                                            : timeLeft.isUrgent
-                                                                ? 'bg-orange-100 text-orange-800'
-                                                                : 'bg-green-100 text-green-800'
-                                                            }`}>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                             <FaClock className="mr-1" />
-                                                            {timeLeft.display}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 mt-1">
-                                                            Expires: {formatDateTime(confirmation.expires_at)}
-                                                        </div>
-                                                    </td>
-
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        {timeLeft.expired ? (
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                                <FaTimes className="mr-1" />
-                                                                Expired
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                                <FaClock className="mr-1" />
-                                                                Pending Response
-                                                            </span>
-                                                        )}
+                                                            Pending Response
+                                                        </span>
                                                     </td>
 
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        {!timeLeft.expired ? (
-                                                            <div className="flex space-x-2">
-                                                                <button
-                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
-                                                                    disabled={isLoading}
-                                                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                                                                >
-                                                                    {isLoading ? (
-                                                                        <FaSpinner className="animate-spin mr-1" />
-                                                                    ) : (
-                                                                        <FaCheck className="mr-1" />
-                                                                    )}
-                                                                    Accept
-                                                                </button>
+                                                        <div className="flex space-x-2">
+                                                            <button
+                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
+                                                                disabled={isLoading}
+                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                                                            >
+                                                                {isLoading ? (
+                                                                    <FaSpinner className="animate-spin mr-1" />
+                                                                ) : (
+                                                                    <FaCheck className="mr-1" />
+                                                                )}
+                                                                Accept
+                                                            </button>
 
-                                                                <button
-                                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
-                                                                    disabled={isLoading}
-                                                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                                                >
-                                                                    {isLoading ? (
-                                                                        <FaSpinner className="animate-spin mr-1" />
-                                                                    ) : (
-                                                                        <FaTimes className="mr-1" />
-                                                                    )}
-                                                                    Reject
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="text-red-600 text-sm">
-                                                                <FaTimes className="inline mr-1" />
-                                                                Auto-rejected
-                                                            </div>
-                                                        )}
+                                                            <button
+                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
+                                                                disabled={isLoading}
+                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                                            >
+                                                                {isLoading ? (
+                                                                    <FaSpinner className="animate-spin mr-1" />
+                                                                ) : (
+                                                                    <FaTimes className="mr-1" />
+                                                                )}
+                                                                Reject
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
@@ -653,13 +707,12 @@ const WaitingList = () => {
 
                             <div className="md:hidden">
                                 {pendingConfirmations.map((confirmation) => {
-                                    const timeLeft = formatTimeLeft(confirmation.expires_at);
                                     const isLoading = loadingStates[confirmation.confirmation_id];
 
                                     return (
                                         <div
                                             key={confirmation.confirmation_id}
-                                            className={`p-4 border-b border-gray-200 ${timeLeft.expired ? 'bg-red-50' : ''}`}
+                                            className="p-4 border-b border-gray-200"
                                         >
                                             <div className="space-y-3">
                                                 <div>
@@ -698,68 +751,39 @@ const WaitingList = () => {
                                                 </div>
 
                                                 <div>
-                                                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${timeLeft.expired
-                                                        ? 'bg-red-100 text-red-800'
-                                                        : timeLeft.isUrgent
-                                                            ? 'bg-orange-100 text-orange-800'
-                                                            : 'bg-green-100 text-green-800'
-                                                        }`}>
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                         <FaClock className="mr-1" />
-                                                        {timeLeft.display}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        Expires: {formatDateTime(confirmation.expires_at)}
-                                                    </div>
+                                                        Pending Response
+                                                    </span>
                                                 </div>
 
-                                                <div>
-                                                    {timeLeft.expired ? (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <div className="flex flex-col space-y-2 pt-2">
+                                                    <button
+                                                        onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
+                                                        disabled={isLoading}
+                                                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                                                    >
+                                                        {isLoading ? (
+                                                            <FaSpinner className="animate-spin mr-1" />
+                                                        ) : (
+                                                            <FaCheck className="mr-1" />
+                                                        )}
+                                                        Accept
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
+                                                        disabled={isLoading}
+                                                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                                    >
+                                                        {isLoading ? (
+                                                            <FaSpinner className="animate-spin mr-1" />
+                                                        ) : (
                                                             <FaTimes className="mr-1" />
-                                                            Expired
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                            <FaClock className="mr-1" />
-                                                            Pending Response
-                                                        </span>
-                                                    )}
+                                                        )}
+                                                        Reject
+                                                    </button>
                                                 </div>
-
-                                                {!timeLeft.expired ? (
-                                                    <div className="flex flex-col space-y-2 pt-2">
-                                                        <button
-                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
-                                                            disabled={isLoading}
-                                                            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                                                        >
-                                                            {isLoading ? (
-                                                                <FaSpinner className="animate-spin mr-1" />
-                                                            ) : (
-                                                                <FaCheck className="mr-1" />
-                                                            )}
-                                                            Accept
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
-                                                            disabled={isLoading}
-                                                            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                                        >
-                                                            {isLoading ? (
-                                                                <FaSpinner className="animate-spin mr-1" />
-                                                            ) : (
-                                                                <FaTimes className="mr-1" />
-                                                            )}
-                                                            Reject
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-red-600 text-sm pt-2">
-                                                        <FaTimes className="inline mr-1" />
-                                                        Auto-rejected
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     );
