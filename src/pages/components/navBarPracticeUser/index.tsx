@@ -7,6 +7,7 @@ import ProfileModal from '../profilePracticeUser/index';
 import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import CalendarModal from '../calendar/CalendarModal';
 import { useCheckPracticeHasCardsQuery } from '../../../redux/slices/cardPracticeUserSlice';
+import { clearSessionStorage } from '@/utils/sessionManager';
 
 const NavBar = () => {
   const router = useRouter();
@@ -208,9 +209,7 @@ const NavBar = () => {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('profile');
+        clearSessionStorage();
         setIsLoggedIn(false);
 
         Swal.fire({
