@@ -176,9 +176,11 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
       // Notify practice of confirmation
       console.log(`🔔 [Confirm] Notifying practice ${confirmation.request.practice_id} about confirmation`);
+      const locumName = booking.locumProfile?.fullName ?? 'Your locum';
+
       await sendNotificationToUser(confirmation.request.practice_id, 'practice', {
         title: 'Appointment Confirmed!',
-        body: `${booking.locumProfile.fullName} confirmed the appointment.`,
+        body: `${locumName} confirmed the appointment.`,
         data: {
           type: NotificationType.APPOINTMENT_CONFIRMED,
           userType: 'practice',
