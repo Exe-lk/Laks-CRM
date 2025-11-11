@@ -2,6 +2,8 @@ import { supabase } from "@/lib/supabaseclient";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { cancelAutoCancellation } from '@/lib/autoCancelManager';
+import { sendNotificationToUser } from "@/lib/fcmService";
+import { NotificationType } from "@/types/notifications";
 
 const prisma = new PrismaClient()
 
@@ -153,6 +155,18 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
             // Cancel auto-cancellation since a locum has been selected
             cancelAutoCancellation(request_id);
+
+            await sendNotificationToUser(locum_id, 'locum', {
+                title: 'You Were Selected!',
+                body: `You are selected for an appointment. Please confirm within ${expiryTime.toLocaleTimeString()}.`,
+                data: {
+                  type: NotificationType.APPLICANT_SELECTED,
+                  userType: 'locum',
+                  confirmation_id: confirmation.confirmation_id,
+                  request_id,
+                  url: '/locumStaff/waitingList',
+                },
+              }).catch((err) => console.error('Notification error:', err));
 
             console.log(`Transaction completed successfully for request_id: ${request_id}`);
             return confirmation;

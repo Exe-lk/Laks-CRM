@@ -205,6 +205,7 @@ model Branch {
   appointmentRequests AppointmentRequest[]
   invoices            Invoice[]
   stripeCustomer      BranchStripeCustomer?
+  cancellationPenalties CancellationPenalty[]
 
   @@map("branches")
 }
@@ -411,6 +412,7 @@ model CancellationPenalty {
   // Relations - one of these will be set based on cancelledPartyType
   chargedLocumId        String?  @map("charged_locum_id") // Set if locum is charged
   chargedPracticeId     String?  @map("charged_practice_id") // Set if practice is charged
+  chargedBranchId       String?  @map("charged_branch_id") // Set if branch is charged
   
   cancelledPartyType    String   @map("cancelled_party_type") // "locum" or "practice"
   appointmentStartTime  DateTime @map("appointment_start_time")
@@ -435,6 +437,7 @@ model CancellationPenalty {
   booking               Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   chargedLocum          LocumProfile?   @relation(fields: [chargedLocumId], references: [id], onDelete: Cascade)
   chargedPractice       Practice?       @relation(fields: [chargedPracticeId], references: [id], onDelete: Cascade)
+  chargedBranch         Branch?         @relation(fields: [chargedBranchId], references: [id], onDelete: Cascade)
   paymentLogs            PenaltyPaymentLog[]
   
   @@map("cancellation_penalties")
@@ -482,4 +485,17 @@ model BookingPayment {
   booking               Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   
   @@map("booking_payments")
+}
+
+model FCMToken {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  userType      String   @map("user_type") // "locum", "practice", "branch"
+  token         String   @unique
+  deviceInfo    String?  @map("device_info")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("fcm_tokens")
 }
