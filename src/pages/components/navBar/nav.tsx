@@ -7,6 +7,7 @@ import ProfileModal from '../profile/ProfileModal';
 import CalendarModal from '../calendar/CalendarModal';
 import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
+import { clearSessionStorage } from '@/utils/sessionManager';
 
 
 const NavBar = () => {
@@ -188,9 +189,7 @@ const NavBar = () => {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('profile');
+        clearSessionStorage();
         setIsLoggedIn(false);
 
         Swal.fire({

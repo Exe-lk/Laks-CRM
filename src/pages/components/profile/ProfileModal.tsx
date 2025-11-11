@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useUpdateLocumProfileMutation } from '../../../redux/slices/locumProfileSlice';
 import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { clearSessionStorage } from '@/utils/sessionManager';
 
 
 interface Profile {
@@ -54,9 +55,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('profile');
+        clearSessionStorage();
         setIsLoggedIn(false);
 
         Swal.fire({

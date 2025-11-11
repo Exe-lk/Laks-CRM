@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import { useLoginMutation } from '../../../redux/slices/practiceProfileSlice';
 import Swal from 'sweetalert2';
+import { setSessionExpiry } from '@/utils/sessionManager';
 
 interface LoginFormValues {
   email: string;
@@ -63,9 +64,11 @@ const LoginForm = () => {
           if (accessToken) {
             localStorage.setItem('token', accessToken);
             console.log('Stored accessToken:', accessToken);
+            setSessionExpiry();
           } else if (session?.access_token) {
             localStorage.setItem('token', session.access_token);
             console.log('Stored session access_token:', session.access_token); 
+            setSessionExpiry();
           }
 
           if (session?.refresh_token) {

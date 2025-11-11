@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
+import { setSessionExpiry } from '@/utils/sessionManager';
 
 interface LoginFormData {
     email: string;
@@ -53,6 +54,7 @@ const BranchLoginPage = () => {
                 if (response.ok) {
                     localStorage.setItem('token', data.accessToken);
                     localStorage.setItem('profile', JSON.stringify(data.profile));
+                    setSessionExpiry();
                     
                     await Swal.fire({
                         title: 'Login Successful!',

@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';
 import CalendarModal from '../calendar/CalendarModal';
 import { FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import { clearSessionStorage } from '@/utils/sessionManager';
 
 const BranchNavBar = () => {
   const router = useRouter();
@@ -220,9 +221,7 @@ const BranchNavBar = () => {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('profile');
+        clearSessionStorage();
         setIsLoggedIn(false);
 
         Swal.fire({
