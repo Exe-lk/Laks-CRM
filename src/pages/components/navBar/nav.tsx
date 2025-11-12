@@ -5,8 +5,10 @@ import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profile/ProfileModal';
 import CalendarModal from '../calendar/CalendarModal';
-import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt, FaCalendarAlt } from 'react-icons/fa';
+import NotificationDropdown from '../notification/NotificationDropdown';
+import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt, FaCalendarAlt, FaBell } from 'react-icons/fa';
 import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
+import { useGetNotificationsQuery } from '../../../redux/slices/notificationSlice';
 import { clearSessionStorage } from '@/utils/sessionManager';
 
 
@@ -15,6 +17,7 @@ const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<{
+    id?: string;
     fullName?: string;
     emailAddress?: string;
     contactNumber?: string;
@@ -26,6 +29,13 @@ const NavBar = () => {
   } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  const { data: notificationsData } = useGetNotificationsQuery(
+    { locumId: profile?.id || '', limit: 100 },
+    { skip: !profile?.id || !isLoggedIn }
+  );
+  const unreadCount = notificationsData?.data?.filter((n: any) => n.status === 'UNREAD').length || 0;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -258,6 +268,19 @@ const NavBar = () => {
                 </svg>
               </button>
               <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 mr-2 relative"
+                onClick={() => setIsNotificationOpen(true)}
+                aria-label="View Notifications"
+                title="View Notifications"
+              >
+                <FaBell className="text-xl" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 mr-2"
                 onClick={() => setIsCalendarModalOpen(true)}
                 aria-label="View Calendar"
@@ -483,6 +506,19 @@ const NavBar = () => {
                         </svg>
                       </button>
                       <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800 relative"
+                        onClick={() => { setIsNotificationOpen(true); closeMobileMenu(); }}
+                        aria-label="View Notifications"
+                        title="View Notifications"
+                      >
+                        <FaBell className="text-xl" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
+                      </button>
+                      <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-blue-100 transition text-blue-600 hover:text-blue-800"
                         onClick={() => { setIsCalendarModalOpen(true); closeMobileMenu(); }}
                         aria-label="View Calendar"
@@ -572,6 +608,14 @@ const NavBar = () => {
       )}
       {isCalendarModalOpen && (
         <CalendarModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} />
+      )}
+      {isLoggedIn && profile?.id && (
+        <NotificationDropdown
+          userId={profile.id}
+          userType="locum"
+          isOpen={isNotificationOpen}
+          onClose={() => setIsNotificationOpen(false)}
+        />
       )}
     </nav>
   );

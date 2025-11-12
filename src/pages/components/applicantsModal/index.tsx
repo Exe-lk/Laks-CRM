@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { FiX, FiUser, FiMapPin, FiPhone, FiMail, FiClock, FiCheck, FiLoader } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { useGetApplicantsQuery, useSelectApplicantMutation, Applicant, JobDetails } from '@/redux/slices/appointmentPracticeSlice';
-import { sendSMS } from '@/redux/slices/smsSlice';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
+import { useCreateNotificationMutation } from '@/redux/slices/notificationSlice';
 
 interface ApplicantsModalProps {
   isOpen: boolean;
@@ -21,7 +19,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
 }) => {
   const [selectingApplicant, setSelectingApplicant] = useState<string | null>(null);
   const [hasShownAutoSelect, setHasShownAutoSelect] = useState(false);
-  const dispatch = useDispatch<AppDispatch>();
   
   const { 
     data: applicantsData, 
@@ -35,6 +32,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
   console.log(applicantsData)
   
   const [selectApplicant] = useSelectApplicantMutation();
+  const [createNotification] = useCreateNotificationMutation();
 
   const applicants = applicantsData?.data?.applicants || [];
   const jobDetails = applicantsData?.data?.job || null;
@@ -161,6 +159,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
         locum_id: locumId
       }).unwrap();
 
+      // Create notification for the selected locum
       if (jobDetails?.request_date && jobDetails?.request_start_time && jobDetails?.request_end_time) {
         const practiceName = jobDetails.practice?.name || 'the practice';
         const appointmentDate = formatDate(jobDetails.request_date);
@@ -168,10 +167,11 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
         const endTime = formatTime(jobDetails.request_end_time);
         const appointmentLocation = jobDetails.location || 'the specified location';
         
-        dispatch(sendSMS({
-          to: applicant.locumProfile.contactNumber,
-          body: `You have been selected for the appointment from ${practiceName} on ${appointmentDate} at ${startTime} - ${endTime} at ${appointmentLocation}. Please login to your account to view the details.`,
-        }));
+        await createNotification({
+          locumId: locumId,
+          message: `You have been selected for the appointment from ${practiceName} on ${appointmentDate} at ${startTime} - ${endTime} at ${appointmentLocation}.`,
+          status: 'UNREAD',
+        }).unwrap();
       }
 
       await Swal.fire({

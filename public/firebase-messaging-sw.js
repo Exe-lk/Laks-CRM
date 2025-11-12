@@ -1,17 +1,11 @@
 // Service Worker for Firebase Cloud Messaging
+// This file is auto-generated at build time
 try {
     importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
     importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
   
     // Initialize Firebase
-    firebase.initializeApp({
-      apiKey: 'AIzaSyDi31YC2HPGcI5Ml9JEYsW5KJ7WkTVFioA',
-      authDomain: 'laks-7e516.firebaseapp.com',
-      projectId: 'laks-7e516',
-      storageBucket: 'laks-7e516.firebasestorage.app',
-      messagingSenderId: '30714062559',
-      appId: '1:30714062559:web:825a390815a77cfe4eab6a',
-    });
+    firebase.initializeApp({});
   
     const messaging = firebase.messaging();
   
