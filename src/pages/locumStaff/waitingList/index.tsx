@@ -4,9 +4,7 @@ import { FaCheck, FaTimes, FaClock, FaPhoneAlt, FaMapMarkerAlt, FaCalendarAlt, F
 import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetApplicationHistoryQuery, useIgnoreAppointmentMutation, useCheckIgnoredQuery } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
-import { sendSMS } from '@/redux/slices/smsSlice';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
+import { useCreateNotificationMutation } from '../../../redux/slices/notificationSlice';
 
 type RequestWithDistance = any & {
     distance: number | null;
@@ -16,7 +14,6 @@ type TabKey = 'pending-requests' | 'request-appoitment' | 'pending-confirmations
 
 const WaitingList = () => {
     const [profile, setProfile] = useState<any>(null);
-    const dispatch = useDispatch<AppDispatch>();
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
     const [activeTab, setActiveTab] = useState<TabKey>('request-appoitment');
     const [tabLoading, setTabLoading] = useState<Record<TabKey, boolean>>({
@@ -289,6 +286,7 @@ const WaitingList = () => {
     }, [activeTab, profile?.id, tabRefreshCounters, refetchConfirmations, refetchHistory, refetch]);
 
     const [confirmAppointment] = useConfirmAppointmentMutation();
+    const [createNotification] = useCreateNotificationMutation();
 
     const handleConfirmation = async (confirmationId: string, action: 'CONFIRM' | 'REJECT', confirmation?: any) => {
         if (!profile?.id) return;
@@ -349,13 +347,37 @@ const WaitingList = () => {
             });
 
             if (action === 'CONFIRM' && confirmation) {
+                const message = `Good news! ${profile.fullName || 'A locum staff'} has accepted your appointment request from ${confirmation.practice.name} on ${formatDate(confirmation.appointment.date)} at ${formatTime(confirmation.appointment.start_time)} - ${formatTime(confirmation.appointment.end_time)} at ${confirmation.appointment.location}.`;
+                
+                const notificationData: {
+                    practiceId: string;
+                    branchId?: string;
+                    message: string;
+                    status: 'UNREAD';
+                } = {
+                    practiceId: confirmation.practice.id,
+                    message,
+                    status: 'UNREAD',
+                };
+
+                if (confirmation.branch?.id) {
+                    notificationData.branchId = confirmation.branch.id;
+                    console.log('✅ Branch ID found and included:', confirmation.branch.id);
+                } else {
+                    console.log('ℹ️ No branch ID - notification will be for practice only');
+                }
+                
                 try {
-                    await dispatch(sendSMS({
-                        to: confirmation.practice.telephone,
-                        body: `Good news! ${profile.fullName || 'A locum staff'} has accepted your appointment request from ${confirmation.practice.name} on ${formatDate(confirmation.appointment.date)} at ${formatTime(confirmation.appointment.start_time)} - ${formatTime(confirmation.appointment.end_time)} at ${confirmation.appointment.location}. Please login to your account to view the details.`,
-                    })).unwrap();
-                } catch (smsError) {
-                    console.error('Failed to send SMS notification:', smsError);
+                    const notificationResult = await createNotification(notificationData).unwrap();
+                    console.log('Notification created successfully:', notificationResult);
+                } catch (notificationError: any) {
+                    Swal.fire({
+                        title: 'Warning',
+                        text: 'Appointment confirmed, but notification could not be sent. Please notify the practice manually.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#F59E0B'
+                    });
                 }
             }
 

@@ -10,6 +10,7 @@ import { PracticeUserPaymentApiSlice } from './slices/practiceUserPaymentSlice';
 import { cardPracticeUserApiSlice } from './slices/cardPracticeUserSlice';
 import { cardBranchApiSlice } from './slices/cardPracticerUserBranchSlice';
 import { locumCardApiSlice } from './slices/locumCardSlice';
+import { notificationApiSlice } from './slices/notificationSlice';
 import branchReducer from './slices/branchPracticeSlice';
 import timesheetReducer from './slices/timesheetSlice';
 import smsReducer from './slices/smsSlice';
@@ -27,6 +28,7 @@ const store = configureStore({
 		[cardPracticeUserApiSlice.reducerPath]: cardPracticeUserApiSlice.reducer,
 		[cardBranchApiSlice.reducerPath]: cardBranchApiSlice.reducer,
 		[locumCardApiSlice.reducerPath]: locumCardApiSlice.reducer,
+		[notificationApiSlice.reducerPath]: notificationApiSlice.reducer,
 		branches: branchReducer,
 		timesheet: timesheetReducer,
 		sms: smsReducer,
@@ -44,6 +46,7 @@ const store = configureStore({
 			cardPracticeUserApiSlice.middleware,
 			cardBranchApiSlice.middleware,
 			locumCardApiSlice.middleware,
+			notificationApiSlice.middleware,
 		),
 });
 setupListeners(store.dispatch);

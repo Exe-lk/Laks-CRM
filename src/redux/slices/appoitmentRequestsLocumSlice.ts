@@ -62,6 +62,7 @@ export interface PendingConfirmation {
   confirmation_id: string;
   request_id: string;
   practice: {
+    id: string;
     name: string;
     telephone: string;
     location: string;

@@ -50,6 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           include: {
             practice: {
               select: {
+                id: true,
                 name: true,
                 telephone: true,
                 location: true
@@ -104,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         confirmation_id: confirmation.confirmation_id,
         request_id: confirmation.request_id,
         practice: {
+          id: confirmation.request.practice.id,
           name: confirmation.request.practice.name,
           telephone: confirmation.request.practice.telephone,
           location: confirmation.request.practice.location

@@ -53,6 +53,7 @@ model LocumProfile {
   payslips                 Payslip[]
   cancellationPenalties    CancellationPenalty[]
   stripeCustomer           LocumStripeCustomer?
+  notifications            Notification[]
 
   @@map("locum_profiles")
 }
@@ -95,6 +96,7 @@ model Practice {
   timesheetJobs       TimesheetJob[]
   invoices            Invoice[]
   cancellationPenalties CancellationPenalty[]
+  notifications       Notification[]
 
   @@map("practices")
 }
@@ -206,6 +208,7 @@ model Branch {
   invoices            Invoice[]
   stripeCustomer      BranchStripeCustomer?
   cancellationPenalties CancellationPenalty[]
+  notifications       Notification[]
 
   @@map("branches")
 }
@@ -498,4 +501,21 @@ model FCMToken {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("fcm_tokens")
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  locumId     String?   @map("locum_id")
+  practiceId  String?   @map("practice_id")
+  branchId    String?   @map("branch_id")
+  message     String
+  status      String    @default("UNREAD") // UNREAD, READ, PENDING
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  locumProfile LocumProfile? @relation(fields: [locumId], references: [id], onDelete: Cascade)
+  practice     Practice?     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
+  branch       Branch?       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

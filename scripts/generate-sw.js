@@ -1,11 +1,23 @@
-// Service Worker for Firebase Cloud Messaging
+const fs = require('fs');
+const path = require('path');
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const swContent = `// Service Worker for Firebase Cloud Messaging
 // This file is auto-generated at build time
 try {
     importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
     importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
   
     // Initialize Firebase
-    firebase.initializeApp({});
+    firebase.initializeApp(${JSON.stringify(firebaseConfig, null, 2)});
   
     const messaging = firebase.messaging();
   
@@ -15,7 +27,7 @@ try {
     
     const data = payload.data || {};
     // Create unique tag using type + relevant ID + timestamp to show ALL notifications
-    const uniqueTag = `${data.type || 'notification'}_${data.request_id || data.booking_id || ''}_${Date.now()}`;
+    const uniqueTag = \`\${data.type || 'notification'}_\${data.request_id || data.booking_id || ''}_\${Date.now()}\`;
     
     const notificationTitle = payload.notification?.title || 'New Notification';
     const notificationOptions = {
@@ -63,3 +75,8 @@ try {
   } catch (error) {
     console.error('[SW] Service worker initialization error:', error);
   }
+`;
+
+const outputPath = path.join(__dirname, '../public/firebase-messaging-sw.js');
+fs.writeFileSync(outputPath, swContent);
+console.log('Service worker generated successfully');
