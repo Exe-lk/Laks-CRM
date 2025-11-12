@@ -75,20 +75,13 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
         cancelAutoCancellation(confirmation.request_id);
 
-        // Notify practice of rejection
-        console.log(`🔔 [Reject] Notifying practice ${confirmation.request.practice_id} about rejection`);
-        await sendNotificationToUser(confirmation.request.practice_id, 'practice', {
-          title: 'Appointment Rejected',
-          body: `${confirmation.chosenLocum.fullName} rejected your appointment selection.`,
-          data: {
-            type: NotificationType.APPOINTMENT_REJECTED,
-            userType: 'practice',
-            request_id: confirmation.request_id,
-            url: '/practiceUser/SelectNurses',
-          },
-        }).catch((err) => console.error('❌ [Reject] Notification error:', err));
-
-        return { type: "REJECTED", data:updatedConfirmation}
+        return { 
+          type: "REJECTED", 
+          data: updatedConfirmation,
+          practiceId: confirmation.request.practice_id,
+          locumName: confirmation.chosenLocum.fullName,
+          requestId: confirmation.request_id
+        }
       }
 
       // Check for conflicting bookings
@@ -174,32 +167,68 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
       cancelAutoCancellation(confirmation.request_id);
 
-      // Notify practice of confirmation
-      console.log(`🔔 [Confirm] Notifying practice ${confirmation.request.practice_id} about confirmation`);
-      const locumName = booking.locumProfile?.fullName ?? 'Your locum';
-
-      await sendNotificationToUser(confirmation.request.practice_id, 'practice', {
-        title: 'Appointment Confirmed!',
-        body: `${locumName} confirmed the appointment.`,
-        data: {
-          type: NotificationType.APPOINTMENT_CONFIRMED,
-          userType: 'practice',
-          booking_id: booking.id,
-          url: '/practiceUser/myBookings',
-        },
-      }).catch((err) => console.error('❌ [Confirm] Notification error:', err));
-
-      return {type:"CONFIRMED", data:booking}
+      return {
+        type: "CONFIRMED", 
+        data: booking,
+        practiceId: confirmation.request.practice_id,
+        locumName: booking.locumProfile?.fullName ?? 'Your locum',
+        bookingId: booking.id
+      }
     });
 
+    // Send notifications only after transaction succeeds
     if(result.type === "REJECTED"){
-        res.status(200).json({
+        // Notify practice of rejection
+        try {
+          console.log(`🔔 [Reject] Notifying practice ${result.practiceId} about rejection`);
+          const notificationSent = await sendNotificationToUser(result.practiceId, 'practice', {
+            title: 'Appointment Rejected',
+            body: `${result.locumName} rejected your appointment selection.`,
+            data: {
+              type: NotificationType.APPOINTMENT_REJECTED,
+              userType: 'practice',
+              request_id: result.requestId,
+              url: '/practiceUser/SelectNurses',
+            },
+          });
+          if (notificationSent) {
+            console.log(`✅ [Reject] Notification sent successfully`);
+          } else {
+            console.warn(`⚠️ [Reject] Notification function returned false - may not have been sent`);
+          }
+        } catch (err) {
+          console.error('❌ [Reject] Notification error:', err);
+        }
+
+        return res.status(200).json({
             success:true,
             message:"Selection rejected, Practice can select another user",
             data:result.data
         });
     }else{
-        res.status(201).json({
+        // Notify practice of confirmation
+        try {
+          console.log(`🔔 [Confirm] Notifying practice ${result.practiceId} about confirmation`);
+          const notificationSent = await sendNotificationToUser(result.practiceId, 'practice', {
+            title: 'Appointment Confirmed!',
+            body: `${result.locumName} confirmed the appointment.`,
+            data: {
+              type: NotificationType.APPOINTMENT_CONFIRMED,
+              userType: 'practice',
+              booking_id: result.bookingId,
+              url: '/practiceUser/myBookings',
+            },
+          });
+          if (notificationSent) {
+            console.log(`✅ [Confirm] Notification sent successfully`);
+          } else {
+            console.warn(`⚠️ [Confirm] Notification function returned false - may not have been sent`);
+          }
+        } catch (err) {
+          console.error('❌ [Confirm] Notification error:', err);
+        }
+
+        return res.status(201).json({
             success:true,
             message:"Booking confirmed successfully",
             data:result.data
