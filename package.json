@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-sw.js",
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",
