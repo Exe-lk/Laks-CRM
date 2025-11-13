@@ -103,9 +103,12 @@ export default async function handler(
     });
   } catch (error: any) {
     console.error("Create Notification Error:", error);
+    console.error("Error stack:", error.stack);
+    console.error("Error details:", JSON.stringify(error, null, 2));
     return res.status(500).json({
       error: "Internal server error",
       details: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 }
