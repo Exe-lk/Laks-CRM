@@ -53,7 +53,7 @@ export async function notifyNursesWithinRadius(
   }
 ): Promise<void> {
   try {
-    console.log(`🔔 [Radius] Notifying ${requiredRole}s within 30km of appointment ${appointmentData.request_id}`);
+    console.log(`🔔 [Radius] Notifying ${requiredRole}s within 35km of appointment ${appointmentData.request_id}`);
 
     const coords = parseCoordinates(appointmentLocation);
     if (!coords) {
@@ -64,7 +64,7 @@ export async function notifyNursesWithinRadius(
 
     const locums = await prisma.locumProfile.findMany({
       where: { employeeType: requiredRole },
-      select: { id: true, location: true, fullName: true },
+      select: { id: true, location: true, address: true, fullName: true },
     });
 
     console.log(`📍 [Radius] Found ${locums.length} ${requiredRole}s in database`);
@@ -75,21 +75,26 @@ export async function notifyNursesWithinRadius(
     }
 
     const nearbyLocums = locums.filter((locum) => {
-      const locumCoords = parseCoordinates(locum.location);
-      if (!locumCoords) return false;
+      // Try address first (seems to be where coordinates are stored), then fallback to location
+      const locumCoords = parseCoordinates(locum.address) || parseCoordinates(locum.location);
+      if (!locumCoords) {
+        console.warn(`⚠️ [Radius] Locum ${locum.id} (${locum.fullName}) has no valid coordinates in address or location fields`);
+        return false;
+      }
       const distance = calculateDistance(
         coords.lat,
         coords.lon,
         locumCoords.lat,
         locumCoords.lon
       );
-      return distance <= 30;
+      console.log(`📍 [Radius] Locum ${locum.fullName}: distance = ${distance.toFixed(2)}km`);
+      return distance <= 35;
     });
 
-    console.log(`📍 [Radius] ${nearbyLocums.length} within 30km`);
+    console.log(`📍 [Radius] ${nearbyLocums.length} within 35km`);
 
     if (nearbyLocums.length === 0) {
-      console.log('⚠️ [Radius] No locums within 30km radius');
+      console.log('⚠️ [Radius] No locums within 35km radius');
       return;
     }
 
