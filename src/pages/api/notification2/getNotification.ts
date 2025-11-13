@@ -12,9 +12,9 @@ export default async function handler(
   try {
     const { locumId, practiceId, branchId, status, page = "1", limit = "20" } = req.query;
 
-    const pageNumber = parseInt(page as string, 10);
-    const limitNumber = parseInt(limit as string, 10);
-    const skip = (pageNumber - 1) * limitNumber;
+    const pageNumber = parseInt(page as string, 10) || 1;
+    const limitNumber = Math.min(parseInt(limit as string, 10) || 20, 100); // Max 100 items per page
+    const skip = Math.max(0, (pageNumber - 1) * limitNumber);
 
     const where: any = {};
 
@@ -86,9 +86,12 @@ export default async function handler(
     });
   } catch (error: any) {
     console.error("Get Notifications Error:", error);
+    console.error("Error stack:", error.stack);
+    console.error("Error details:", JSON.stringify(error, null, 2));
     return res.status(500).json({
       error: "Internal server error",
       details: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 }

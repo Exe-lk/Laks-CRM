@@ -7,7 +7,6 @@ import image4 from "../../public/assests/ba6dc03ed4c4ed9261da138a6a60eb3f64f798e
 import Footer from "./components/footer";
 import { useRouter } from 'next/navigation';
 
-
 const Home = () => {
   const router = useRouter();
 

@@ -371,13 +371,7 @@ const WaitingList = () => {
                     const notificationResult = await createNotification(notificationData).unwrap();
                     console.log('Notification created successfully:', notificationResult);
                 } catch (notificationError: any) {
-                    Swal.fire({
-                        title: 'Warning',
-                        text: 'Appointment confirmed, but notification could not be sent. Please notify the practice manually.',
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#F59E0B'
-                    });
+                    console.error('Failed to create notification:', notificationError);
                 }
             }
 
@@ -385,7 +379,7 @@ const WaitingList = () => {
         } catch (error: any) {
             await Swal.fire({
                 title: 'Error',
-                text: error.message || 'Failed to process confirmation',
+                text: error.message || 'You have already have booking for this appointment time.',
                 icon: 'error',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#DC2626'
