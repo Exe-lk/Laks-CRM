@@ -1,6 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+// Load environment variables from .env.local if running locally
+if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  try {
+    require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
+  } catch (e) {
+    console.warn('dotenv not available, using existing environment variables');
+  }
+}
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -9,6 +18,11 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
+
+console.log('✅ Firebase config loaded:', {
+  projectId: firebaseConfig.projectId,
+  apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : 'MISSING'
+});
 
 const swContent = `// Service Worker for Firebase Cloud Messaging
 // This file is auto-generated at build time
