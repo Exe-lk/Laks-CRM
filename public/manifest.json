@@ -18,13 +18,13 @@
       "src": "/icons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "theme_color": "#3B82F6",
