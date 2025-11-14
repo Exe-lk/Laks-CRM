@@ -123,45 +123,45 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   const daysOfWeek = getDaysOfWeek(currentWeekStart);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 pt-24">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6 pt-20 sm:pt-24">
       <NavBar />
-      <div className="max-w-7xl mx-auto pt-32 pb-12">
+      <div className="max-w-7xl mx-auto pt-20 sm:pt-32 pb-6 sm:pb-12">
          <div className="text-center mb-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-black rounded-full mb-3 sm:mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+            <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text px-4">
            Timesheets 
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
           View your dental appointments, access your timesheet, and mark your attendance.
           </p>
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-2 mt-3 sm:mt-4">
             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-8">
+        <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 pt-12">My Bookings</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 pt-4 sm:pt-8 md:pt-12">My Bookings</h1>
+              <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-1">
                 Week of {formatDate(currentWeekStart)} - {formatDate(getWeekEnd(currentWeekStart))}
               </p>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <button
                 onClick={() => navigateWeek('prev')}
-                className="px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
+                className="px-3 sm:px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors text-sm sm:text-base whitespace-nowrap"
               >
                 ← Previous Week
               </button>
               <button
                 onClick={() => navigateWeek('next')}
-                className="px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors"
+                className="px-3 sm:px-4 py-2 bg-[#C3EAE7] text-black rounded-lg hover:bg-[#A9DBD9] transition-colors text-sm sm:text-base whitespace-nowrap"
               >
                 Next Week →
               </button>
@@ -170,28 +170,28 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
 
 
           {bookingsData?.data && (
-            <div className="bg-[#C3EAE7]/20 rounded-lg p-4 mb-6">
+            <div className="bg-[#C3EAE7]/20 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
               <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-900">
+                <div className="w-full">
+                  <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3">
                     Weekly Bookings Summary
                   </h3>
-                  <div className="mt-2 grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Bookings</p>
-                      <p className="text-xl font-bold text-black">
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="bg-white p-3 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-600">Total Bookings</p>
+                      <p className="text-lg sm:text-xl font-bold text-black">
                         {bookingsData.data.length}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Confirmed Bookings</p>
-                      <p className="text-xl font-bold text-black">
+                    <div className="bg-white p-3 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-600">Confirmed Bookings</p>
+                      <p className="text-lg sm:text-xl font-bold text-black">
                         {bookingsData.data.filter((booking: Booking) => booking.status === 'CONFIRMED').length}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">This Week</p>
-                      <p className="text-xl font-bold text-black">
+                    <div className="bg-white p-3 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-600">This Week</p>
+                      <p className="text-lg sm:text-xl font-bold text-black">
                         {getDaysOfWeek(currentWeekStart).reduce((count, day) => {
                           return count + getBookingsForDate(day).length;
                         }, 0)}
@@ -203,17 +203,17 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
             </div>
           )}
 
-          <div className="bg-[#C3EAE7]/10 rounded-lg p-4 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Weekly Calendar</h3>
-              <div className="flex items-center gap-4 text-xs">
+          <div className="bg-[#C3EAE7]/10 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-3">
+              <h3 className="text-base sm:text-lg font-semibold">Weekly Calendar</h3>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 bg-blue-50 border-2 border-blue-200 rounded"></div>
                   <span className="text-gray-600">Unlocked</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 bg-red-50 border-2 border-red-200 rounded"></div>
-                  <span className="text-gray-600">Locked (Future)</span>
+                  <span className="text-gray-600">Locked</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 bg-[#C3EAE7]/20 border-2 border-[#C3EAE7] rounded"></div>
@@ -221,10 +221,11 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-7 gap-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="text-center font-medium text-gray-700 py-2">
-                  {day}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                <div key={day} className="text-center font-medium text-gray-700 py-1 sm:py-2 text-xs sm:text-sm">
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.substring(0, 1)}</span>
                 </div>
               ))}
               {daysOfWeek.map((date, index) => {
@@ -254,33 +255,33 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
                     key={index}
                     onClick={() => handleDateClick(date)}
                     className={`
-                      p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md
+                      p-1 sm:p-2 md:p-3 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md min-h-[60px] sm:min-h-[80px]
                       ${isToday ? 'border-[#C3EAE7] bg-[#C3EAE7]/20' : 'border-gray-200 bg-white'}
                       ${hasBookings ? 'bg-blue-50 border-blue-200' : ''}
                       ${hasLockedBookings ? 'border-red-200 bg-red-50' : ''}
                     `}
                   >
                     <div className="text-center">
-                      <div className={`text-sm font-medium ${isToday ? 'text-black' : 'text-gray-900'}`}>
+                      <div className={`text-xs sm:text-sm font-medium ${isToday ? 'text-black' : 'text-gray-900'}`}>
                         {date.getDate()}
                       </div>
 
                       {hasBookings && (
-                        <div className="mt-1 text-xs space-y-1">
-                          <div className="text-blue-600 font-medium">
-                            {bookings.length} Booking{bookings.length > 1 ? 's' : ''}
+                        <div className="mt-1 text-xs space-y-0.5 sm:space-y-1">
+                          <div className="text-blue-600 font-medium text-[10px] sm:text-xs">
+                            {bookings.length} <span className="hidden sm:inline">Booking{bookings.length > 1 ? 's' : ''}</span>
                           </div>
                           {hasLockedBookings && (
-                            <div className="text-red-600 font-medium text-xs">
-                              🔒 Locked
+                            <div className="text-red-600 font-medium text-[10px] sm:text-xs">
+                              🔒 <span className="hidden sm:inline">Locked</span>
                             </div>
                           )}
-                          <div className="text-blue-500">
-                            Click to view details
+                          <div className="text-blue-500 text-[9px] sm:text-xs hidden sm:block">
+                            Click to view
                           </div>
-                          {bookings.map((booking, idx) => (
-                            <div key={idx} className="text-xs text-gray-600 truncate">
-                              {booking.booking_start_time} - {booking.location}
+                          {bookings.slice(0, 1).map((booking, idx) => (
+                            <div key={idx} className="text-[9px] sm:text-xs text-gray-600 truncate hidden md:block">
+                              {booking.booking_start_time}
                             </div>
                           ))}
                         </div>
@@ -954,30 +955,30 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2 border-b">
-          <h3 className="text-lg font-semibold">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-3 sm:mb-4 sticky top-0 bg-white pb-2 border-b">
+          <h3 className="text-base sm:text-lg font-semibold">
             Bookings for {selectedDate ? new Date(selectedDate).toLocaleDateString() : ''}
           </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl ml-2">
             ×
           </button>
         </div>
 
         {lockedClickAttempt && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg animate-pulse">
-            <p className="text-sm text-red-700 flex items-center gap-2">
-              <span>🔒</span>
+          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg animate-pulse">
+            <p className="text-xs sm:text-sm text-red-700 flex items-start gap-2">
+              <span className="flex-shrink-0">🔒</span>
               <span><strong>This booking is locked.</strong> Bookings unlock 30 minutes before the scheduled start time.</span>
             </p>
           </div>
         )}
 
         {bookings.length > 0 && bookings.every(b => !hasBookingStarted(b)) && (
-          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-            <p className="text-sm text-orange-700 flex items-center gap-2">
-              <span>⚠️</span>
+          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-xs sm:text-sm text-orange-700 flex items-start gap-2">
+              <span className="flex-shrink-0">⚠️</span>
               <span><strong>All bookings for this date are locked.</strong> Timesheets unlock 30 minutes before the job start time.</span>
             </p>
           </div>
@@ -994,7 +995,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                 return (
                   <div
                     key={booking.id}
-                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${
+                    className={`p-2 sm:p-3 md:p-4 border-2 rounded-lg transition-all duration-200 ${
                       !canSelect
                         ? 'border-gray-300 bg-gray-100 opacity-60 cursor-not-allowed'
                         : selectedBooking?.id === booking.id
@@ -1011,25 +1012,25 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                       }
                     }}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-gray-900">{booking.location}</h4>
+                          <h4 className="text-sm sm:text-base font-medium text-gray-900">{booking.location}</h4>
                         </div>
-                        <div className="mt-1 text-sm text-gray-600">
+                        <div className="mt-1 text-xs sm:text-sm text-gray-600">
                           <p>Time: {booking.booking_start_time} - {booking.booking_end_time}</p>
                           {booking.description && (
-                            <p className="mt-1">{booking.description}</p>
+                            <p className="mt-1 line-clamp-2">{booking.description}</p>
                           )}
                         </div>
-                        <div className="mt-2 flex items-center space-x-4">
-                          <span className={`px-2 py-1 rounded-full text-xs ${booking.status === 'CONFIRMED'
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs ${booking.status === 'CONFIRMED'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-yellow-100 text-yellow-800'
                             }`}>
                             {booking.status}
                           </span>
-                          <span className={`px-2 py-1 rounded-full text-xs ${isCompleted
+                          <span className={`px-2 py-1 rounded-full text-[10px] sm:text-xs ${isCompleted
                               ? 'bg-gray-100 text-gray-700'
                               : hasStarted
                                 ? 'bg-green-100 text-green-700'
@@ -1038,50 +1039,50 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             {isCompleted ? '✓ Completed' : hasStarted ? '✅ Can Fill' : '⏳ Upcoming'}
                           </span>
                           {!canSelect && (
-                            <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 flex items-center gap-1">
-                              🔒 Locked (Not Started)
+                            <span className="px-2 py-1 rounded-full text-[10px] sm:text-xs bg-red-100 text-red-800 flex items-center gap-1">
+                              🔒 <span className="hidden sm:inline">Locked (Not Started)</span><span className="sm:hidden">Locked</span>
                             </span>
                           )}
-                          <span className="text-xs text-gray-500">
+                          <span className="text-[10px] sm:text-xs text-gray-500 hidden md:inline">
                             Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                           </span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm font-medium text-gray-900">
+                      <div className="text-left sm:text-right">
+                        <span className="text-xs sm:text-sm font-medium text-gray-900">
                           Rate TBD
                         </span>
                       </div>
                     </div>
 
                     {selectedBooking?.id === booking.id && (
-                      <div className="mt-4 pt-4 border-t border-[#C3EAE7] bg-white rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-3">
-                          <h5 className="text-sm font-semibold text-gray-900">Time Tracking</h5>
-                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#C3EAE7] bg-white rounded-lg p-2 sm:p-3">
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <h5 className="text-xs sm:text-sm font-semibold text-gray-900">Time Tracking</h5>
+                          <div className="text-[10px] sm:text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                            Active
                           </div>
                         </div>
 
                         {isLoading && (
-                          <div className="mb-3 flex items-center text-blue-600">
-                            <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
-                            <span className="text-sm">Loading timesheet data...</span>
+                          <div className="mb-2 sm:mb-3 flex items-center text-blue-600">
+                            <div className="animate-spin inline-block w-3 h-3 sm:w-4 sm:h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                            <span className="text-xs sm:text-sm">Loading timesheet data...</span>
                           </div>
                         )}
 
-                        <div className="mb-3 p-2 bg-cyan-50 border border-cyan-200 rounded-lg">
-                          <p className="text-xs text-cyan-800">
+                        <div className="mb-2 sm:mb-3 p-2 bg-cyan-50 border border-cyan-200 rounded-lg">
+                          <p className="text-[10px] sm:text-xs text-cyan-800">
                             <strong>💡 Hours Calculation:</strong> Total hours = End time - Start time. 
                             If <strong>both</strong> lunch break times are entered, the lunch duration will be deducted. 
                             If only one lunch time is entered, it will be ignored.
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                            <div className="flex items-center space-x-1">
+                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1">
                               <input
                                 type="time"
                                 value={startTime}
@@ -1093,39 +1094,41 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 }}
                                 placeholder="--:--"
                                 disabled={isTimesheetLocked || isStartTimeSet}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                className="flex-1 px-2 py-1.5 sm:py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
-                              <button
-                                onClick={handleSetStartTimeNow}
-                                disabled={isTimesheetLocked || isLoading || isStartTimeSet}
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  isTimesheetLocked || isLoading || isStartTimeSet
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
-                                title="Set to current time"
-                              >
-                                Now
-                              </button>
-                              <button
-                                onClick={handleStartClick}
-                                disabled={(!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading}
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                                  (!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : isStartTimeSet
-                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                }`}
-                              >
-                                {isStartTimeSet ? 'Reset' : 'Set'}
-                              </button>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={handleSetStartTimeNow}
+                                  disabled={isTimesheetLocked || isLoading || isStartTimeSet}
+                                  className={`flex-1 sm:flex-none px-2 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    isTimesheetLocked || isLoading || isStartTimeSet
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
+                                  title="Set to current time"
+                                >
+                                  Now
+                                </button>
+                                <button
+                                  onClick={handleStartClick}
+                                  disabled={(!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading}
+                                  className={`flex-1 sm:flex-none px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    (!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : isStartTimeSet
+                                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                      : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                                >
+                                  {isStartTimeSet ? 'Reset' : 'Set'}
+                                </button>
+                              </div>
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">End Time</label>
-                            <div className="flex items-center space-x-1">
+                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">End Time</label>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1">
                               <input
                                 type="time"
                                 value={endTime}
@@ -1138,49 +1141,51 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId || isTimesheetLocked || isEndTimeSet}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                className="flex-1 px-2 py-1.5 sm:py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
-                              <button
-                                onClick={handleSetEndTimeNow}
-                                disabled={!isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet}
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
-                                title="Set to current time"
-                              >
-                                Now
-                              </button>
-                              <button
-                                onClick={handleEndClick}
-                                disabled={
-                                  (!isStartTimeSet && !isEndTimeSet) ||
-                                  (!endTime && !isEndTimeSet) ||
-                                  (!!timeValidationError && !isEndTimeSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                }
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                                  (!isStartTimeSet && !isEndTimeSet) ||
-                                  (!endTime && !isEndTimeSet) ||
-                                  (!!timeValidationError && !isEndTimeSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : isEndTimeSet
-                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                }`}
-                              >
-                                {isEndTimeSet ? 'Reset' : 'Set'}
-                              </button>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={handleSetEndTimeNow}
+                                  disabled={!isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet}
+                                  className={`flex-1 sm:flex-none px-2 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    !isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
+                                  title="Set to current time"
+                                >
+                                  Now
+                                </button>
+                                <button
+                                  onClick={handleEndClick}
+                                  disabled={
+                                    (!isStartTimeSet && !isEndTimeSet) ||
+                                    (!endTime && !isEndTimeSet) ||
+                                    (!!timeValidationError && !isEndTimeSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                  }
+                                  className={`flex-1 sm:flex-none px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    (!isStartTimeSet && !isEndTimeSet) ||
+                                    (!endTime && !isEndTimeSet) ||
+                                    (!!timeValidationError && !isEndTimeSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : isEndTimeSet
+                                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                      : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                                >
+                                  {isEndTimeSet ? 'Reset' : 'Set'}
+                                </button>
+                              </div>
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Break Start</label>
-                            <div className="flex items-center space-x-1">
+                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Break Start</label>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1">
                               <input
                                 type="time"
                                 value={lunchStartTime}
@@ -1192,61 +1197,63 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId || isTimesheetLocked || isBreakStartSet}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                className="flex-1 px-2 py-1.5 sm:py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
-                              <button
-                                onClick={handleSetLunchStartTimeNow}
-                                disabled={
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  isTimesheetLocked ||
-                                  isLoading ||
-                                  isBreakStartSet
-                                }
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  isTimesheetLocked ||
-                                  isLoading ||
-                                  isBreakStartSet
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
-                                title="Set to current time"
-                              >
-                                Now
-                              </button>
-                              <button
-                                onClick={handleLunchStartClick}
-                                disabled={
-                                  (!isStartTimeSet && !isBreakStartSet) ||
-                                  (!timesheetJobId && !isBreakStartSet) ||
-                                  (!lunchStartTime && !isBreakStartSet) ||
-                                  (!!timeValidationError && !isBreakStartSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                }
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                                  (!isStartTimeSet && !isBreakStartSet) ||
-                                  (!timesheetJobId && !isBreakStartSet) ||
-                                  (!lunchStartTime && !isBreakStartSet) ||
-                                  (!!timeValidationError && !isBreakStartSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : isBreakStartSet
-                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                }`}
-                              >
-                                {isBreakStartSet ? 'Reset' : 'Set'}
-                              </button>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={handleSetLunchStartTimeNow}
+                                  disabled={
+                                    !isStartTimeSet ||
+                                    !timesheetJobId ||
+                                    isTimesheetLocked ||
+                                    isLoading ||
+                                    isBreakStartSet
+                                  }
+                                  className={`flex-1 sm:flex-none px-2 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    !isStartTimeSet ||
+                                    !timesheetJobId ||
+                                    isTimesheetLocked ||
+                                    isLoading ||
+                                    isBreakStartSet
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
+                                  title="Set to current time"
+                                >
+                                  Now
+                                </button>
+                                <button
+                                  onClick={handleLunchStartClick}
+                                  disabled={
+                                    (!isStartTimeSet && !isBreakStartSet) ||
+                                    (!timesheetJobId && !isBreakStartSet) ||
+                                    (!lunchStartTime && !isBreakStartSet) ||
+                                    (!!timeValidationError && !isBreakStartSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                  }
+                                  className={`flex-1 sm:flex-none px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    (!isStartTimeSet && !isBreakStartSet) ||
+                                    (!timesheetJobId && !isBreakStartSet) ||
+                                    (!lunchStartTime && !isBreakStartSet) ||
+                                    (!!timeValidationError && !isBreakStartSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : isBreakStartSet
+                                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                      : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                                >
+                                  {isBreakStartSet ? 'Reset' : 'Set'}
+                                </button>
+                              </div>
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Break End</label>
-                            <div className="flex items-center space-x-1">
+                            <label className="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1">Break End</label>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1">
                               <input
                                 type="time"
                                 value={lunchEndTime}
@@ -1258,63 +1265,65 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 }}
                                 placeholder="--:--"
                                 disabled={!timesheetJobId || isTimesheetLocked || isBreakEndSet}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                className="flex-1 px-2 py-1.5 sm:py-1 text-xs sm:text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
-                              <button
-                                onClick={handleSetLunchEndTimeNow}
-                                disabled={
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  isTimesheetLocked ||
-                                  isLoading ||
-                                  isBreakEndSet
-                                }
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  isTimesheetLocked ||
-                                  isLoading ||
-                                  isBreakEndSet
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
-                                title="Set to current time"
-                              >
-                                Now
-                              </button>
-                              <button
-                                onClick={handleLunchEndClick}
-                                disabled={
-                                  (!isStartTimeSet && !isBreakEndSet) ||
-                                  (!timesheetJobId && !isBreakEndSet) ||
-                                  (!lunchEndTime && !isBreakEndSet) ||
-                                  (!!timeValidationError && !isBreakEndSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                }
-                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                                  (!isStartTimeSet && !isBreakEndSet) ||
-                                  (!timesheetJobId && !isBreakEndSet) ||
-                                  (!lunchEndTime && !isBreakEndSet) ||
-                                  (!!timeValidationError && !isBreakEndSet) ||
-                                  isTimesheetLocked ||
-                                  isLoading
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : isBreakEndSet
-                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                                    : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
-                                }`}
-                              >
-                                {isBreakEndSet ? 'Reset' : 'Set'}
-                              </button>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={handleSetLunchEndTimeNow}
+                                  disabled={
+                                    !isStartTimeSet ||
+                                    !timesheetJobId ||
+                                    isTimesheetLocked ||
+                                    isLoading ||
+                                    isBreakEndSet
+                                  }
+                                  className={`flex-1 sm:flex-none px-2 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    !isStartTimeSet ||
+                                    !timesheetJobId ||
+                                    isTimesheetLocked ||
+                                    isLoading ||
+                                    isBreakEndSet
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
+                                  title="Set to current time"
+                                >
+                                  Now
+                                </button>
+                                <button
+                                  onClick={handleLunchEndClick}
+                                  disabled={
+                                    (!isStartTimeSet && !isBreakEndSet) ||
+                                    (!timesheetJobId && !isBreakEndSet) ||
+                                    (!lunchEndTime && !isBreakEndSet) ||
+                                    (!!timeValidationError && !isBreakEndSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                  }
+                                  className={`flex-1 sm:flex-none px-3 py-1.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded transition-colors ${
+                                    (!isStartTimeSet && !isBreakEndSet) ||
+                                    (!timesheetJobId && !isBreakEndSet) ||
+                                    (!lunchEndTime && !isBreakEndSet) ||
+                                    (!!timeValidationError && !isBreakEndSet) ||
+                                    isTimesheetLocked ||
+                                    isLoading
+                                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                      : isBreakEndSet
+                                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                      : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
+                                  }`}
+                                >
+                                  {isBreakEndSet ? 'Reset' : 'Set'}
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
 
                         {timeValidationError && (
-                          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-xs text-red-700 flex items-center gap-1">
-                              <span>⚠️</span>
+                          <div className="mt-2 sm:mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-[10px] sm:text-xs text-red-700 flex items-start gap-1">
+                              <span className="flex-shrink-0">⚠️</span>
                               <span>{timeValidationError}</span>
                             </p>
                           </div>
@@ -1326,15 +1335,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           
                           if (calculatedHours !== null && !timeValidationError) {
                             return (
-                              <div className="mt-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
-                                <h6 className="text-xs font-semibold text-purple-900 mb-1">Hours Preview</h6>
+                              <div className="mt-2 sm:mt-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                                <h6 className="text-[10px] sm:text-xs font-semibold text-purple-900 mb-1">Hours Preview</h6>
                                 <div className="space-y-1">
-                                  <div className="flex justify-between text-xs">
+                                  <div className="flex justify-between text-[10px] sm:text-xs">
                                     <span className="text-purple-700">Estimated Total Hours:</span>
                                     <span className="font-medium text-purple-900">{calculatedHours.toFixed(2)} hours</span>
                                   </div>
                                   {lunchStartTime && lunchEndTime && (
-                                    <div className="flex justify-between text-xs">
+                                    <div className="flex justify-between text-[10px] sm:text-xs">
                                       <span className="text-purple-700">Lunch Break:</span>
                                       <span className="font-medium text-purple-900">
                                         {((timeToMinutes(lunchEndTime) - timeToMinutes(lunchStartTime)) / 60).toFixed(2)} hours deducted
@@ -1342,13 +1351,13 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                     </div>
                                   )}
                                   {hasIncompleteLunchBreak && (
-                                    <p className="text-xs text-orange-600 italic mt-1 flex items-center gap-1">
-                                      <span>ℹ️</span>
+                                    <p className="text-[9px] sm:text-xs text-orange-600 italic mt-1 flex items-start gap-1">
+                                      <span className="flex-shrink-0">ℹ️</span>
                                       <span>Only one lunch time entered - lunch break ignored in calculation</span>
                                     </p>
                                   )}
                                   {hourlyRate && (
-                                    <div className="flex justify-between text-xs pt-1 border-t border-purple-200">
+                                    <div className="flex justify-between text-[10px] sm:text-xs pt-1 border-t border-purple-200">
                                       <span className="text-purple-700 font-semibold">Estimated Pay:</span>
                                       <span className="font-bold text-green-700">£{(calculatedHours * hourlyRate).toFixed(2)}</span>
                                     </div>
@@ -1361,12 +1370,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                         })()}
 
                         {timesheetJobId && isEndTimeSet && (
-                          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                          <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
                             {!isTimesheetLocked ? (
                               <button
                                 onClick={handleFinalizeClick}
                                 disabled={isLoading || !!timeValidationError}
-                                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                className={`w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                                   isLoading || !!timeValidationError
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-emerald-500 text-white hover:bg-emerald-600'
@@ -1377,7 +1386,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             ) : (
                               <button
                                 onClick={() => setShowSignatureModal(true)}
-                                className="w-full sm:w-auto px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]"
+                                className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]"
                               >
                                 Open Signature
                               </button>
@@ -1385,21 +1394,21 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                           </div>
                         )}
 
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <div className="flex items-center gap-2 mb-2">
+                        <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200">
+                          <div className="flex items-center gap-2 mb-1 sm:mb-2">
                             <div className="w-2 h-2 bg-[#C3EAE7] rounded-full"></div>
-                            <p className="text-xs font-medium text-gray-900">Current Booking</p>
+                            <p className="text-[10px] sm:text-xs font-medium text-gray-900">Current Booking</p>
                           </div>
-                          <p className="text-xs text-gray-700 mb-1">
+                          <p className="text-[10px] sm:text-xs text-gray-700 mb-1">
                             <span className="font-medium">Scheduled:</span> {booking.booking_start_time} - {booking.booking_end_time}
                           </p>
-                          <p className="text-xs text-gray-700">
+                          <p className="text-[10px] sm:text-xs text-gray-700">
                             <span className="font-medium">Date:</span> {new Date(booking.booking_date as any).toLocaleDateString()}
                           </p>
                           {timesheetJobId && (
                             <div className="mt-2 pt-2 border-t border-gray-200">
-                              <p className="text-xs text-green-600 flex items-center gap-1">
-                                <span>✓</span>
+                              <p className="text-[10px] sm:text-xs text-green-600 flex items-start gap-1">
+                                <span className="flex-shrink-0">✓</span>
                                 <span>Timesheet job created - ID: {timesheetJobId.substring(0, 8)}...</span>
                               </p>
                             </div>
@@ -1407,27 +1416,27 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                         </div>
 
                         {hourlyRate !== null && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 bg-blue-50 p-2 rounded">
-                            <h6 className="text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
+                          <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200 bg-blue-50 p-2 rounded">
+                            <h6 className="text-[10px] sm:text-xs font-semibold text-blue-900 mb-1">Payment Details</h6>
                             <div className="space-y-1">
-                              <div className="flex justify-between text-xs">
+                              <div className="flex justify-between text-[10px] sm:text-xs">
                                 <span className="text-blue-700">Hourly Rate:</span>
                                 <span className="font-medium text-blue-900">£{hourlyRate.toFixed(2)}/hour</span>
                               </div>
                               {totalHours !== null && (
-                                <div className="flex justify-between text-xs">
+                                <div className="flex justify-between text-[10px] sm:text-xs">
                                   <span className="text-blue-700">Total Hours:</span>
                                   <span className="font-medium text-blue-900">{totalHours.toFixed(2)} hours</span>
                                 </div>
                               )}
                               {totalPay !== null && (
-                                <div className="flex justify-between text-xs pt-1 border-t border-blue-200">
+                                <div className="flex justify-between text-[10px] sm:text-xs pt-1 border-t border-blue-200">
                                   <span className="text-blue-700 font-semibold">Total Pay:</span>
                                   <span className="font-bold text-green-700">£{totalPay.toFixed(2)}</span>
                                 </div>
                               )}
                               {totalHours === null && (
-                                <p className="text-xs text-blue-600 italic mt-1">
+                                <p className="text-[9px] sm:text-xs text-blue-600 italic mt-1">
                                   ⏳ Total hours and pay will be calculated when end time is recorded
                                 </p>
                               )}
@@ -1448,28 +1457,28 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         </div>
 
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700"> {error}</p>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs sm:text-sm text-red-700"> {error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-700"> {success}</p>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-xs sm:text-sm text-green-700"> {success}</p>
           </div>
         )}
 
 
         {!selectedBooking && bookings.length > 0 && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="text-blue-600">ℹ️</div>
-              <h4 className="text-sm font-medium text-blue-900">No Booking Selected</h4>
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-2 mb-2">
+              <div className="text-blue-600 flex-shrink-0">ℹ️</div>
+              <h4 className="text-xs sm:text-sm font-medium text-blue-900">No Booking Selected</h4>
             </div>
-            <p className="text-sm text-blue-700 mb-2">
+            <p className="text-xs sm:text-sm text-blue-700 mb-2">
               Click on any unlocked booking to begin time tracking.
             </p>
-            <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+            <div className="text-[10px] sm:text-xs text-blue-600 bg-blue-100 p-2 rounded">
               <strong>Important:</strong> Bookings remain locked until 30 minutes before their scheduled start time. Once you are within that window you can select the booking and fill in your timesheet with your actual work hours.
             </div>
           </div>
@@ -1641,20 +1650,20 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">Submit Timesheet</h3>
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[60] p-2 sm:p-4">
+      <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Submit Timesheet</h3>
 
         {bookingDate && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
-            <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
+            <h4 className="text-xs sm:text-sm font-semibold text-blue-900 mb-2 sm:mb-3 flex items-center gap-2">
               <span>📅</span>
               <span>Timesheet Summary</span>
             </h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div className="bg-white p-2 rounded border border-blue-100">
-                <p className="text-xs text-gray-600 mb-1">Date</p>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-[10px] sm:text-xs text-gray-600 mb-1">Date</p>
+                <p className="text-xs sm:text-sm font-semibold text-gray-900">
                   {new Date(bookingDate).toLocaleDateString('en-US', { 
                     weekday: 'short', 
                     year: 'numeric', 
@@ -1665,20 +1674,20 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               </div>
               {startTime && (
                 <div className="bg-white p-2 rounded border border-blue-100">
-                  <p className="text-xs text-gray-600 mb-1">Start Time</p>
-                  <p className="text-sm font-semibold text-gray-900">{startTime}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 mb-1">Start Time</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900">{startTime}</p>
                 </div>
               )}
               {endTime && (
                 <div className="bg-white p-2 rounded border border-blue-100">
-                  <p className="text-xs text-gray-600 mb-1">End Time</p>
-                  <p className="text-sm font-semibold text-gray-900">{endTime}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 mb-1">End Time</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900">{endTime}</p>
                 </div>
               )}
               {lunchStartTime && lunchEndTime && (
                 <div className="bg-white p-2 rounded border border-blue-100">
-                  <p className="text-xs text-gray-600 mb-1">Lunch Break</p>
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-[10px] sm:text-xs text-gray-600 mb-1">Lunch Break</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900">
                     {lunchStartTime} - {lunchEndTime}
                   </p>
                 </div>
@@ -1688,20 +1697,20 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         )}
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">❌ {error}</p>
+          <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs sm:text-sm text-red-700">❌ {error}</p>
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700">
                 Staff Signature <span className="text-red-500">*</span>
               </label>
               <button
                 onClick={clearStaffSignature}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800"
                 disabled={isLoading}
               >
                 Clear
@@ -1711,22 +1720,22 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               <SignatureCanvas
                 ref={staffSignatureRef}
                 canvasProps={{
-                  className: 'w-full h-40 cursor-crosshair',
+                  className: 'w-full h-32 sm:h-40 cursor-crosshair',
                 }}
                 backgroundColor="rgb(255, 255, 255)"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Draw your signature above</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Draw your signature above</p>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Manager Signature <span className="text-gray-400"></span>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                Manager Signature <span className="text-gray-400 text-[10px] sm:text-xs">(Optional)</span>
               </label>
               <button
                 onClick={clearManagerSignature}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-800"
                 disabled={isLoading}
               >
                 Clear
@@ -1736,29 +1745,29 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               <SignatureCanvas
                 ref={managerSignatureRef}
                 canvasProps={{
-                  className: 'w-full h-40 cursor-crosshair',
+                  className: 'w-full h-32 sm:h-40 cursor-crosshair',
                 }}
                 backgroundColor="rgb(255, 255, 255)"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Manager can draw signature above</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Manager can draw signature above</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Manager ID <span className="text-gray-400"></span>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              Manager ID <span className="text-gray-400 text-[10px] sm:text-xs">(Optional)</span>
             </label>
             <input
               type="text"
               value={managerId}
               onChange={(e) => setManagerId(e.target.value)}
               placeholder="Manager's ID"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
+              className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C3EAE7] focus:border-transparent"
               disabled={isLoading}
             />
           </div>
 
-          <div className="text-xs bg-blue-50 p-3 rounded border border-blue-200 mt-2">
+          <div className="text-[10px] sm:text-xs bg-blue-50 p-2 sm:p-3 rounded border border-blue-200 mt-2">
             <p className="text-blue-800 font-medium">ℹ️ Important Information:</p>
             <ul className="mt-2 space-y-1 text-blue-700">
               <li>• <span className="font-medium">Each job has its own separate timesheet</span></li>
@@ -1769,9 +1778,9 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           </div>
 
           {isUploading && (
-            <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mt-4">
-              <h4 className="text-lg font-bold text-black mb-3">Uploading Signatures...</h4>
-              <div className="space-y-3">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200 mt-3 sm:mt-4">
+              <h4 className="text-sm sm:text-base md:text-lg font-bold text-black mb-2 sm:mb-3">Uploading Signatures...</h4>
+              <div className="space-y-2 sm:space-y-3">
                 {Array.from(uploadProgress.values()).map((progress) => (
                   <UploadProgress
                     key={progress.fileId}
@@ -1789,26 +1798,26 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               </div>
               
               {uploadProgress.size === 0 && (
-                <div className="text-center py-4">
-                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                  <p className="text-gray-600 mt-2 text-sm">Preparing signature uploads...</p>
+                <div className="text-center py-3 sm:py-4">
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-500"></div>
+                  <p className="text-gray-600 mt-2 text-xs sm:text-sm">Preparing signature uploads...</p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <div className="flex justify-end space-x-3 mt-6">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             disabled={isLoading}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className={`px-4 py-2 font-medium rounded-lg transition-colors ${
+            className={`w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
               isUploading 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
                 : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
