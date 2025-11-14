@@ -57,6 +57,43 @@ try {
     return self.registration.showNotification(notificationTitle, notificationOptions);
   });
   
+  // Handle push events (required for iOS)
+  self.addEventListener('push', (event) => {
+    console.log('[SW] Push event received:', event);
+    
+    let notificationData = {};
+    let notificationTitle = 'New Notification';
+    let notificationBody = '';
+    
+    if (event.data) {
+      try {
+        const payload = event.data.json();
+        notificationData = payload.data || {};
+        notificationTitle = payload.notification?.title || notificationTitle;
+        notificationBody = payload.notification?.body || notificationBody;
+      } catch (e) {
+        console.error('[SW] Error parsing push data:', e);
+        notificationBody = event.data.text();
+      }
+    }
+    
+    const uniqueTag = \`\${notificationData.type || 'notification'}_\${notificationData.request_id || notificationData.booking_id || ''}_\${Date.now()}\`;
+    
+    const notificationOptions = {
+      body: notificationBody,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      data: notificationData,
+      tag: uniqueTag,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(notificationTitle, notificationOptions)
+    );
+  });
+  
     // Handle notification clicks
     self.addEventListener('notificationclick', (event) => {
       console.log('[SW] Notification clicked:', event);

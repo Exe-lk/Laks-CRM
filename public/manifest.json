@@ -7,6 +7,7 @@
   "scope": "/",
   "lang": "en-US",
   "id": "/",
+  "gcm_sender_id": "30714062559",
   "icons": [
     {
       "src": "/icons/web-app-manifest-192x192.png",
