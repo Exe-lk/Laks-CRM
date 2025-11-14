@@ -132,7 +132,7 @@ const WaitingList = () => {
         } catch (error: any) {
             await Swal.fire({
                 title: 'Error!',
-                text: error.message || 'Failed to accept appointment. Please try again.',
+                text: error.message || 'You have already have booking for this appointment time.',
                 icon: 'error',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#EF4444'
