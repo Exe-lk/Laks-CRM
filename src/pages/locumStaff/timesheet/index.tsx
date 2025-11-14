@@ -639,6 +639,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   const handleStartClick = async () => {
+    // If already set, reset it
+    if (isStartTimeSet) {
+      setIsStartTimeSet(false);
+      return;
+    }
+
     if (!selectedBooking || !startTime || isTimesheetLocked) return;
 
     setIsLoading(true);
@@ -732,6 +738,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   const handleEndClick = async () => {
+    // If already set, reset it
+    if (isEndTimeSet) {
+      setIsEndTimeSet(false);
+      return;
+    }
+
     if (!timesheetJobId || !selectedBooking || !endTime || isTimesheetLocked) return;
 
     setIsLoading(true);
@@ -783,7 +795,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
         ? `, Total Pay: £${updateData.data.job.totalPay.toFixed(2)}`
         : '';
 
-      setSuccess(`End time recorded successfully!${hoursText}${payText} Click "Finalize & Sign" to continue.`);
+      setSuccess(`End time recorded successfully!${hoursText}${payText} Click "Submit" to continue.`);
       setIsEndTimeSet(true);
       setTimeValidationError(null);
     } catch (err: any) {
@@ -807,6 +819,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   const handleLunchStartClick = async () => {
+    // If already set, reset it
+    if (isBreakStartSet) {
+      setIsBreakStartSet(false);
+      return;
+    }
+
     if (!timesheetJobId || !selectedBooking || !lunchStartTime || isTimesheetLocked) return;
 
     setIsLoading(true);
@@ -865,6 +883,12 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
   };
 
   const handleLunchEndClick = async () => {
+    // If already set, reset it
+    if (isBreakEndSet) {
+      setIsBreakEndSet(false);
+      return;
+    }
+
     if (!timesheetJobId || !selectedBooking || !lunchEndTime || isTimesheetLocked) return;
 
     setIsLoading(true);
@@ -1063,19 +1087,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 value={startTime}
                                 onChange={(e) => {
                                   setStartTime(e.target.value);
-                                setIsStartTimeSet(false);
+                                  setIsStartTimeSet(false);
                                   const validationError = validateTimeOrder(e.target.value, lunchStartTime, lunchEndTime, endTime);
                                   setTimeValidationError(validationError);
                                 }}
                                 placeholder="--:--"
-                              disabled={isTimesheetLocked}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                disabled={isTimesheetLocked || isStartTimeSet}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
                                 onClick={handleSetStartTimeNow}
-                              disabled={isTimesheetLocked || isLoading}
+                                disabled={isTimesheetLocked || isLoading || isStartTimeSet}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  isTimesheetLocked || isLoading
+                                  isTimesheetLocked || isLoading || isStartTimeSet
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                 }`}
@@ -1085,14 +1109,16 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleStartClick}
-                              disabled={!startTime || !!timeValidationError || isTimesheetLocked || isLoading}
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !startTime || !!timeValidationError || isTimesheetLocked || isLoading
+                                disabled={(!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading}
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                                  (!startTime && !isStartTimeSet) || (!!timeValidationError && !isStartTimeSet) || isTimesheetLocked || isLoading
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : isStartTimeSet
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
                               >
-                                {isStartTimeSet ? '✓ Set' : 'Set'}
+                                {isStartTimeSet ? 'Reset' : 'Set'}
                               </button>
                             </div>
                           </div>
@@ -1106,19 +1132,19 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 onChange={(e) => {
                                   const newEndTime = e.target.value;
                                   setEndTime(newEndTime);
-                                setIsEndTimeSet(false);
+                                  setIsEndTimeSet(false);
                                   const validationError = validateTimeOrder(startTime, lunchStartTime, lunchEndTime, newEndTime);
                                   setTimeValidationError(validationError);
                                 }}
                                 placeholder="--:--"
-                              disabled={!timesheetJobId || isTimesheetLocked}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                disabled={!timesheetJobId || isTimesheetLocked || isEndTimeSet}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
                                 onClick={handleSetEndTimeNow}
-                              disabled={!isStartTimeSet || isTimesheetLocked || isLoading}
+                                disabled={!isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet}
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet || isTimesheetLocked || isLoading
+                                  !isStartTimeSet || isTimesheetLocked || isLoading || isEndTimeSet
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                 }`}
@@ -1128,24 +1154,26 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               </button>
                               <button
                                 onClick={handleEndClick}
-                              disabled={
-                                !isStartTimeSet ||
-                                !endTime ||
-                                !!timeValidationError ||
-                                isTimesheetLocked ||
-                                isLoading
-                              }
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet ||
-                                  !endTime ||
-                                  !!timeValidationError ||
+                                disabled={
+                                  (!isStartTimeSet && !isEndTimeSet) ||
+                                  (!endTime && !isEndTimeSet) ||
+                                  (!!timeValidationError && !isEndTimeSet) ||
+                                  isTimesheetLocked ||
+                                  isLoading
+                                }
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                                  (!isStartTimeSet && !isEndTimeSet) ||
+                                  (!endTime && !isEndTimeSet) ||
+                                  (!!timeValidationError && !isEndTimeSet) ||
                                   isTimesheetLocked ||
                                   isLoading
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : isEndTimeSet
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
                               >
-                                {isEndTimeSet ? '✓ Set' : 'Set'}
+                                {isEndTimeSet ? 'Reset' : 'Set'}
                               </button>
                             </div>
                           </div>
@@ -1158,13 +1186,13 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 value={lunchStartTime}
                                 onChange={(e) => {
                                   setLunchStartTime(e.target.value);
-                                setIsBreakStartSet(false);
+                                  setIsBreakStartSet(false);
                                   const validationError = validateTimeOrder(startTime, e.target.value, lunchEndTime, endTime);
                                   setTimeValidationError(validationError);
                                 }}
                                 placeholder="--:--"
-                              disabled={!timesheetJobId || isTimesheetLocked}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                disabled={!timesheetJobId || isTimesheetLocked || isBreakStartSet}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
                                 onClick={handleSetLunchStartTimeNow}
@@ -1172,13 +1200,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                   !isStartTimeSet ||
                                   !timesheetJobId ||
                                   isTimesheetLocked ||
-                                  isLoading
+                                  isLoading ||
+                                  isBreakStartSet
                                 }
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                                   !isStartTimeSet ||
                                   !timesheetJobId ||
                                   isTimesheetLocked ||
-                                  isLoading
+                                  isLoading ||
+                                  isBreakStartSet
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                 }`}
@@ -1189,25 +1219,27 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <button
                                 onClick={handleLunchStartClick}
                                 disabled={
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  !lunchStartTime ||
-                                  !!timeValidationError ||
+                                  (!isStartTimeSet && !isBreakStartSet) ||
+                                  (!timesheetJobId && !isBreakStartSet) ||
+                                  (!lunchStartTime && !isBreakStartSet) ||
+                                  (!!timeValidationError && !isBreakStartSet) ||
                                   isTimesheetLocked ||
                                   isLoading
                                 }
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  !lunchStartTime ||
-                                  !!timeValidationError ||
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                                  (!isStartTimeSet && !isBreakStartSet) ||
+                                  (!timesheetJobId && !isBreakStartSet) ||
+                                  (!lunchStartTime && !isBreakStartSet) ||
+                                  (!!timeValidationError && !isBreakStartSet) ||
                                   isTimesheetLocked ||
                                   isLoading
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : isBreakStartSet
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
                               >
-                                {isBreakStartSet ? '✓ Set' : 'Set'}
+                                {isBreakStartSet ? 'Reset' : 'Set'}
                               </button>
                             </div>
                           </div>
@@ -1220,13 +1252,13 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                 value={lunchEndTime}
                                 onChange={(e) => {
                                   setLunchEndTime(e.target.value);
-                                setIsBreakEndSet(false);
+                                  setIsBreakEndSet(false);
                                   const validationError = validateTimeOrder(startTime, lunchStartTime, e.target.value, endTime);
                                   setTimeValidationError(validationError);
                                 }}
                                 placeholder="--:--"
-                              disabled={!timesheetJobId || isTimesheetLocked}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
+                                disabled={!timesheetJobId || isTimesheetLocked || isBreakEndSet}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white disabled:bg-gray-100"
                               />
                               <button
                                 onClick={handleSetLunchEndTimeNow}
@@ -1234,13 +1266,15 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                   !isStartTimeSet ||
                                   !timesheetJobId ||
                                   isTimesheetLocked ||
-                                  isLoading
+                                  isLoading ||
+                                  isBreakEndSet
                                 }
                                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                                   !isStartTimeSet ||
                                   !timesheetJobId ||
                                   isTimesheetLocked ||
-                                  isLoading
+                                  isLoading ||
+                                  isBreakEndSet
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                                 }`}
@@ -1251,25 +1285,27 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                               <button
                                 onClick={handleLunchEndClick}
                                 disabled={
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  !lunchEndTime ||
-                                  !!timeValidationError ||
+                                  (!isStartTimeSet && !isBreakEndSet) ||
+                                  (!timesheetJobId && !isBreakEndSet) ||
+                                  (!lunchEndTime && !isBreakEndSet) ||
+                                  (!!timeValidationError && !isBreakEndSet) ||
                                   isTimesheetLocked ||
                                   isLoading
                                 }
-                                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                                  !isStartTimeSet ||
-                                  !timesheetJobId ||
-                                  !lunchEndTime ||
-                                  !!timeValidationError ||
+                                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                                  (!isStartTimeSet && !isBreakEndSet) ||
+                                  (!timesheetJobId && !isBreakEndSet) ||
+                                  (!lunchEndTime && !isBreakEndSet) ||
+                                  (!!timeValidationError && !isBreakEndSet) ||
                                   isTimesheetLocked ||
                                   isLoading
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : isBreakEndSet
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
                                     : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9]'
                                 }`}
                               >
-                                {isBreakEndSet ? '✓ Set' : 'Set'}
+                                {isBreakEndSet ? 'Reset' : 'Set'}
                               </button>
                             </div>
                           </div>
@@ -1336,7 +1372,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                                     : 'bg-emerald-500 text-white hover:bg-emerald-600'
                                 }`}
                               >
-                                Finalize &amp; Sign
+                                Submit
                               </button>
                             ) : (
                               <button
@@ -1727,9 +1763,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             <ul className="mt-2 space-y-1 text-blue-700">
               <li>• <span className="font-medium">Each job has its own separate timesheet</span></li>
               <li>• By signing, you confirm that the time entries for this job are accurate</li>
-              <li>• Manager signature and ID are optional at this stage</li>
               <li>• <span className="font-medium">If both manager signature and ID are provided</span>, the timesheet will be automatically approved and locked</li>
-              <li>• If manager fields are left empty, the timesheet will be submitted for approval</li>
               <li>• Signatures will be saved as images</li>
             </ul>
           </div>
