@@ -5,7 +5,14 @@ try {
     importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
   
     // Initialize Firebase
-    firebase.initializeApp({});
+    firebase.initializeApp({
+  "apiKey": "AIzaSyDi31YC2HPGcI5Ml9JEYsW5KJ7WkTVFioA",
+  "authDomain": "laks-7e516.firebaseapp.com",
+  "projectId": "laks-7e516",
+  "storageBucket": "laks-7e516.firebasestorage.app",
+  "messagingSenderId": "30714062559",
+  "appId": "1:30714062559:web:825a390815a77cfe4eab6a"
+});
   
     const messaging = firebase.messaging();
   
@@ -29,6 +36,43 @@ try {
     };
 
     return self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+  
+  // Handle push events (required for iOS)
+  self.addEventListener('push', (event) => {
+    console.log('[SW] Push event received:', event);
+    
+    let notificationData = {};
+    let notificationTitle = 'New Notification';
+    let notificationBody = '';
+    
+    if (event.data) {
+      try {
+        const payload = event.data.json();
+        notificationData = payload.data || {};
+        notificationTitle = payload.notification?.title || notificationTitle;
+        notificationBody = payload.notification?.body || notificationBody;
+      } catch (e) {
+        console.error('[SW] Error parsing push data:', e);
+        notificationBody = event.data.text();
+      }
+    }
+    
+    const uniqueTag = `${notificationData.type || 'notification'}_${notificationData.request_id || notificationData.booking_id || ''}_${Date.now()}`;
+    
+    const notificationOptions = {
+      body: notificationBody,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      data: notificationData,
+      tag: uniqueTag,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(notificationTitle, notificationOptions)
+    );
   });
   
     // Handle notification clicks

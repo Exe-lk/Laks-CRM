@@ -1,10 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-
-// Load environment variables from .env.local if running locally
 if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
   try {
-    require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
+    require('dotenv').config({ path: path.join(__dirname, '../.env') });
   } catch (e) {
     console.warn('dotenv not available, using existing environment variables');
   }

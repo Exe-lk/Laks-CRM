@@ -55,6 +55,13 @@ function NotificationInitializer() {
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      // Force update the service worker on page load
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          registration.update();
+        });
+      });
+
       navigator.serviceWorker
         .register('/firebase-messaging-sw.js', {
           scope: '/',
@@ -62,13 +69,16 @@ export default function App({ Component, pageProps }: AppProps) {
         .then((registration) => {
           console.log('Service Worker registered successfully:', registration.scope);
           
+          // Force an immediate update check
+          registration.update();
+          
           // Check for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('New service worker available');
+                  console.log('✅ New service worker installed and ready');
                 }
               });
             }
