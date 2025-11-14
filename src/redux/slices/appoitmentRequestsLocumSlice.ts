@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithReauth } from '@/redux/baseQueryWithReauth';
 
 export interface AvailableAppointmentRequest {
   request_id: string;
@@ -204,16 +205,7 @@ export interface CheckIgnoredResponse {
 
 export const appointmentRequestsLocumApiSlice = createApi({
   reducerPath: 'appointmentRequestsLocumApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/appointment`,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQueryWithReauth(`${process.env.NEXT_PUBLIC_SITE_URL}/api/appointment`),
   tagTypes: ['AvailableRequests', 'PendingConfirmations', 'ApplicationHistory', 'IgnoredAppointments'],
   endpoints: (builder) => ({
     getAvailableRequests: builder.query<AvailableRequestsResponse, { locum_id: string }>({

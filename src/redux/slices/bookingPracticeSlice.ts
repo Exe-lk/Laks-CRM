@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithReauth } from '@/redux/baseQueryWithReauth';
 
 export interface Booking {
   id?: string;
@@ -25,17 +26,7 @@ export interface ErrorResponse {
 
 export const bookingApiSlice = createApi({
   reducerPath: 'bookingApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/booking`,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('token');
-      console.log('Token from localStorage:', token); 
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQueryWithReauth(`${process.env.NEXT_PUBLIC_SITE_URL}/api/booking`),
   tagTypes: ['Booking'],
   endpoints: (builder) => ({
     getBookings: builder.query<any, { userId: string; userType: 'locum' | 'practice' | 'branch' }>({

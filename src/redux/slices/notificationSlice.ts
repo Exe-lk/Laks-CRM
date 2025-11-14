@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createBaseQueryWithReauth } from '@/redux/baseQueryWithReauth';
 
 export interface Notification {
   id: string;
@@ -60,16 +61,7 @@ export interface UpdateNotificationParams {
 
 export const notificationApiSlice = createApi({
   reducerPath: 'notificationApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/notification2`,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQueryWithReauth(`${process.env.NEXT_PUBLIC_SITE_URL}/api/notification2`),
   tagTypes: ['Notification'],
   endpoints: (builder) => ({
     getNotifications: builder.query<NotificationResponse, GetNotificationsParams>({
