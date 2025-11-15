@@ -67,6 +67,11 @@ const Home = () => {
     bookingDate.setHours(0, 0, 0, 0);
     return bookingDate < today;
   }).length;
+  const futureBookings = bookingsData.filter((booking: any) => {
+    const bookingDate = new Date(booking.booking_date);
+    bookingDate.setHours(0, 0, 0, 0);
+    return bookingDate >= today && booking.status === 'CONFIRMED';
+  }).length;
 
   const totalPendingConfirmations = pendingConfirmations?.data?.pending_confirmations?.length || 0;
   const totalApplicationHistory = applicationHistory?.data?.length || 0;
@@ -74,7 +79,6 @@ const Home = () => {
 
   const isLoggedIn = !!profile?.id;
 
-  // Initialize push notifications
   usePushNotifications(profile?.id || null, 'locum');
 
   return (
@@ -165,7 +169,7 @@ const Home = () => {
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{acceptedBookings-pastBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{futureBookings}</span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Future & Ongoing Bookings</p>
