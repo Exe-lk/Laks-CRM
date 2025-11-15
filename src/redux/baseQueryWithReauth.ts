@@ -1,6 +1,6 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { refreshAccessToken, getValidToken } from '@/utils/tokenRefresh';
+import { refreshAccessToken, getValidToken, stopTokenRefreshMonitor } from '@/utils/tokenRefresh';
 
 /**
  * Creates a base query with automatic token refresh on 401 errors
@@ -44,6 +44,8 @@ export const createBaseQueryWithReauth = (baseUrl: string): BaseQueryFn<
       } else {
         console.error('❌ Token refresh failed, redirecting to login...');
         if (typeof window !== 'undefined') {
+          stopTokenRefreshMonitor();
+          
           localStorage.removeItem('token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('profile');

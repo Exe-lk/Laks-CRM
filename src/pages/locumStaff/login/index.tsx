@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import { useLoginMutation } from '../../../redux/slices/locumProfileSlice';
 import Swal from 'sweetalert2';
-import { setSessionExpiry } from '@/utils/sessionManager';
+import { startTokenRefreshMonitor } from '@/utils/tokenRefresh';
 
 interface LoginFormValues {
   email: string;
@@ -64,20 +64,26 @@ const LoginForm = () => {
           if (accessToken) {
             localStorage.setItem('token', accessToken);
             console.log('Stored accessToken:', accessToken); 
-            setSessionExpiry();
           } else if (session?.access_token) {
             localStorage.setItem('token', session.access_token);
             console.log('Stored session access_token:', session.access_token);
-            setSessionExpiry();
           }
-
+          
           if (session?.refresh_token) {
             localStorage.setItem('refresh_token', session.refresh_token);
+          }
+          
+          if (session?.expires_at) {
+            const expiryMs = session.expires_at * 1000;
+            localStorage.setItem('sessionExpiry', expiryMs.toString());
+            console.log('Session expiry saved:', new Date(expiryMs).toLocaleString());
           }
 
           localStorage.setItem('locumId', JSON.stringify(result.data.profile.id));
           localStorage.setItem('profile', JSON.stringify(result.data.profile));
           console.log(result.data.profile)
+          
+          startTokenRefreshMonitor();
 
           await Swal.fire({
             title: 'Login Successful!',

@@ -19,7 +19,7 @@ function addRefreshSubscriber(callback: (token: string) => void) {
 
 /**
  * Refreshes the Supabase access token using the refresh token stored in localStorage
- * This is called when we get a 401 error (token expired)
+ * This is called when we get a 401 error (token expired) or proactively before expiry
  * @returns The new access token or null if refresh failed
  */
 export async function refreshAccessToken(): Promise<string | null> {
@@ -43,7 +43,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   isRefreshing = true;
 
   try {
-    console.log('🔄 Token expired, refreshing access token...');
+    console.log('🔄 Refreshing access token...');
     
     const { data, error } = await supabaseClient.auth.refreshSession({
       refresh_token: refreshToken
@@ -58,14 +58,18 @@ export async function refreshAccessToken(): Promise<string | null> {
     if (data?.session?.access_token) {
       const newAccessToken = data.session.access_token;
       const newRefreshToken = data.session.refresh_token;
+      const expiresAt = data.session.expires_at;
 
       localStorage.setItem('token', newAccessToken);
       if (newRefreshToken) {
         localStorage.setItem('refresh_token', newRefreshToken);
       }
-
-      console.log('✅ Token refreshed successfully');
       
+      if (expiresAt) {
+        localStorage.setItem('sessionExpiry', (expiresAt * 1000).toString());
+        console.log('✅ Token refreshed successfully, new expiry:', new Date(expiresAt * 1000).toLocaleString());
+      }
+
       isRefreshing = false;
       onRefreshed(newAccessToken);
       
@@ -82,22 +86,30 @@ export async function refreshAccessToken(): Promise<string | null> {
 }
 
 /**
- * Checks if the current token is expired or about to expire
+ * Checks if the current token is expired or about to expire (within 5 minutes)
  * @returns true if token needs refresh
  */
 export function shouldRefreshToken(): boolean {
   if (typeof window === 'undefined') return false;
 
   const token = localStorage.getItem('token');
-  if (!token) return false;
+  const sessionExpiry = localStorage.getItem('sessionExpiry');
+  
+  if (!token || !sessionExpiry) return false;
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000; 
+    const expiryTime = parseInt(sessionExpiry, 10);
     const now = Date.now();
     
     const bufferTime = 5 * 60 * 1000;
-    return (exp - now) < bufferTime;
+    const shouldRefresh = (expiryTime - now) < bufferTime;
+    
+    if (shouldRefresh) {
+      const minutesLeft = Math.floor((expiryTime - now) / 1000 / 60);
+      console.log(`⏰ Token expiring in ${minutesLeft} minutes, refreshing...`);
+    }
+    
+    return shouldRefresh;
   } catch (error) {
     console.error('Error checking token expiration:', error);
     return false;
@@ -123,5 +135,54 @@ export async function getValidToken(): Promise<string | null> {
   }
 
   return currentToken;
+}
+
+let tokenCheckInterval: NodeJS.Timeout | null = null;
+
+/**
+ * Starts a background interval that checks and refreshes the token every minute
+ * This ensures tokens are refreshed before they expire
+ */
+export function startTokenRefreshMonitor(): void {
+  if (typeof window === 'undefined') return;
+  
+  if (tokenCheckInterval) {
+    clearInterval(tokenCheckInterval);
+  }
+  
+  console.log('🔐 Starting token refresh monitor...');
+  
+  checkAndRefreshToken();
+  
+  tokenCheckInterval = setInterval(() => {
+    checkAndRefreshToken();
+  }, 60000);
+}
+
+/**
+ * Stops the token refresh monitor
+ */
+export function stopTokenRefreshMonitor(): void {
+  if (tokenCheckInterval) {
+    clearInterval(tokenCheckInterval);
+    tokenCheckInterval = null;
+    console.log('🔐 Token refresh monitor stopped');
+  }
+}
+
+/**
+ * Internal function to check and refresh token if needed
+ */
+async function checkAndRefreshToken(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  
+  const token = localStorage.getItem('token');
+  const sessionExpiry = localStorage.getItem('sessionExpiry');
+  
+  if (!token || !sessionExpiry) return;
+  
+  if (shouldRefreshToken()) {
+    await refreshAccessToken();
+  }
 }
 
