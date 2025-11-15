@@ -1,3 +1,5 @@
+import { stopTokenRefreshMonitor } from "./tokenRefresh";
+
 const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; 
 const SESSION_EXPIRY_KEY = "sessionExpiry";
 
@@ -33,6 +35,8 @@ export const getSessionExpiry = (): number | null => {
 
 export const clearSessionStorage = (): void => {
   if (typeof window === "undefined") return;
+
+  stopTokenRefreshMonitor();
 
   for (const key of SESSION_STORAGE_KEYS) {
     window.localStorage.removeItem(key);

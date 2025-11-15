@@ -6,6 +6,38 @@ import ProtectedRoute from "../pages/components/ProtectedRoute/ProtectedRoute";
 import { useEffect, useState } from "react";
 import { usePushNotifications } from "@/hooks/useNotifications";
 import { UserType } from "@/types/notifications";
+import { startTokenRefreshMonitor, stopTokenRefreshMonitor } from "@/utils/tokenRefresh";
+
+function TokenRefreshInitializer() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkAndStartMonitor = () => {
+      const token = localStorage.getItem('token');
+      const refreshToken = localStorage.getItem('refresh_token');
+      const sessionExpiry = localStorage.getItem('sessionExpiry');
+      
+      if (token && refreshToken && sessionExpiry) {
+        console.log('🔐 User is logged in, starting token refresh monitor...');
+        startTokenRefreshMonitor();
+      } else {
+        console.log('🔓 No active session found');
+        stopTokenRefreshMonitor();
+      }
+    };
+
+    checkAndStartMonitor();
+
+    window.addEventListener('storage', checkAndStartMonitor);
+    
+    return () => {
+      window.removeEventListener('storage', checkAndStartMonitor);
+      stopTokenRefreshMonitor();
+    };
+  }, []);
+
+  return null;
+}
 
 function NotificationInitializer() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -23,7 +55,6 @@ function NotificationInitializer() {
           const parsedProfile = JSON.parse(profile);
           setUserId(parsedProfile.id || null);
           
-          // Determine user type from userRole
           if (userRole === 'locum') {
             setUserType('locum');
           } else if (userRole === 'practice' || userRole === 'practiceAdmin') {
@@ -37,16 +68,13 @@ function NotificationInitializer() {
       }
     };
 
-    // Check immediately
     checkUser();
 
-    // Listen for storage changes (when user logs in on another tab or logs out)
     window.addEventListener('storage', checkUser);
     
     return () => window.removeEventListener('storage', checkUser);
   }, []);
 
-  // Initialize notifications if user is logged in
   usePushNotifications(userId, userType || 'locum');
 
   return null;
@@ -55,7 +83,6 @@ function NotificationInitializer() {
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      // Force update the service worker on page load
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => {
           registration.update();
@@ -69,10 +96,8 @@ export default function App({ Component, pageProps }: AppProps) {
         .then((registration) => {
           console.log('Service Worker registered successfully:', registration.scope);
           
-          // Force an immediate update check
           registration.update();
           
-          // Check for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
@@ -99,6 +124,7 @@ export default function App({ Component, pageProps }: AppProps) {
   
   return (
     <Provider store={store}>
+      <TokenRefreshInitializer />
       <NotificationInitializer />
       <ProtectedRoute>
         <Component {...pageProps} />
