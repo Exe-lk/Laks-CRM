@@ -2,13 +2,11 @@ import { supabase } from "@/lib/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSpecialityDisplayName } from "@/lib/enums";
-import { applyCors } from "@/lib/api-cors";
 
 const prisma = new PrismaClient();
 
 export default async function handler(req:NextApiRequest, res:NextApiResponse) {
     try {
-        if(applyCors(req, res)) return;
         const authHeader = req.headers.authorization;
         if(!authHeader){
             return res.status(401).json({error: "Authorization headers are missing"})

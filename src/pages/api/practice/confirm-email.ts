@@ -1,13 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
-import { applyCors } from "@/lib/api-cors";
 
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if(applyCors(req, res)) return;
   try {
     switch (req.method) {
       

@@ -1,13 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
-import { applyCors } from "@/lib/api-cors";
+
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if(applyCors(req, res)) return;
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
