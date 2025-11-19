@@ -650,10 +650,6 @@ const WaitingList = () => {
                                                                 </div>
                                                             )}
                                                             <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                                <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                                {confirmation.practice.location}
-                                                            </div>
-                                                            <div className="text-sm text-gray-500 flex items-center mt-1">
                                                                 <FaPhoneAlt className="mr-1 text-gray-400" />
                                                                 {confirmation.practice.telephone}
                                                             </div>
@@ -853,10 +849,6 @@ const WaitingList = () => {
                                                                 Branch: {application.request.branch.name}
                                                             </div>
                                                         )}
-                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                            <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                            {application.request.practice.location}
-                                                        </div>
                                                         <div className="text-sm text-gray-500 flex items-center mt-1">
                                                             <FaPhoneAlt className="mr-1 text-gray-400" />
                                                             {application.request.practice.telephone}

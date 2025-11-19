@@ -685,9 +685,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         {userType === 'locum' ? (
                           <div>
                             <div className="font-medium text-gray-900">{booking.practice?.name}</div>
-                            {booking.practice?.location && (
-                              <div className="text-xs text-gray-500">{booking.practice.location}</div>
-                            )}
+                           
                           </div>
                         ) : (
                           <div>
