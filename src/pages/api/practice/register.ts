@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue, getSpecialityDisplayName } from "@/lib/enums";
 
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
