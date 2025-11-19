@@ -6,7 +6,7 @@ import {
   hasSessionExpired,
 } from "@/utils/sessionManager";
 
-const publicRoutes = ["/","/components/aboutus", "/components/dentalpractices", "/components/dentalnurses", "/components/hygienist", "/components/accounting", "/components/contactus", "/locumStaff/login", "/locumStaff/register","/practiceUser/practiceRegister","/practiceUser/practiceLogin","/branch/login"];
+const publicRoutes = ["/","/components/aboutus", "/components/dentalpractices", "/components/dentalnurses", "/components/hygienist", "/components/accounting", "/components/contactus", "/locumStaff/login", "/locumStaff/register","/practiceUser/practiceRegister","/practiceUser/practiceLogin","/branch/login","/resetPassword"];
 
 export default function ProtectedRoute({
   children,
