@@ -3,10 +3,12 @@ import { PrismaClient } from '@prisma/client';
 import { supabase } from "@/lib/supabase";
 import { scheduleAutoCancellation } from '@/lib/autoCancelManager';
 import { notifyNursesWithinRadius } from '@/lib/notificationHelpers';
+import { applyCors } from '@/lib/api-cors';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if(applyCors(req, res)) return;
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
