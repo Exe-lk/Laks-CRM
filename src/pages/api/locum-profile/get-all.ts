@@ -1,4 +1,3 @@
-import { applyCors } from "@/lib/api-cors";
 import { getSpecialityDisplayName } from "@/lib/enums";
 import { prisma } from "@/lib/prisma";
 import { count } from "console";
