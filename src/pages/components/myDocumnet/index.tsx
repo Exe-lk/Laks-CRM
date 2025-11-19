@@ -424,6 +424,16 @@ const MyDocument = () => {
                                                     <span className="text-red-500 ml-1">*</span>
                                                 </label>
                                             </div>
+                                            <div className="mb-4">
+                                                <a
+                                                    href="/components/termsandconditions"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-800 underline text-base font-medium cursor-pointer"
+                                                >
+                                                    Read Full Terms and Conditions
+                                                </a>
+                                            </div>
                                             <ErrorMessage
                                                 name="termsAccepted"
                                                 component="div"
@@ -659,8 +669,8 @@ const MyDocument = () => {
                                             type="submit"
                                             disabled={isUploading}
                                             className={`px-8 py-4 rounded-lg text-lg font-semibold transition-colors ${isUploading
-                                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                                    : 'bg-black text-white hover:bg-gray-800'
+                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                                : 'bg-black text-white hover:bg-gray-800'
                                                 }`}
                                         >
                                             {isUploading ? 'Uploading...' : 'Submit All Documents'}
