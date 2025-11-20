@@ -41,7 +41,7 @@ const Home = () => {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button className="group relative px-6 lg:px-8 py-3 lg:py-4 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                    onClick={() => router.push('/register')}>
+                    onClick={() => router.push('/locumStaff/register')}>
                     <span className="relative z-10">Register Now</span>
                     <div className="absolute inset-0 bg-[#C3EAE7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </button>

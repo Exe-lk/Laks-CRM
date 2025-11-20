@@ -1,5 +1,6 @@
 import React from 'react';
 import NavBar from '../navBar/nav';
+import Footer from '../footer/index';
 
 const ContactUs = () => {
   return (
@@ -25,7 +26,7 @@ const ContactUs = () => {
               <div className="h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] relative">
                 <iframe
                   title="Google Map"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.073964024052!2d-0.2106786842298377!3d51.4198579796196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48760a7e2e2e2e2e%3A0x1234567890abcdef!2sLux%20Dent%20Agency%20Ltd!5e0!3m2!1sen!2suk!4v1680000000000!5m2!1sen!2suk"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2487.0744668866545!2d-0.21372482337046684!3d51.42377301618997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487607d8e6c3f3e7%3A0x8c4d4f4e3b5e5c5c!2s61B%20Griffiths%20Rd%2C%20London%20SW19%201ST%2C%20UK!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -76,25 +77,6 @@ const ContactUs = () => {
                       placeholder="Phone Number"
                       className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
                     />
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <select
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white text-gray-700 appearance-none"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Select Service</option>
-                    <option value="service1">Web Development</option>
-                    <option value="service2">Mobile App Development</option>
-                    <option value="service3">UI/UX Design</option>
-                    <option value="service4">Digital Marketing</option>
-                    <option value="service5">Consulting</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 sm:pr-4 pointer-events-none">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
                   </div>
                 </div>
 
@@ -151,6 +133,7 @@ const ContactUs = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };
