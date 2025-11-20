@@ -105,7 +105,7 @@ const PracticeRegisterForm = () => {
             if (!values.confirmPassword) errors.confirmPassword = 'Please confirm your password';
             else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
             if (!values.practiceType) errors.practiceType = 'Practice type is required';
-            if (!values.location) errors.location = 'Location is required';            
+            if (!values.location) errors.location = 'Location is required';
             return errors;
         },
         onSubmit: async (values) => {
@@ -434,19 +434,34 @@ const PracticeRegisterForm = () => {
                             <label className="block text-sm font-semibold text-black">
                                 Practice Type *
                             </label>
-                            <select
-                                name="practiceType"
-                                value={formik.values.practiceType}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${formik.errors.practiceType && formik.touched.practiceType ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
-                                required
-                            >
-                                <option value="">Select your practice type</option>
-                                <option value="Private">Private Practice</option>
-                                <option value="Corporate">Corporate Practice</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    name="practiceType"
+                                    value={formik.values.practiceType}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.practiceType && formik.touched.practiceType ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                    required
+                                >
+                                    <option value="">Select your practice type</option>
+                                    <option value="Private">Private Practice</option>
+                                    <option value="Corporate">Corporate Practice</option>
+                                </select>
+                                <svg
+                                    className="w-5 h-5 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </div>
                             {formik.errors.practiceType && formik.touched.practiceType && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.practiceType}</div>
                             )}
@@ -485,9 +500,9 @@ const PracticeRegisterForm = () => {
                         </div>
                         <div className="text-center text-sm text-gray-600 pt-4">
                             By registering, you agree to our{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
+                            <a href="/components/termsandconditions" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
                             and{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
+                            <a href="/components/privacy" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
                         </div>
                     </form>
                 </div>

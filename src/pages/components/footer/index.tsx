@@ -272,7 +272,9 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row justify-between items-center text-sm lg:text-base">
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-0">
               <a
-                href="#"
+                href="/components/termsandconditions"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-700 hover:text-teal-700 transition-colors duration-200 hover:underline font-medium"
               >
                 Terms and Conditions

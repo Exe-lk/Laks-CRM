@@ -410,6 +410,13 @@ const NavBar = () => {
             !isLoggedIn && (
               <>
                 <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                    }`}
+                  onClick={() => router.push('/')}
+                >
+                  Home
+                </li>
+                <li
                   className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
                   onClick={() => router.push('/components/aboutus')}
@@ -578,6 +585,13 @@ const NavBar = () => {
                 {
                   !isLoggedIn && (
                     <>
+                    <li
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                          }`}
+                        onClick={() => { router.push('/'); closeMobileMenu(); }}
+                      >
+                        Home
+                      </li>
                       <li
                         className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
