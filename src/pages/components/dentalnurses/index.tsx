@@ -10,6 +10,8 @@ import dentalNurses4 from "../../../../public/assests/dentalnurses/pexels-cedric
 import dentalNurses5 from "../../../../public/assests/dentalnurses/pexels-cottonbro-6502307.jpg"
 import dentalNurses6 from "../../../../public/assests/dentalnurses/pexels-pavel-danilyuk-6809652.jpg"
 import dentalNurses7 from "../../../../public/assests/dentalnurses/pexels-shvetsa-3845745.jpg"
+import dentalNurses8 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269695.jpg"
+import dentalNurses9 from "../../../../public/assests/dentalnurses/pexels-cottonbro-7086240.jpg"
 
 
 const DentalNurses = () => {
@@ -23,6 +25,8 @@ const DentalNurses = () => {
     { id: 5, image: dentalNurses5, title: "Modern Techniques", description: "Up-to-date with latest dental practices" },
     { id: 6, image: dentalNurses6, title: "Team Support", description: "Supporting your practice with excellence" },
     { id: 7, image: dentalNurses7, title: "Trusted Professionals", description: "Certified and experienced dental nurses" },
+    { id: 8, image: dentalNurses8, title: "Flexible Scheduling", description: "Certified and experienced dental nurses" },
+    { id: 9, image: dentalNurses9, title: "Competitive Rates", description: "Certified and experienced dental nurses" },
   ];
 
   const cardsPerSlide = 3;
@@ -66,14 +70,13 @@ const DentalNurses = () => {
                 Great things in business are never done by one person.
                 They're done by a team of people. Let's work together and build up your profile for better Pay ((£))
               </h2>
-              <h2 className="text-3xl lg:text-4xl text-black text-center mt-6">
+              <h2 className="text-3xl lg:text-4xl text-black text-center mt-12">
               WHY LOCUMLUX?
             </h2>
             <p className="text-base lg:text-xl text-gray-700 text-center max-w-2xl mx-auto mt-4">
               Our agency supplies fully qualified and experienced Locum Dental Nurses and Hygienists to Greater London.
             </p>
 
-            {/* Auto-rotating Slider */}
             <div className="mt-16 relative">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                 {getCurrentCards().map((card, index) => (
@@ -104,7 +107,6 @@ const DentalNurses = () => {
                 ))}
               </div>
 
-              {/* Slide Indicators */}
               <div className="flex justify-center mt-8 space-x-2">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
