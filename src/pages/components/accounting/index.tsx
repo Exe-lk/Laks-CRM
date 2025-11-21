@@ -4,7 +4,7 @@ import Footer from "../footer/index";
 import imageAbout from "../../../../public/assests/aboutusimage1.jpg"
 import companyRegistration from "../../../../public/assests/accounting/Untitled design.png"
 import bookKeeping from "../../../../public/assests/accounting/Untitled design (3).png"
-import accounting from "../../../../public/assests/accounting/Untitled design (3).png"
+import accounting from "../../../../public/assests/accounting/Untitled design (1).png"
 import companyyearend from "../../../../public/assests/accounting/Untitled design (2).png"
 import selfaccounting from "../../../../public/assests/accounting/Untitled design (4).png"
 import llpaccounts from "../../../../public/assests/accounting/Untitled design (5).png"
