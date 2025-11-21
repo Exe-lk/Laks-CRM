@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState , useRef} from 'react';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 import { setSessionExpiry } from '@/utils/sessionManager';
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
 
 interface LoginFormData {
     email: string;
@@ -20,6 +21,8 @@ const BranchLoginPage = () => {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const recaptchaRef = useRef<ReCaptchaRef>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
     const formik = useFormik({
         initialValues,
@@ -41,6 +44,16 @@ const BranchLoginPage = () => {
         onSubmit: async (values) => {
             setIsLoading(true);
             try {
+                if (!recaptchaToken) {
+                    await Swal.fire({
+                        title: 'Verification Required',
+                        text: 'Please complete the reCAPTCHA verification',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                    return;
+                }
                 const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/login`, {
                     method: 'POST',
                     headers: {
@@ -63,6 +76,9 @@ const BranchLoginPage = () => {
                         confirmButtonText: 'Continue',
                         confirmButtonColor: '#C3EAE7'
                     });
+
+                    recaptchaRef.current?.reset();
+                    setRecaptchaToken(null);
 
                     router.push('/branch/home');
                 } else {
@@ -191,11 +207,32 @@ const BranchLoginPage = () => {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#C3EAE7'
                 });
+                recaptchaRef.current?.reset();
+                setRecaptchaToken(null);
             } finally {
                 setIsLoading(false);
             }
         }
     });
+
+    const handleRecaptchaChange = (token: string | null) => {
+        setRecaptchaToken(token);
+    };
+
+    const handleRecaptchaExpired = () => {
+        setRecaptchaToken(null);
+        Swal.fire({
+            title: 'Verification Expired',
+            text: 'Please complete the reCAPTCHA verification again',
+
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#C3EAE7',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    };
 
     return (
         <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
@@ -299,9 +336,18 @@ const BranchLoginPage = () => {
                             </div>
                         </div>
 
+                        <div className="border-t pt-6">
+                            <ReCaptcha
+                                ref={recaptchaRef}
+                                onChange={handleRecaptchaChange}
+                                onExpired={handleRecaptchaExpired}
+                                theme="light"
+                                size="normal"
+                            />
+                        </div>
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || !recaptchaToken}
                             className="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
                             <span className="flex items-center justify-center space-x-2">
