@@ -464,7 +464,7 @@ const NavBar = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={closeMobileMenu}>
+        <div className="md:hidden fixed inset-0 z-50 backdrop-blur-sm bg-opacity-50" onClick={closeMobileMenu}>
           <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <span className="text-lg font-semibold">Menu</span>

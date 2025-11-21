@@ -55,6 +55,11 @@ const Home = () => {
     bookingDate.setHours(0, 0, 0, 0);
     return bookingDate < today;
   }).length;
+  const futureAndOngoingBookings = bookingsData.filter((booking: any) => {
+    const bookingDate = new Date(booking.booking_date);
+    bookingDate.setHours(0, 0, 0, 0);
+    return booking.status === 'CONFIRMED' && bookingDate >= today;
+  }).length;
 
   const isLoggedIn = !!profile?.id;
 
@@ -149,7 +154,7 @@ const Home = () => {
                         ) : errorBookings ? (
                           <span className="text-3xl font-bold text-red-500">--</span>
                         ) : (
-                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{acceptedBookings-pastBookings}</span>
+                          <span className="text-3xl font-bold text-gray-900 text-center justify-center items-center">{futureAndOngoingBookings}</span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 font-medium text-center justify-center items-center">Future & Ongoing Bookings</p>
