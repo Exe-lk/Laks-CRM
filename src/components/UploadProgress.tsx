@@ -84,7 +84,7 @@ const UploadProgress: React.FC<UploadProgressProps> = ({
             }
           </span>
           <span className="text-gray-500">
-            {progress.progress}%
+            {Math.round(progress.progress)}%
           </span>
         </div>
       </div>
