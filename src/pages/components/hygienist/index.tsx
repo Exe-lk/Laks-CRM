@@ -37,6 +37,14 @@ const Hygienist = () => {
 
                 </div>
               </div>
+              <h2 className="text-base lg:text-base text-black text-center mt-12 font-bold">
+              Do you want to be surprised register and find out more.
+              </h2>
+              <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">
+              High profile Locum Nurses              </h2>
+              <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">
+              Our competitive fee              </h2>
+              <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">Available 24/7</h2>
             </div>
           </div>
         </section>

@@ -273,7 +273,7 @@ const LoginForm = () => {
               </div>
             </div>
 
-            <div className="border-t pt-6">
+            <div className="pt-6">
               <ReCaptcha
                 ref={recaptchaRef}
                 onChange={handleRecaptchaChange}
