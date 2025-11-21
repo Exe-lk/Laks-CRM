@@ -230,7 +230,7 @@ export default function Footer() {
                   <MdPhoneAndroid className="text-pink-500 text-lg" />
                 </div>
                 <a href="tel:07490714868" className="text-gray-700 hover:text-pink-600 transition-colors font-medium">
-                  074 9071 4868
+                020 3071 4868
                 </a>
               </div>
 
