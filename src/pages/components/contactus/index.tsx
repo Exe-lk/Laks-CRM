@@ -144,7 +144,7 @@ const ContactUs = () => {
                 </svg>
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-black mb-1 sm:mb-2">Phone</h3>
-              <p className="text-sm sm:text-base text-gray-600">074 9071 4868</p>
+              <p className="text-sm sm:text-base text-gray-600">020 3071 4868</p>
             </div>
 
             <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
