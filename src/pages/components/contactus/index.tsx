@@ -1,8 +1,35 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import NavBar from '../navBar/nav';
 import Footer from '../footer/index';
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
+import Swal from 'sweetalert2';
 
 const ContactUs = () => {
+  const recaptchaRef = useRef<ReCaptchaRef>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+  };
+
+  const handleRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!recaptchaToken) {
+      Swal.fire({
+        title: 'Verification Required',
+        text: 'Please complete the reCAPTCHA verification',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#C3EAE7'
+      });
+      return;
+    }
+  };
+
   return (
     <>
       <NavBar />
@@ -86,9 +113,19 @@ const ContactUs = () => {
                     className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white min-h-[100px] sm:min-h-[120px] md:min-h-[140px] resize-none"
                   ></textarea>
                 </div>
+                <div className="pt-6">
+                  <ReCaptcha
+                    ref={recaptchaRef}
+                    onChange={handleRecaptchaChange}
+                    onExpired={handleRecaptchaExpired}
+                    theme="light"
+                    size="normal"
+                  />
+                </div>
 
                 <button
                   type="submit"
+                  disabled={!recaptchaToken}
                   className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-[#C3EAE7] to-[#C3EAE7]/90 text-black font-bold rounded-lg sm:rounded-xl hover:from-[#C3EAE7]/90 hover:to-[#C3EAE7] transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 border-[#C3EAE7]"
                 >
                   Send Message

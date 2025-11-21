@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState , useRef} from "react";
 import { useFormik } from 'formik';
 import Swal from 'sweetalert2';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useAddPracticeProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/practiceProfileSlice';
 import { useRouter } from "next/router";
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
 
 
 export interface PracticeProfile {
@@ -41,6 +42,8 @@ const PracticeRegisterForm = () => {
     const [open, setOpen] = useState(false);
     const [addLocumProfile, { isLoading: isAdding }] = useAddPracticeProfileMutation();
     const router = useRouter();
+    const recaptchaRef = useRef<ReCaptchaRef>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
     const formatTelephone = (value: string) => {
         return value.replace(/\D/g, '').slice(0, 10);
@@ -111,6 +114,17 @@ const PracticeRegisterForm = () => {
         onSubmit: async (values) => {
             setIsSubmitting(true);
             try {
+                if (!recaptchaToken) {
+                    await Swal.fire({
+                        title: 'Verification Required',
+                        text: 'Please complete the reCAPTCHA verification',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
                 console.log('Registration form values:', values);
                 const [yyyy, mm, dd] = values.dob.split("-");
                 const dob = `${dd}-${mm}-${yyyy}`;
@@ -136,6 +150,8 @@ const PracticeRegisterForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                     formik.resetForm();
+                    recaptchaRef.current?.reset();
+                    setRecaptchaToken(null);
                     router.push('/');
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
@@ -167,11 +183,32 @@ const PracticeRegisterForm = () => {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#C3EAE7'
                 });
+                recaptchaRef.current?.reset();
+                setRecaptchaToken(null);
             } finally {
                 setIsSubmitting(false);
             }
         },
     });
+
+    const handleRecaptchaChange = (token: string | null) => {
+        setRecaptchaToken(token);
+    };
+
+    const handleRecaptchaExpired = () => {
+        setRecaptchaToken(null);
+        Swal.fire({
+            title: 'Verification Expired',
+            text: 'Please complete the reCAPTCHA verification again',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#C3EAE7',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    };
 
     const handleMapClick = (lat: number, lng: number) => {
         setSelectedLocation({ lat, lng });
@@ -470,11 +507,20 @@ const PracticeRegisterForm = () => {
                             </p>
                         </div>
                         <div className="pt-6">
+                            <ReCaptcha
+                                ref={recaptchaRef}
+                                onChange={handleRecaptchaChange}
+                                onExpired={handleRecaptchaExpired}
+                                theme="light"
+                                size="normal"
+                            />
+                        </div>
+                        <div className="pt-6">
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || !recaptchaToken}
                                     className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     <span className="flex items-center justify-center gap-2">
