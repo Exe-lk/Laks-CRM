@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState , useRef} from "react";
 import { useFormik } from 'formik';
 import Swal from 'sweetalert2';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useAddPracticeProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/practiceProfileSlice';
 import { useRouter } from "next/router";
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
 
 
 export interface PracticeProfile {
@@ -41,6 +42,8 @@ const PracticeRegisterForm = () => {
     const [open, setOpen] = useState(false);
     const [addLocumProfile, { isLoading: isAdding }] = useAddPracticeProfileMutation();
     const router = useRouter();
+    const recaptchaRef = useRef<ReCaptchaRef>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
     const formatTelephone = (value: string) => {
         return value.replace(/\D/g, '').slice(0, 10);
@@ -105,12 +108,23 @@ const PracticeRegisterForm = () => {
             if (!values.confirmPassword) errors.confirmPassword = 'Please confirm your password';
             else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
             if (!values.practiceType) errors.practiceType = 'Practice type is required';
-            if (!values.location) errors.location = 'Location is required';            
+            if (!values.location) errors.location = 'Location is required';
             return errors;
         },
         onSubmit: async (values) => {
             setIsSubmitting(true);
             try {
+                if (!recaptchaToken) {
+                    await Swal.fire({
+                        title: 'Verification Required',
+                        text: 'Please complete the reCAPTCHA verification',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
                 console.log('Registration form values:', values);
                 const [yyyy, mm, dd] = values.dob.split("-");
                 const dob = `${dd}-${mm}-${yyyy}`;
@@ -136,6 +150,8 @@ const PracticeRegisterForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                     formik.resetForm();
+                    recaptchaRef.current?.reset();
+                    setRecaptchaToken(null);
                     router.push('/');
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
@@ -167,11 +183,32 @@ const PracticeRegisterForm = () => {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#C3EAE7'
                 });
+                recaptchaRef.current?.reset();
+                setRecaptchaToken(null);
             } finally {
                 setIsSubmitting(false);
             }
         },
     });
+
+    const handleRecaptchaChange = (token: string | null) => {
+        setRecaptchaToken(token);
+    };
+
+    const handleRecaptchaExpired = () => {
+        setRecaptchaToken(null);
+        Swal.fire({
+            title: 'Verification Expired',
+            text: 'Please complete the reCAPTCHA verification again',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#C3EAE7',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    };
 
     const handleMapClick = (lat: number, lng: number) => {
         setSelectedLocation({ lat, lng });
@@ -434,19 +471,34 @@ const PracticeRegisterForm = () => {
                             <label className="block text-sm font-semibold text-black">
                                 Practice Type *
                             </label>
-                            <select
-                                name="practiceType"
-                                value={formik.values.practiceType}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${formik.errors.practiceType && formik.touched.practiceType ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
-                                required
-                            >
-                                <option value="">Select your practice type</option>
-                                <option value="Private">Private Practice</option>
-                                <option value="Corporate">Corporate Practice</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    name="practiceType"
+                                    value={formik.values.practiceType}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.practiceType && formik.touched.practiceType ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                    required
+                                >
+                                    <option value="">Select your practice type</option>
+                                    <option value="Private">Private Practice</option>
+                                    <option value="Corporate">Corporate Practice</option>
+                                </select>
+                                <svg
+                                    className="w-5 h-5 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </div>
                             {formik.errors.practiceType && formik.touched.practiceType && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.practiceType}</div>
                             )}
@@ -455,11 +507,20 @@ const PracticeRegisterForm = () => {
                             </p>
                         </div>
                         <div className="pt-6">
+                            <ReCaptcha
+                                ref={recaptchaRef}
+                                onChange={handleRecaptchaChange}
+                                onExpired={handleRecaptchaExpired}
+                                theme="light"
+                                size="normal"
+                            />
+                        </div>
+                        <div className="pt-6">
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || !recaptchaToken}
                                     className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     <span className="flex items-center justify-center gap-2">
@@ -485,9 +546,9 @@ const PracticeRegisterForm = () => {
                         </div>
                         <div className="text-center text-sm text-gray-600 pt-4">
                             By registering, you agree to our{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
+                            <a href="/components/termsandconditions" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
                             and{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
+                            <a href="/components/privacy" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
                         </div>
                     </form>
                 </div>

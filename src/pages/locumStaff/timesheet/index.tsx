@@ -1731,7 +1731,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                Manager Signature <span className="text-gray-400 text-[10px] sm:text-xs">(Optional)</span>
+                Manager Signature <span className="text-gray-400 text-[10px] sm:text-xs"></span>
               </label>
               <button
                 onClick={clearManagerSignature}
@@ -1755,7 +1755,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
 
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-              Manager ID <span className="text-gray-400 text-[10px] sm:text-xs">(Optional)</span>
+              Manager ID <span className="text-gray-400 text-[10px] sm:text-xs"></span>
             </label>
             <input
               type="text"

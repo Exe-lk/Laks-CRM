@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useState, useRef } from "react";
 import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import Swal from 'sweetalert2';
@@ -6,6 +6,7 @@ import { useAddLocumProfileMutation, type RegistrationResponse, type ErrorRespon
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { MdOutlineMyLocation } from "react-icons/md";
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
 
 export interface Specialty {
     speciality: string;
@@ -25,7 +26,7 @@ export interface LocumProfile {
     specialties?: Specialty[];
 }
 
-const jobTypes = ["Nurse", "Hygienist", "Receptionist","Dentist"];
+const jobTypes = ["Nurse", "Hygienist", "Receptionist", "Dentist"];
 
 const dentistFields = [
     "General Dentist",
@@ -103,7 +104,7 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
             });
             break;
 
-         case 'Dentist':
+        case 'Dentist':
             values.selectedDentistFields.forEach(field => {
                 const experienceStr = values.dentistExperience[field];
                 if (experienceStr) {
@@ -140,6 +141,8 @@ const SignUpForm = () => {
     const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
     const [addressLat, setAddressLat] = useState<number | null>(null);
     const [addressLng, setAddressLng] = useState<number | null>(null);
+    const recaptchaRef = useRef<ReCaptchaRef>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
     const router = useRouter();
 
     const formik = useFormik({
@@ -203,6 +206,19 @@ const SignUpForm = () => {
         onSubmit: async (values) => {
             setIsSubmitting(true);
             try {
+                // Verify reCAPTCHA
+                if (!recaptchaToken) {
+                    await Swal.fire({
+                        title: 'Verification Required',
+                        text: 'Please complete the reCAPTCHA verification',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#C3EAE7'
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 console.log('Registration form values:', values);
                 const apiData = transformFormDataToAPI(values, addressLat, addressLng);
                 console.log('API payload:', apiData);
@@ -217,6 +233,8 @@ const SignUpForm = () => {
                         confirmButtonColor: '#C3EAE7'
                     });
                     formik.resetForm();
+                    recaptchaRef.current?.reset();
+                    setRecaptchaToken(null);
                     router.push('/');
                 } else if (response.error) {
                     const errorMessage = 'data' in response.error
@@ -249,11 +267,33 @@ const SignUpForm = () => {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#C3EAE7'
                 });
+                // Reset reCAPTCHA on error
+                recaptchaRef.current?.reset();
+                setRecaptchaToken(null);
             } finally {
                 setIsSubmitting(false);
             }
         },
     });
+
+    const handleRecaptchaChange = (token: string | null) => {
+        setRecaptchaToken(token);
+    };
+
+    const handleRecaptchaExpired = () => {
+        setRecaptchaToken(null);
+        Swal.fire({
+            title: 'Verification Expired',
+            text: 'Please complete the reCAPTCHA verification again',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#C3EAE7',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    };
 
     const handleDentistFieldChange = (field: string) => {
         const currentSelected = formik.values.selectedDentistFields;
@@ -271,7 +311,7 @@ const SignUpForm = () => {
         formik.setFieldValue('selectedDentistFields', newSelected);
     };
 
-     const handleNursesFieldChange = (field: string) => {
+    const handleNursesFieldChange = (field: string) => {
         const currentSelected = formik.values.selectedNurseFields;
         let newSelected;
 
@@ -545,24 +585,39 @@ const SignUpForm = () => {
                             <label className="block text-sm font-semibold text-black">
                                 GDC Registration *
                             </label>
-                            <select
-                                name="gdcRegistration"
-                                value={formik.values.gdcRegistration}
-                                onChange={(e) => {
-                                    formik.handleChange(e);
-                                    if (e.target.value !== "yes") {
-                                        formik.setFieldValue('gdcNumber', '');
-                                    }
-                                }}
-                                onBlur={formik.handleBlur}
-                                className={`w-full px-4 py-3 border-2 ${formik.errors.gdcRegistration && formik.touched.gdcRegistration ? 'border-red-500' : 'border-gray-200'
-                                    } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
-                                required
-                            >
-                                <option value="">Select an option</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    name="gdcRegistration"
+                                    value={formik.values.gdcRegistration}
+                                    onChange={(e) => {
+                                        formik.handleChange(e);
+                                        if (e.target.value !== "yes") {
+                                            formik.setFieldValue('gdcNumber', '');
+                                        }
+                                    }}
+                                    onBlur={formik.handleBlur}
+                                    className={`w-full px-4 py-3 border-2 ${formik.errors.gdcRegistration && formik.touched.gdcRegistration ? 'border-red-500' : 'border-gray-200'
+                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                    required
+                                >
+                                    <option value="">Select an option</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                <svg
+                                    className="w-5 h-5 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </div>
                             {formik.errors.gdcRegistration && formik.touched.gdcRegistration && (
                                 <div className="text-red-500 text-sm mt-1">{formik.errors.gdcRegistration}</div>
                             )}
@@ -596,27 +651,42 @@ const SignUpForm = () => {
 
                             <div className="space-y-2 mb-6">
                                 <label className="block text-sm font-semibold text-black">Job Type *</label>
-                                <select
-                                    name="jobType"
-                                    value={formik.values.jobType}
-                                    onChange={(e) => {
-                                        formik.handleChange(e);
-                                        formik.setFieldValue('selectedDentistFields', []);
-                                        formik.setFieldValue('dentistExperience', {});
-                                        formik.setFieldValue('therapistExperience', {});
-                                    }}
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 ${formik.errors.jobType && formik.touched.jobType ? 'border-red-500' : 'border-gray-200'
-                                        } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
-                                    required
-                                >
-                                    <option value="">Select your job type</option>
-                                    {jobTypes.map((type) => (
-                                        <option key={type} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        name="jobType"
+                                        value={formik.values.jobType}
+                                        onChange={(e) => {
+                                            formik.handleChange(e);
+                                            formik.setFieldValue('selectedDentistFields', []);
+                                            formik.setFieldValue('dentistExperience', {});
+                                            formik.setFieldValue('therapistExperience', {});
+                                        }}
+                                        onBlur={formik.handleBlur}
+                                        className={`w-full px-4 py-3 border-2 ${formik.errors.jobType && formik.touched.jobType ? 'border-red-500' : 'border-gray-200'
+                                            } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none appearance-none bg-white`}
+                                        required
+                                    >
+                                        <option value="">Select your job type</option>
+                                        {jobTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <svg
+                                        className="w-5 h-5 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </div>
                                 {formik.errors.jobType && formik.touched.jobType && (
                                     <div className="text-red-500 text-sm mt-1">{formik.errors.jobType}</div>
                                 )}
@@ -792,11 +862,21 @@ const SignUpForm = () => {
                         )}
 
                         <div className="pt-6">
+                            <ReCaptcha
+                                ref={recaptchaRef}
+                                onChange={handleRecaptchaChange}
+                                onExpired={handleRecaptchaExpired}
+                                theme="light"
+                                size="normal"
+                            />
+                        </div>
+
+                        <div className="pt-6">
                             <div className="relative group">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || !recaptchaToken}
                                     className="relative w-full bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#C3EAE7]/30 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     <span className="flex items-center justify-center gap-2">
@@ -823,9 +903,9 @@ const SignUpForm = () => {
 
                         <div className="text-center text-sm text-gray-600 pt-4">
                             By registering, you agree to our{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
+                            <a href="/components/termsandconditions" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Terms of Service</a>{" "}
                             and{" "}
-                            <a href="#" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
+                            <a href="/components/privacy" target="_blank" rel="noopener noreferrer" className="text-black hover:text-gray-700 font-semibold">Privacy Policy</a>
                         </div>
                     </form>
                 </div>

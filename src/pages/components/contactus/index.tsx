@@ -117,7 +117,7 @@ const ContactUs = () => {
               <div className="h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] relative">
                 <iframe
                   title="Google Map"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2481.073964024052!2d-0.2106786842298377!3d51.4198579796196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48760a7e2e2e2e2e%3A0x1234567890abcdef!2sLux%20Dent%20Agency%20Ltd!5e0!3m2!1sen!2suk!4v1680000000000!5m2!1sen!2suk"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2487.0744668866545!2d-0.21372482337046684!3d51.42377301618997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487607d8e6c3f3e7%3A0x8c4d4f4e3b5e5c5c!2s61B%20Griffiths%20Rd%2C%20London%20SW19%201ST%2C%20UK!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -218,6 +218,15 @@ const ContactUs = () => {
                     className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white min-h-[100px] sm:min-h-[120px] md:min-h-[140px] resize-none"
                   ></textarea>
                 </div>
+                <div className="pt-6">
+                  <ReCaptcha
+                    ref={recaptchaRef}
+                    onChange={handleRecaptchaChange}
+                    onExpired={handleRecaptchaExpired}
+                    theme="light"
+                    size="normal"
+                  />
+                </div>
 
                 <button
                   type="submit"
@@ -240,7 +249,7 @@ const ContactUs = () => {
                 </svg>
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-black mb-1 sm:mb-2">Phone</h3>
-              <p className="text-sm sm:text-base text-gray-600">074 9071 4868</p>
+              <p className="text-sm sm:text-base text-gray-600">020 3071 4868</p>
             </div>
 
             <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
@@ -266,6 +275,7 @@ const ContactUs = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

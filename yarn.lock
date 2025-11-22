@@ -1290,6 +1290,13 @@
   resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-19.1.6.tgz"
   integrity sha512-4hOiT/dwO8Ko0gV1m/TJZYk3y0KBnY9vzDh7W+DH17b2HFSOGgdj33dhihPeuy3l0q23+4e+hoXHV6hCC4dCXw==
 
+"@types/react-google-recaptcha@^2.1.9":
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/@types/react-google-recaptcha/-/react-google-recaptcha-2.1.9.tgz#cd1ffe571fe738473b66690a86dad6c9d3648427"
+  integrity sha512-nT31LrBDuoSZJN4QuwtQSF3O89FVHC4jLhM+NtKEmVF5R1e8OY0Jo4//x2Yapn2aNHguwgX5doAq8Zo+Ehd0ug==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-redux@^7.1.34":
   version "7.1.34"
   resolved "https://registry.npmjs.org/@types/react-redux/-/react-redux-7.1.34.tgz"
@@ -2597,7 +2604,7 @@ promise-polyfill@^6.0.2:
   resolved "https://registry.npmjs.org/promise-polyfill/-/promise-polyfill-6.1.0.tgz"
   integrity sha512-g0LWaH0gFsxovsU7R5LrrhHhWAWiHRnh1GPrhXnPgYsDkIqjRYUYSZEsej/wtleDrz5xVSIDbeKfidztp2XHFQ==
 
-prop-types@^15.8.1:
+prop-types@^15.5.0, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -2641,10 +2648,13 @@ proxy-from-env@^1.1.0:
   resolved "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
-querystringify@^2.1.1:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
-  integrity sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==
+react-async-script@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-async-script/-/react-async-script-1.2.0.tgz#ab9412a26f0b83f5e2e00de1d2befc9400834b21"
+  integrity sha512-bCpkbm9JiAuMGhkqoAiC0lLkb40DJ0HOEJIku+9JDjxX3Rcs+ztEOG13wbrOskt3n2DTrjshhaQ/iay+SnGg5Q==
+  dependencies:
+    hoist-non-react-statics "^3.3.0"
+    prop-types "^15.5.0"
 
 react-dom@^19.0.0:
   version "19.1.0"
@@ -2657,6 +2667,14 @@ react-fast-compare@^2.0.1:
   version "2.0.4"
   resolved "https://registry.npmjs.org/react-fast-compare/-/react-fast-compare-2.0.4.tgz"
   integrity sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==
+
+react-google-recaptcha@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-google-recaptcha/-/react-google-recaptcha-3.1.0.tgz#44aaab834495d922b9d93d7d7a7fb2326315b4ab"
+  integrity sha512-cYW2/DWas8nEKZGD7SCu9BSuVz8iOcOLHChHyi7upUuVhkpkhYG/6N3KDiTQ3XAiZ2UAZkfvYKMfAHOzBOcGEg==
+  dependencies:
+    prop-types "^15.5.0"
+    react-async-script "^1.2.0"
 
 react-icons@^5.5.0:
   version "5.5.0"
