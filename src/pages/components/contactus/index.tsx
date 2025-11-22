@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import NavBar from '../navBar/nav';
 import Swal from 'sweetalert2';
@@ -92,6 +93,38 @@ const ContactUs = () => {
     } finally {
       setIsSubmitting(false);
     }
+=======
+import React, { useRef, useState } from 'react';
+import NavBar from '../navBar/nav';
+import Footer from '../footer/index';
+import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
+import Swal from 'sweetalert2';
+
+const ContactUs = () => {
+  const recaptchaRef = useRef<ReCaptchaRef>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+  };
+
+  const handleRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!recaptchaToken) {
+      Swal.fire({
+        title: 'Verification Required',
+        text: 'Please complete the reCAPTCHA verification',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#C3EAE7'
+      });
+      return;
+    }
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
   };
 
   return (
@@ -188,6 +221,7 @@ const ContactUs = () => {
                 </div>
 
                 <div className="relative">
+<<<<<<< HEAD
                   <select
                     name="service"
                     value={formData.service}
@@ -209,6 +243,8 @@ const ContactUs = () => {
                 </div>
 
                 <div className="relative">
+=======
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
                   <textarea
                     name="message"
                     placeholder="Tell us about your project or inquiry... *"
@@ -230,8 +266,13 @@ const ContactUs = () => {
 
                 <button
                   type="submit"
+<<<<<<< HEAD
                   disabled={isSubmitting}
                   className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-[#C3EAE7] to-[#C3EAE7]/90 text-black font-bold rounded-lg sm:rounded-xl hover:from-[#C3EAE7]/90 hover:to-[#C3EAE7] transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 border-[#C3EAE7] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+=======
+                  disabled={!recaptchaToken}
+                  className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-[#C3EAE7] to-[#C3EAE7]/90 text-black font-bold rounded-lg sm:rounded-xl hover:from-[#C3EAE7]/90 hover:to-[#C3EAE7] transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 border-[#C3EAE7]"
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>

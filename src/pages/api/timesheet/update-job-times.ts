@@ -46,10 +46,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Timesheet job not found" });
     }
 
-    // Check if timesheet is locked
+    // Check if timesheet is locked or submitted
     if (timesheetJob.timesheet.status === 'LOCKED') {
       return res.status(403).json({ 
-        error: "Cannot modify timesheet job - timesheet is locked" 
+        error: "Cannot modify timesheet job - timesheet is locked",
+        details: {
+          timesheetId: timesheetJob.timesheet.id,
+          timesheetStatus: timesheetJob.timesheet.status,
+          timesheetMonth: timesheetJob.timesheet.month,
+          timesheetYear: timesheetJob.timesheet.year,
+          message: "This timesheet has been approved by a manager and can no longer be modified. Please contact your manager if you need to make changes."
+        }
+      });
+    }
+
+    if (timesheetJob.timesheet.status === 'SUBMITTED') {
+      return res.status(403).json({ 
+        error: "Cannot modify timesheet job - timesheet has been submitted",
+        details: {
+          timesheetId: timesheetJob.timesheet.id,
+          timesheetStatus: timesheetJob.timesheet.status,
+          message: "This timesheet has been submitted for approval and can no longer be modified. Please contact your manager if you need to make changes."
+        }
       });
     }
 
