@@ -1,3 +1,99 @@
+<<<<<<< HEAD
+import React, { useState } from 'react';
+import NavBar from '../navBar/nav';
+import Swal from 'sweetalert2';
+
+const ContactUs = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    service: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.message) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Please fill in all required fields (First Name, Last Name, Email, Phone, and Message)',
+        confirmButtonColor: '#C3EAE7',
+      });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address',
+        confirmButtonColor: '#C3EAE7',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      // Success notification
+      Swal.fire({
+        icon: 'success',
+        title: 'Message Sent!',
+        text: 'Thank you for contacting us. We will get back to you within 24 hours.',
+        confirmButtonColor: '#C3EAE7',
+      });
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        service: '',
+        message: '',
+      });
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to send message. Please try again later.',
+        confirmButtonColor: '#C3EAE7',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+=======
 import React, { useRef, useState } from 'react';
 import NavBar from '../navBar/nav';
 import Footer from '../footer/index';
@@ -28,6 +124,7 @@ const ContactUs = () => {
       });
       return;
     }
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
   };
 
   return (
@@ -72,19 +169,27 @@ const ContactUs = () => {
                 <p className="text-sm sm:text-base text-gray-700">We'll get back to you within 24 hours</p>
               </div>
 
-              <form className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-12">
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="First Name"
+                      name="firstName"
+                      placeholder="First Name *"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
                       className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
                     />
                   </div>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Last Name"
+                      name="lastName"
+                      placeholder="Last Name *"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
                       className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
                     />
                   </div>
@@ -94,22 +199,58 @@ const ContactUs = () => {
                   <div className="relative">
                     <input
                       type="email"
-                      placeholder="Email Address"
+                      name="email"
+                      placeholder="Email Address *"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                       className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
                     />
                   </div>
                   <div className="relative">
                     <input
                       type="tel"
-                      placeholder="Phone Number"
+                      name="phone"
+                      placeholder="Phone Number *"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
                       className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
                     />
                   </div>
                 </div>
 
                 <div className="relative">
+<<<<<<< HEAD
+                  <select
+                    name="service"
+                    value={formData.service}
+                    onChange={handleChange}
+                    className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white text-gray-700 appearance-none"
+                  >
+                    <option value="">Select Service (Optional)</option>
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="Locum Services">Locum Services</option>
+                    <option value="Practice Services">Practice Services</option>
+                    <option value="Support">Support</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 sm:pr-4 pointer-events-none">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="relative">
+=======
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
                   <textarea
-                    placeholder="Tell us about your project or inquiry..."
+                    name="message"
+                    placeholder="Tell us about your project or inquiry... *"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
                     className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white min-h-[100px] sm:min-h-[120px] md:min-h-[140px] resize-none"
                   ></textarea>
                 </div>
@@ -125,10 +266,15 @@ const ContactUs = () => {
 
                 <button
                   type="submit"
+<<<<<<< HEAD
+                  disabled={isSubmitting}
+                  className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-[#C3EAE7] to-[#C3EAE7]/90 text-black font-bold rounded-lg sm:rounded-xl hover:from-[#C3EAE7]/90 hover:to-[#C3EAE7] transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 border-[#C3EAE7] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+=======
                   disabled={!recaptchaToken}
                   className="w-full py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-[#C3EAE7] to-[#C3EAE7]/90 text-black font-bold rounded-lg sm:rounded-xl hover:from-[#C3EAE7]/90 hover:to-[#C3EAE7] transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 border-[#C3EAE7]"
+>>>>>>> 71a7e7e0b7dafd64e00c33adca16708e574529a6
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>
