@@ -8,9 +8,9 @@ const AboutUs = () => {
     <>
       <NavBar />
       <main className="min-h-screen bg-white pt-32">
-        <section className="py-16 lg:py-20 bg-white">
+        <section className="pt-16 lg:pt-20 pb-4 lg:pb-6 bg-white">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12 lg:mb-16">
+            <div className="text-center mb-4 lg:mb-6">
               <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
                 About LOCUMLUX
               </h2>
@@ -19,15 +19,15 @@ const AboutUs = () => {
               </p>
             </div>
           </div>
-          <div className="max-w-7xl mx-auto px-4">
-            <Image src={imageAbout} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
+          <div className="max-w-5xl mx-auto px-4">
+            <Image src={imageAbout} alt="aboutus" width={500} height={500} className="w-full h-full object-cover" />
           </div>
         </section>
 
-        <section className="py-16 lg:py-20 bg-white">
+        <section className="pt-4 lg:pt-6 pb-16 lg:pb-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
-            <div className=" mb-12 lg:mb-16">
-              <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4">
+            <div className="">
+              <h2 className="text-xl lg:text-2xl font-semibold text-black mb-2">
                 Introduction
               </h2>
               <p className="text-base lg:text-xl text-gray-700">

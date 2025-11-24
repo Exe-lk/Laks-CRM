@@ -3,50 +3,88 @@ import { useState, useEffect } from 'react';
 import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
 import imageAbout from "../../../../public/assests/MacBook Air - 17.png"
-import dentalNurses1 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269689.jpg"
-import dentalNurses2 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269692.jpg"
-import dentalNurses3 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269694.jpg"
-import dentalNurses4 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269696.jpg"
-import dentalNurses5 from "../../../../public/assests/dentalnurses/pexels-cottonbro-6502307.jpg"
-import dentalNurses6 from "../../../../public/assests/dentalnurses/pexels-pavel-danilyuk-6809652.jpg"
-import dentalNurses7 from "../../../../public/assests/dentalnurses/pexels-shvetsa-3845745.jpg"
-import dentalNurses8 from "../../../../public/assests/dentalnurses/pexels-cedric-fauntleroy-4269695.jpg"
-import dentalNurses9 from "../../../../public/assests/dentalnurses/pexels-cottonbro-7086240.jpg"
+import dentalNurses1 from "../../../../public/assests/BADN check.jpg"
+import dentalNurses2 from "../../../../public/assests/DBS or Disclosure Scotland check.jpg"
+import dentalNurses3 from "../../../../public/assests/GDC registration check.jpg"
+import dentalNurses4 from "../../../../public/assests/Indemtity Insurance check.jpg"
+import dentalNurses5 from "../../../../public/assests/Immunisation check.jpg"
 
 
 const DentalNurses = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const cards = [
-    { id: 1, image: dentalNurses1, title: "Professional Care", description: "Experienced dental nurses providing top-quality care" },
-    { id: 2, image: dentalNurses2, title: "Expert Team", description: "Qualified professionals dedicated to your practice" },
-    { id: 3, image: dentalNurses3, title: "Quality Service", description: "Reliable and skilled dental nursing services" },
-    { id: 4, image: dentalNurses4, title: "Patient Focus", description: "Compassionate care for every patient" },
-    { id: 5, image: dentalNurses5, title: "Modern Techniques", description: "Up-to-date with latest dental practices" },
-    { id: 6, image: dentalNurses6, title: "Team Support", description: "Supporting your practice with excellence" },
-    { id: 7, image: dentalNurses7, title: "Trusted Professionals", description: "Certified and experienced dental nurses" },
-    { id: 8, image: dentalNurses8, title: "Flexible Scheduling", description: "Certified and experienced dental nurses" },
-    { id: 9, image: dentalNurses9, title: "Competitive Rates", description: "Certified and experienced dental nurses" },
+  const slides = [
+    { 
+      id: 1, 
+      image: dentalNurses1, 
+      title: "BADN Check",
+      overlayPosition: "bottom-center"
+    },
+    { 
+      id: 2, 
+      image: dentalNurses2, 
+      title: "DBS or Disclosure Scotland Check",
+      overlayPosition: "bottom-center"
+    },
+    { 
+      id: 3, 
+      image: dentalNurses3, 
+      title: "GDC registration check",
+      overlayPosition: "bottom-center"
+    },
+    { 
+      id: 4, 
+      image: dentalNurses4, 
+      title: "Indemtity Insurance check",
+      overlayPosition: "bottom-center"
+    },
+    { 
+      id: 5, 
+      image: dentalNurses5, 
+      title: "Immunisation Check",
+      overlayPosition: "bottom-center"
+    },
   ];
 
-  const cardsPerSlide = 3;
-  const totalSlides = Math.ceil(cards.length / cardsPerSlide);
+  const totalSlides = slides.length;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, 10000);
+    }, 5000); // Changed to 5 seconds for better engagement
 
     return () => clearInterval(interval);
   }, [totalSlides]);
 
-  const getCurrentCards = () => {
-    const startIndex = currentSlide * cardsPerSlide;
-    return cards.slice(startIndex, startIndex + cardsPerSlide);
-  };
-
   const goToSlide = (slideIndex: number) => {
     setCurrentSlide(slideIndex);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  const getOverlayPositionClasses = (position: string) => {
+    switch(position) {
+      case 'top-left':
+        return 'top-8 left-8';
+      case 'top-right':
+        return 'top-8 right-8';
+      case 'bottom-left':
+        return 'bottom-8 left-8';
+      case 'bottom-right':
+        return 'bottom-8 right-8';
+      case 'bottom-center':
+        return 'bottom-8 left-1/2 transform -translate-x-1/2';
+      case 'center':
+        return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+      default:
+        return 'bottom-8 left-8';
+    }
   };
 
   return (
@@ -78,49 +116,89 @@ const DentalNurses = () => {
             </p>
 
             <div className="mt-16 relative">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                {getCurrentCards().map((card, index) => (
-                  <div 
-                    key={card.id}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:scale-105"
-                    style={{
-                      animation: 'fadeIn 0.5s ease-in-out'
-                    }}
-                  >
-                    <div className="relative h-64 lg:h-80">
-                      <Image 
-                        src={card.image} 
-                        alt={card.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-black mb-2">
-                        {card.title}
-                      </h3>
-                      <p className="text-gray-600">
-                        {card.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <div className="relative h-[350px] lg:h-[450px] flex items-center justify-center overflow-visible">
+                <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+                  {slides.map((slide, index) => {
+                    const position = index - currentSlide;
+                    const isActive = position === 0;
+                    const isPrev = position === -1;
+                    const isNext = position === 1;
+                    const isVisible = Math.abs(position) <= 1;
+
+                    return (
+                      <div
+                        key={slide.id}
+                        className={`absolute transition-all duration-700 ease-in-out ${
+                          !isVisible ? 'opacity-0 pointer-events-none' : ''
+                        }`}
+                        style={{
+                          transform: `translateX(${position * 70}%) scale(${isActive ? 1 : 0.75})`,
+                          zIndex: isActive ? 20 : isPrev || isNext ? 10 : 0,
+                        }}
+                      >
+                        <div className={`relative w-[280px] lg:w-[400px] h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${
+                          !isActive ? 'blur-sm opacity-60' : ''
+                        }`}>
+                          <Image 
+                            src={slide.image} 
+                            alt={slide.title}
+                            fill
+                            className="object-cover"
+                            priority={index === 0}
+                          />
+                          
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+                          {isActive && (
+                            <div className={`absolute ${getOverlayPositionClasses(slide.overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
+                              <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
+                                <h3 className="text-base lg:text-xl font-bold text-white text-center">
+                                  {slide.title}
+                                </h3>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-0 lg:left-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                  aria-label="Previous slide"
+                >
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-0 lg:right-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                  aria-label="Next slide"
+                >
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
 
-              <div className="flex justify-center mt-8 space-x-2">
-                {Array.from({ length: totalSlides }).map((_, index) => (
+              <div className="flex justify-center items-center mt-8 space-x-3">
+                {slides.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    className={`rounded-full transition-all duration-500 ${
                       currentSlide === index 
-                        ? 'bg-blue-600 w-8' 
-                        : 'bg-gray-300 hover:bg-gray-400'
+                        ? 'w-12 h-3 bg-gradient-to-r from-pink-500 to-rose-500' 
+                        : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125'
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
+                    aria-current={currentSlide === index ? 'true' : 'false'}
                   />
                 ))}
               </div>
+
             </div>
 
             </div>

@@ -265,10 +265,10 @@ const BranchNavBar = () => {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
           {!isLoggedIn ? (
             <>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleLoginClick}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleLoginClick}>
                 Login
               </button>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleRegisterClick}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleRegisterClick}>
                 Register
               </button>
             </>
@@ -276,8 +276,8 @@ const BranchNavBar = () => {
             <>
               {profile?.name && profile?.practiceName && (
                 <div className="text-center mr-3 py-2 px-4 bg-[#C3EAE7]/30 rounded-lg">
-                  <p className="text-sm font-semibold text-gray-800">{profile.name}</p>
-                  <p className="text-xs text-gray-600">{profile.practiceName}</p>
+                  <p className="text-base font-semibold text-gray-800">{profile.name}</p>
+                  <p className="text-sm text-gray-600">{profile.practiceName}</p>
                 </div>
               )}
               <button
@@ -356,7 +356,7 @@ const BranchNavBar = () => {
       </div>
 
       <div className="hidden md:block border-t border-gray-300">
-        <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
+        <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base font-medium text-gray-800">
 
           {isLoggedIn && (
             <>
@@ -457,7 +457,7 @@ const BranchNavBar = () => {
             </div>
 
             <div className="px-4 py-6">
-              <ul className="space-y-4 text-lg font-medium text-gray-800">
+              <ul className="space-y-4 text-base font-medium text-gray-800">
 
                 {isLoggedIn && (
                   <>
@@ -492,8 +492,8 @@ const BranchNavBar = () => {
                     <li className="flex flex-col items-center space-y-3">
                       {profile?.name && profile?.practiceName && (
                         <div className="text-center w-full py-2 px-3 bg-[#C3EAE7]/30 rounded-lg">
-                          <p className="text-sm font-semibold text-gray-800">{profile.name}</p>
-                          <p className="text-xs text-gray-600">{profile.practiceName}</p>
+                          <p className="text-base font-semibold text-gray-800">{profile.name}</p>
+                          <p className="text-sm text-gray-600">{profile.practiceName}</p>
                         </div>
                       )}
                       <div className="flex items-center space-x-2">
@@ -593,10 +593,10 @@ const BranchNavBar = () => {
               <div className="mt-8 space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-sm px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
                       Login
                     </button>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-sm px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
                       Register
                     </button>
                   </>

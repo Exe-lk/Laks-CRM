@@ -254,17 +254,17 @@ const NavBar = () => {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
           {!isLoggedIn ? (
             <>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleLoginClick}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleLoginClick}>
                 Login
               </button>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-sm lg:text-base" onClick={handleRegisterClick}>
+              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleRegisterClick}>
                 Register
               </button>
             </>
           ) : (
             <>
               <div className="flex items-center space-x-2 border border-gray-300 rounded-lg p-3 shadow-sm bg-white">
-                <div className="flex flex-col items-end mr-3 text-xs lg:text-sm">
+                <div className="flex flex-col items-end mr-3 text-sm lg:text-base">
                   <span className="font-semibold text-gray-700 leading-tight">
                     {profile?.fullName || 'Practice User'}
                   </span>
@@ -352,7 +352,7 @@ const NavBar = () => {
       </div>
 
       <div className="hidden md:block border-t border-gray-300">
-        <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base lg:text-lg font-medium text-gray-800">
+        <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base font-medium text-gray-800">
           <li
             className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
               }`}
@@ -487,13 +487,13 @@ const NavBar = () => {
                     {profile?.fullName || 'Practice User'}
                   </p>
                   {profile?.emailAddress && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-base text-gray-500">
                       {profile.emailAddress}
                     </p>
                   )}
                 </div>
               )}
-              <ul className="space-y-4 text-lg font-medium text-gray-800">
+              <ul className="space-y-4 text-base font-medium text-gray-800">
                 <li
                   className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
                     }`}
@@ -642,10 +642,10 @@ const NavBar = () => {
               <div className="mt-8 space-y-3">
                 {!isLoggedIn ? (
                   <>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-sm px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleLoginClick} >
                       Login
                     </button>
-                    <button className="w-full bg-[#C3EAE7] text-black px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
+                    <button className="w-full bg-[#C3EAE7] text-black text-sm px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition" onClick={handleRegisterClick} >
                       Register
                     </button>
                   </>

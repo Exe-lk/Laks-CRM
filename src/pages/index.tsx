@@ -1,9 +1,7 @@
 import Image from 'next/image';
 import NavBar from "./components/navBar/nav";
-import image1 from "../../public/assests/66e8ec37c700d67af1aa8ac0608e157b5810b1f2.jpg";
-import image2 from "../../public/assests/867184619ad618a8c654853279eb113657284e77.png";
-import image3 from "../../public/assests/b274c82439ece60c86526c9adf4ed6912e98f6ed.jpg";
-import image4 from "../../public/assests/ba6dc03ed4c4ed9261da138a6a60eb3f64f798e3.jpg";
+import image4 from "../../public/assests/phone.png";
+import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
 import { useRouter } from 'next/navigation';
 
@@ -22,7 +20,25 @@ const Home = () => {
 
           <div className="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-              <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
+              <div className="relative order-2 lg:order-1">
+                <div className="hidden lg:block">
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="space-y-6">
+                      <div className="w-full h-full">
+                        <Image
+                          src={image4}
+                          alt="Doctor"
+                          width={500}
+                          height={500}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 lg:space-y-8 order-1 lg:order-2">
                 <div className="space-y-4">
                   <div className="inline-flex items-center px-4 py-2 bg-[#C3EAE7] text-black rounded-full text-sm font-medium">
                     <span className="w-2 h-2 bg-black rounded-full mr-2 animate-pulse"></span>
@@ -62,155 +78,47 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="relative order-1 lg:order-2">
-                <div className="lg:hidden">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-3">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image4}
-                          alt="Doctor"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image2}
-                          alt="Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-3 pt-6">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image1}
-                          alt="Smiling Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image3}
-                          alt="Surgery"
-                          width={300}
-                          height={200}
-                          className="w-full h-32 lg:h-40 object-cover rounded-2xl shadow-lg"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="hidden lg:block">
-                  <div className="grid grid-cols-2 gap-6 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                    <div className="space-y-6">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image4}
-                          alt="Doctor"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image2}
-                          alt="Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-6 pt-12">
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image1}
-                          alt="Smiling Nurse"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
-                      <div className="transform hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={image3}
-                          alt="Surgery"
-                          width={300}
-                          height={200}
-                          className="w-full h-48 object-cover rounded-2xl shadow-2xl"
-                        />
-                      </div>
-                    </div>
-                  </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 lg:py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="mb-16 lg:mb-20">
+              <div className="relative pl-6 lg:pl-8 border-l-4 border-gray-300 bg-gray-50 p-4 rounded-lg">
+                <p className="text-2xl lg:text-3xl text-gray-800 font-semibold leading-relaxed">
+                 " After 5 years of hard work and experience, we have built up a cost-effective platform with fundamental facilities to approach both Practices and Locum parties.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+              <div className="space-y-4">
+                <div className="relative w-full max-w-md mx-auto lg:mx-0">
+                  <Image
+                    src={image5}
+                    alt="Clock showing time"
+                    width={500}
+                    height={350}
+                    className="w-full h-auto object-cover rounded-lg"
+                  />
                 </div>
+                <p className="text-base lg:text-lg text-gray-700 text-center lg:text-left">
+                  LocumLux – My Grandma took 50secs to register.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <p className="text-lg lg:text-xl text-gray-700 leading-relaxed">
+                  LocumLux has created the fastest and simplest system. It's a stepwise system for the users to register and use the functionalities so that it takes within 1 minute to register, and within 1 minute for any selected step.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-16 lg:py-20 bg-[#C3EAE7]/10">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12 lg:mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
-                Everything You Need to Succeed
-              </h2>
-              <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
-                Comprehensive tools and resources designed specifically for nursing professionals
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-              {[
-                {
-                  title: 'Learn & Grow',
-                  description: 'Access cutting-edge courses and certifications to advance your career',
-                  icon: '📚',
-                },
-                {
-                  title: 'On Board',
-                  description: 'Find your dream position with our curated job listings',
-                  icon: '💼',
-                },
-                {
-                  title: 'Community',
-                  description: 'Connect with peers, share experiences, and build your network',
-                  icon: '🤝',
-                }
-              ].map((feature, index) => (
-                <div
-                  key={feature.title}
-                  className="group relative p-6 lg:p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-[#C3EAE7]/20"
-                >
-                  <div className="w-14 h-14 lg:w-16 lg:h-16 bg-[#C3EAE7] rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl lg:text-2xl font-bold text-black mb-4">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-sm lg:text-base">
-                    {feature.description}
-                  </p>
-                  <div className="mt-6">
-                    <button className="text-black font-semibold hover:text-[#C3EAE7] transition-colors duration-200">
-                      Learn More →
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 lg:py-20 bg-black">
+        {/* <section className="py-16 lg:py-20 bg-black">
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 text-center">
               {[
@@ -230,7 +138,7 @@ const Home = () => {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
         <Footer />
 
       </main>
