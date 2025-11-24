@@ -243,8 +243,8 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 w-full border-b border-gray-300 bg-white shadow-md z-50">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
+    <nav className="fixed top-0 left-0 right-0 w-full border-b border-black bg-[#C3EAE7] shadow-md z-50">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start ml-4">
           <div className="flex items-center space-x-1 sm:space-x-2">
             <Image src={Logo} alt="Logo" width={160} height={100} />
@@ -254,16 +254,34 @@ const NavBar = () => {
         <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
           {!isLoggedIn ? (
             <>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleLoginClick}>
+              <button className="bg-white text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleLoginClick}>
                 Login
               </button>
-              <button className="bg-[#C3EAE7] text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleRegisterClick}>
+              <button className="bg-white text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleRegisterClick}>
                 Register
               </button>
+              <button className="text-black px-4 lg:px-6 py-2 rounded-full font-medium transition text-base flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                  />
+                </svg>
+                User Guide
+              </button>
+
             </>
           ) : (
             <>
-              <div className="flex items-center space-x-2 border border-gray-300 rounded-lg p-3 shadow-sm bg-white">
+              <div className="flex items-center space-x-2 border border-black rounded-lg p-3 shadow-sm bg-white">
                 <div className="flex flex-col items-end mr-3 text-sm lg:text-base">
                   <span className="font-semibold text-gray-700 leading-tight">
                     {profile?.fullName || 'Practice User'}
@@ -351,7 +369,7 @@ const NavBar = () => {
         </div>
       </div>
 
-      <div className="hidden md:block border-t border-gray-300">
+      <div className="hidden md:block border-t border-black">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base font-medium text-gray-800">
           <li
             className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
@@ -466,7 +484,7 @@ const NavBar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 backdrop-blur-sm bg-opacity-50" onClick={closeMobileMenu}>
           <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 border-b border-black">
               <span className="text-lg font-semibold">Menu</span>
               <button
                 onClick={closeMobileMenu}
@@ -585,7 +603,7 @@ const NavBar = () => {
                 {
                   !isLoggedIn && (
                     <>
-                    <li
+                      <li
                         className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
                           }`}
                         onClick={() => { router.push('/'); closeMobileMenu(); }}

@@ -12,7 +12,7 @@ const Home = () => {
     <>
       <NavBar />
 
-      <main className="min-h-screen bg-white pt-32">
+      <main className="min-h-screen bg-white pt-22">
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[#C3EAE7]/5"></div>
           <div className="absolute top-20 left-10 w-72 h-72 bg-[#C3EAE7]/20 rounded-full blur-3xl"></div>
@@ -44,25 +44,29 @@ const Home = () => {
                     <span className="w-2 h-2 bg-black rounded-full mr-2 animate-pulse"></span>
                     Trusted by 10,000+ Nurses
                   </div>
-                  <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-black leading-tight">
+                  <p className="text-3xl lg:text-5xl xl:text-6xl font-bold text-black leading-tight">
                     Empowering Your{' '}
                     <span className="text-[#C3EAE7]">
                       Nursing Journey
                     </span>
-                  </h1>
+                  </p>
                   <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-lg">
                     Grow your skills, discover new job opportunities, and connect with peers — all through a trusted platform built just for nurses. Welcome to your next step.
                   </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="group relative px-6 lg:px-8 py-3 lg:py-4 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                    onClick={() => router.push('/locumStaff/register')}>
-                    <span className="relative z-10">Register Now</span>
-                    <div className="absolute inset-0 bg-[#C3EAE7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300"
+                    onClick={() => router.push('/practiceUser/practiceRegister')}>
+                    <span className="relative z-10">Practices</span>
                   </button>
-                  <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300">
-                    User Guide
+                  <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300"
+                    onClick={() => router.push('/locumStaff/register')}>
+                    Nurses
+                  </button>
+                  <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300"
+                    onClick={() => router.push('/locumStaff/register')}>
+                    Hygienist
                   </button>
                 </div>
 
