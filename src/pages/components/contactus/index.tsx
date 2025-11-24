@@ -13,7 +13,8 @@ const ContactUs = () => {
     lastName: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',	
+    service: ''
   });
 
   const handleRecaptchaChange = (token: string | null) => {
@@ -68,16 +69,15 @@ const ContactUs = () => {
           confirmButtonColor: '#C3EAE7'
         });
         
-        // Reset form
         setFormData({
           firstName: '',
           lastName: '',
           email: '',
           phone: '',
-          message: ''
+          message: '',
+          service: ''
         });
         
-        // Reset reCAPTCHA
         if (recaptchaRef.current) {
           recaptchaRef.current.reset();
         }
@@ -190,6 +190,21 @@ const ContactUs = () => {
                     />
                   </div>
                 </div>
+                  <div className="relative">
+                    <select
+                      name="service"
+                      value={formData.service}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange(e as unknown as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)}
+                      required
+                      className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
+                    >
+                      <option value="" className="text-gray-500">Select Service</option>
+                      <option value="Dental Practice" className="text-gray-500">Dental Practice</option>
+                      <option value="Dental Nurse" className="text-gray-500">Dental Nurse</option>
+                      <option value="Hygienist" className="text-gray-500">Hygienist</option>
+                      <option value="Accounting" className="text-gray-500">Accounting</option>
+                    </select>
+                  </div>
 
                 <div className="relative">
                   <textarea
@@ -232,7 +247,7 @@ const ContactUs = () => {
                 </svg>
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-black mb-1 sm:mb-2">Phone</h3>
-              <p className="text-sm sm:text-base text-gray-600">020 3071 4868</p>
+              <p className="text-sm sm:text-base text-gray-600">074 9071 4868</p>
             </div>
 
             <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
@@ -253,7 +268,7 @@ const ContactUs = () => {
                 </svg>
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-black mb-1 sm:mb-2">Address</h3>
-              <p className="text-sm sm:text-base text-gray-600">61B Griffiths Rd, London SW19 1ST, United Kingdom</p>
+              <p className="text-sm sm:text-base text-gray-600">61 Griffiths Road, Wimbledon, London, England, SW19 1ST</p>
             </div>
           </div>
         </div>

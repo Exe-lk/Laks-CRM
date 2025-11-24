@@ -94,16 +94,16 @@ export default function Footer() {
   const quickLinks = userRole ? quickLinksByRole[userRole] : [];
   const showQuickAccess = isLoggedIn && quickLinks.length > 0;
   const gridClasses = showQuickAccess
-    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
+    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
     : isLoggedIn
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12";
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6";
 
   const quickAccessTagline = userRole ? roleTaglines[userRole] : "Stay organised with quick access to your key tools.";
 
   return (
     <footer className="bg-gradient-to-br from-[#d1eeeb] to-[#c3eae7] text-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-5">
         <div className={gridClasses}>
 
           <div className="lg:col-span-2 sm:col-span-2">
@@ -111,14 +111,14 @@ export default function Footer() {
               <img
                 src={imageLogo.src}
                 alt="Locum Lux Logo"
-                className="w-28 lg:w-32 mb-6 hover:scale-105 transition-transform duration-300"
+                className="w-28 lg:w-32 mb-3 hover:scale-105 transition-transform duration-300"
               />
               <div className="text-sm lg:text-base text-gray-700 leading-relaxed">
-                <p className="mb-2">
+                <p className="mb-1">
                   <span className="font-semibold text-gray-800">Locumlux</span> is a trading name & owned by
                   <span className="font-bold text-gray-900 block mt-1">LUX DENT AGENCY LIMITED</span>
                 </p>
-                <div className="space-y-1 mt-4 text-sm">
+                <div className="space-y-1 mt-2 text-sm">
                   <p><span className="font-medium">Company no.</span> 10800218</p>
                   <p>Registered in England and Wales</p>
                 </div>
@@ -128,18 +128,18 @@ export default function Footer() {
 
           {showQuickAccess && (
             <div className="sm:col-span-1">
-              <h3 className="font-bold text-lg mb-3 text-gray-900 border-b-2 border-emerald-400 pb-2 inline-block">
+              <h3 className="font-bold text-lg mb-2 text-gray-900 border-b-2 border-emerald-400 pb-1 inline-block">
                 QUICK ACCESS
               </h3>
-              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
                 {quickAccessTagline}
               </p>
-              <ul className="space-y-3 text-sm lg:text-base">
+              <ul className="space-y-2 text-sm lg:text-base">
                 {quickLinks.map(({ label, href, description }) => (
                   <li key={label}>
                     <a
                       href={href}
-                      className="group block rounded-xl border border-transparent bg-white/40 px-4 py-3 text-gray-800 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:bg-white"
+                      className="group block rounded-xl border border-transparent bg-white/40 px-3 py-2 text-gray-800 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:bg-white"
                     >
                       <span className="flex items-center justify-between font-semibold">
                         {label}
@@ -159,10 +159,10 @@ export default function Footer() {
 
           {!isLoggedIn && (
             <div className="sm:col-span-1">
-              <h3 className="font-bold text-lg mb-4 text-gray-900 border-b-2 border-teal-400 pb-2 inline-block">
+              <h3 className="font-bold text-lg mb-2 text-gray-900 border-b-2 border-teal-400 pb-1 inline-block">
                 ABOUT
               </h3>
-              <ul className="space-y-3 text-sm lg:text-base">
+              <ul className="space-y-2 text-sm lg:text-base">
                 {[
                   { label: 'About Us', href: '/components/aboutus' },
                   { label: 'Dental Practices', href: '/components/dentalpractices' },
@@ -187,10 +187,10 @@ export default function Footer() {
 
           {!isLoggedIn && (
             <div className="sm:col-span-1">
-              <h3 className="font-bold text-lg mb-4 text-gray-900 border-b-2 border-pink-400 pb-2 inline-block">
+              <h3 className="font-bold text-lg mb-2 text-gray-900 border-b-2 border-pink-400 pb-1 inline-block">
                 USEFUL LINKS
               </h3>
-              <ul className="space-y-3 text-sm lg:text-base">
+              <ul className="space-y-2 text-sm lg:text-base">
                 {[
                   { label: 'Join as a Practice', href: '/practiceUser/practiceRegister' },
                   { label: 'Join as a Nurse', href: '/locumStaff/register' },
@@ -210,42 +210,42 @@ export default function Footer() {
           )}
 
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="font-bold text-lg mb-4 text-gray-900 border-b-2 border-blue-400 pb-2 inline-block">
+            <h3 className="font-bold text-lg mb-2 text-gray-900 border-b-2 border-blue-400 pb-1 inline-block">
               CONTACT US
             </h3>
 
-            <div className="mb-6">
-              <div className="flex items-start gap-3 text-sm lg:text-base mb-4">
+            <div className="mb-3">
+              <div className="flex items-start gap-3 text-sm lg:text-base mb-2">
                 <MdLocationOn className="text-blue-500 text-xl mt-1 flex-shrink-0" />
                 <div>
                   <span className="font-semibold block mb-1">Office Address:</span>
                   <p className="text-gray-700 leading-relaxed">
-                    61 Griffiths Road, Wimbledon, London, England, SW19 1ST
+                  61 Griffiths Road, Wimbledon, London, England, SW19 1ST
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mb-3 text-sm lg:text-base group cursor-pointer">
+              <div className="flex items-center gap-3 mb-2 text-sm lg:text-base group cursor-pointer">
                 <div className="bg-pink-100 p-2 rounded-full group-hover:bg-pink-200 transition-colors">
                   <MdPhoneAndroid className="text-pink-500 text-lg" />
                 </div>
                 <a href="tel:07490714868" className="text-gray-700 hover:text-pink-600 transition-colors font-medium">
-                020 3071 4868
+                074 9071 4868
                 </a>
               </div>
 
-              <div className="flex items-center gap-3 mb-6 text-sm lg:text-base group cursor-pointer">
+              <div className="flex items-center gap-3 mb-3 text-sm lg:text-base group cursor-pointer">
                 <div className="bg-blue-100 p-2 rounded-full group-hover:bg-blue-200 transition-colors">
                   <MdEmail className="text-blue-500 text-lg" />
                 </div>
                 <a href="mailto:info@locumlux.co.uk" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                  info@locumlux.co.uk
+                info@locumlux.co.uk
                 </a>
               </div>
             </div>
 
             <div>
-              <h4 className="font-bold text-base mb-4 text-gray-900">FOLLOW US</h4>
+              <h4 className="font-bold text-base mb-2 text-gray-900">FOLLOW US</h4>
               <div className="flex space-x-4">
                 {[
                   { Icon: FaFacebookF, color: 'hover:bg-blue-600', bg: 'bg-blue-500' },
@@ -256,9 +256,9 @@ export default function Footer() {
                   <a
                     key={index}
                     href="#"
-                    className={`${bg} ${color} text-white p-3 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg transform`}
+                    className={`${bg} ${color} text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg transform`}
                   >
-                    <Icon className="text-lg" />
+                    <Icon className="text-base" />
                   </a>
                 ))}
               </div>
@@ -268,7 +268,7 @@ export default function Footer() {
       </div>
 
       <div className="bg-[#b8e3df] border-t border-teal-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-col sm:flex-row justify-between items-center text-sm lg:text-base">
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-3 sm:mb-0">
               <a
