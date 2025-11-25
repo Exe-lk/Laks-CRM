@@ -372,7 +372,7 @@ const NavBar = () => {
       <div className="hidden md:block border-t border-black">
         <ul className="flex justify-center space-x-6 lg:space-x-12 py-3 text-base font-medium text-gray-800">
           <li
-            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
+            className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-white text-black' : ''
               }`}
             onClick={() => router.push('/practiceUser/home')}
           >
@@ -383,12 +383,12 @@ const NavBar = () => {
             <>
               {profile?.practiceType === 'Corporate' ? (
                 <><li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''}`}
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-white text-black' : ''}`}
                   onClick={() => router.push('/practiceUser/branches')}
                 >
                   Branches
                 </li><li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''}`}
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-white text-black' : ''}`}
                   onClick={() => router.push('/practiceUser/myBookings')}
                 >
                     My Bookings
@@ -397,21 +397,21 @@ const NavBar = () => {
               ) : (
                 <>
                   <li
-                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-white text-black' : ''
                       }`}
                     onClick={() => router.push('/practiceUser/SelectNurses')}
                   >
                     Appointments
                   </li>
                   <li
-                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-white text-black' : ''
                       }`}
                     onClick={() => router.push('/practiceUser/myBookings')}
                   >
                     My Bookings
                   </li>
                   <li
-                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                    className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-white text-black' : ''
                       }`}
                     onClick={() => router.push('/practiceUser/payment')}
                   >
@@ -428,49 +428,49 @@ const NavBar = () => {
             !isLoggedIn && (
               <>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/')}
                 >
                   Home
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/aboutus') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/aboutus')}
                 >
                   About Us
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/dentalpractices')}
                 >
                   Dental Practices
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/dentalnurses')}
                 >
                   Dental Nurses
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/hygienist') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/hygienist')}
                 >
                   Hygienist
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/accounting') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/accounting')}
                 >
                   Accounting
                 </li>
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/components/contactus') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => router.push('/components/contactus')}
                 >
@@ -483,7 +483,7 @@ const NavBar = () => {
 
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 backdrop-blur-sm bg-opacity-50" onClick={closeMobileMenu}>
-          <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-[#C3EAE7] shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-black">
               <span className="text-lg font-semibold">Menu</span>
               <button
@@ -500,8 +500,8 @@ const NavBar = () => {
 
             <div className="px-4 py-6">
               {isLoggedIn && (
-                <div className="mb-6">
-                  <p className="text-base font-semibold text-gray-800">
+                <div className="mb-6 bg-white border border-black rounded-lg p-3 shadow-sm items-center">
+                  <p className="text-base font-semibold text-black">
                     {profile?.fullName || 'Practice User'}
                   </p>
                   {profile?.emailAddress && (
@@ -513,7 +513,7 @@ const NavBar = () => {
               )}
               <ul className="space-y-4 text-base font-medium text-gray-800">
                 <li
-                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-[#C3EAE7] text-black' : ''
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/home') ? 'bg-white text-black' : ''
                     }`}
                   onClick={() => { router.push('/practiceUser/home'); closeMobileMenu(); }}
                 >
@@ -523,7 +523,7 @@ const NavBar = () => {
                   <>
                     {profile?.practiceType === 'Corporate' ? (
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/branches') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/practiceUser/branches'); closeMobileMenu(); }}
                       >
@@ -532,21 +532,21 @@ const NavBar = () => {
                     ) : (
                       <>
                         <li
-                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/SelectNurses') ? 'bg-white text-black' : ''
                             }`}
                           onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
                         >
                           Appointments
                         </li>
                         <li
-                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-[#C3EAE7] text-black' : ''
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-white text-black' : ''
                             }`}
                           onClick={() => { router.push('/practiceUser/myBookings'); closeMobileMenu(); }}
                         >
                           My Bookings
                         </li>
                         <li
-                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-[#C3EAE7] text-black' : ''
+                          className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/payment') ? 'bg-white text-black' : ''
                             }`}
                           onClick={() => { router.push('/practiceUser/payment'); closeMobileMenu(); }}
                         >
@@ -604,49 +604,49 @@ const NavBar = () => {
                   !isLoggedIn && (
                     <>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/'); closeMobileMenu(); }}
                       >
                         Home
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/aboutus') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/aboutus'); closeMobileMenu(); }}
                       >
                         About Us
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalpractices') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/dentalpractices'); closeMobileMenu(); }}
                       >
                         Dental Practices
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/dentalnurses') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/dentalnurses'); closeMobileMenu(); }}
                       >
                         Dental Nurses
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/hygienist') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/hygienist') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/hygienist'); closeMobileMenu(); }}
                       >
                         Hygienist
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/accounting') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/accounting') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/accounting'); closeMobileMenu(); }}
                       >
                         Accounting
                       </li>
                       <li
-                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/contactus') ? 'bg-[#C3EAE7] text-black' : ''
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/components/contactus') ? 'bg-white text-black' : ''
                           }`}
                         onClick={() => { router.push('/components/contactus'); closeMobileMenu(); }}
                       >

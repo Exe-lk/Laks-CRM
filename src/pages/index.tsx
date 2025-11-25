@@ -3,6 +3,7 @@ import NavBar from "./components/navBar/nav";
 import image4 from "../../public/assests/phone.png";
 import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
+import Logo from "../../public/assests/Laks Dent Logo.png"
 import { useRouter } from 'next/navigation';
 
 const Home = () => {
@@ -39,22 +40,16 @@ const Home = () => {
               </div>
 
               <div className="space-y-6 lg:space-y-8 order-1 lg:order-2">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center px-4 py-2 bg-[#C3EAE7] text-black rounded-full text-sm font-medium">
-                    <span className="w-2 h-2 bg-black rounded-full mr-2 animate-pulse"></span>
-                    Trusted by 10,000+ Nurses
-                  </div>
-                  <p className="text-3xl lg:text-5xl xl:text-6xl font-bold text-black leading-tight">
-                    Empowering Your{' '}
-                    <span className="text-[#C3EAE7]">
-                      Nursing Journey
-                    </span>
-                  </p>
-                  <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-lg">
-                    Grow your skills, discover new job opportunities, and connect with peers — all through a trusted platform built just for nurses. Welcome to your next step.
-                  </p>
-                </div>
-
+                
+              <div className="w-full h-full">
+                        <Image
+                          src={Logo}
+                          alt="Doctor"
+                          width={500}
+                          height={500}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300"
                     onClick={() => router.push('/practiceUser/practiceRegister')}>
@@ -68,17 +63,6 @@ const Home = () => {
                     onClick={() => router.push('/locumStaff/register')}>
                     Hygienist
                   </button>
-                </div>
-
-                <div className="flex items-center space-x-4 lg:space-x-6 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="w-6 h-6 lg:w-8 lg:h-8 bg-[#C3EAE7] rounded-full border-2 border-white"></div>
-                      ))}
-                    </div>
-                    <span className="ml-3">Join 10,000+ nurses</span>
-                  </div>
                 </div>
               </div>
 
