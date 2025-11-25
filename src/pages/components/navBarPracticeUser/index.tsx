@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Logo from "../../../../public/assests/logolaksCRM.jpg"
+import Logo from "../../../../public/assests/Laks Dent Logo.png"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';

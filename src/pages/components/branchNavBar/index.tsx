@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Logo from "../../../../public/assests/logolaksCRM.jpg"
+import Logo from "../../../../public/assests/Laks Dent Logo.png"
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import ProfileModal from '../profilePracticeUser/index';
@@ -380,14 +380,14 @@ const BranchNavBar = () => {
           {isLoggedIn && (
             <>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/home') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/home') ? 'bg-[#A9DBD9] text-black' : ''
                   }`}
                 onClick={() => router.push('/branch/home')}
               >
                 Home
               </li>
               <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/SelectNurses') ? 'bg-[#C3EAE7] text-black' : ''
+                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/SelectNurses') ? 'bg-[#A9DBD9] text-black' : ''
                   }`}
                 onClick={() => router.push('/branch/SelectNurses')}
               >
@@ -460,7 +460,7 @@ const BranchNavBar = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={closeMobileMenu}>
+        <div className="md:hidden fixed inset-0 z-50 bg-[#C3EAE7] bg-opacity-50" onClick={closeMobileMenu}>
           <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-black">
               <span className="text-lg font-semibold">Menu</span>
