@@ -262,13 +262,13 @@ const NavBar = () => {
             </>
           ) : (
             <>
-              <div className="flex items-center space-x-2 border border-black rounded-lg p-3 shadow-sm bg-black">
+              <div className="flex items-center space-x-2 border border-black rounded-lg p-3 shadow-sm bg-white">
                 <div className="flex flex-col items-end mr-3 text-sm lg:text-base">
-                  <span className="font-semibold text-gray-700 leading-tight">
+                  <span className="font-semibold text-black leading-tight">
                     {profile?.fullName || 'Practice User'}
                   </span>
                   {profile?.emailAddress && (
-                    <span className="text-gray-500">
+                    <span className="text-black">
                       {profile.emailAddress}
                     </span>
                   )}
