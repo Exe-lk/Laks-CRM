@@ -83,28 +83,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentMonth = jobDate.getMonth() + 1; // 1-12
     const currentYear = jobDate.getFullYear();
 
-    // First check if ANY timesheet exists for this locum, month, and year
-    const existingTimesheet = await prisma.timesheet.findFirst({
+    // Reuse the most recent DRAFT timesheet for this month/year if it exists
+    let timesheet = await prisma.timesheet.findFirst({
       where: {
         locumId: booking.locum_id!,
         month: currentMonth,
-        year: currentYear
+        year: currentYear,
+        status: 'DRAFT'
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
-
-    // If a timesheet exists but is not DRAFT, we can't add jobs to it
-    if (existingTimesheet && existingTimesheet.status !== 'DRAFT') {
-      return res.status(400).json({ 
-        error: `Cannot add job to ${existingTimesheet.status.toLowerCase()} timesheet. The timesheet for ${currentMonth}/${currentYear} has already been submitted or locked.`,
-        data: {
-          timesheetId: existingTimesheet.id,
-          timesheetStatus: existingTimesheet.status
-        }
-      });
-    }
-
-    // Use existing DRAFT timesheet or create a new one
-    let timesheet = existingTimesheet;
     if (!timesheet) {
       timesheet = await prisma.timesheet.create({
         data: {
