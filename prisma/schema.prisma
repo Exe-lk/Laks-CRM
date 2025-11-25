@@ -278,7 +278,6 @@ model Timesheet {
   locumProfile  LocumProfile   @relation(fields: [locumId], references: [id], onDelete: Cascade)
   timesheetJobs TimesheetJob[]
 
-  @@unique([locumId, month, year], name: "locum_month_year_unique")
   @@map("timesheets")
 }
 
