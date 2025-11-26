@@ -3,7 +3,7 @@ import NavBar from "./components/navBar/nav";
 import image4 from "../../public/assests/phone.png";
 import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
-import Logo from "../../public/assests/Laks Dent Logo.png"
+import Logo from "../../public/assests/IMG_4296.PNG"
 import { useRouter } from 'next/navigation';
 
 const Home = () => {
@@ -50,7 +50,7 @@ const Home = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                   <button className="px-6 lg:px-8 py-3 lg:py-4 bg-white text-black border-2 border-[#C3EAE7] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-[#C3EAE7] transform hover:-translate-y-1 transition-all duration-300"
                     onClick={() => router.push('/practiceUser/practiceRegister')}>
                     <span className="relative z-10">Practices</span>
