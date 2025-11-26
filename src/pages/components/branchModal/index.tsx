@@ -100,6 +100,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 }) => {
   const isEditing = !!branch;
   const [showMap, setShowMap] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -136,7 +137,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
         console.log('Submitting branch data:', {
           ...branchData,
-          email: `"${branchData.email}"`, 
+          email: `"${branchData.email}"`,
           password: '[REDACTED]'
         });
         await onSubmit(branchData);
@@ -149,10 +150,10 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
   useEffect(() => {
     if (branch && isOpen) {
-      const telephoneDigits = branch.telephone?.startsWith('+44') 
-        ? branch.telephone.substring(3) 
+      const telephoneDigits = branch.telephone?.startsWith('+44')
+        ? branch.telephone.substring(3)
         : (branch.telephone || '');
-      
+
       formik.setValues({
         name: branch.name,
         address: branch.address,
@@ -354,26 +355,54 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 <FiLock className="w-4 h-4 text-[#C3EAE7]" />
                 Password *
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder={isEditing ? "Enter new password (leave empty to keep current password)" : "Enter password"}
-                className={`w-full px-4 py-3 border-2 rounded-xl 
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder={isEditing ? "Enter new password (leave empty to keep current password)" : "Enter password"}
+                  className={`w-full px-4 py-3 border-2 rounded-xl 
                   focus:ring-2 focus:ring-[#C3EAE7]/30 
                   transition-all duration-200 outline-none 
                   hover:border-[#C3EAE7]/50
                   ${formik.touched.password && formik.errors.password
-                    ? 'border-red-300 focus:border-red-400 bg-red-50'
-                    : 'border-gray-200 focus:border-[#C3EAE7]'
-                  }`}
-                required={!isEditing}
-              />
-              <p className="text-xs text-gray-500">
-                Password must be at least 8 characters with uppercase, lowercase, number, and special character
-              </p>
+                      ? 'border-red-300 focus:border-red-400 bg-red-50'
+                      : 'border-gray-200 focus:border-[#C3EAE7]'
+                    }`}
+                  required={!isEditing}
+                />
+                <p className="text-xs text-gray-500">
+                  Password must be at least 8 characters with uppercase, lowercase, number, and special character
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-black transition-colors"
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274
+              4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477
+               0-8.268-2.943-9.542-7a9.97 9.97 0 012.563-4.263M9.88
+               9.88a3 3 0 104.243 4.243" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M3 3l18 18" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {formik.touched.password && formik.errors.password && (
                 <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                   <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
