@@ -95,12 +95,12 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
                 }
                 return `${hour24.toString().padStart(2, '0')}:${minutes}`;
             }
-            return timeStr; 
+            return timeStr;
         };
 
         const start24 = convertTo24Hour(values.request_start_time);
         const end24 = convertTo24Hour(values.request_end_time);
-        
+
         const start = new Date(`2000-01-01T${start24}`);
         const end = new Date(`2000-01-01T${end24}`);
 
@@ -125,7 +125,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         if (trimmedLocation.length < 3) {
             errors.location = 'Location must be at least 3 characters long';
         }
-        if (trimmedLocation.length > 200) { 
+        if (trimmedLocation.length > 200) {
             errors.location = 'Location must be less than 200 characters';
         }
     }
@@ -155,10 +155,10 @@ const CreateAppointmentPage = () => {
     console.log(profile)
 
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
-    
-    const { 
-        data: cardStatusData, 
-        isLoading: isLoadingCardStatus 
+
+    const {
+        data: cardStatusData,
+        isLoading: isLoadingCardStatus
     } = useCheckPracticeHasCardsQuery(profile?.id || '', {
         skip: !profile?.id
     });
@@ -275,7 +275,7 @@ const CreateAppointmentPage = () => {
         if (profile?.id && profile?.address) {
             const initialLocation = profile.practiceType === 'Private' ? (profile.address || '') : '';
             const initialAddress = profile.practiceType === 'Private' ? (profile.location || '') : '';
-            
+
             formik.setValues({
                 practice_id: profile.id || '',
                 request_date: '',
@@ -304,8 +304,8 @@ const CreateAppointmentPage = () => {
             formik.setValues({
                 ...formik.values,
                 branch_id: branchId,
-                location: selectedBranch.location,  
-                address: selectedBranch.address     
+                location: selectedBranch.location,
+                address: selectedBranch.address
             });
         }
     };
@@ -337,9 +337,9 @@ const CreateAppointmentPage = () => {
             if (profile?.practiceType === 'Private') {
                 submissionValues.location = profile.address || '';
                 submissionValues.address = profile.location || '';
-                submissionValues.branch_id = ''; 
+                submissionValues.branch_id = '';
             }
-            
+
             console.log('Submitting appointment request with values:', {
                 practice_id: submissionValues.practice_id,
                 request_date: submissionValues.request_date,
@@ -350,7 +350,7 @@ const CreateAppointmentPage = () => {
                 required_role: submissionValues.required_role,
                 branch_id: submissionValues.branch_id
             });
-            
+
             const result = await createAppointmentRequest(submissionValues).unwrap();
 
             Swal.fire({
@@ -376,7 +376,7 @@ const CreateAppointmentPage = () => {
         setCurrentPage(page);
     };
 
-    console.log("branches",branches)
+    console.log("branches", branches)
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
@@ -406,9 +406,9 @@ const CreateAppointmentPage = () => {
                                 className={`flex items-center gap-2 px-8 py-4 font-bold rounded-xl 
                                          transition-all duration-200 shadow-lg
                                          ${isLoadingCardStatus || !cardStatusData?.hasCards
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105'
-                                        }`}
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105'
+                                    }`}
                             >
                                 <FiPlus className="text-xl" />
                                 {isLoadingCardStatus ? 'Loading...' : 'Create New Appointment'}
@@ -460,22 +460,50 @@ const CreateAppointmentPage = () => {
                                     </svg>
                                     Request Date *
                                 </label>
-                                <input
-                                    type="date"
-                                    name="request_date"
-                                    value={formik.values.request_date}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    className={`w-full px-4 py-3 border-2 rounded-xl 
-                           focus:ring-2 focus:ring-[#C3EAE7]/30 
-                           transition-all duration-200 outline-none 
-                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
-                           ${formik.touched.request_date && formik.errors.request_date
-                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
-                                            : 'border-gray-200 focus:border-[#C3EAE7]'
-                                        }`}
-                                    required
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        name="request_date_display"
+                                        value={formik.values.request_date ? (() => {
+                                            const [year, month, day] = formik.values.request_date.split('-');
+                                            if (year && month && day) {
+                                                return `${day}/${month}/${year}`;
+                                            }
+                                            return '';
+                                        })() : ''}
+                                        placeholder="DD/MM/YYYY"
+                                        readOnly
+                                        className={`w-full px-4 py-3 pr-12 border-2 rounded-xl 
+                               focus:ring-2 focus:ring-[#C3EAE7]/30 
+                               transition-all duration-200 outline-none cursor-pointer
+                               hover:border-[#C3EAE7]/50 group-hover:shadow-md bg-white
+                               ${formik.touched.request_date && formik.errors.request_date
+                                                ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                                : 'border-gray-200 focus:border-[#C3EAE7]'
+                                            }`}
+                                    />
+                                    <input
+                                        type="date"
+                                        id="request_date_hidden"
+                                        name="request_date"
+                                        value={formik.values.request_date}
+                                        onChange={(e) => {
+                                            formik.setFieldValue('request_date', e.target.value);
+                                        }}
+                                        onBlur={formik.handleBlur}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        style={{ zIndex: 1 }}
+                                        required
+                                    />
+                                    <div
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C3EAE7] pointer-events-none"
+                                        style={{ zIndex: 0 }}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />
+                                        </svg>
+                                    </div>
+                                </div>
                                 {formik.touched.request_date && formik.errors.request_date && (
                                     <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                                         <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -598,7 +626,7 @@ const CreateAppointmentPage = () => {
                                     )}
                                 </div>
                             )}
-                            
+
                             {profile?.practiceType === 'Private' && (
                                 <div className="space-y-2 group">
                                     <label className="block text-sm font-semibold text-black flex items-center gap-2">
@@ -639,7 +667,7 @@ const CreateAppointmentPage = () => {
                                     )}
                                 </div>
                             )}
-                            
+
                             <div className="space-y-2 group">
                                 <label className="block text-sm font-semibold text-black flex items-center gap-2">
                                     <svg
