@@ -73,7 +73,7 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
     switch (values.jobType) {
         case 'Receptionist':
             if (values.receptionistYearsExperience) {
-                const years = parseInt(values.receptionistYearsExperience.replace(/\D/g, '')) || 0;
+                const years = parseInt(String(values.receptionistYearsExperience).replace(/\D/g, '')) || 0;
                 specialties.push({
                     speciality: "Receptionist",
                     numberOfYears: years
@@ -83,7 +83,7 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
 
         case 'Hygienist':
             if (values.hygienistYearsExperience) {
-                const years = parseInt(values.hygienistYearsExperience.replace(/\D/g, '')) || 0;
+                const years = parseInt(String(values.hygienistYearsExperience).replace(/\D/g, '')) || 0;
                 specialties.push({
                     speciality: "Hygienist",
                     numberOfYears: years
@@ -95,7 +95,7 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
             values.selectedNurseFields.forEach(field => {
                 const experienceStr = values.nurseExperience[field];
                 if (experienceStr) {
-                    const years = parseInt(experienceStr.replace(/\D/g, '')) || 0;
+                    const years = parseInt(String(experienceStr).replace(/\D/g, '')) || 0;
                     specialties.push({
                         speciality: field,
                         numberOfYears: years
@@ -108,7 +108,7 @@ const transformFormDataToAPI = (values: typeof initialValues, addressLat: number
             values.selectedDentistFields.forEach(field => {
                 const experienceStr = values.dentistExperience[field];
                 if (experienceStr) {
-                    const years = parseInt(experienceStr.replace(/\D/g, '')) || 0;
+                    const years = parseInt(String(experienceStr).replace(/\D/g, '')) || 0;
                     specialties.push({
                         speciality: field,
                         numberOfYears: years
