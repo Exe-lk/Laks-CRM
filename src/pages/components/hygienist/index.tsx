@@ -24,8 +24,8 @@ const Hygienist = () => {
               </p>
               <div className="max-w-7xl mx-auto px-4 mt-12">
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
-                  <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                  <div className="flex flex-col lg:flex-row items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image3} alt="register" width={1000} height={1000} className="w-full h-auto" />
@@ -38,15 +38,15 @@ const Hygienist = () => {
                         LESS THAN A ONE MINUTE TO REGISTER
                       </p>
                     </div>
-                    <div className="hidden lg:flex items-center justify-center mx-2">
+                    <div className="flex items-center justify-center mt-4 lg:mt-0 mx-0 lg:mx-2">
                       <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
-                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                        <FaArrowRight className="text-[#4A90E2] text-xl rotate-90 lg:rotate-0 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                  <div className="flex flex-col lg:flex-row items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image1} alt="register" width={1000} height={1000} className="w-full h-auto" />
@@ -58,15 +58,15 @@ const Hygienist = () => {
                       <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
                         FILL YOUR DETAILS TO CREATE PROFILE                      </p>
                     </div>
-                    <div className="hidden lg:flex items-center justify-center mx-2">
+                    <div className="flex items-center justify-center mt-4 lg:mt-0 mx-0 lg:mx-2">
                       <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
-                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                        <FaArrowRight className="text-[#4A90E2] text-xl rotate-90 lg:rotate-0 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image2} alt="register" width={1000} height={1000} className="w-full h-auto" />

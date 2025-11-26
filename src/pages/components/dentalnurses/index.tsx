@@ -14,8 +14,11 @@ import image3 from "../../../../public/assests/Untitled design (15).png"
 import { FaHospital, FaSearch, FaUser, FaCalendarCheck, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
 
 
+const slideSizesAttr = '(min-width: 1024px) 400px, (min-width: 640px) 420px, 90vw';
+
 const DentalNurses = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   const slides = [
     {
@@ -59,6 +62,31 @@ const DentalNurses = () => {
 
     return () => clearInterval(interval);
   }, [totalSlides]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsLargeScreen(event.matches);
+    };
+
+    handleChange(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
 
   const goToSlide = (slideIndex: number) => {
     setCurrentSlide(slideIndex);
@@ -107,8 +135,8 @@ const DentalNurses = () => {
               </p>
               <div className="max-w-7xl mx-auto px-4 mt-12">
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
-                  <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                  <div className="flex flex-col lg:flex-row items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image3} alt="register" width={1000} height={1000} className="w-full h-auto" />
@@ -121,15 +149,15 @@ const DentalNurses = () => {
                         LESS THAN A ONE MINUTE TO REGISTER
                       </p>
                     </div>
-                    <div className="hidden lg:flex items-center justify-center mx-2">
+                    <div className="flex items-center justify-center mt-4 lg:mt-0 mx-0 lg:mx-2">
                       <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
-                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                        <FaArrowRight className="text-[#4A90E2] text-xl rotate-90 lg:rotate-0 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                  <div className="flex flex-col lg:flex-row items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image1} alt="register" width={1000} height={1000} className="w-full h-auto" />
@@ -141,15 +169,15 @@ const DentalNurses = () => {
                       <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
                         FILL YOUR DETAILS TO CREATE PROFILE                      </p>
                     </div>
-                    <div className="hidden lg:flex items-center justify-center mx-2">
+                    <div className="flex items-center justify-center mt-4 lg:mt-0 mx-0 lg:mx-2">
                       <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
-                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                        <FaArrowRight className="text-[#4A90E2] text-xl rotate-90 lg:rotate-0 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center">
-                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm flex flex-col items-center min-h-[280px]">
                       <div className="flex justify-center mb-4">
                         <div className="relative">
                           <Image src={image2} alt="register" width={1000} height={1000} className="w-full h-auto" />
@@ -178,47 +206,71 @@ const DentalNurses = () => {
               <div className="mt-16 relative">
                 <div className="relative h-[350px] lg:h-[450px] flex items-center justify-center overflow-visible">
                   <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
-                    {slides.map((slide, index) => {
-                      const position = index - currentSlide;
-                      const isActive = position === 0;
-                      const isPrev = position === -1;
-                      const isNext = position === 1;
-                      const isVisible = Math.abs(position) <= 1;
+                    {isLargeScreen ? (
+                      slides.map((slide, index) => {
+                        const position = index - currentSlide;
+                        const isActive = position === 0;
+                        const isPrev = position === -1;
+                        const isNext = position === 1;
+                        const isVisible = Math.abs(position) <= 1;
+                        const translateX = position * 70;
+                        const scaleValue = isActive ? 1 : 0.85;
 
-                      return (
-                        <div
-                          key={slide.id}
-                          className={`absolute transition-all duration-700 ease-in-out ${!isVisible ? 'opacity-0 pointer-events-none' : ''
-                            }`}
-                          style={{
-                            transform: `translateX(${position * 70}%) scale(${isActive ? 1 : 0.75})`,
-                            zIndex: isActive ? 20 : isPrev || isNext ? 10 : 0,
-                          }}
-                        >
-                          <div className={`relative w-[280px] lg:w-[400px] h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${!isActive ? 'blur-sm opacity-60' : ''
-                            }`}>
-                            <Image
-                              src={slide.image}
-                              alt={slide.title}
-                              fill
-                              className="object-cover"
-                              priority={index === 0}
-                            />
+                        return (
+                          <div
+                            key={slide.id}
+                            className={`absolute transition-all duration-700 ease-in-out ${!isVisible ? 'opacity-0 pointer-events-none' : ''
+                              }`}
+                            style={{
+                              transform: `translateX(${translateX}%) scale(${scaleValue})`,
+                              zIndex: isActive ? 20 : isPrev || isNext ? 10 : 0,
+                            }}
+                          >
+                            <div className={`relative w-full max-w-[360px] sm:max-w-[420px] lg:w-[420px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${!isActive ? 'blur-sm opacity-60' : ''
+                              }`}>
+                              <Image
+                                src={slide.image}
+                                alt={slide.title}
+                                fill
+                                className="object-cover"
+                                sizes={slideSizesAttr}
+                                priority={index === 0}
+                              />
 
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
-                            {isActive && (
-                              <div className={`absolute ${getOverlayPositionClasses(slide.overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
-                                <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
-                                  <h3 className="text-base lg:text-xl font-bold text-white text-center">
-                                    {slide.title}
-                                  </h3>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+                              {isActive && (
+                                <div className={`absolute ${getOverlayPositionClasses(slide.overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
+                                  <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
+                                    <h3 className="text-base lg:text-xl font-bold text-white text-center">
+                                      {slide.title}
+                                    </h3>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="relative w-full max-w-[360px] sm:max-w-[420px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
+                        <Image
+                          src={slides[currentSlide].image}
+                          alt={slides[currentSlide].title}
+                          fill
+                          className="object-cover"
+                          sizes={slideSizesAttr}
+                          priority
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+                        <div className={`absolute ${getOverlayPositionClasses(slides[currentSlide].overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
+                          <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
+                            <h3 className="text-base font-bold text-white text-center">
+                              {slides[currentSlide].title}
+                            </h3>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    )}
                   </div>
 
                   <button
