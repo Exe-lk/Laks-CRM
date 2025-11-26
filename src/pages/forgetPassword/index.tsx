@@ -95,9 +95,8 @@ const ForgotPassword = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-3 border-2 ${
-                  error ? 'border-red-500' : 'border-gray-200'
-                } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
+                className={`w-full px-4 py-3 border-2 ${error ? 'border-red-500' : 'border-gray-200'
+                  } rounded-xl focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/30 transition-all duration-200 outline-none hover:border-[#C3EAE7]/50 group-hover:shadow-md`}
                 placeholder="Enter your email address"
               />
             </div>
@@ -129,7 +128,7 @@ const ForgotPassword = () => {
               <button
                 type="button"
                 onClick={() => router.push('/locumStaff/login')}
-                className="text-sm text-[#C3EAE7] hover:text-black font-semibold transition-colors hover:underline" style={{ textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black' }}
+                className="text-sm text-black hover:text-black font-bold transition-colors hover:underline"
               >
                 Back to Login
               </button>

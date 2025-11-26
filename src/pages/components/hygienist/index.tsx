@@ -3,7 +3,10 @@ import NavBar from "../navBar/nav";
 import Footer from "../footer/index";
 import imageAbout from "../../../../public/assests/MacBook Air - 17.png"
 import imagechart from "../../../../public/assests/nurses3.jpg"
-
+import image1 from "../../../../public/assests/Untitled design (12).png"
+import image2 from "../../../../public/assests/Untitled design (13).png"
+import image3 from "../../../../public/assests/Untitled design (15).png"
+import { FaHospital, FaSearch, FaUser, FaCalendarCheck, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
 
 const Hygienist = () => {
   return (
@@ -19,8 +22,64 @@ const Hygienist = () => {
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
                 Use LocumLux Network for work.
               </p>
-              <div className="max-w-7xl mx-auto px-4">
-                <Image src={imageAbout} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
+              <div className="max-w-7xl mx-auto px-4 mt-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image3} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        REGISTER
+                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        LESS THAN A ONE MINUTE TO REGISTER
+                      </p>
+                    </div>
+                    <div className="hidden lg:flex items-center justify-center mx-2">
+                      <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
+                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image1} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        CREATE PROFILE
+                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        FILL YOUR DETAILS TO CREATE PROFILE                      </p>
+                    </div>
+                    <div className="hidden lg:flex items-center justify-center mx-2">
+                      <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
+                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image2} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        ACCEPT APPOITMENTS                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        COMPLETE APPOITMENTS TO EARN
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
               <h2 className="text-xl lg:text-2xl font-bold text-black mb-4 mt-6">
                 Great things in business are never done by one person.
@@ -38,12 +97,12 @@ const Hygienist = () => {
                 </div>
               </div>
               <h2 className="text-base lg:text-base text-black text-center mt-12 font-bold">
-              Do you want to be surprised register and find out more.
+                Do you want to be surprised register and find out more.
               </h2>
               <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">
-              High profile Locum Nurses              </h2>
+                High profile Locum Nurses              </h2>
               <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">
-              Our competitive fee              </h2>
+                Our competitive fee              </h2>
               <h2 className="text-base lg:text-base text-black text-center max-w-2xl mx-auto mt-2">Available 24/7</h2>
             </div>
           </div>

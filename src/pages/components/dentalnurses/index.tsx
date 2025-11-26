@@ -8,39 +8,43 @@ import dentalNurses2 from "../../../../public/assests/DBS or Disclosure Scotland
 import dentalNurses3 from "../../../../public/assests/GDC registration check.jpg"
 import dentalNurses4 from "../../../../public/assests/Indemtity Insurance check.jpg"
 import dentalNurses5 from "../../../../public/assests/Immunisation check.jpg"
+import image1 from "../../../../public/assests/Untitled design (12).png"
+import image2 from "../../../../public/assests/Untitled design (13).png"
+import image3 from "../../../../public/assests/Untitled design (15).png"
+import { FaHospital, FaSearch, FaUser, FaCalendarCheck, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
 
 
 const DentalNurses = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
-    { 
-      id: 1, 
-      image: dentalNurses1, 
+    {
+      id: 1,
+      image: dentalNurses1,
       title: "BADN Check",
       overlayPosition: "bottom-center"
     },
-    { 
-      id: 2, 
-      image: dentalNurses2, 
+    {
+      id: 2,
+      image: dentalNurses2,
       title: "DBS or Disclosure Scotland Check",
       overlayPosition: "bottom-center"
     },
-    { 
-      id: 3, 
-      image: dentalNurses3, 
+    {
+      id: 3,
+      image: dentalNurses3,
       title: "GDC registration check",
       overlayPosition: "bottom-center"
     },
-    { 
-      id: 4, 
-      image: dentalNurses4, 
+    {
+      id: 4,
+      image: dentalNurses4,
       title: "Indemtity Insurance check",
       overlayPosition: "bottom-center"
     },
-    { 
-      id: 5, 
-      image: dentalNurses5, 
+    {
+      id: 5,
+      image: dentalNurses5,
       title: "Immunisation Check",
       overlayPosition: "bottom-center"
     },
@@ -69,7 +73,7 @@ const DentalNurses = () => {
   };
 
   const getOverlayPositionClasses = (position: string) => {
-    switch(position) {
+    switch (position) {
       case 'top-left':
         return 'top-8 left-8';
       case 'top-right':
@@ -101,105 +105,158 @@ const DentalNurses = () => {
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
                 Use LocumLux Network to find Dental Practices.
               </p>
-              <div className="max-w-7xl mx-auto px-4">
-                <Image src={imageAbout} alt="aboutus" width={1000} height={1000} className="w-full h-auto" />
+              <div className="max-w-7xl mx-auto px-4 mt-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image3} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        REGISTER
+                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        LESS THAN A ONE MINUTE TO REGISTER
+                      </p>
+                    </div>
+                    <div className="hidden lg:flex items-center justify-center mx-2">
+                      <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
+                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image1} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        CREATE PROFILE
+                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        FILL YOUR DETAILS TO CREATE PROFILE                      </p>
+                    </div>
+                    <div className="hidden lg:flex items-center justify-center mx-2">
+                      <div className="bg-white rounded-full p-3 shadow-md border-2 border-[#C3EAE7]">
+                        <FaArrowRight className="text-[#4A90E2] text-xl" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="bg-[#C3EAE7] rounded-lg p-6 lg:p-8 w-full max-w-[280px] lg:max-w-[240px] text-center shadow-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <Image src={image2} alt="register" width={1000} height={1000} className="w-full h-auto" />
+                        </div>
+                      </div>
+                      <h3 className="text-[#FF69B4] font-bold text-lg lg:text-xl mb-3 uppercase tracking-wide">
+                        ACCEPT APPOITMENTS                      </h3>
+                      <p className="text-black text-xs lg:text-sm uppercase font-medium leading-tight">
+                        COMPLETE APPOITMENTS TO EARN
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-xl lg:text-2xl font-bold text-black">
+              <h2 className="text-xl lg:text-2xl font-bold text-black mt-12">
                 Great things in business are never done by one person.
                 They're done by a team of people. Let's work together and build up your profile for better Pay ((£))
               </h2>
               <h2 className="text-3xl lg:text-4xl text-black text-center mt-12">
-              WHY LOCUMLUX?
-            </h2>
-            <p className="text-base lg:text-xl text-gray-700 text-center max-w-2xl mx-auto mt-4">
-              Our agency supplies fully qualified and experienced Locum Dental Nurses and Hygienists to Greater London.
-            </p>
+                WHY LOCUMLUX?
+              </h2>
+              <p className="text-base lg:text-xl text-gray-700 text-center max-w-2xl mx-auto mt-4">
+                Our agency supplies fully qualified and experienced Locum Dental Nurses and Hygienists to Greater London.
+              </p>
 
-            <div className="mt-16 relative">
-              <div className="relative h-[350px] lg:h-[450px] flex items-center justify-center overflow-visible">
-                <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
-                  {slides.map((slide, index) => {
-                    const position = index - currentSlide;
-                    const isActive = position === 0;
-                    const isPrev = position === -1;
-                    const isNext = position === 1;
-                    const isVisible = Math.abs(position) <= 1;
+              <div className="mt-16 relative">
+                <div className="relative h-[350px] lg:h-[450px] flex items-center justify-center overflow-visible">
+                  <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
+                    {slides.map((slide, index) => {
+                      const position = index - currentSlide;
+                      const isActive = position === 0;
+                      const isPrev = position === -1;
+                      const isNext = position === 1;
+                      const isVisible = Math.abs(position) <= 1;
 
-                    return (
-                      <div
-                        key={slide.id}
-                        className={`absolute transition-all duration-700 ease-in-out ${
-                          !isVisible ? 'opacity-0 pointer-events-none' : ''
-                        }`}
-                        style={{
-                          transform: `translateX(${position * 70}%) scale(${isActive ? 1 : 0.75})`,
-                          zIndex: isActive ? 20 : isPrev || isNext ? 10 : 0,
-                        }}
-                      >
-                        <div className={`relative w-[280px] lg:w-[400px] h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${
-                          !isActive ? 'blur-sm opacity-60' : ''
-                        }`}>
-                          <Image 
-                            src={slide.image} 
-                            alt={slide.title}
-                            fill
-                            className="object-cover"
-                            priority={index === 0}
-                          />
-                          
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
-                          {isActive && (
-                            <div className={`absolute ${getOverlayPositionClasses(slide.overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
-                              <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
-                                <h3 className="text-base lg:text-xl font-bold text-white text-center">
-                                  {slide.title}
-                                </h3>
+                      return (
+                        <div
+                          key={slide.id}
+                          className={`absolute transition-all duration-700 ease-in-out ${!isVisible ? 'opacity-0 pointer-events-none' : ''
+                            }`}
+                          style={{
+                            transform: `translateX(${position * 70}%) scale(${isActive ? 1 : 0.75})`,
+                            zIndex: isActive ? 20 : isPrev || isNext ? 10 : 0,
+                          }}
+                        >
+                          <div className={`relative w-[280px] lg:w-[400px] h-[300px] lg:h-[400px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${!isActive ? 'blur-sm opacity-60' : ''
+                            }`}>
+                            <Image
+                              src={slide.image}
+                              alt={slide.title}
+                              fill
+                              className="object-cover"
+                              priority={index === 0}
+                            />
+
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+                            {isActive && (
+                              <div className={`absolute ${getOverlayPositionClasses(slide.overlayPosition)} w-[calc(100%-2rem)] max-w-md z-10`}>
+                                <div className="bg-[#2c3e7e]/90 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
+                                  <h3 className="text-base lg:text-xl font-bold text-white text-center">
+                                    {slide.title}
+                                  </h3>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-0 lg:left-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                    aria-label="Previous slide"
+                  >
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-0 lg:right-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                    aria-label="Next slide"
+                  >
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 </div>
 
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-0 lg:left-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-                  aria-label="Previous slide"
-                >
-                  <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-0 lg:right-8 top-1/2 -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-gray-800 p-2 lg:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-                  aria-label="Next slide"
-                >
-                  <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
+                <div className="flex justify-center items-center mt-8 space-x-3">
+                  {slides.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      className={`rounded-full transition-all duration-500 ${currentSlide === index
+                          ? 'w-12 h-3 bg-gradient-to-r from-pink-500 to-rose-500'
+                          : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125'
+                        }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                      aria-current={currentSlide === index ? 'true' : 'false'}
+                    />
+                  ))}
+                </div>
 
-              <div className="flex justify-center items-center mt-8 space-x-3">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`rounded-full transition-all duration-500 ${
-                      currentSlide === index 
-                        ? 'w-12 h-3 bg-gradient-to-r from-pink-500 to-rose-500' 
-                        : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                    aria-current={currentSlide === index ? 'true' : 'false'}
-                  />
-                ))}
               </div>
-
-            </div>
 
             </div>
           </div>
