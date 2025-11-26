@@ -25,7 +25,7 @@ const ContactUs = () => {
     setRecaptchaToken(null);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -194,16 +194,21 @@ const ContactUs = () => {
                     <select
                       name="service"
                       value={formData.service}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange(e as unknown as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)}
+                      onChange={handleChange}
                       required
-                      className="w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white"
+                      className={`w-full px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-[#C3EAE7] focus:ring-2 focus:ring-[#C3EAE7]/20 transition-all duration-300 bg-gray-50 focus:bg-white appearance-none ${formData.service ? 'text-gray-800' : 'text-gray-400'}`}
                     >
-                      <option value="" className="text-gray-500">Select Service</option>
-                      <option value="Dental Practice" className="text-gray-500">Dental Practice</option>
-                      <option value="Dental Nurse" className="text-gray-500">Dental Nurse</option>
-                      <option value="Hygienist" className="text-gray-500">Hygienist</option>
-                      <option value="Accounting" className="text-gray-500">Accounting</option>
+                      <option value="" className="text-gray-400">Select Service</option>
+                      <option value="Dental Practice" className="text-gray-800">Dental Practice</option>
+                      <option value="Dental Nurse" className="text-gray-800">Dental Nurse</option>
+                      <option value="Hygienist" className="text-gray-800">Hygienist</option>
+                      <option value="Accounting" className="text-gray-800">Accounting</option>
                     </select>
+                    <span className={`pointer-events-none absolute inset-y-0 right-4 flex items-center ${formData.service ? 'text-gray-500' : 'text-gray-400'}`}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
                   </div>
 
                 <div className="relative">

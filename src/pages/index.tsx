@@ -21,17 +21,18 @@ const Home = () => {
 
           <div className="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-              <div className="relative order-2 lg:order-1">
-                <div className="hidden lg:block">
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="space-y-6">
-                      <div className="w-full h-full">
+              <div className="relative order-2 lg:order-1 flex justify-center lg:block">
+                <div className="grid grid-cols-1 gap-6 w-full">
+                  <div className="space-y-6">
+                    <div className="w-full flex justify-center">
+                      <div className="max-w-xs sm:max-w-sm md:max-w-md w-full">
                         <Image
                           src={image4}
                           alt="Doctor"
                           width={500}
                           height={500}
-                          className="w-full h-full object-cover"
+                          className="w-full h-auto object-contain drop-shadow-2xl"
+                          priority
                         />
                       </div>
                     </div>

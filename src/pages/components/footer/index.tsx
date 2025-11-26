@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 import { MdEmail, MdPhoneAndroid, MdLocationOn } from "react-icons/md";
-import imageLogo from "../../../../public/assests/Laks Dent Logo.png"
+import imageLogo from "../../../../public/assests/logo background remove.png"
 
 type UserRole = "locum" | "practice" | "branch";
 
