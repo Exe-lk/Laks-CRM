@@ -454,7 +454,10 @@ const CreateAppointmentPage = () => {
                         <form onSubmit={formik.handleSubmit} className="space-y-4">
 
                             <div className="space-y-2 group">
-                                <label className="block text-sm font-semibold text-black flex items-center gap-2">
+                                <label
+                                    htmlFor="request_date_hidden"
+                                    className="block text-sm font-semibold text-black flex items-center gap-2"
+                                >
                                     <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />
                                     </svg>
@@ -472,6 +475,20 @@ const CreateAppointmentPage = () => {
                                             return '';
                                         })() : ''}
                                         placeholder="DD/MM/YYYY"
+                                        onClick={() => {
+                                            const dateInput = document.getElementById('request_date_hidden') as HTMLInputElement | null;
+                                            if (dateInput) {
+                                                // Prefer native date picker where supported
+                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                                // @ts-ignore
+                                                if (typeof dateInput.showPicker === 'function') {
+                                                    // @ts-ignore
+                                                    dateInput.showPicker();
+                                                } else {
+                                                    dateInput.focus();
+                                                }
+                                            }
+                                        }}
                                         readOnly
                                         className={`w-full px-4 py-3 pr-12 border-2 rounded-xl 
                                focus:ring-2 focus:ring-[#C3EAE7]/30 
