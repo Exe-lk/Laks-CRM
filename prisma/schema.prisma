@@ -53,7 +53,6 @@ model LocumProfile {
   payslips                 Payslip[]
   cancellationPenalties    CancellationPenalty[]
   stripeCustomer           LocumStripeCustomer?
-  notifications            Notification[]
 
   @@map("locum_profiles")
 }
@@ -96,7 +95,6 @@ model Practice {
   timesheetJobs       TimesheetJob[]
   invoices            Invoice[]
   cancellationPenalties CancellationPenalty[]
-  notifications       Notification[]
 
   @@map("practices")
 }
@@ -208,7 +206,6 @@ model Branch {
   invoices            Invoice[]
   stripeCustomer      BranchStripeCustomer?
   cancellationPenalties CancellationPenalty[]
-  notifications       Notification[]
 
   @@map("branches")
 }
@@ -278,6 +275,7 @@ model Timesheet {
   locumProfile  LocumProfile   @relation(fields: [locumId], references: [id], onDelete: Cascade)
   timesheetJobs TimesheetJob[]
 
+  @@unique([locumId, month, year], name: "locum_month_year_unique")
   @@map("timesheets")
 }
 
@@ -304,6 +302,7 @@ model TimesheetJob {
   practice         Practice          @relation(fields: [practiceId], references: [id], onDelete: Cascade)
   branch           Branch?           @relation(fields: [branchId], references: [id], onDelete: Cascade)
   invoiceLineItems InvoiceLineItem[]
+  payslipLineItems PayslipLineItem[]
 
   @@map("timesheet_jobs")
 }
@@ -318,6 +317,7 @@ model Invoice {
   subtotal      Float     @default(0)
   taxRate       Float?    @default(0) @map("tax_rate") // Tax rate as percentage
   taxAmount     Float?    @default(0) @map("tax_amount")
+  deductions    Float?    @default(0)
   totalAmount   Float     @map("total_amount")
   status        String    @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
   notes         String?
@@ -386,7 +386,8 @@ model PayslipLineItem {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  payslip Payslip @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  payslip      Payslip      @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  timesheetJob TimesheetJob @relation(fields: [timesheetJobId], references: [id], onDelete: Cascade)
 
   @@map("payslip_line_items")
 }
@@ -416,7 +417,7 @@ model CancellationPenalty {
   chargedPracticeId     String?  @map("charged_practice_id") // Set if practice is charged
   chargedBranchId       String?  @map("charged_branch_id") // Set if branch is charged
   
-  cancelledPartyType    String   @map("cancelled_party_type") // "locum" or "practice"
+  cancelledPartyType    String   @map("cancelled_party_type") // "locum" or "practice" or "branch"
   appointmentStartTime  DateTime @map("appointment_start_time")
   cancellationTime      DateTime @map("cancellation_time")
   hoursBeforeAppointment Float   @map("hours_before_appointment")
@@ -487,34 +488,4 @@ model BookingPayment {
   booking               Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   
   @@map("booking_payments")
-}
-
-model FCMToken {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  userType      String   @map("user_type") // "locum", "practice", "branch"
-  token         String   @unique
-  deviceInfo    String?  @map("device_info")
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@map("fcm_tokens")
-}
-
-model Notification {
-  id          String    @id @default(cuid())
-  locumId     String?   @map("locum_id")
-  practiceId  String?   @map("practice_id")
-  branchId    String?   @map("branch_id")
-  message     String
-  status      String    @default("UNREAD") // UNREAD, READ, PENDING
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  locumProfile LocumProfile? @relation(fields: [locumId], references: [id], onDelete: Cascade)
-  practice     Practice?     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-  branch       Branch?       @relation(fields: [branchId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
 }
