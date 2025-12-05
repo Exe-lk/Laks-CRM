@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 
 const reviews = [
@@ -72,12 +72,15 @@ const reviews = [
 export default function ReviewSlider() {
   const [index, setIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const CARDS_PER_VIEW = 3;
 
   const next = () => {
     if (index < reviews.length - CARDS_PER_VIEW) {
       setIndex(index + 1);
+    } else {
+      setIndex(0);
     }
   };
 
@@ -87,14 +90,38 @@ export default function ReviewSlider() {
     }
   };
 
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setIndex((prevIndex) => {
+        if (prevIndex < reviews.length - CARDS_PER_VIEW) {
+          return prevIndex + 1;
+        } else {
+          return 0; 
+        }
+      });
+    }, 10000); 
+
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  const handleMouseEnter = (i: number) => {
+    setHoveredIndex(i);
+    setIsPaused(true); 
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredIndex(null);
+    setIsPaused(false); 
+  };
+
   return (
     <section className="py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-      {/* Background decorative elements */}
       <div className="absolute top-10 right-10 w-72 h-72 bg-[#C3EAE7]/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-200/10 rounded-full blur-3xl"></div>
       
       <div className="max-w-7xl mx-auto px-4 relative z-10">
-        {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-[#C3EAE7]/20 px-4 py-2 rounded-full mb-4">
             <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
@@ -109,9 +136,12 @@ export default function ReviewSlider() {
         </div>
 
         <div className="relative w-full px-12">
-          {/* Navigation Buttons */}
           <button
-            onClick={prev}
+            onClick={() => {
+              prev();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 15000); // Resume after 15s
+            }}
             disabled={index === 0}
             className={`absolute -left-2 top-1/2 -translate-y-1/2 bg-white shadow-xl p-3 rounded-full z-20 transition-all duration-300 ${
               index === 0 
@@ -133,21 +163,18 @@ export default function ReviewSlider() {
                 <div
                   key={i}
                   className="min-w-[calc(33.33%-1rem)] relative"
-                  onMouseEnter={() => setHoveredIndex(i)}
-                  onMouseLeave={() => setHoveredIndex(null)}
+                  onMouseEnter={() => handleMouseEnter(i)}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  {/* Card */}
                   <div className={`relative bg-white p-8 rounded-2xl shadow-lg transition-all duration-500 h-full border border-gray-100 ${
                     hoveredIndex === i 
                       ? 'transform -translate-y-2 shadow-2xl scale-105' 
                       : 'hover:shadow-xl'
                   }`}>
-                    {/* Quote Icon */}
                     <div className="absolute -top-4 -left-4 bg-gradient-to-br from-[#C3EAE7] to-[#4FD1C5] p-3 rounded-xl shadow-lg">
                       <Quote className="w-6 h-6 text-white" />
                     </div>
 
-                    {/* Stars */}
                     <div className="flex gap-1 mb-4 justify-center">
                       {Array.from({ length: rev.rating }).map((_, idx) => (
                         <Star
@@ -159,19 +186,15 @@ export default function ReviewSlider() {
                       ))}
                     </div>
 
-                    {/* Review Text */}
                     <div className="relative">
                       <p className="text-gray-700 text-base leading-relaxed mb-6 min-h-[80px] text-center italic">
                         "{rev.text}"
                       </p>
                     </div>
 
-                    {/* Divider */}
                     <div className="w-16 h-1 bg-gradient-to-r from-[#C3EAE7] to-[#4FD1C5] mx-auto mb-6 rounded-full"></div>
 
-                    {/* User Info */}
                     <div className="flex flex-col items-center gap-3">
-                      {/* Avatar with gradient background */}
                       <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${rev.color} flex items-center justify-center font-bold text-white text-xl shadow-lg transform transition-transform duration-300 ${
                         hoveredIndex === i ? 'scale-110 rotate-6' : ''
                       }`}>
@@ -179,11 +202,9 @@ export default function ReviewSlider() {
                       </div>
                       <div className="text-center">
                         <p className="font-bold text-gray-900 text-lg">{rev.name}</p>
-                        <p className="text-sm text-gray-500">Verified User</p>
                       </div>
                     </div>
 
-                    {/* Decorative corner */}
                     <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-[#C3EAE7]/10 to-transparent rounded-tl-full"></div>
                   </div>
                 </div>
@@ -192,19 +213,17 @@ export default function ReviewSlider() {
           </div>
 
           <button
-            onClick={next}
-            disabled={index >= reviews.length - CARDS_PER_VIEW}
-            className={`absolute -right-2 top-1/2 -translate-y-1/2 bg-white shadow-xl p-3 rounded-full z-20 transition-all duration-300 ${
-              index >= reviews.length - CARDS_PER_VIEW 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'hover:scale-110 hover:shadow-2xl hover:bg-gradient-to-r hover:from-[#4FD1C5] hover:to-[#C3EAE7]'
-            }`}
+            onClick={() => {
+              next();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 15000); 
+            }}
+            className={`absolute -right-2 top-1/2 -translate-y-1/2 bg-white shadow-xl p-3 rounded-full z-20 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:bg-gradient-to-r hover:from-[#4FD1C5] hover:to-[#C3EAE7]`}
           >
-            <ChevronRight size={28} className={index >= reviews.length - CARDS_PER_VIEW ? 'text-gray-400' : 'text-gray-700'} />
+            <ChevronRight size={28} className="text-gray-700" />
           </button>
         </div>
 
-        {/* Dots Indicator */}
         <div className="flex justify-center gap-2 mt-8">
           {Array.from({ length: reviews.length - CARDS_PER_VIEW + 1 }).map((_, i) => (
             <button
