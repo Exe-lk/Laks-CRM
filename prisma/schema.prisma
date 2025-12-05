@@ -293,6 +293,8 @@ model TimesheetJob {
   totalHours     Float?    @map("total_hours")
   hourlyRate     Float?    @map("hourly_rate")
   totalPay       Float?    @map("total_pay")
+  rating         Float? 
+  remark         String? 
   notes          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

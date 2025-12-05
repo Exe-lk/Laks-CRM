@@ -183,7 +183,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, staffSignature } = req.body;
+    const { timesheetId, staffSignature, rating, remark } = req.body;
 
     if (!timesheetId || !staffSignature) {
       return res.status(400).json({ 
@@ -286,6 +286,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Use transaction for atomicity - update timesheet, complete booking, and charge payment
     console.log('[STEP 1] Starting transaction to update timesheet and process payments');
     const result = await prisma.$transaction(async (tx) => {
+      // Update timesheet jobs with rating and remark if provided
+      if (rating || remark) {
+        console.log('[STEP 1.5] Updating timesheet jobs with rating and remark');
+        await tx.timesheetJob.updateMany({
+          where: { timesheetId: timesheetId },
+          data: {
+            rating: rating || null,
+            remark: remark || null
+          }
+        });
+      }
+      
       // Update timesheet with staff signature, totals, and change status to SUBMITTED
       console.log('[STEP 2] Updating timesheet with signature and totals');
       const updatedTimesheet = await tx.timesheet.update({

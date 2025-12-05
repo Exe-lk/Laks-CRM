@@ -5,6 +5,7 @@ import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
 import Logo from "../../public/assests/IMG_4296.PNG"
 import { useRouter } from 'next/navigation';
+import ReviewSlider from './components/ReviewSlider';
 
 const Home = () => {
   const router = useRouter();
@@ -107,27 +108,9 @@ const Home = () => {
           </div>
         </section>
 
-        {/* <section className="py-16 lg:py-20 bg-black">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8 text-center">
-              {[
-                { number: '10,000+', label: 'Active Nurses' },
-                { number: '500+', label: 'Job Opportunities' },
-                { number: '50+', label: 'Certification Courses' },
-                { number: '99%', label: 'Satisfaction Rate' }
-              ].map((stat, index) => (
-                <div key={stat.label} className="group">
-                  <div className="text-3xl lg:text-4xl xl:text-5xl font-bold text-[#C3EAE7] mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {stat.number}
-                  </div>
-                  <div className="text-gray-300 text-sm lg:text-lg">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section> */}
+        <section>
+         <ReviewSlider />
+        </section>
         <Footer />
 
       </main>
