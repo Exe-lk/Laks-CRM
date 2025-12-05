@@ -290,9 +290,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Update each job with locum signature, status, rating, and remark
       console.log('[STEP 2] Updating each job with locum signature and SUBMITTED status');
       const now = new Date();
-      await tx.timesheetJob.updateMany({
-        where: { timesheetId: timesheetId },
-        data: {
+        await tx.timesheetJob.updateMany({
+          where: { timesheetId: timesheetId },
+          data: {
           locumSignature: staffSignature,
           locumSignatureDate: now,
           status: 'SUBMITTED',
@@ -351,7 +351,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
 
-      const now = new Date();
       const paymentResults: any[] = [];
 
       console.log(`[STEP 3] Processing ${updatedTimesheet.timesheetJobs.length} job(s) for payment`);
@@ -794,15 +793,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log(`[STEP 19.1] All payment results:`, result.payments);
     }
 
-    console.log(`[STEP 20] Sending success response to client`);
-    console.log(`[STEP 20.1] Final summary:`, {
-      timesheetId: result.timesheet.id,
-      totalPayments: result.payments.length,
-      successfulPayments: result.payments.filter((p: any) => p.status === 'SUCCESS').length,
-      failedPayments: result.payments.filter((p: any) => p.status !== 'SUCCESS').length,
-      submittedJobs: updatedJobs.length
-    });
-    
     // Get updated jobs to return signature dates
     const updatedJobs = await prisma.timesheetJob.findMany({
       where: { timesheetId: result.timesheet.id },
@@ -813,6 +803,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    console.log(`[STEP 20] Sending success response to client`);
+    console.log(`[STEP 20.1] Final summary:`, {
+      timesheetId: result.timesheet.id,
+      totalPayments: result.payments.length,
+      successfulPayments: result.payments.filter((p: any) => p.status === 'SUCCESS').length,
+      failedPayments: result.payments.filter((p: any) => p.status !== 'SUCCESS').length,
+      submittedJobs: updatedJobs.length
+    });
+    
     res.status(200).json({
       success: true,
       message: "Timesheet submitted successfully, booking(s) completed, and payment(s) processed",
