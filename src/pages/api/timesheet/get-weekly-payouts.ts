@@ -23,10 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { month, year } = req.query;
 
-    // Build where clause for locked timesheets
-    let whereClause: any = {
-      status: 'LOCKED'
-    };
+    // Build where clause for timesheets
+    let whereClause: any = {};
 
     // Add month/year filter if provided
     if (month) {
@@ -36,8 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       whereClause.year = parseInt(year as string);
     }
 
-    // Get all locked timesheets for payout
-    const lockedTimesheets = await prisma.timesheet.findMany({
+    // Get all timesheets that have at least one LOCKED job
+    const allTimesheets = await prisma.timesheet.findMany({
       where: whereClause,
       include: {
         locumProfile: {
@@ -78,8 +76,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    // Filter to only timesheets with LOCKED jobs
+    const lockedTimesheets = allTimesheets.filter(timesheet => 
+      timesheet.timesheetJobs.some(job => job.status === 'LOCKED')
+    );
+
+    // Filter jobs to only include LOCKED ones for payout calculations
+    const lockedTimesheetsWithFilteredJobs = lockedTimesheets.map(timesheet => ({
+      ...timesheet,
+      timesheetJobs: timesheet.timesheetJobs.filter(job => job.status === 'LOCKED')
+    }));
+
     // Group by locum for individual payouts
-    const payoutsByLocum = lockedTimesheets.reduce((acc: any, timesheet: any) => {
+    const payoutsByLocum = lockedTimesheetsWithFilteredJobs.reduce((acc: any, timesheet: any) => {
       const locumId = timesheet.locumId;
       const locumName = timesheet.locumProfile.fullName;
       
@@ -107,7 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }, {} as any);
 
     // Group by practice for practice-wise payouts
-    const payoutsByPractice = lockedTimesheets.reduce((acc: any, timesheet: any) => {
+    const payoutsByPractice = lockedTimesheetsWithFilteredJobs.reduce((acc: any, timesheet: any) => {
       timesheet.timesheetJobs.forEach((job: any) => {
         const practiceId = job.practiceId;
         const practiceName = job.practice.name;
@@ -138,19 +147,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return acc;
     }, {} as any);
 
-    // Calculate overall summary
+    // Calculate overall summary (only count LOCKED jobs)
+    const totalLockedJobs = lockedTimesheetsWithFilteredJobs.reduce((sum: number, t: any) => sum + t.timesheetJobs.length, 0);
+    const totalHours = lockedTimesheetsWithFilteredJobs.reduce((sum: number, t: any) => 
+      sum + t.timesheetJobs.reduce((jobSum: number, job: any) => jobSum + (job.totalHours || 0), 0), 0
+    );
+    const totalPay = lockedTimesheetsWithFilteredJobs.reduce((sum: number, t: any) => 
+      sum + t.timesheetJobs.reduce((jobSum: number, job: any) => jobSum + (job.totalPay || 0), 0), 0
+    );
+
     const summary = {
       totalTimesheets: lockedTimesheets.length,
-      totalHours: lockedTimesheets.reduce((sum: number, t: any) => sum + (t.totalHours || 0), 0),
-      totalPay: lockedTimesheets.reduce((sum: number, t: any) => sum + (t.totalPay || 0), 0),
+      totalLockedJobs: totalLockedJobs,
+      totalHours: totalHours,
+      totalPay: totalPay,
       uniquePractices: Object.keys(payoutsByPractice).length,
       uniqueLocums: Object.keys(payoutsByLocum).length,
-      averageHoursPerTimesheet: lockedTimesheets.length > 0 
-        ? lockedTimesheets.reduce((sum: number, t: any) => sum + (t.totalHours || 0), 0) / lockedTimesheets.length 
-        : 0,
-      averagePayPerTimesheet: lockedTimesheets.length > 0 
-        ? lockedTimesheets.reduce((sum: number, t: any) => sum + (t.totalPay || 0), 0) / lockedTimesheets.length 
-        : 0
+      averageHoursPerJob: totalLockedJobs > 0 ? totalHours / totalLockedJobs : 0,
+      averagePayPerJob: totalLockedJobs > 0 ? totalPay / totalLockedJobs : 0
     };
 
     res.status(200).json({

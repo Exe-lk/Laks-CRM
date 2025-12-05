@@ -260,44 +260,43 @@ model Timesheet {
   locumId              String    @map("locum_id")
   month                Int // 1-12
   year                 Int // e.g., 2024
-  status               String    @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, LOCKED
-  totalHours           Float?    @map("total_hours")
-  totalPay             Float?    @map("total_pay")
-  staffSignature       String?   @map("staff_signature") // URL to signature image in Supabase storage
-  staffSignatureDate   DateTime? @map("staff_signature_date")
-  managerSignature     String?   @map("manager_signature") // URL to signature image in Supabase storage
-  managerSignatureDate DateTime? @map("manager_signature_date")
-  managerId            String?   @map("manager_id") // ID of the practice manager who approved
-  submittedAt          DateTime? @map("submitted_at")
+  totalHours           Float?    @map("total_hours") // Aggregated from jobs for reporting
+  totalPay             Float?    @map("total_pay") // Aggregated from jobs for reporting
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
   locumProfile  LocumProfile   @relation(fields: [locumId], references: [id], onDelete: Cascade)
   timesheetJobs TimesheetJob[]
 
-  @@unique([locumId, month, year], name: "locum_month_year_unique")
   @@map("timesheets")
 }
 
 model TimesheetJob {
-  id             String    @id @default(cuid())
-  timesheetId    String    @map("timesheet_id")
-  bookingId      String    @map("booking_id") // Reference to the booking
-  practiceId     String    @map("practice_id")
-  branchId       String?   @map("branch_id") // Optional for corporate practices
-  jobDate        DateTime  @map("job_date")
-  startTime      DateTime? @map("start_time")
-  endTime        DateTime? @map("end_time")
-  lunchStartTime DateTime? @map("lunch_start_time")
-  lunchEndTime   DateTime? @map("lunch_end_time")
-  totalHours     Float?    @map("total_hours")
-  hourlyRate     Float?    @map("hourly_rate")
-  totalPay       Float?    @map("total_pay")
-  rating         Float? 
-  remark         String? 
-  notes          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  timesheetId          String    @map("timesheet_id")
+  bookingId            String    @map("booking_id") // Reference to the booking
+  practiceId           String    @map("practice_id")
+  branchId             String?   @map("branch_id") // Optional for corporate practices
+  jobDate              DateTime  @map("job_date")
+  startTime            DateTime? @map("start_time")
+  endTime              DateTime? @map("end_time")
+  lunchStartTime       DateTime? @map("lunch_start_time")
+  lunchEndTime         DateTime? @map("lunch_end_time")
+  totalHours           Float?    @map("total_hours")
+  hourlyRate           Float?    @map("hourly_rate")
+  totalPay             Float?    @map("total_pay")
+  status               String    @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, LOCKED - per job
+  locumSignature       String?   @map("locum_signature") // URL to locum signature image
+  locumSignatureDate   DateTime? @map("locum_signature_date")
+  managerSignature     String?   @map("manager_signature") // URL to manager signature image
+  managerSignatureDate DateTime? @map("manager_signature_date")
+  managerId            String?   @map("manager_id") // ID of the practice manager who approved this job
+  submittedAt          DateTime? @map("submitted_at")
+  rating               Float? 
+  remark               String? 
+  notes                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   timesheet        Timesheet         @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
   booking          Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)

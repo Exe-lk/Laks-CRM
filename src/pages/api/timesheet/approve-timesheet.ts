@@ -21,11 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, managerSignature, managerId, action } = req.body;
+    const { timesheetJobId, managerSignature, managerId, action } = req.body;
 
-    if (!timesheetId || !managerSignature || !managerId || !action) {
+    if (!timesheetJobId || !managerSignature || !managerId || !action) {
       return res.status(400).json({ 
-        error: "timesheetId, managerSignature, managerId, and action are required" 
+        error: "timesheetJobId, managerSignature, managerId, and action are required" 
       });
     }
 
@@ -35,43 +35,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Get the timesheet with jobs
-    const timesheet = await prisma.timesheet.findUnique({
-      where: { id: timesheetId },
+    // Get the timesheet job with related data
+    const timesheetJob = await prisma.timesheetJob.findUnique({
+      where: { id: timesheetJobId },
       include: {
-        timesheetJobs: {
+        timesheet: {
           include: {
-            practice: true
+            locumProfile: {
+              select: {
+                fullName: true,
+                emailAddress: true
+              }
+            }
           }
         },
-        locumProfile: {
+        practice: {
           select: {
-            fullName: true,
-            emailAddress: true
+            id: true,
+            name: true,
+            location: true
+          }
+        },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true
           }
         }
       }
     });
 
-    if (!timesheet) {
-      return res.status(404).json({ error: "Timesheet not found" });
+    if (!timesheetJob) {
+      return res.status(404).json({ error: "Timesheet job not found" });
     }
 
-    // Check if timesheet is in SUBMITTED status
-    if (timesheet.status !== 'SUBMITTED') {
+    // Verify manager belongs to the practice for this job
+    // TODO: Add proper authorization check here to ensure managerId matches practice/branch
+
+    // Check if job is in SUBMITTED status
+    if (timesheetJob.status !== 'SUBMITTED') {
       return res.status(400).json({ 
-        error: `Timesheet is not submitted. Current status: ${timesheet.status}` 
+        error: `Job is not submitted. Current status: ${timesheetJob.status}` 
       });
     }
 
-    let updatedTimesheet;
+    let updatedJob;
     let newStatus;
 
     if (action === 'approve') {
-      // Update timesheet with manager signature and lock it
+      // Update job with manager signature and lock it
       // Note: Booking is already COMPLETED and payment already charged during timesheet submission
-      updatedTimesheet = await prisma.timesheet.update({
-        where: { id: timesheetId },
+      updatedJob = await prisma.timesheetJob.update({
+        where: { id: timesheetJobId },
         data: {
           managerSignature: managerSignature,
           managerSignatureDate: new Date(),
@@ -79,26 +95,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           status: 'LOCKED'
         },
         include: {
-          timesheetJobs: {
+          timesheet: {
             include: {
-              practice: {
+              locumProfile: {
                 select: {
-                  name: true,
-                  location: true
-                }
-              },
-              branch: {
-                select: {
-                  name: true,
-                  location: true
+                  fullName: true,
+                  emailAddress: true
                 }
               }
             }
           },
-          locumProfile: {
+          practice: {
             select: {
-              fullName: true,
-              emailAddress: true
+              name: true,
+              location: true
+            }
+          },
+          branch: {
+            select: {
+              name: true,
+              location: true
             }
           }
         }
@@ -106,34 +122,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       newStatus = 'LOCKED';
     } else {
       // Reject and return to DRAFT status
-      updatedTimesheet = await prisma.timesheet.update({
-        where: { id: timesheetId },
+      updatedJob = await prisma.timesheetJob.update({
+        where: { id: timesheetJobId },
         data: {
           status: 'DRAFT',
-          staffSignature: null,
-          staffSignatureDate: null
+          locumSignature: null,
+          locumSignatureDate: null,
+          submittedAt: null
         },
         include: {
-          timesheetJobs: {
+          timesheet: {
             include: {
-              practice: {
+              locumProfile: {
                 select: {
-                  name: true,
-                  location: true
-                }
-              },
-              branch: {
-                select: {
-                  name: true,
-                  location: true
+                  fullName: true,
+                  emailAddress: true
                 }
               }
             }
           },
-          locumProfile: {
+          practice: {
             select: {
-              fullName: true,
-              emailAddress: true
+              name: true,
+              location: true
+            }
+          },
+          branch: {
+            select: {
+              name: true,
+              location: true
             }
           }
         }
@@ -143,18 +160,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({
       success: true,
-      message: `Timesheet ${action === 'approve' ? 'approved and locked' : 'rejected and returned to draft'}`,
+      message: `Job ${action === 'approve' ? 'approved and locked' : 'rejected and returned to draft'}`,
       data: {
-        timesheetId: updatedTimesheet.id,
+        timesheetJobId: updatedJob.id,
+        timesheetId: updatedJob.timesheetId,
         status: newStatus,
-        managerSignatureDate: action === 'approve' ? updatedTimesheet.managerSignatureDate : null,
-        submittedAt: action === 'approve' ? updatedTimesheet.submittedAt : null,
-        totalHours: updatedTimesheet.totalHours,
-        totalPay: updatedTimesheet.totalPay,
-        month: updatedTimesheet.month,
-        year: updatedTimesheet.year,
-        locumName: updatedTimesheet.locumProfile.fullName,
-        totalJobs: updatedTimesheet.timesheetJobs.length
+        managerSignatureDate: action === 'approve' ? updatedJob.managerSignatureDate : null,
+        submittedAt: action === 'approve' ? updatedJob.submittedAt : null,
+        totalHours: updatedJob.totalHours,
+        totalPay: updatedJob.totalPay,
+        practice: updatedJob.practice,
+        branch: updatedJob.branch,
+        locumName: updatedJob.timesheet.locumProfile.fullName
       }
     });
 

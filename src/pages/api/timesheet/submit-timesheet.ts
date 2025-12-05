@@ -211,15 +211,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Timesheet found:', { 
       id: timesheet.id, 
-      status: timesheet.status, 
       jobCount: timesheet.timesheetJobs.length 
     });
 
-    // Check if timesheet is in DRAFT status
-    if (timesheet.status !== 'DRAFT') {
-      console.log('Timesheet status validation failed:', timesheet.status);
+    // Check if all jobs are in DRAFT status (each job has its own status)
+    const nonDraftJobs = timesheet.timesheetJobs.filter(job => job.status !== 'DRAFT');
+    if (nonDraftJobs.length > 0) {
+      console.log('Some jobs are not in DRAFT status:', nonDraftJobs.map(j => ({ id: j.id, status: j.status })));
       return res.status(400).json({ 
-        error: `Timesheet is already ${timesheet.status.toLowerCase()}` 
+        error: `Cannot submit timesheet - some jobs are already ${nonDraftJobs[0].status.toLowerCase()}`,
+        nonDraftJobs: nonDraftJobs.map(j => ({ jobId: j.id, status: j.status }))
       });
     }
 
@@ -286,29 +287,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Use transaction for atomicity - update timesheet, complete booking, and charge payment
     console.log('[STEP 1] Starting transaction to update timesheet and process payments');
     const result = await prisma.$transaction(async (tx) => {
-      // Update timesheet jobs with rating and remark if provided
-      if (rating || remark) {
-        console.log('[STEP 1.5] Updating timesheet jobs with rating and remark');
-        await tx.timesheetJob.updateMany({
-          where: { timesheetId: timesheetId },
-          data: {
-            rating: rating || null,
-            remark: remark || null
-          }
-        });
-      }
+      // Update each job with locum signature, status, rating, and remark
+      console.log('[STEP 2] Updating each job with locum signature and SUBMITTED status');
+      const now = new Date();
+      await tx.timesheetJob.updateMany({
+        where: { timesheetId: timesheetId },
+        data: {
+          locumSignature: staffSignature,
+          locumSignatureDate: now,
+          status: 'SUBMITTED',
+          submittedAt: now,
+          rating: rating || undefined,
+          remark: remark || undefined
+        }
+      });
       
-      // Update timesheet with staff signature, totals, and change status to SUBMITTED
-      console.log('[STEP 2] Updating timesheet with signature and totals');
+      // Update timesheet totals only (no status/signatures - those are per job)
+      console.log('[STEP 2.5] Updating timesheet totals');
       const updatedTimesheet = await tx.timesheet.update({
         where: { id: timesheetId },
         data: {
-          staffSignature: staffSignature,
-          staffSignatureDate: new Date(),
           totalHours: totalHours,
-          totalPay: totalPay,
-          status: 'SUBMITTED',
-          submittedAt: new Date()
+          totalPay: totalPay
         },
         include: {
           timesheetJobs: {
@@ -797,25 +797,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`[STEP 20] Sending success response to client`);
     console.log(`[STEP 20.1] Final summary:`, {
       timesheetId: result.timesheet.id,
-      status: result.timesheet.status,
       totalPayments: result.payments.length,
       successfulPayments: result.payments.filter((p: any) => p.status === 'SUCCESS').length,
-      failedPayments: result.payments.filter((p: any) => p.status !== 'SUCCESS').length
+      failedPayments: result.payments.filter((p: any) => p.status !== 'SUCCESS').length,
+      submittedJobs: updatedJobs.length
     });
     
+    // Get updated jobs to return signature dates
+    const updatedJobs = await prisma.timesheetJob.findMany({
+      where: { timesheetId: result.timesheet.id },
+      select: {
+        id: true,
+        status: true,
+        locumSignatureDate: true
+      }
+    });
+
     res.status(200).json({
       success: true,
       message: "Timesheet submitted successfully, booking(s) completed, and payment(s) processed",
       data: {
         timesheetId: result.timesheet.id,
-        status: result.timesheet.status,
-        staffSignatureDate: result.timesheet.staffSignatureDate,
         totalHours: result.timesheet.totalHours,
         totalPay: result.timesheet.totalPay,
         month: result.timesheet.month,
         year: result.timesheet.year,
         locumName: result.timesheet.locumProfile.fullName,
         totalJobs: result.timesheet.timesheetJobs.length,
+        submittedJobs: updatedJobs.length,
+        jobsStatus: updatedJobs.map(j => ({ jobId: j.id, status: j.status, signedAt: j.locumSignatureDate })),
         paymentResults: result.payments
       }
     });

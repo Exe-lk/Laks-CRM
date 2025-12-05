@@ -41,10 +41,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     // For admin, no additional filtering (can see all timesheets)
 
-    // Add status filter if provided
-    if (status) {
-      whereClause.status = status as string;
-    }
+    // Note: Status filter removed - status is now per job, not per timesheet
+    // If status filtering is needed, it should filter by jobs with that status
 
     // Add month/year filter if provided
     if (month) {
@@ -92,12 +90,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
-    // Calculate summary statistics
+    // Calculate summary statistics based on job statuses
+    const allJobs = timesheets.flatMap(t => t.timesheetJobs);
     const summary = {
       total: timesheets.length,
-      draft: timesheets.filter(t => t.status === 'DRAFT').length,
-      submitted: timesheets.filter(t => t.status === 'SUBMITTED').length,
-      locked: timesheets.filter(t => t.status === 'LOCKED').length,
+      totalJobs: allJobs.length,
+      draftJobs: allJobs.filter(j => j.status === 'DRAFT').length,
+      submittedJobs: allJobs.filter(j => j.status === 'SUBMITTED').length,
+      lockedJobs: allJobs.filter(j => j.status === 'LOCKED').length,
       totalHours: timesheets.reduce((sum, t) => sum + (t.totalHours || 0), 0),
       totalPay: timesheets.reduce((sum, t) => sum + (t.totalPay || 0), 0)
     };

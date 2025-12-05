@@ -23,10 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { month, year } = req.query;
 
-    // Build where clause for submitted timesheets
-    let whereClause: any = {
-      status: 'SUBMITTED'
-    };
+    // Build where clause for timesheets
+    let whereClause: any = {};
 
     // Add month/year filter if provided
     if (month) {
@@ -36,8 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       whereClause.year = parseInt(year as string);
     }
 
-    // Get all submitted timesheets
-    const pendingTimesheets = await prisma.timesheet.findMany({
+    // Get all timesheets that have at least one SUBMITTED job
+    const allTimesheets = await prisma.timesheet.findMany({
       where: whereClause,
       include: {
         locumProfile: {
@@ -68,11 +66,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             jobDate: 'asc'
           }
         }
-      },
-      orderBy: {
-        staffSignatureDate: 'asc' // Oldest submissions first
       }
     });
+
+    // Filter to only timesheets with SUBMITTED jobs
+    const pendingTimesheets = allTimesheets.filter(timesheet => 
+      timesheet.timesheetJobs.some(job => job.status === 'SUBMITTED')
+    );
 
     // Calculate summary for pending timesheets
     const summary = {
@@ -86,8 +86,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Add additional metadata to each timesheet
     const enhancedTimesheets = pendingTimesheets.map(timesheet => {
-      const daysSinceSubmission = timesheet.staffSignatureDate 
-        ? Math.floor((new Date().getTime() - timesheet.staffSignatureDate.getTime()) / (1000 * 60 * 60 * 24))
+      // Get the earliest submission date from submitted jobs
+      const submittedJobs = timesheet.timesheetJobs.filter(job => job.status === 'SUBMITTED');
+      const earliestSubmission = submittedJobs.length > 0 && submittedJobs[0].submittedAt
+        ? submittedJobs[0].submittedAt
+        : null;
+      
+      const daysSinceSubmission = earliestSubmission
+        ? Math.floor((new Date().getTime() - earliestSubmission.getTime()) / (1000 * 60 * 60 * 24))
         : 0;
 
       const completedJobs = timesheet.timesheetJobs.filter(job => 
@@ -95,9 +101,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ).length;
 
       const totalJobs = timesheet.timesheetJobs.length;
+      const submittedJobsCount = submittedJobs.length;
 
       return {
         ...timesheet,
+        submittedJobsCount,
         daysSinceSubmission,
         completedJobs,
         totalJobs,
