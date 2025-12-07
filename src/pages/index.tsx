@@ -3,7 +3,7 @@ import NavBar from "./components/navBar/nav";
 import image4 from "../../public/assests/phone.png";
 import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
-import Logo from "../../public/assests/IMG_4296.PNG"
+import Logo from "../../public/assests/IMG_4296.png"
 import { useRouter } from 'next/navigation';
 import ReviewSlider from './components/ReviewSlider';
 
