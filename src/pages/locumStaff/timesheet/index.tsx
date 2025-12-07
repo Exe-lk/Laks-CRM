@@ -1602,26 +1602,46 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         throw new Error(errorData.error || 'Failed to submit timesheet');
       }
 
-      if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim()) {
+      // Get the submitted job IDs from the response
+      const submitData = await submitResponse.json();
+      const newlySubmittedJobIds = submitData.data?.newlySubmittedJobIds || [];
+
+      // If manager signature is provided, approve each newly submitted job
+      if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim() && newlySubmittedJobIds.length > 0) {
         const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
         const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
 
-        const approveResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/approve-timesheet`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            timesheetId: timesheetId,
-            managerSignature: managerSignatureUrl,
-            managerId: managerId,
-            action: 'approve'
-          })
+        // Approve each newly submitted job individually
+        console.log('Approving jobs with manager signature:', {
+          jobIds: newlySubmittedJobIds,
+          managerId: managerId,
+          managerSignatureUrl: managerSignatureUrl
         });
 
-        if (!approveResponse.ok) {
-          console.error('Failed to add manager signature and approve');
+        for (const jobId of newlySubmittedJobIds) {
+          console.log(`Approving job ${jobId}...`);
+          const approveResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/approve-timesheet`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              timesheetJobId: jobId,
+              managerSignature: managerSignatureUrl,
+              managerId: managerId,
+              action: 'approve'
+            })
+          });
+
+          if (!approveResponse.ok) {
+            const errorData = await approveResponse.json();
+            console.error(`Failed to add manager signature for job ${jobId}:`, errorData);
+            console.warn(`Manager approval failed but timesheet was submitted. Error: ${errorData.error || 'Unknown error'}`);
+          } else {
+            const approveData = await approveResponse.json();
+            console.log(`Successfully approved job ${jobId}:`, approveData);
+          }
         }
       }
 

@@ -214,18 +214,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       jobCount: timesheet.timesheetJobs.length 
     });
 
-    // Check if all jobs are in DRAFT status (each job has its own status)
-    const nonDraftJobs = timesheet.timesheetJobs.filter(job => job.status !== 'DRAFT');
-    if (nonDraftJobs.length > 0) {
-      console.log('Some jobs are not in DRAFT status:', nonDraftJobs.map(j => ({ id: j.id, status: j.status })));
+    // Filter for only DRAFT jobs (jobs that can be submitted)
+    // This allows submitting individual jobs even if other jobs are already submitted
+    const draftJobs = timesheet.timesheetJobs.filter(job => job.status === 'DRAFT');
+    const alreadySubmittedJobs = timesheet.timesheetJobs.filter(job => job.status !== 'DRAFT');
+    
+    if (alreadySubmittedJobs.length > 0) {
+      console.log('Some jobs are already submitted, will skip them:', alreadySubmittedJobs.map(j => ({ id: j.id, status: j.status })));
+    }
+
+    if (draftJobs.length === 0) {
+      console.log('No DRAFT jobs to submit');
       return res.status(400).json({ 
-        error: `Cannot submit timesheet - some jobs are already ${nonDraftJobs[0].status.toLowerCase()}`,
-        nonDraftJobs: nonDraftJobs.map(j => ({ jobId: j.id, status: j.status }))
+        error: 'No jobs in DRAFT status to submit. All jobs have already been submitted.',
+        alreadySubmittedJobs: alreadySubmittedJobs.map(j => ({ jobId: j.id, status: j.status }))
       });
     }
 
-    // Validate that the job has complete start/end times
-    const incompleteJobs = timesheet.timesheetJobs.filter(job => 
+    console.log('Found DRAFT jobs to submit:', { 
+      draftCount: draftJobs.length,
+      draftJobIds: draftJobs.map(j => j.id)
+    });
+
+    // Validate that the DRAFT jobs have complete start/end times
+    const incompleteJobs = draftJobs.filter(job => 
       !job.startTime || !job.endTime
     );
 
@@ -286,12 +298,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Use transaction for atomicity - update timesheet, complete booking, and charge payment
     console.log('[STEP 1] Starting transaction to update timesheet and process payments');
+    const draftJobIds = draftJobs.map(j => j.id);
+    console.log('[STEP 1.1] Will update only DRAFT jobs:', draftJobIds);
+    
     const result = await prisma.$transaction(async (tx) => {
-      // Update each job with locum signature, status, rating, and remark
-      console.log('[STEP 2] Updating each job with locum signature and SUBMITTED status');
+      // Update only the DRAFT jobs with locum signature, status, rating, and remark
+      console.log('[STEP 2] Updating DRAFT jobs with locum signature and SUBMITTED status');
       const now = new Date();
         await tx.timesheetJob.updateMany({
-          where: { timesheetId: timesheetId },
+          where: { 
+            timesheetId: timesheetId,
+            status: 'DRAFT' // Only update jobs that are in DRAFT status
+          },
           data: {
           locumSignature: staffSignature,
           locumSignatureDate: now,
@@ -353,10 +371,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const paymentResults: any[] = [];
 
-      console.log(`[STEP 3] Processing ${updatedTimesheet.timesheetJobs.length} job(s) for payment`);
+      // Filter to only process jobs that were just submitted (were DRAFT, now SUBMITTED)
+      const jobsToProcess = updatedTimesheet.timesheetJobs.filter(job => 
+        draftJobIds.includes(job.id)
+      );
+
+      console.log(`[STEP 3] Processing ${jobsToProcess.length} newly submitted job(s) for payment`);
+      console.log(`[STEP 3.1] Skipping ${updatedTimesheet.timesheetJobs.length - jobsToProcess.length} already-processed job(s)`);
       
-      // Process each job - complete booking and charge payment
-      for (const job of updatedTimesheet.timesheetJobs) {
+      // Process each newly submitted job - complete booking and charge payment
+      for (const job of jobsToProcess) {
         console.log(`[STEP 4] Processing job ${job.id} for booking ${job.bookingId}`);
         console.log(`[STEP 4.1] Job details:`, {
           jobId: job.id,
@@ -793,8 +817,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log(`[STEP 19.1] All payment results:`, result.payments);
     }
 
-    // Get updated jobs to return signature dates
-    const updatedJobs = await prisma.timesheetJob.findMany({
+    // Get all jobs to return their current status
+    const allJobs = await prisma.timesheetJob.findMany({
       where: { timesheetId: result.timesheet.id },
       select: {
         id: true,
@@ -803,18 +827,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
 
+    const newlySubmittedJobs = allJobs.filter(j => draftJobIds.includes(j.id));
+
     console.log(`[STEP 20] Sending success response to client`);
     console.log(`[STEP 20.1] Final summary:`, {
       timesheetId: result.timesheet.id,
       totalPayments: result.payments.length,
       successfulPayments: result.payments.filter((p: any) => p.status === 'SUCCESS').length,
       failedPayments: result.payments.filter((p: any) => p.status !== 'SUCCESS').length,
-      submittedJobs: updatedJobs.length
+      newlySubmittedJobs: newlySubmittedJobs.length,
+      totalJobsInTimesheet: allJobs.length
     });
     
     res.status(200).json({
       success: true,
-      message: "Timesheet submitted successfully, booking(s) completed, and payment(s) processed",
+      message: `Successfully submitted ${newlySubmittedJobs.length} job(s), booking(s) completed, and payment(s) processed`,
       data: {
         timesheetId: result.timesheet.id,
         totalHours: result.timesheet.totalHours,
@@ -822,9 +849,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         month: result.timesheet.month,
         year: result.timesheet.year,
         locumName: result.timesheet.locumProfile.fullName,
-        totalJobs: result.timesheet.timesheetJobs.length,
-        submittedJobs: updatedJobs.length,
-        jobsStatus: updatedJobs.map(j => ({ jobId: j.id, status: j.status, signedAt: j.locumSignatureDate })),
+        totalJobsInTimesheet: allJobs.length,
+        newlySubmittedJobs: newlySubmittedJobs.length,
+        alreadySubmittedJobs: allJobs.length - newlySubmittedJobs.length,
+        jobsStatus: allJobs.map(j => ({ jobId: j.id, status: j.status, signedAt: j.locumSignatureDate })),
+        newlySubmittedJobIds: newlySubmittedJobs.map(j => j.id),
         paymentResults: result.payments
       }
     });

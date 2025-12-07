@@ -23,7 +23,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { timesheetJobId, managerSignature, managerId, action } = req.body;
 
+    console.log('[APPROVE] Request received:', {
+      timesheetJobId,
+      hasManagerSignature: !!managerSignature,
+      managerId,
+      action
+    });
+
     if (!timesheetJobId || !managerSignature || !managerId || !action) {
+      console.log('[APPROVE] Missing required fields:', {
+        hasTimesheetJobId: !!timesheetJobId,
+        hasManagerSignature: !!managerSignature,
+        hasManagerId: !!managerId,
+        hasAction: !!action
+      });
       return res.status(400).json({ 
         error: "timesheetJobId, managerSignature, managerId, and action are required" 
       });
@@ -86,6 +99,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (action === 'approve') {
       // Update job with manager signature and lock it
       // Note: Booking is already COMPLETED and payment already charged during timesheet submission
+      console.log('[APPROVE] Updating job with manager signature:', {
+        jobId: timesheetJobId,
+        managerId: managerId
+      });
+      
       updatedJob = await prisma.timesheetJob.update({
         where: { id: timesheetJobId },
         data: {
@@ -119,6 +137,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
       });
+      
+      console.log('[APPROVE] Job updated successfully:', {
+        jobId: updatedJob.id,
+        status: updatedJob.status,
+        managerId: updatedJob.managerId,
+        hasManagerSignature: !!updatedJob.managerSignature,
+        managerSignatureDate: updatedJob.managerSignatureDate
+      });
+      
       newStatus = 'LOCKED';
     } else {
       // Reject and return to DRAFT status
