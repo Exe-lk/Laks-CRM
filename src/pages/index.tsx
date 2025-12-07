@@ -7,6 +7,7 @@ import Logo from "../../public/assests/IMG_4296.png"
 import { useRouter } from 'next/navigation';
 import ReviewSlider from './components/ReviewSlider';
 
+
 const Home = () => {
   const router = useRouter();
 
