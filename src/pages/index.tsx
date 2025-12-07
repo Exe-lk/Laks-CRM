@@ -3,7 +3,7 @@ import NavBar from "./components/navBar/nav";
 import image4 from "../../public/assests/phone.png";
 import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
-import Logo from "../../public/assests/IMG_4296.png"
+import Logo1 from "../../public/assests/logowithoutbg.png"
 import { useRouter } from 'next/navigation';
 import ReviewSlider from './components/ReviewSlider';
 
@@ -46,8 +46,8 @@ const Home = () => {
                 
               <div className="w-full h-full">
                         <Image
-                          src={Logo}
-                          alt="Doctor"
+                          src={Logo1}
+                          alt="image"
                           width={500}
                           height={500}
                           className="w-full h-full object-cover"
