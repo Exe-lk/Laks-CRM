@@ -21,74 +21,91 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, reason } = req.body;
+    const { timesheetJobId, reason } = req.body;
 
-    if (!timesheetId) {
+    if (!timesheetJobId) {
       return res.status(400).json({ 
-        error: "timesheetId is required" 
+        error: "timesheetJobId is required" 
       });
     }
 
-    // Get the timesheet
-    const timesheet = await prisma.timesheet.findUnique({
-      where: { id: timesheetId },
+    // Get the timesheet job
+    const timesheetJob = await prisma.timesheetJob.findUnique({
+      where: { id: timesheetJobId },
       include: {
-        timesheetJobs: true,
-        locumProfile: {
+        timesheet: {
+          include: {
+            locumProfile: {
+              select: {
+                fullName: true,
+                emailAddress: true
+              }
+            }
+          }
+        },
+        practice: {
           select: {
-            fullName: true,
-            emailAddress: true
+            name: true,
+            location: true
+          }
+        },
+        branch: {
+          select: {
+            name: true,
+            location: true
           }
         }
       }
     });
 
-    if (!timesheet) {
-      return res.status(404).json({ error: "Timesheet not found" });
+    if (!timesheetJob) {
+      return res.status(404).json({ error: "Timesheet job not found" });
     }
 
-    // Check if timesheet is LOCKED or SUBMITTED
-    if (timesheet.status !== 'LOCKED' && timesheet.status !== 'SUBMITTED') {
+    // Check if job is LOCKED or SUBMITTED
+    if (timesheetJob.status !== 'LOCKED' && timesheetJob.status !== 'SUBMITTED') {
       return res.status(400).json({ 
-        error: `Timesheet cannot be unlocked. Current status: ${timesheet.status}`,
-        details: "Only LOCKED or SUBMITTED timesheets can be unlocked."
+        error: `Job cannot be unlocked. Current status: ${timesheetJob.status}`,
+        details: "Only LOCKED or SUBMITTED jobs can be unlocked."
       });
     }
 
-    // Unlock the timesheet by returning it to DRAFT status
+    const previousStatus = timesheetJob.status;
+
+    // Unlock the job by returning it to DRAFT status
     // Clear manager signature and approval data
-    const updatedTimesheet = await prisma.timesheet.update({
-      where: { id: timesheetId },
+    const updatedJob = await prisma.timesheetJob.update({
+      where: { id: timesheetJobId },
       data: {
         status: 'DRAFT',
         managerSignature: null,
         managerSignatureDate: null,
         managerId: null,
-        staffSignature: null,
-        staffSignatureDate: null,
+        locumSignature: null,
+        locumSignatureDate: null,
         submittedAt: null
       },
       include: {
-        timesheetJobs: {
+        timesheet: {
           include: {
-            practice: {
+            locumProfile: {
               select: {
-                name: true,
-                location: true
-              }
-            },
-            branch: {
-              select: {
-                name: true,
-                location: true
+                fullName: true,
+                emailAddress: true
               }
             }
           }
         },
-        locumProfile: {
+        practice: {
           select: {
-            fullName: true,
-            emailAddress: true
+            name: true,
+            location: true
+          }
+        },
+        branch: {
+          select: {
+            name: true,
+            location: true
           }
         }
       }
@@ -96,10 +113,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({
       success: true,
-      message: `Timesheet unlocked successfully. Status changed from ${timesheet.status} to DRAFT.`,
+      message: `Job unlocked successfully. Status changed from ${previousStatus} to DRAFT.`,
       data: {
-        timesheet: updatedTimesheet,
-        previousStatus: timesheet.status,
+        job: updatedJob,
+        previousStatus: previousStatus,
         reason: reason || "Unlocked by authorized user"
       }
     });

@@ -209,14 +209,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalPay: aggregatedTotalPay,
       timesheets: timesheets.map(ts => ({
         id: ts.id,
-        status: ts.status,
         totalHours: ts.totalHours,
         totalPay: ts.totalPay,
-        staffSignature: ts.staffSignature,
-        staffSignatureDate: ts.staffSignatureDate,
-        managerSignature: ts.managerSignature,
-        managerSignatureDate: ts.managerSignatureDate,
-        submittedAt: ts.submittedAt,
         createdAt: ts.createdAt,
         updatedAt: ts.updatedAt,
         jobCount: ts.timesheetJobs.length

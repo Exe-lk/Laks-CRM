@@ -78,18 +78,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Find or create timesheet for this month/year
+    // Find or create timesheet for this month/year (grouping container)
     const jobDate = new Date(booking.booking_date);
     const currentMonth = jobDate.getMonth() + 1; // 1-12
     const currentYear = jobDate.getFullYear();
 
-    // Reuse the most recent DRAFT timesheet for this month/year if it exists
+    // Reuse the most recent timesheet for this month/year if it exists
     let timesheet = await prisma.timesheet.findFirst({
       where: {
         locumId: booking.locum_id!,
         month: currentMonth,
-        year: currentYear,
-        status: 'DRAFT'
+        year: currentYear
       },
       orderBy: {
         createdAt: 'desc'
@@ -100,8 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           locumId: booking.locum_id!,
           month: currentMonth,
-          year: currentYear,
-          status: 'DRAFT'
+          year: currentYear
         }
       });
     }
@@ -117,7 +115,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Create timesheet job
+    // Create timesheet job with DRAFT status (each job is independent)
+    // Note: status defaults to 'DRAFT' in schema, but we'll set it explicitly
     const timesheetJob = await prisma.timesheetJob.create({
       data: {
         timesheetId: timesheet.id,

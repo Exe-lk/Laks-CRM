@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Timesheet not found" });
     }
 
-    // Calculate job breakdown
+    // Calculate job breakdown with per-job signatures and status
     const jobBreakdown = timesheet.timesheetJobs.map(job => {
       const date = job.jobDate.toISOString().split('T')[0];
       const startTime = job.startTime?.toISOString() || null;
@@ -96,6 +96,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         totalHours: job.totalHours || 0,
         hourlyRate: job.hourlyRate || 0,
         totalPay: job.totalPay || 0,
+        status: job.status,
+        locumSignature: job.locumSignature,
+        locumSignatureDate: job.locumSignatureDate,
+        managerSignature: job.managerSignature,
+        managerSignatureDate: job.managerSignatureDate,
+        managerId: job.managerId,
+        submittedAt: job.submittedAt,
         notes: job.notes,
         isComplete: !!(job.startTime && job.endTime),
         practice: job.practice,
@@ -115,6 +122,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         : 0
     };
 
+    // Aggregate job statuses for summary
+    const jobStatuses = timesheet.timesheetJobs.map(j => j.status);
+    const statusSummary = {
+      draft: jobStatuses.filter(s => s === 'DRAFT').length,
+      submitted: jobStatuses.filter(s => s === 'SUBMITTED').length,
+      locked: jobStatuses.filter(s => s === 'LOCKED').length
+    };
+
     res.status(200).json({
       success: true,
       data: {
@@ -122,20 +137,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         locumId: timesheet.locumId,
         month: timesheet.month,
         year: timesheet.year,
-        status: timesheet.status,
         totalHours: timesheet.totalHours,
         totalPay: timesheet.totalPay,
-        staffSignature: timesheet.staffSignature,
-        staffSignatureDate: timesheet.staffSignatureDate,
-        managerSignature: timesheet.managerSignature,
-        managerSignatureDate: timesheet.managerSignatureDate,
-        managerId: timesheet.managerId,
-        submittedAt: timesheet.submittedAt,
         createdAt: timesheet.createdAt,
         updatedAt: timesheet.updatedAt,
         locumProfile: timesheet.locumProfile,
         jobBreakdown: jobBreakdown,
-        monthSummary: monthSummary
+        monthSummary: monthSummary,
+        statusSummary: statusSummary
       }
     });
 

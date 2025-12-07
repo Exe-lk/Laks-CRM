@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "timesheetJobId is required" });
     }
 
-    // Get the timesheet job with timesheet info
+    // Get the timesheet job
     const timesheetJob = await prisma.timesheetJob.findUnique({
       where: { id: timesheetJobId },
       include: {
@@ -46,27 +46,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: "Timesheet job not found" });
     }
 
-    // Check if timesheet is locked or submitted
-    if (timesheetJob.timesheet.status === 'LOCKED') {
+    // Check if job is locked or submitted (each job has its own status)
+    if (timesheetJob.status === 'LOCKED') {
       return res.status(403).json({ 
-        error: "Cannot modify timesheet job - timesheet is locked",
+        error: "Cannot modify timesheet job - job is locked",
         details: {
+          jobId: timesheetJob.id,
+          jobStatus: timesheetJob.status,
           timesheetId: timesheetJob.timesheet.id,
-          timesheetStatus: timesheetJob.timesheet.status,
-          timesheetMonth: timesheetJob.timesheet.month,
-          timesheetYear: timesheetJob.timesheet.year,
-          message: "This timesheet has been approved by a manager and can no longer be modified. Please contact your manager if you need to make changes."
+          message: "This job has been approved by a manager and can no longer be modified. Please contact your manager if you need to make changes."
         }
       });
     }
 
-    if (timesheetJob.timesheet.status === 'SUBMITTED') {
+    if (timesheetJob.status === 'SUBMITTED') {
       return res.status(403).json({ 
-        error: "Cannot modify timesheet job - timesheet has been submitted",
+        error: "Cannot modify timesheet job - job has been submitted",
         details: {
+          jobId: timesheetJob.id,
+          jobStatus: timesheetJob.status,
           timesheetId: timesheetJob.timesheet.id,
-          timesheetStatus: timesheetJob.timesheet.status,
-          message: "This timesheet has been submitted for approval and can no longer be modified. Please contact your manager if you need to make changes."
+          message: "This job has been submitted for approval and can no longer be modified. Please contact your manager if you need to make changes."
         }
       });
     }
@@ -187,8 +187,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         timesheet: {
           select: {
             totalHours: true,
-            totalPay: true,
-            status: true
+            totalPay: true
           }
         }
       }
