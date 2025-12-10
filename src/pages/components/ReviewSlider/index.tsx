@@ -49,7 +49,7 @@ const reviews = [
   {
     name: "John Doe",
     initial: "J",
-    text: "Great experience using Locum Loop. Nurses are easy to book and very helpful.",
+    text: "Great experience using Laks Dent. Nurses are easy to book and very helpful.",
     rating: 5,
     color: "from-teal-400 to-cyan-400",
   },
