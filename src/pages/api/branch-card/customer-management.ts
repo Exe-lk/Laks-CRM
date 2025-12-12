@@ -7,18 +7,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { action, branch_id, email, name, payment_method_id, customer_id } = req.body;
+        let { action, branch_id, email, name, payment_method_id, customer_id } = req.body;
 
         if (!action) {
             return res.status(400).json({ error: "Action is required" });
         }
 
         // Validate required fields for create_customer action
+        // Note: email and name can be fetched from branch if not provided
         if (action === "create_customer") {
-            if (!branch_id || !email || !name) {
+            if (!branch_id) {
                 return res.status(400).json({ 
-                    error: "Missing required fields: branch_id, email, name",
-                    received: { branch_id: !!branch_id, email: !!email, name: !!name }
+                    error: "Missing required field: branch_id",
+                    received: { branch_id: !!branch_id }
                 });
             }
         }
@@ -45,10 +46,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured for customer management" });
         }
 
-        // For create_customer action, verify branch exists
+        // For create_customer action, verify branch exists and get email/name if not provided
         if (action === "create_customer" && branch_id) {
             const branch = await prisma.branch.findUnique({
-                where: { id: branch_id }
+                where: { id: branch_id },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true
+                }
             });
 
             if (!branch) {
@@ -70,20 +76,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 });
             }
+
+            // If email/name not provided, use branch details
+            if (!email && branch.email) {
+                email = branch.email;
+            }
+            if (!name && branch.name) {
+                name = branch.name;
+            }
+
+            // Fallback if still no email/name
+            if (!email) {
+                email = `branch-${branch_id}@example.com`;
+            }
+            if (!name) {
+                name = branch.name || `Branch ${branch_id}`;
+            }
         }
 
-        // Map branch_id to practice_id for Supabase function compatibility
+        // Pass all fields including branch_id and set_as_default
         const requestBody: any = {
             action,
             email,
             name,
             payment_method_id,
-            customer_id
+            customer_id,
+            set_as_default: req.body.set_as_default
         };
 
-        // The Supabase function uses 'practice_id' as the field name for all entity types
+        // Pass branch_id as-is
         if (branch_id) {
-            requestBody.practice_id = branch_id;
+            requestBody.branch_id = branch_id;
         }
 
         console.log('Sending request to Supabase function:', requestBody);

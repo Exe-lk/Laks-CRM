@@ -22,6 +22,7 @@ export interface CreateCustomerRequest {
   name?: string;
   payment_method_id?: string;
   customer_id?: string;
+  set_as_default?: boolean;
 }
 
 export interface CustomerResponse {
