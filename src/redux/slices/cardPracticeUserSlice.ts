@@ -20,13 +20,14 @@ export interface PaymentCard {
 
 export interface CreateCardRequest {
   practiceId: string;
-  cardHolderName: string;
-  cardNumber: string;
-  expiryMonth: string;
-  expiryYear: string;
-  cvv: string;
+  cardHolderName?: string;
+  cardNumber?: string;
+  expiryMonth?: string;
+  expiryYear?: string;
+  cvv?: string;
   cardType?: string;
   isDefault?: boolean;
+  paymentMethodId?: string; // If provided, use this instead of creating from card details
 }
 
 export interface CreateCardResponse {
@@ -120,7 +121,51 @@ export const cardPracticeUserApiSlice = createApi({
             };
           }
 
-          const testPaymentMethodId = 'pm_card_visa';
+          // Use provided payment method ID, or create from card details (deprecated - use Stripe.js on frontend)
+          let paymentMethodId: string;
+          
+          if (cardData.paymentMethodId) {
+            // Use provided payment method ID (created via Stripe.js on frontend)
+            paymentMethodId = cardData.paymentMethodId;
+            console.log('Using provided payment method ID:', paymentMethodId);
+          } else if (cardData.cardNumber && cardData.expiryMonth && cardData.expiryYear && cardData.cvv) {
+            // Legacy: Create payment method from card details (not recommended - use Stripe.js instead)
+            console.warn('Creating payment method from card details - consider using Stripe.js on frontend');
+            const createPMResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/payments/create-payment-method`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                cardNumber: cardData.cardNumber.replace(/\s/g, ''),
+                expiryMonth: cardData.expiryMonth,
+                expiryYear: cardData.expiryYear,
+                cvv: cardData.cvv,
+                cardHolderName: cardData.cardHolderName
+              })
+            });
+
+            const pmData = await createPMResponse.json();
+            
+            if (!createPMResponse.ok || !pmData.payment_method?.id) {
+              return { 
+                error: { 
+                  status: createPMResponse.status, 
+                  data: { error: pmData.details || pmData.error || 'Failed to create payment method' } 
+                } as any 
+              };
+            }
+
+            paymentMethodId = pmData.payment_method.id;
+            console.log('Payment method created:', paymentMethodId);
+          } else {
+            return {
+              error: {
+                status: 400,
+                data: { error: 'Either paymentMethodId or card details (cardNumber, expiryMonth, expiryYear, cvv) must be provided' }
+              } as any
+            };
+          }
           
           const cardResponse = await fetchWithBQ({
             url: 'practice-card/customer-management',
@@ -129,7 +174,8 @@ export const cardPracticeUserApiSlice = createApi({
               action: 'attach_payment_method',
               customer_id: customerId,
               practice_id: cardData.practiceId,
-              payment_method_id: testPaymentMethodId,
+              payment_method_id: paymentMethodId,
+              set_as_default: cardData.isDefault
             },
           });
 

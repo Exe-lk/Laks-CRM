@@ -7,10 +7,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { action, practice_id, email, name, payment_method_id, customer_id } = req.body;
+        let { action, practice_id, email, name, payment_method_id, customer_id } = req.body;
 
         if (!action) {
             return res.status(400).json({ error: "Action is required" });
+        }
+
+        // Validate required fields for create_customer action
+        // Note: email and name can be fetched from practice if not provided
+        if (action === "create_customer") {
+            if (!practice_id) {
+                return res.status(400).json({ 
+                    error: "Missing required field: practice_id",
+                    received: { practice_id: !!practice_id }
+                });
+            }
+        }
+
+        // Validate required fields for attach_payment_method action
+        if (action === "attach_payment_method") {
+            if (!customer_id || !payment_method_id) {
+                console.error('Missing required fields for attach_payment_method:', { 
+                    customer_id: !!customer_id, 
+                    payment_method_id: !!payment_method_id 
+                });
+                return res.status(400).json({ 
+                    error: "Missing required fields: customer_id, payment_method_id",
+                    received: { customer_id: !!customer_id, payment_method_id: !!payment_method_id }
+                });
+            }
+            console.log('Attaching payment method:', { customer_id, payment_method_id });
         }
 
         const SUPABASE_CUSTOMER_FUNCTION_URL = process.env.SUPABASE_CUSTOMER_FUNCTION_URL;
@@ -20,13 +46,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).json({ error: "Server not configured for customer management" });
         }
 
-        // For create_customer action, verify practice exists and get email/name
-        let practiceEmail = email;
-        let practiceName = name;
-        
+        // For create_customer action, verify practice exists and get email/name if not provided
         if (action === "create_customer" && practice_id) {
             const practice = await prisma.practice.findUnique({
-                where: { id: practice_id }
+                where: { id: practice_id },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true
+                }
             });
 
             if (!practice) {
@@ -49,14 +77,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            // Use practice data if email/name not provided
-            if (!practiceEmail) {
-                practiceEmail = practice.email || `practice-${practice_id}@default.com`;
+            // If email/name not provided, use practice details
+            if (!email && practice.email) {
+                email = practice.email;
             }
-            if (!practiceName) {
-                practiceName = practice.name || `Practice ${practice_id}`;
+            if (!name && practice.name) {
+                name = practice.name;
+            }
+
+            // Fallback if still no email/name
+            if (!email) {
+                email = `practice-${practice_id}@example.com`;
+            }
+            if (!name) {
+                name = practice.name || `Practice ${practice_id}`;
             }
         }
+
+        // Pass all fields including practice_id and set_as_default
+        const requestBody: any = {
+            action,
+            email,
+            name,
+            payment_method_id,
+            customer_id,
+            set_as_default: req.body.set_as_default
+        };
+
+        // Pass practice_id as-is
+        if (practice_id) {
+            requestBody.practice_id = practice_id;
+        }
+
+        console.log('Sending request to Supabase function:', requestBody);
 
         const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
             method: "POST",
@@ -64,17 +117,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 Authorization: `Bearer ${CUSTOMER_FUNCTION_SECRET}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                action,
-                practice_id,
-                email: practiceEmail,
-                name: practiceName,
-                payment_method_id,
-                customer_id
-            })
+            body: JSON.stringify(requestBody)
         });
 
         const json = await resp.json().catch(() => ({}));
+        
+        console.log('Supabase function response:', { 
+            status: resp.status, 
+            ok: resp.ok, 
+            data: json 
+        });
 
         // If customer creation was successful, store in database
         if (resp.ok && action === "create_customer" && json.customer && practice_id) {
@@ -89,7 +141,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             } catch (dbError) {
                 console.error("Failed to save practice customer to database:", dbError);
-                // Don't fail the request if DB save fails, customer still created in Stripe
             }
         }
 
@@ -98,4 +149,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: error?.message || String(error) });
     }
 }
-

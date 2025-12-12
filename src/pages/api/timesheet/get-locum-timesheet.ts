@@ -44,8 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (year) {
       timesheetWhereClause.year = targetYear;
     }
-
-    // Get all timesheets for this locum (filtered by month/year if provided)
     const timesheets = await prisma.timesheet.findMany({
       where: timesheetWhereClause,
       include: {
@@ -87,11 +85,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         createdAt: 'desc'
       }
     });
-
-    // Flatten all jobs from all timesheets
     let allJobs = timesheets.flatMap(ts => ts.timesheetJobs);
-
-    // If weekStartDate is provided, filter jobs for that week
     if (weekStartDate) {
       const weekStart = new Date(weekStartDate as string);
       const weekEnd = new Date(weekStart);
@@ -107,8 +101,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const timesheetJobs = allJobs.sort((a, b) => {
       return new Date(a.jobDate).getTime() - new Date(b.jobDate).getTime();
     });
-
-    // For compatibility, we'll keep the old structure but return aggregated data
     const timesheetJobsQuery = await prisma.timesheetJob.findMany({
       where: {
         timesheetId: {
@@ -148,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     timesheetJobs.forEach(job => {
       const jobDate = new Date(job.jobDate);
       const weekStart = new Date(jobDate);
-      weekStart.setDate(jobDate.getDate() - jobDate.getDay()); // Start of week (Sunday)
+      weekStart.setDate(jobDate.getDate() - jobDate.getDay());
       weekStart.setHours(0, 0, 0, 0);
       
       const weekKey = weekStart.toISOString().split('T')[0];
@@ -198,13 +190,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalTimesheets: timesheets.length
     };
 
-    // For backward compatibility, return aggregated timesheet data
     const aggregatedTimesheet = {
       id: timesheets.length > 0 ? timesheets[0].id : null,
       locumId: locumId as string,
       month: targetMonth,
       year: targetYear,
-      status: 'MULTIPLE', // Indicate multiple timesheets
+      status: 'MULTIPLE', 
       totalHours: aggregatedTotalHours,
       totalPay: aggregatedTotalPay,
       timesheets: timesheets.map(ts => ({
