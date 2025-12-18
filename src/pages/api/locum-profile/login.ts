@@ -69,6 +69,14 @@ export default async function handler(
         });
     }
 
+    // Check if user is active (only for approved users)
+    if (locumProfile.status === "accept" && locumProfile.isActive === false) {
+      return res.status(403).json({
+        error: "Your account has been deactivated. Please contact admin.",
+        status: "inactive",
+      });
+    }
+
     const { data: signInData, error: signInError } =
       await supabase.auth.signInWithPassword({
         email: email,
