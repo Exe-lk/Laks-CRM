@@ -36,6 +36,7 @@ model LocumProfile {
   hourlyPayRate            Float?
   totalRatings             Int?
   idImage                  String?                   @map("id_image")
+  isActive                 Boolean?                  @default(true) @map("is_active") // Active/inactive status for approved users
   autoSendPayslips         Boolean?                  @default(false) @map("auto_send_payslips") // Toggle for automatic payslip sending
   payslipFrequency         String?                   @map("payslip_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
   payslipDayOfWeek         Int?                      @map("payslip_day_of_week") // 0-6 for weekly (0 = Sunday)
@@ -81,6 +82,7 @@ model Practice {
   location            String?
   status              String
   practiceType        String               @default("Private") // Private or Corporate
+  isActive            Boolean?             @default(true) @map("is_active") // Active/inactive status for approved users
   autoSendInvoices    Boolean?             @default(false) @map("auto_send_invoices") // Toggle for automatic invoice sending
   invoiceFrequency    String?              @map("invoice_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
   invoiceDayOfWeek    Int?                 @map("invoice_day_of_week") // 0-6 for weekly (0 = Sunday)
