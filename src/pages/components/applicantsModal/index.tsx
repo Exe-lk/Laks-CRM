@@ -330,7 +330,8 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                           </h4>
                           <p className="text-sm text-gray-600">
                             {applicant.locumProfile.employeeType}
-                          </p>
+
+                        </p>
                         </div>
                       </div>
 
@@ -351,6 +352,14 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                           <FiClock className="text-[#C3EAE7]" />
                           Applied: {formatResponseTime(applicant.responded_at)}
                         </div>
+                        {typeof applicant.locumProfile.hourlyPayRate === 'number' && applicant.locumProfile.hourlyPayRate !== undefined && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            Hourly Pay Rate:{' '}
+                            <span className="font-medium text-green-700">
+                              £{applicant.locumProfile.hourlyPayRate.toFixed(2)}/hour
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 text-sm text-gray-600 col-span-1 md:col-span-2">
                           <FiMapPin className="text-green-500" />
                           <span className="font-medium text-green-600">{getDistanceText(applicant)}</span>

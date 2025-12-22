@@ -125,6 +125,7 @@ export interface Applicant {
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
+    hourlyPayRate?: number;
     averageRating?: number;
     specialties: Array<{
       speciality: string;

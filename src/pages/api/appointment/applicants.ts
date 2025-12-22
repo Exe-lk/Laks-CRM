@@ -78,6 +78,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     contactNumber:true,
                     emailAddress:true,
                     employeeType:true,
+                    hourlyPayRate:true,
                     averageRating:true,
                     specialties:{
                         select:{
