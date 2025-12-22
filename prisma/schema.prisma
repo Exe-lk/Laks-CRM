@@ -52,9 +52,9 @@ model LocumProfile {
   timesheets               Timesheet[]
   ignoredAppointments      IgnoredAppointment[]
   payslips                 Payslip[]
+  notifications            Notification[]
   cancellationPenalties    CancellationPenalty[]
   stripeCustomer           LocumStripeCustomer?
-  notifications            Notification[]
 
   @@map("locum_profiles")
 }
@@ -116,7 +116,6 @@ model Booking {
   status             String
   location           String
   description        String?
-  deductions         Float?             @default(0) // Deductions applied to locum pay for this booking
   accept_time        DateTime?
   cancel_by          String?
   cancel_time        DateTime?
@@ -131,7 +130,6 @@ model Booking {
   timesheetJobs         TimesheetJob[]
   cancellationPenalties CancellationPenalty[]
   bookingPayments       BookingPayment[]
-  bookingExtras         BookingExtra[]
 }
 
 model AppointmentRequest {
@@ -302,6 +300,9 @@ model TimesheetJob {
   rating               Float? 
   remark               String? 
   notes                String?
+  deductions           Float?    @default(0) // Deductions applied to locum pay for this timesheet job
+  locumExtra           Float?    @default(0) @map("locum_extra") // Extra amount for locum (added to payslip)
+  practiceExtra        Float?    @default(0) @map("practice_extra") // Extra amount for practice (stored only)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -325,7 +326,6 @@ model Invoice {
   subtotal      Float     @default(0)
   taxRate       Float?    @default(0) @map("tax_rate") // Tax rate as percentage
   taxAmount     Float?    @default(0) @map("tax_amount")
-  deductions    Float?    @default(0)
   totalAmount   Float     @map("total_amount")
   status        String    @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
   notes         String?
@@ -366,6 +366,7 @@ model Payslip {
   endDate       DateTime  @map("end_date") // Period end date
   payslipDate   DateTime  @map("payslip_date")
   grossPay      Float     @default(0) @map("gross_pay")
+  locumExtra    Float?    @default(0) @map("locum_extra")
   deductions    Float?    @default(0)
   netPay        Float     @map("net_pay")
   totalHours    Float?    @map("total_hours")
@@ -528,17 +529,3 @@ model Notification {
   @@map("notifications")
 }
 
-model BookingExtra {
-  id          String   @id @default(cuid())
-  bookingId   String   @map("booking_id")
-  extraType   String   @map("extra_type") // LOCUM_EXTRA or PRACTICE_EXTRA
-  amount      Float
-  description String?  // Optional description for the extra
-  createdBy   String   @map("created_by") // Admin identifier
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  
-  @@map("booking_extras")
-}
