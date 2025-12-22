@@ -16,8 +16,18 @@ export default function VerifyEmail() {
       if (hasProcessed) return;
       
       try {
-        // First, wait a moment for Supabase to process any hash fragments
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Clean up URL hash fragments after Supabase processes them
+        if (typeof window !== 'undefined' && window.location.hash) {
+          // Wait for Supabase to process hash fragments
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Clean the URL (remove hash)
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState(null, '', cleanUrl);
+        } else {
+          // Wait a moment for Supabase to process any hash fragments
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
         
         // Try to get existing session
         let { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -83,6 +93,10 @@ export default function VerifyEmail() {
                   setStatus('success');
                   setMessage('Email verified successfully!');
                   setHasProcessed(true);
+                  // Clean URL before redirect
+                  if (typeof window !== 'undefined') {
+                    window.history.replaceState(null, '', '/locumStaff/verifyEmail');
+                  }
                   setTimeout(() => {
                     router.push('/locumStaff/login');
                   }, 2000);
@@ -92,6 +106,10 @@ export default function VerifyEmail() {
                   setStatus('success');
                   setMessage('Email verified successfully!');
                   setHasProcessed(true);
+                  // Clean URL before redirect
+                  if (typeof window !== 'undefined') {
+                    window.history.replaceState(null, '', '/locumStaff/verifyEmail');
+                  }
                   setTimeout(() => {
                     router.push('/locumStaff/login');
                   }, 2000);

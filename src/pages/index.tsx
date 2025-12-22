@@ -4,12 +4,85 @@ import image4 from "../../public/assests/phone.png";
 import image5 from "../../public/assests/clock.png";
 import Footer from "./components/footer";
 import Logo1 from "../../public/assests/logowithoutbg.png"
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import ReviewSlider from './components/ReviewSlider';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseclient';
 
 
 const Home = () => {
   const router = useRouter();
+  const [isHandlingAuth, setIsHandlingAuth] = useState(false);
+
+  useEffect(() => {
+    // Handle Supabase authentication redirects from root URL
+    const handleAuthRedirect = async () => {
+      if (isHandlingAuth) return;
+      
+      // Check if there are hash fragments in the URL (Supabase auth tokens)
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const hash = window.location.hash;
+        // Check if it's a Supabase auth hash (contains access_token, type, etc.)
+        if (hash.includes('access_token') || hash.includes('type=signup') || hash.includes('type=recovery')) {
+          setIsHandlingAuth(true);
+          
+          try {
+            // Wait for Supabase to process the hash
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Get the session
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (session && session.user) {
+              const email = session.user.email;
+              
+              if (email) {
+                // Determine which verify email page to redirect to based on email domain or user type
+                // We'll check the database to see if it's a locum, practice, or branch
+                try {
+                  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/api/auth/check-user-type?email=${encodeURIComponent(email)}`);
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.userType === 'locum') {
+                      // Redirect to verify email page (hash will be processed there)
+                      router.push('/locumStaff/verifyEmail');
+                      return;
+                    } else if (data.userType === 'practice') {
+                      router.push('/practiceUser/verifyEmail');
+                      return;
+                    } else if (data.userType === 'branch') {
+                      router.push('/branch/verifyEmail');
+                      return;
+                    }
+                  }
+                } catch (err) {
+                  console.error('Error checking user type:', err);
+                }
+                
+                // If we can't determine, clean the URL and let user navigate manually
+                window.history.replaceState(null, '', '/');
+              }
+            }
+            
+            // If we can't determine the user type, clean the URL anyway
+            window.history.replaceState(null, '', '/');
+          } catch (error) {
+            console.error('Error handling auth redirect:', error);
+            // Clean the URL on error
+            window.history.replaceState(null, '', '/');
+          } finally {
+            setIsHandlingAuth(false);
+          }
+        }
+      }
+    };
+
+    if (router.isReady) {
+      handleAuthRedirect();
+    }
+  }, [router, isHandlingAuth]);
 
   return (
     <>
