@@ -17,6 +17,24 @@ export default async function handler(
           return res.status(400).json({ error: "Email and status are required" });
         }
 
+        // First, check if the profile exists
+        const existingProfile = await prisma.locumProfile.findUnique({
+          where: { emailAddress: email },
+        });
+
+        if (!existingProfile) {
+          return res.status(404).json({ error: "Profile not found" });
+        }
+
+        // If already verified, return success (idempotent)
+        if (existingProfile.status === status || existingProfile.status === 'verify') {
+          return res.status(200).json({
+            ...existingProfile,
+            message: "Email already verified",
+          });
+        }
+
+        // Update the status
         const updatedProfile = await prisma.locumProfile.update({
           where: { emailAddress: email },
           data: { status },
