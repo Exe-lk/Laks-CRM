@@ -23,6 +23,14 @@ export default async function handler(
           return res.status(404).json({ error: "Branch not found" });
         }
 
+        // If already has the target status, return success (idempotent)
+        if (branch.status === status) {
+          return res.status(200).json({
+            ...branch,
+            message: "Status already set",
+          });
+        }
+
         // Update branch status
         const updatedBranch = await prisma.branch.update({
           where: { id: branch.id },
