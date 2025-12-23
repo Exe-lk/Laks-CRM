@@ -127,7 +127,7 @@ const BranchNavBar = () => {
             👩‍⚕️ Locum Staff
           </button>
           <button id="dentalBtn" class="w-full bg-[#A9DBD9] hover:bg-[#92cfc7] text-black py-2 px-4 rounded-md text-base font-medium">
-            🏥 Dental Practice
+            🏥 Individual Practice / Corporate Practices
           </button>
         </div>
       `,
@@ -174,10 +174,10 @@ const BranchNavBar = () => {
             👩‍⚕️ Locum Staff
           </button>
           <button id="dentalBtn" class="w-full bg-[#A9DBD9] hover:bg-[#92cfc7] text-black py-2 px-4 rounded-md text-base font-medium">
-            🏥 Dental Practice
+            🏥 Individual Practice / Corporate Practices
           </button>
           <button id="branchBtn" class="w-full bg-[#B8E6E3] hover:bg-[#9dd6d1] text-black py-2 px-4 rounded-md text-base font-medium">
-            🏢 Branch
+            🏢 Multiple Practices / Corporate Company
           </button>
         </div>
       `,
