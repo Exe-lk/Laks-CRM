@@ -58,10 +58,10 @@ const LocumTimesheet: React.FC<LocumTimesheetProps> = () => {
   }
 
   function formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
     });
   }
 
@@ -959,7 +959,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
       <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-3 sm:mb-4 sticky top-0 bg-white pb-2 border-b">
           <h3 className="text-base sm:text-lg font-semibold">
-            Bookings for {selectedDate ? new Date(selectedDate).toLocaleDateString() : ''}
+            Bookings for {selectedDate ? new Date(selectedDate).toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            }) : ''}
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl ml-2">
             ×
@@ -1043,7 +1047,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             </span>
                           )}
                           <span className="text-[10px] sm:text-xs text-gray-500 hidden md:inline">
-                            Created: {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
+                            Created: {booking.createdAt ? new Date(booking.createdAt as any).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            }) : 'N/A'}
                           </span>
                         </div>
                       </div>
@@ -1393,7 +1401,11 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
                             <span className="font-medium">Scheduled:</span> {booking.booking_start_time} - {booking.booking_end_time}
                           </p>
                           <p className="text-[10px] sm:text-xs text-gray-700">
-                            <span className="font-medium">Date:</span> {new Date(booking.booking_date as any).toLocaleDateString()}
+                            <span className="font-medium">Date:</span> {new Date(booking.booking_date as any).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })}
                           </p>
                           {timesheetJobId && (
                             <div className="mt-2 pt-2 border-t border-gray-200">
@@ -1678,11 +1690,10 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               <div className="bg-white p-2 rounded border border-blue-100">
                 <p className="text-[10px] sm:text-xs text-gray-600 mb-1">Date</p>
                 <p className="text-xs sm:text-sm font-semibold text-gray-900">
-                  {new Date(bookingDate).toLocaleDateString('en-US', {
-                    weekday: 'short',
+                  {new Date(bookingDate).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
                     year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
                   })}
                 </p>
               </div>
