@@ -300,6 +300,7 @@ model TimesheetJob {
   rating               Float? 
   remark               String? 
   notes                String?
+  showRatingRemark     Boolean?  @default(true) @map("show_rating_remark") // Toggle to show/hide Rating & Remark section for this job
   deductions           Float?    @default(0) // Deductions applied to locum pay for this timesheet job
   locumExtra           Float?    @default(0) @map("locum_extra") // Extra amount for locum (added to payslip)
   practiceExtra        Float?    @default(0) @map("practice_extra") // Extra amount for practice (stored only)
