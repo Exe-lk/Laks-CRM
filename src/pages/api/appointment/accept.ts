@@ -26,6 +26,52 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse){
             return res.status(400).json({ error: "Missing required fields"})
         }
 
+        // Check if locum has payment cards
+        const locumCustomer = await prisma.locumStripeCustomer.findUnique({
+            where: { locumId: locum_id }
+        });
+
+        if (!locumCustomer) {
+            return res.status(400).json({ 
+                error: "Payment card required. Please add a payment card before applying for appointments." 
+            });
+        }
+
+        // Check if locum has payment methods
+        const SUPABASE_CUSTOMER_FUNCTION_URL = process.env.SUPABASE_CUSTOMER_FUNCTION_URL;
+        const CUSTOMER_FUNCTION_SECRET = process.env.CUSTOMER_FUNCTION_SECRET;
+
+        if (SUPABASE_CUSTOMER_FUNCTION_URL && CUSTOMER_FUNCTION_SECRET) {
+            try {
+                const resp = await fetch(SUPABASE_CUSTOMER_FUNCTION_URL, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${CUSTOMER_FUNCTION_SECRET}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: "list_payment_methods",
+                        customer_id: locumCustomer.stripeCustomerId
+                    })
+                });
+
+                const json = await resp.json().catch(() => ({}));
+                
+                if (json.success) {
+                    const paymentMethods = json.payment_methods || [];
+                    if (paymentMethods.length === 0) {
+                        return res.status(400).json({ 
+                            error: "Payment card required. Please add a payment card before applying for appointments." 
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking payment methods:", error);
+                // Continue with the request if we can't check payment methods
+                // The frontend check should catch this anyway
+            }
+        }
+
         const result = await prisma.$transaction(async (tx) =>{
             const request = await tx.appointmentRequest.findUnique({
                 where:{request_id}

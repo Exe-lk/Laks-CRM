@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import NavBar from "../../components/navBar/nav";
 import { FaCheck, FaSpinner, FaClock, FaExclamationTriangle } from "react-icons/fa";
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
+import { useCheckLocumHasCardsQuery } from '../../../redux/slices/locumCardSlice';
+import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 
 const LocumStaffRequestList = () => {
+    const router = useRouter();
     const [profile, setProfile] = useState<any>(null);
     const [loadingStates, setLoadingStates] = useState<{[key: string]: boolean}>({});
 
@@ -26,6 +29,13 @@ const LocumStaffRequestList = () => {
         { locum_id: profile?.id },
         { skip: !profile?.id }
     );
+
+    const {
+        data: cardStatusData,
+        isLoading: isLoadingCardStatus
+    } = useCheckLocumHasCardsQuery(profile?.id || '', {
+        skip: !profile?.id
+    });
     
     console.log('Query params:', { locum_id: profile?.id });
     console.log('Available requests data:', availableRequestsData);
@@ -36,6 +46,27 @@ const LocumStaffRequestList = () => {
 
     const handleAccept = async (requestId: string) => {
         if (!profile?.id) return;
+
+        // Check if locum has payment cards
+        if (cardStatusData && !cardStatusData.hasCards) {
+            const result = await Swal.fire({
+                title: 'Payment Card Required',
+                text: 'You need to add a payment card before applying for appointments. Would you like to add one now?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Add Payment Card',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#C3EAE7',
+                cancelButtonColor: '#6B7280',
+            });
+
+            if (result.isConfirmed) {
+                router.push('/locumStaff/payment');
+                return;
+            } else {
+                return;
+            }
+        }
         
         const result = await Swal.fire({
             title: 'Confirm Application',

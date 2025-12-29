@@ -38,10 +38,12 @@ model LocumProfile {
   idImage                  String?                   @map("id_image")
   isActive                 Boolean?                  @default(true) @map("is_active") // Active/inactive status for approved users
   autoSendPayslips         Boolean?                  @default(false) @map("auto_send_payslips") // Toggle for automatic payslip sending
-  payslipFrequency         String?                   @map("payslip_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
+  payslipFrequency         String?                   @map("payslip_frequency") // WEEKLY, BIWEEKLY, MONTHLY, DAILY, CUSTOM
   payslipDayOfWeek         Int?                      @map("payslip_day_of_week") // 0-6 for weekly (0 = Sunday)
   payslipDayOfMonth        Int?                      @map("payslip_day_of_month") // 1-31 for monthly
   lastPayslipSentAt        DateTime?                 @map("last_payslip_sent_at")
+  autoSendEnabledAt        DateTime?                 @map("auto_send_enabled_at") // When auto-send was enabled
+  timezone                 String?                   @default("UTC") // Timezone for the locum
   createdAt                DateTime                  @default(now()) @map("created_at")
   updatedAt                DateTime                  @updatedAt @map("updated_at")
   paymentMode              String?                   @default("MANUAL") @map("payment_mode")
@@ -84,10 +86,12 @@ model Practice {
   practiceType        String               @default("Private") // Private or Corporate
   isActive            Boolean?             @default(true) @map("is_active") // Active/inactive status for approved users
   autoSendInvoices    Boolean?             @default(false) @map("auto_send_invoices") // Toggle for automatic invoice sending
-  invoiceFrequency    String?              @map("invoice_frequency") // WEEKLY, BIWEEKLY, MONTHLY, CUSTOM
+  invoiceFrequency    String?              @map("invoice_frequency") // WEEKLY, BIWEEKLY, MONTHLY, DAILY, CUSTOM
   invoiceDayOfWeek    Int?                 @map("invoice_day_of_week") // 0-6 for weekly (0 = Sunday)
   invoiceDayOfMonth   Int?                 @map("invoice_day_of_month") // 1-31 for monthly
   lastInvoiceSentAt   DateTime?            @map("last_invoice_sent_at")
+  autoSendEnabledAt   DateTime?            @map("auto_send_enabled_at") // When auto-send was enabled
+  timezone            String?              @default("UTC") // Timezone for the practice
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   paymentMode         String?                   @default("MANUAL") @map("payment_mode")
