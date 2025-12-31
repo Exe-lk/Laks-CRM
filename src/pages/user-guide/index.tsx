@@ -60,7 +60,7 @@ const UserGuideSelection = () => {
       <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         {/* Top Section - Logo and Tagline */}
         <div className="max-w-7xl mx-auto">
-          <div className="bg-[#C3EAE7] rounded-xl shadow-lg p-8 sm:p-12 mb-12">
+          <div className="p-8 sm:p-12 mb-12">
             <div className="flex flex-col items-center text-center">
               <div className="mb-6">
                 <Image 

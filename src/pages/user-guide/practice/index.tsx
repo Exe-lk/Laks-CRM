@@ -14,7 +14,7 @@ const PracticeUserGuide = () => {
       <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Top Section - Logo and Tagline matching the image */}
-          <div className="bg-[#C3EAE7] rounded-xl shadow-lg p-8 sm:p-12 mb-12">
+          <div className="p-8 sm:p-12 mb-12">
             <div className="flex flex-col items-center text-center">
               <div className="mb-6">
                 <Image 
