@@ -245,6 +245,16 @@ const NavBar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleUserGuideClick = () => {
+    if (isLoggedIn && profile) {
+      // Practice users go to practice guide
+      router.push('/user-guide/practice');
+    } else {
+      router.push('/user-guide');
+    }
+    closeMobileMenu();
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 w-full border-b border-black bg-[#C3EAE7] shadow-md z-50">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -263,7 +273,10 @@ const NavBar = () => {
               <button className="bg-white text-black px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition text-base" onClick={handleRegisterClick}>
                 Register
               </button>
-              <button className="text-black px-4 lg:px-6 py-2 rounded-full font-medium transition text-base flex items-center gap-2">
+              <button 
+                className="text-black px-4 lg:px-6 py-2 rounded-full font-medium transition text-base flex items-center gap-2 hover:bg-[#A9DBD9]"
+                onClick={handleUserGuideClick}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-5 h-5"
@@ -327,6 +340,27 @@ const NavBar = () => {
                 title="View Calendar"
               >
                 <FaCalendarAlt className="text-xl" />
+              </button>
+              <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black mr-2"
+                onClick={handleUserGuideClick}
+                aria-label="User Guide"
+                title="User Guide"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                  />
+                </svg>
               </button>
               <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
@@ -591,6 +625,27 @@ const NavBar = () => {
                         title="View Calendar"
                       >
                         <FaCalendarAlt className="text-xl" />
+                      </button>
+                      <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black"
+                        onClick={() => { handleUserGuideClick(); closeMobileMenu(); }}
+                        aria-label="User Guide"
+                        title="User Guide"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                          />
+                        </svg>
                       </button>
                       <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
