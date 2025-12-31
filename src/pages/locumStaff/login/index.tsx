@@ -124,12 +124,12 @@ const LoginForm = () => {
 
             if (errorData.status === 'pending') {
               await Swal.fire({
-                title: 'Pending Approval',
-                text: 'Your account is awaiting approval from the administrator. You will receive an email once your profile is approved.',
-                icon: 'info',
-                confirmButtonText: 'Understood',
+                title: 'Email Verification Required',
+                text: 'Your account is not verified yet. Please check your email inbox and verify your account to continue.',
+                icon: 'warning',
+                confirmButtonText: 'Check Email',
                 confirmButtonColor: '#C3EAE7',
-                iconColor: '#3B82F6'
+                iconColor: '#FFA500'
               });
             } else if (errorData.status === 'deleted') {
               await Swal.fire({
@@ -142,12 +142,12 @@ const LoginForm = () => {
               });
             } else if (errorData.status === 'verify') {
               await Swal.fire({
-                title: 'Email Verification Required',
-                text: 'Your account is not verified yet. Please check your email inbox and verify your account to continue.',
-                icon: 'warning',
-                confirmButtonText: 'Check Email',
+                title: 'Pending Approval',
+                text: 'Your account is awaiting approval from the administrator.',
+                icon: 'info',
+                confirmButtonText: 'Understood',
                 confirmButtonColor: '#C3EAE7',
-                iconColor: '#FFA500'
+                iconColor: '#3B82F6'
               });
             } else {
               await Swal.fire({
