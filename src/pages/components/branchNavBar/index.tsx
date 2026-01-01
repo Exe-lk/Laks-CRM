@@ -282,7 +282,7 @@ const BranchNavBar = () => {
                 Register
               </button>
               <button 
-                className="text-black px-4 lg:px-6 py-2 rounded-full font-medium transition text-base flex items-center gap-2 hover:bg-[#A9DBD9]"
+                className="bg-white text-black text-sm px-4 lg:px-6 py-2 rounded-full font-medium hover:bg-[#A9DBD9] transition flex items-center gap-2"
                 onClick={handleUserGuideClick}
               >
                 <svg
@@ -674,7 +674,7 @@ const BranchNavBar = () => {
                       Register
                     </button>
                     <button 
-                      className="w-full text-black text-sm px-6 py-3 rounded-full font-medium transition flex items-center justify-center gap-2 hover:bg-[#A9DBD9]"
+                      className="w-full bg-white text-black text-sm px-6 py-3 rounded-full font-medium hover:bg-[#A9DBD9] transition flex items-center justify-center gap-2"
                       onClick={handleUserGuideClick}
                     >
                       <svg
