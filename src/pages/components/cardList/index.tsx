@@ -1,6 +1,6 @@
 import React from 'react';
-import { PaymentCard as PracticePaymentCard } from '../../../redux/slices/cardPracticeUserSlice';
-import { PaymentCard as LocumPaymentCard } from '../../../redux/slices/locumCardSlice';
+import { PaymentCard as PracticePaymentCard, useSetDefaultPaymentMethodMutation as useSetDefaultPracticeMutation } from '../../../redux/slices/cardPracticeUserSlice';
+import { PaymentCard as LocumPaymentCard, useSetDefaultPaymentMethodMutation as useSetDefaultLocumMutation } from '../../../redux/slices/locumCardSlice';
 import { useDeleteCardMutation as useDeletePracticeCardMutation } from '../../../redux/slices/cardPracticeUserSlice';
 import { useDeleteCardMutation as useDeleteLocumCardMutation } from '../../../redux/slices/locumCardSlice';
 import Swal from 'sweetalert2';
@@ -12,13 +12,17 @@ interface CardListProps {
   onEdit?: (card: PaymentCard) => void;
   onAddNew?: () => void;
   cardType?: 'practice' | 'locum';
+  entityId?: string; // practiceId or locumId
 }
 
-const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardType = 'practice' }) => {
+const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardType = 'practice', entityId }) => {
   const [deletePracticeCard, { isLoading: isDeletingPractice }] = useDeletePracticeCardMutation();
   const [deleteLocumCard, { isLoading: isDeletingLocum }] = useDeleteLocumCardMutation();
+  const [setDefaultPractice, { isLoading: isSettingDefaultPractice }] = useSetDefaultPracticeMutation();
+  const [setDefaultLocum, { isLoading: isSettingDefaultLocum }] = useSetDefaultLocumMutation();
   
   const isDeleting = cardType === 'locum' ? isDeletingLocum : isDeletingPractice;
+  const isSettingDefault = cardType === 'locum' ? isSettingDefaultLocum : isSettingDefaultPractice;
 
   const handleDeleteCard = async (card: PaymentCard, cardNumber: string) => {
     const result = await Swal.fire({
@@ -56,6 +60,46 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardT
           confirmButtonColor: '#C3EAE7'
         });
       }
+    }
+  };
+
+  const handleSetDefault = async (card: PaymentCard) => {
+    if (!entityId) {
+      await Swal.fire({
+        title: 'Error!',
+        text: 'Unable to set default payment method. Please refresh the page.',
+        icon: 'error',
+        confirmButtonColor: '#C3EAE7'
+      });
+      return;
+    }
+
+    if (card.isDefault) {
+      return; // Already default
+    }
+
+    try {
+      if (cardType === 'practice') {
+        await setDefaultPractice({ practiceId: entityId, paymentMethodId: card.id }).unwrap();
+      } else {
+        await setDefaultLocum({ locumId: entityId, paymentMethodId: card.id }).unwrap();
+      }
+      
+      await Swal.fire({
+        title: 'Success!',
+        text: 'Default payment method updated successfully.',
+        icon: 'success',
+        confirmButtonColor: '#C3EAE7'
+      });
+    } catch (error: any) {
+      console.error('Error setting default payment method:', error);
+      
+      await Swal.fire({
+        title: 'Error!',
+        text: error?.data?.error || 'Failed to set default payment method. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#C3EAE7'
+      });
     }
   };
 
@@ -151,6 +195,16 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardT
               </div>
 
               <div className="flex items-center space-x-2">
+                {!card.isDefault && (
+                  <button
+                    onClick={() => handleSetDefault(card)}
+                    disabled={isSettingDefault}
+                    className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#C3EAE7] text-gray-700 hover:text-black rounded transition-colors disabled:opacity-50"
+                    title="Set as default"
+                  >
+                    Set Default
+                  </button>
+                )}
                 <button
                   onClick={() => handleDeleteCard(card, card.lastFourDigits)}
                   disabled={isDeleting}

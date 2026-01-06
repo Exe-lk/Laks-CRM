@@ -105,6 +105,8 @@ const PaymentPage = () => {
               cards={cardsData?.cards || []}
               onEdit={handleEditCard}
               onAddNew={() => setIsAddCardModalOpen(true)}
+              cardType="practice"
+              entityId={profile?.id}
             />
           )}
         </div>

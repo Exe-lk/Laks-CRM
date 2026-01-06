@@ -61,34 +61,67 @@ export const cardPracticeUserApiSlice = createApi({
   tagTypes: ['PaymentCard'],
   endpoints: (builder) => ({
     getPracticeCards: builder.query<CardsResponse, string>({
-      query: (practiceId) => `payments/list-payment-methods?practice_id=${practiceId}`,
-      transformResponse: (response: any) => {
-        console.log('Raw payment methods response:', response);
-        
-        const paymentMethods = response.data || [];
-        const transformedCards = paymentMethods.map((pm: any) => {
-          const card = pm.card || {};
+      queryFn: async (practiceId, _queryApi, _extraOptions, fetchWithBQ) => {
+        try {
+          // Fetch payment methods
+          const paymentMethodsResponse = await fetchWithBQ({
+            url: `payments/list-payment-methods?practice_id=${practiceId}`,
+          });
+
+          if (paymentMethodsResponse.error) {
+            return { error: paymentMethodsResponse.error as any };
+          }
+
+          const paymentMethods = (paymentMethodsResponse.data as any)?.data || [];
+
+          // Fetch customer details to get default payment method
+          let defaultPaymentMethodId: string | null = null;
+          try {
+            const customerDetailsResponse = await fetchWithBQ({
+              url: `payments/get-customer-details?practice_id=${practiceId}`,
+            });
+
+            if (!customerDetailsResponse.error && customerDetailsResponse.data) {
+              const customerData = customerDetailsResponse.data as any;
+              defaultPaymentMethodId = customerData.default_payment_method || 
+                                      customerData.customer?.invoice_settings?.default_payment_method || 
+                                      null;
+            }
+          } catch (error) {
+            console.warn('Could not fetch customer details for default payment method:', error);
+          }
+
+          const transformedCards = paymentMethods.map((pm: any) => {
+            const card = pm.card || {};
+            return {
+              id: pm.id,
+              practiceId: '',
+              cardHolderName: pm.billing_details?.name || 'N/A',
+              lastFourDigits: card.last4 || '****',
+              cardType: card.brand || 'card',
+              isDefault: defaultPaymentMethodId === pm.id,
+              status: 'active',
+              maskedCardNumber: `•••• •••• •••• ${card.last4 || '****'}`,
+              expiryDisplay: card.exp_month && card.exp_year ? `${card.exp_month}/${card.exp_year}` : 'N/A',
+              createdAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+              updatedAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+            };
+          });
+
           return {
-            id: pm.id,
-            practiceId: '',
-            cardHolderName: pm.billing_details?.name || 'N/A',
-            lastFourDigits: card.last4 || '****',
-            cardType: card.brand || 'card',
-            isDefault: false,
-            status: 'active',
-            maskedCardNumber: `•••• •••• •••• ${card.last4 || '****'}`,
-            expiryDisplay: card.exp_month && card.exp_year ? `${card.exp_month}/${card.exp_year}` : 'N/A',
-            createdAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
-            updatedAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+            data: {
+              cards: transformedCards,
+              count: transformedCards.length
+            }
           };
-        });
-        
-        console.log('Transformed cards:', transformedCards);
-        
-        return {
-          cards: transformedCards,
-          count: transformedCards.length
-        };
+        } catch (error: any) {
+          return {
+            error: {
+              status: 500,
+              data: { error: error.message || 'An error occurred' }
+            } as any
+          };
+        }
       },
       providesTags: ['PaymentCard'],
     }),
@@ -228,6 +261,18 @@ export const cardPracticeUserApiSlice = createApi({
       },
       providesTags: ['PaymentCard'],
     }),
+
+    setDefaultPaymentMethod: builder.mutation<{ success: boolean; message?: string }, { practiceId: string; paymentMethodId: string }>({
+      query: ({ practiceId, paymentMethodId }) => ({
+        url: 'payments/set-default-payment-method',
+        method: 'POST',
+        body: {
+          practice_id: practiceId,
+          payment_method_id: paymentMethodId
+        }
+      }),
+      invalidatesTags: ['PaymentCard'],
+    }),
   }),
 });
 
@@ -237,4 +282,5 @@ export const {
   useUpdateCardMutation,
   useDeleteCardMutation,
   useCheckPracticeHasCardsQuery,
+  useSetDefaultPaymentMethodMutation,
 } = cardPracticeUserApiSlice;

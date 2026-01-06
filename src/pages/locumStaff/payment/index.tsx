@@ -106,6 +106,7 @@ const PaymentPage = () => {
               onEdit={handleEditCard}
               onAddNew={() => setIsAddCardModalOpen(true)}
               cardType="locum"
+              entityId={profile?.id}
             />
           )}
         </div>
