@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCreateCardMutation } from '../../../redux/slices/locumCardSlice';
+import { useCreateCardMutation, useGetLocumCardsQuery } from '../../../redux/slices/locumCardSlice';
 import Swal from 'sweetalert2';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -28,13 +28,14 @@ const AddLocumCardForm: React.FC<{
   locumName?: string;
   onSuccess: () => void;
   onClose: () => void;
-}> = ({ locumId, locumEmail, locumName, onSuccess, onClose }) => {
+  existingCards?: any[];
+}> = ({ locumId, locumEmail, locumName, onSuccess, onClose, existingCards = [] }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [createCard, { isLoading }] = useCreateCardMutation();
   const [formData, setFormData] = useState<CardFormData>({
     cardHolderName: '',
-    isDefault: false
+    isDefault: existingCards.length === 0 // Set as default if no cards exist
   });
   const [cardError, setCardError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -135,6 +136,19 @@ const AddLocumCardForm: React.FC<{
 
       if (pmError || !paymentMethod) {
         throw new Error(pmError?.message || 'Failed to create payment method');
+      }
+
+      // Check for duplicate card (same last4 digits)
+      const newCardLast4 = paymentMethod.card?.last4;
+      if (newCardLast4 && existingCards.length > 0) {
+        const duplicateCard = existingCards.find((card: any) => {
+          const cardLast4 = card.card?.last4 || card.lastFourDigits;
+          return cardLast4 === newCardLast4;
+        });
+        
+        if (duplicateCard) {
+          throw new Error(`This card ending in ${newCardLast4} is already added to your account.`);
+        }
       }
 
       // Step 4: Confirm setup intent with payment method
@@ -291,6 +305,9 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
   locumName,
   onSuccess 
 }) => {
+  const { data: cardsData } = useGetLocumCardsQuery(locumId, { skip: !isOpen || !locumId });
+  const existingCards = cardsData?.cards || [];
+
   if (!isOpen) return null;
 
   return (
@@ -317,6 +334,7 @@ const AddLocumCardModal: React.FC<AddLocumCardModalProps> = ({
             locumName={locumName}
             onSuccess={onSuccess || (() => {})}
             onClose={onClose}
+            existingCards={existingCards}
           />
         </Elements>
       </div>

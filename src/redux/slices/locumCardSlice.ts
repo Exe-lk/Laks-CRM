@@ -64,34 +64,67 @@ export const locumCardApiSlice = createApi({
   tagTypes: ['LocumPaymentCard'],
   endpoints: (builder) => ({
     getLocumCards: builder.query<CardsResponse, string>({
-      query: (locumId) => `payments/list-payment-methods?locum_id=${locumId}`,
-      transformResponse: (response: any) => {
-        console.log('Raw payment methods response:', response);
-        
-        const paymentMethods = response.data || [];
-        const transformedCards = paymentMethods.map((pm: any) => {
-          const card = pm.card || {};
+      queryFn: async (locumId, _queryApi, _extraOptions, fetchWithBQ) => {
+        try {
+          // Fetch payment methods
+          const paymentMethodsResponse = await fetchWithBQ({
+            url: `payments/list-payment-methods?locum_id=${locumId}`,
+          });
+
+          if (paymentMethodsResponse.error) {
+            return { error: paymentMethodsResponse.error as any };
+          }
+
+          const paymentMethods = (paymentMethodsResponse.data as any)?.data || [];
+
+          // Fetch customer details to get default payment method
+          let defaultPaymentMethodId: string | null = null;
+          try {
+            const customerDetailsResponse = await fetchWithBQ({
+              url: `payments/get-customer-details?locum_id=${locumId}`,
+            });
+
+            if (!customerDetailsResponse.error && customerDetailsResponse.data) {
+              const customerData = customerDetailsResponse.data as any;
+              defaultPaymentMethodId = customerData.default_payment_method || 
+                                      customerData.customer?.invoice_settings?.default_payment_method || 
+                                      null;
+            }
+          } catch (error) {
+            console.warn('Could not fetch customer details for default payment method:', error);
+          }
+
+          const transformedCards = paymentMethods.map((pm: any) => {
+            const card = pm.card || {};
+            return {
+              id: pm.id,
+              locumId: '',
+              cardHolderName: pm.billing_details?.name || 'N/A',
+              lastFourDigits: card.last4 || '****',
+              cardType: card.brand || 'card',
+              isDefault: defaultPaymentMethodId === pm.id,
+              status: 'active',
+              maskedCardNumber: `•••• •••• •••• ${card.last4 || '****'}`,
+              expiryDisplay: card.exp_month && card.exp_year ? `${card.exp_month}/${card.exp_year}` : 'N/A',
+              createdAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+              updatedAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+            };
+          });
+
           return {
-            id: pm.id,
-            locumId: '',
-            cardHolderName: pm.billing_details?.name || 'N/A',
-            lastFourDigits: card.last4 || '****',
-            cardType: card.brand || 'card',
-            isDefault: false,
-            status: 'active',
-            maskedCardNumber: `•••• •••• •••• ${card.last4 || '****'}`,
-            expiryDisplay: card.exp_month && card.exp_year ? `${card.exp_month}/${card.exp_year}` : 'N/A',
-            createdAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
-            updatedAt: pm.created ? new Date(pm.created * 1000).toISOString() : new Date().toISOString(),
+            data: {
+              cards: transformedCards,
+              count: transformedCards.length
+            }
           };
-        });
-        
-        console.log('Transformed cards:', transformedCards);
-        
-        return {
-          cards: transformedCards,
-          count: transformedCards.length
-        };
+        } catch (error: any) {
+          return {
+            error: {
+              status: 500,
+              data: { error: error.message || 'An error occurred' }
+            } as any
+          };
+        }
       },
       providesTags: ['LocumPaymentCard'],
     }),
@@ -217,10 +250,14 @@ export const locumCardApiSlice = createApi({
       invalidatesTags: ['LocumPaymentCard'],
     }),
     
-    deleteCard: builder.mutation<{ message: string }, string>({
-      query: (id) => ({
-        url: `card/delete?id=${id}`,
+    deleteCard: builder.mutation<{ message: string }, { id: string; locumId: string }>({
+      query: ({ id, locumId }) => ({
+        url: 'payments/delete-payment-method',
         method: 'DELETE',
+        body: {
+          payment_method_id: id,
+          locum_id: locumId,
+        },
       }),
       invalidatesTags: ['LocumPaymentCard'],
     }),
@@ -236,6 +273,18 @@ export const locumCardApiSlice = createApi({
       },
       providesTags: ['LocumPaymentCard'],
     }),
+
+    setDefaultPaymentMethod: builder.mutation<{ success: boolean; message?: string }, { locumId: string; paymentMethodId: string }>({
+      query: ({ locumId, paymentMethodId }) => ({
+        url: 'payments/set-default-payment-method',
+        method: 'POST',
+        body: {
+          locum_id: locumId,
+          payment_method_id: paymentMethodId
+        }
+      }),
+      invalidatesTags: ['LocumPaymentCard'],
+    }),
   }),
 });
 
@@ -245,4 +294,5 @@ export const {
   useUpdateCardMutation,
   useDeleteCardMutation,
   useCheckLocumHasCardsQuery,
+  useSetDefaultPaymentMethodMutation,
 } = locumCardApiSlice;

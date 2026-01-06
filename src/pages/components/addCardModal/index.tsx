@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useCreateCardMutation } from '../../../redux/slices/cardPracticeUserSlice';
+import { useCreateCardMutation, useGetPracticeCardsQuery } from '../../../redux/slices/cardPracticeUserSlice';
 import Swal from 'sweetalert2';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -24,13 +24,14 @@ const AddCardForm: React.FC<{
   practiceId: string;
   onSuccess: () => void;
   onClose: () => void;
-}> = ({ practiceId, onSuccess, onClose }) => {
+  existingCards?: any[];
+}> = ({ practiceId, onSuccess, onClose, existingCards = [] }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [createCard, { isLoading }] = useCreateCardMutation();
   const [formData, setFormData] = useState<CardFormData>({
     cardHolderName: '',
-    isDefault: false
+    isDefault: existingCards.length === 0 // Set as default if no cards exist
   });
   const [cardError, setCardError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -129,6 +130,19 @@ const AddCardForm: React.FC<{
 
       if (pmError || !paymentMethod) {
         throw new Error(pmError?.message || 'Failed to create payment method');
+      }
+
+      // Check for duplicate card (same last4 digits)
+      const newCardLast4 = paymentMethod.card?.last4;
+      if (newCardLast4 && existingCards.length > 0) {
+        const duplicateCard = existingCards.find((card: any) => {
+          const cardLast4 = card.card?.last4 || card.lastFourDigits;
+          return cardLast4 === newCardLast4;
+        });
+        
+        if (duplicateCard) {
+          throw new Error(`This card ending in ${newCardLast4} is already added to your account.`);
+        }
       }
 
       // Step 4: Confirm setup intent with payment method
@@ -278,6 +292,9 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
   practiceId, 
   onSuccess 
 }) => {
+  const { data: cardsData } = useGetPracticeCardsQuery(practiceId, { skip: !isOpen || !practiceId });
+  const existingCards = cardsData?.cards || [];
+
   if (!isOpen) return null;
 
   return (
@@ -302,6 +319,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({
             practiceId={practiceId}
             onSuccess={onSuccess || (() => {})}
             onClose={onClose}
+            existingCards={existingCards}
           />
         </Elements>
       </div>
