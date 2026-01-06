@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import NavBar from "../../components/navBarPracticeUser";
 import Footer from "../../components/footer/index";
 import AppointmentsTable from "../../components/appointmentsTable";
@@ -148,6 +148,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
 
 const CreateAppointmentPage = () => {
     const router = useRouter();
+    const dateInputRef = useRef<HTMLInputElement>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [branches, setBranches] = useState<Branch[]>([]);
     const [loadingBranches, setLoadingBranches] = useState(false);
@@ -475,24 +476,10 @@ const CreateAppointmentPage = () => {
                                             return '';
                                         })() : ''}
                                         placeholder="DD/MM/YYYY"
-                                        onClick={() => {
-                                            const dateInput = document.getElementById('request_date_hidden') as HTMLInputElement | null;
-                                            if (dateInput) {
-                                                // Prefer native date picker where supported
-                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                // @ts-ignore
-                                                if (typeof dateInput.showPicker === 'function') {
-                                                    // @ts-ignore
-                                                    dateInput.showPicker();
-                                                } else {
-                                                    dateInput.focus();
-                                                }
-                                            }
-                                        }}
                                         readOnly
                                         className={`w-full px-4 py-3 pr-12 border-2 rounded-xl 
                                focus:ring-2 focus:ring-[#C3EAE7]/30 
-                               transition-all duration-200 outline-none cursor-pointer
+                               transition-all duration-200 outline-none cursor-pointer pointer-events-none
                                hover:border-[#C3EAE7]/50 group-hover:shadow-md bg-white
                                ${formik.touched.request_date && formik.errors.request_date
                                                 ? 'border-red-300 focus:border-red-400 bg-red-50'
@@ -500,6 +487,7 @@ const CreateAppointmentPage = () => {
                                             }`}
                                     />
                                     <input
+                                        ref={dateInputRef}
                                         type="date"
                                         id="request_date_hidden"
                                         name="request_date"
@@ -508,8 +496,28 @@ const CreateAppointmentPage = () => {
                                             formik.setFieldValue('request_date', e.target.value);
                                         }}
                                         onBlur={formik.handleBlur}
+                                        onClick={(e) => {
+                                            // Ensure the date picker opens immediately
+                                            e.stopPropagation();
+                                            if (dateInputRef.current) {
+                                                requestAnimationFrame(() => {
+                                                    if (dateInputRef.current) {
+                                                        try {
+                                                            // @ts-ignore - showPicker is not in TypeScript types yet
+                                                            if (typeof dateInputRef.current.showPicker === 'function') {
+                                                                // @ts-ignore
+                                                                dateInputRef.current.showPicker();
+                                                            }
+                                                        } catch (error) {
+                                                            // showPicker failed, but click should still work
+                                                            console.log('showPicker not available, using native click');
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        style={{ zIndex: 1 }}
+                                        style={{ zIndex: 10 }}
                                         required
                                     />
                                     <div

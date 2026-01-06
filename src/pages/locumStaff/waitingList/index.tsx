@@ -5,6 +5,8 @@ import { useGetPendingConfirmationsQuery, useConfirmAppointmentMutation, useGetA
 import Swal from 'sweetalert2';
 import { useGetAvailableRequestsQuery, useAcceptAppointmentMutation } from '../../../redux/slices/appoitmentRequestsLocumSlice';
 import { useCreateNotificationMutation } from '../../../redux/slices/notificationSlice';
+import { useCheckLocumHasCardsQuery } from '../../../redux/slices/locumCardSlice';
+import { useRouter } from 'next/router';
 
 type RequestWithDistance = any & {
     distance: number | null;
@@ -13,6 +15,7 @@ type RequestWithDistance = any & {
 type TabKey = 'pending-requests' | 'request-appoitment' | 'pending-confirmations';
 
 const WaitingList = () => {
+    const router = useRouter();
     const [profile, setProfile] = useState<any>(null);
     const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
     const [activeTab, setActiveTab] = useState<TabKey>('request-appoitment');
@@ -93,11 +96,39 @@ const WaitingList = () => {
         { skip: !profile?.id }
     );
 
+    const {
+        data: cardStatusData,
+        isLoading: isLoadingCardStatus
+    } = useCheckLocumHasCardsQuery(profile?.id || '', {
+        skip: !profile?.id
+    });
+
     const [acceptAppointment] = useAcceptAppointmentMutation();
     const [ignoreAppointment] = useIgnoreAppointmentMutation();
 
     const handleAccept = async (requestId: string) => {
         if (!profile?.id) return;
+
+        // Check if locum has payment cards
+        if (cardStatusData && !cardStatusData.hasCards) {
+            const result = await Swal.fire({
+                title: 'Payment Card Required',
+                text: 'You need to add a payment card before applying for appointments. Would you like to add one now?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Add Payment Card',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#C3EAE7',
+                cancelButtonColor: '#6B7280',
+            });
+
+            if (result.isConfirmed) {
+                router.push('/locumStaff/payment');
+                return;
+            } else {
+                return;
+            }
+        }
 
         const result = await Swal.fire({
             title: 'Confirm Application',
@@ -130,13 +161,36 @@ const WaitingList = () => {
 
             refetch();
         } catch (error: any) {
-            await Swal.fire({
-                title: 'Error!',
-                text: error.message || 'You already have booking for this appointment time.',
-                icon: 'error',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#EF4444'
-            });
+            // Check if error is related to payment card
+            const errorMessage = error?.data?.error || error?.error || error?.message || '';
+            const isCardError = errorMessage.toLowerCase().includes('payment card') || 
+                               errorMessage.toLowerCase().includes('payment method') ||
+                               error?.status === 400 && errorMessage.toLowerCase().includes('card');
+
+            if (isCardError) {
+                const cardResult = await Swal.fire({
+                    title: 'Payment Card Required',
+                    text: 'You need to add a payment card before applying for appointments. Would you like to add one now?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Add Payment Card',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#C3EAE7',
+                    cancelButtonColor: '#6B7280',
+                });
+
+                if (cardResult.isConfirmed) {
+                    router.push('/locumStaff/payment');
+                }
+            } else {
+                await Swal.fire({
+                    title: 'Error!',
+                    text: errorMessage || 'Failed to apply for appointment. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#EF4444'
+                });
+            }
         } finally {
             setLoadingStates(prev => ({ ...prev, [requestId]: false }));
         }
