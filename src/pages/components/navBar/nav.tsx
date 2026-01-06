@@ -9,6 +9,7 @@ import NotificationDropdown from '../notification/NotificationDropdown';
 import { FaUserMd, FaEnvelope, FaIdBadge, FaPhone, FaBirthdayCake, FaUserShield, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaBriefcase, FaSignOutAlt, FaCalendarAlt, FaBell } from 'react-icons/fa';
 import { useGetBookingsQuery } from '../../../redux/slices/bookingPracticeSlice';
 import { useGetNotificationsQuery } from '../../../redux/slices/notificationSlice';
+import { useCheckLocumHasCardsQuery } from '../../../redux/slices/locumCardSlice';
 import { clearSessionStorage } from '@/utils/sessionManager';
 
 
@@ -36,6 +37,10 @@ const NavBar = () => {
     { skip: !profile?.id || !isLoggedIn }
   );
   const unreadCount = notificationsData?.data?.filter((n: any) => n.status === 'UNREAD').length || 0;
+
+  const { data: cardStatusData } = useCheckLocumHasCardsQuery(profile?.id || '', {
+    skip: !profile?.id || !isLoggedIn
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -443,6 +448,9 @@ const NavBar = () => {
                 onClick={() => router.push('/locumStaff/payment')}
               >
                 Payment
+                {cardStatusData && !cardStatusData.hasCards && (
+                  <span className="ml-1 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </li>
             </>
           )}
@@ -572,6 +580,9 @@ const NavBar = () => {
                       onClick={() => { router.push('/locumStaff/payment'); closeMobileMenu(); }}
                     >
                       Payment
+                      {cardStatusData && !cardStatusData.hasCards && (
+                        <span className="ml-1 inline-flex items-center justify-center w-2 h-2 bg-red-500 rounded-full"></span>
+                      )}
                     </li>
                     <li className="flex items-center space-x-2">
                       <button
