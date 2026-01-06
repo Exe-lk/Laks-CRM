@@ -25,9 +25,25 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardT
   const isSettingDefault = cardType === 'locum' ? isSettingDefaultLocum : isSettingDefaultPractice;
 
   const handleDeleteCard = async (card: PaymentCard, cardNumber: string) => {
+    // Prevent deleting if it's the last card
+    if (cards.length === 1) {
+      await Swal.fire({
+        title: 'Cannot Delete',
+        text: 'You must have at least one payment card. Please add another card before deleting this one.',
+        icon: 'warning',
+        confirmButtonColor: '#C3EAE7'
+      });
+      return;
+    }
+
+    const isDefaultCard = card.isDefault;
+    const warningText = isDefaultCard 
+      ? `This is your default payment card. Deleting it will remove the default status. Are you sure you want to delete card ending in ${cardNumber}?`
+      : `Are you sure you want to delete card ending in ${cardNumber}?`;
+
     const result = await Swal.fire({
       title: 'Delete Card',
-      text: `Are you sure you want to delete card ending in ${cardNumber}?`,
+      text: warningText,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#C3EAE7',
@@ -37,11 +53,21 @@ const CardList: React.FC<CardListProps> = ({ cards = [], onEdit, onAddNew, cardT
     });
 
     if (result.isConfirmed) {
+      if (!entityId) {
+        await Swal.fire({
+          title: 'Error!',
+          text: 'Unable to delete card. Please refresh the page.',
+          icon: 'error',
+          confirmButtonColor: '#C3EAE7'
+        });
+        return;
+      }
+
       try {
-        if (cardType === 'practice' && 'practiceId' in card) {
-          await deletePracticeCard({ id: card.id, practiceId: card.practiceId }).unwrap();
+        if (cardType === 'practice') {
+          await deletePracticeCard({ id: card.id, practiceId: entityId }).unwrap();
         } else {
-          await deleteLocumCard(card.id).unwrap();
+          await deleteLocumCard({ id: card.id, locumId: entityId }).unwrap();
         }
         
         await Swal.fire({

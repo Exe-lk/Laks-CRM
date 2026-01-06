@@ -250,10 +250,14 @@ export const locumCardApiSlice = createApi({
       invalidatesTags: ['LocumPaymentCard'],
     }),
     
-    deleteCard: builder.mutation<{ message: string }, string>({
-      query: (id) => ({
-        url: `card/delete?id=${id}`,
+    deleteCard: builder.mutation<{ message: string }, { id: string; locumId: string }>({
+      query: ({ id, locumId }) => ({
+        url: 'payments/delete-payment-method',
         method: 'DELETE',
+        body: {
+          payment_method_id: id,
+          locum_id: locumId,
+        },
       }),
       invalidatesTags: ['LocumPaymentCard'],
     }),
