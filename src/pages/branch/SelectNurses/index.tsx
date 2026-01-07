@@ -564,6 +564,16 @@ const CreateAppointmentPage = () => {
                                     value={formik.values.request_date}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
+                                    min={(() => {
+                                        const tomorrow = new Date();
+                                        tomorrow.setDate(tomorrow.getDate() + 1);
+                                        return tomorrow.toISOString().split('T')[0];
+                                    })()}
+                                    max={(() => {
+                                        const sixMonthsLater = new Date();
+                                        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+                                        return sixMonthsLater.toISOString().split('T')[0];
+                                    })()}
                                     className={`w-full px-4 py-3 border-2 rounded-xl 
                            focus:ring-2 focus:ring-[#C3EAE7]/30 
                            transition-all duration-200 outline-none 

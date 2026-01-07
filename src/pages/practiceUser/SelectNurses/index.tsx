@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from "../../components/navBarPracticeUser";
 import Footer from "../../components/footer/index";
 import AppointmentsTable from "../../components/appointmentsTable";
@@ -148,7 +148,6 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
 
 const CreateAppointmentPage = () => {
     const router = useRouter();
-    const dateInputRef = useRef<HTMLInputElement>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [branches, setBranches] = useState<Branch[]>([]);
     const [loadingBranches, setLoadingBranches] = useState(false);
@@ -456,7 +455,7 @@ const CreateAppointmentPage = () => {
 
                             <div className="space-y-2 group">
                                 <label
-                                    htmlFor="request_date_hidden"
+                                    htmlFor="request_date"
                                     className="block text-sm font-semibold text-black flex items-center gap-2"
                                 >
                                     <svg className="w-4 h-4 text-[#C3EAE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,71 +463,35 @@ const CreateAppointmentPage = () => {
                                     </svg>
                                     Request Date *
                                 </label>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        name="request_date_display"
-                                        value={formik.values.request_date ? (() => {
-                                            const [year, month, day] = formik.values.request_date.split('-');
-                                            if (year && month && day) {
-                                                return `${day}/${month}/${year}`;
-                                            }
-                                            return '';
-                                        })() : ''}
-                                        placeholder="DD/MM/YYYY"
-                                        readOnly
-                                        className={`w-full px-4 py-3 pr-12 border-2 rounded-xl 
-                               focus:ring-2 focus:ring-[#C3EAE7]/30 
-                               transition-all duration-200 outline-none cursor-pointer pointer-events-none
-                               hover:border-[#C3EAE7]/50 group-hover:shadow-md bg-white
-                               ${formik.touched.request_date && formik.errors.request_date
-                                                ? 'border-red-300 focus:border-red-400 bg-red-50'
-                                                : 'border-gray-200 focus:border-[#C3EAE7]'
-                                            }`}
-                                    />
-                                    <input
-                                        ref={dateInputRef}
-                                        type="date"
-                                        id="request_date_hidden"
-                                        name="request_date"
-                                        value={formik.values.request_date}
-                                        onChange={(e) => {
-                                            formik.setFieldValue('request_date', e.target.value);
-                                        }}
-                                        onBlur={formik.handleBlur}
-                                        onClick={(e) => {
-                                            // Ensure the date picker opens immediately
-                                            e.stopPropagation();
-                                            if (dateInputRef.current) {
-                                                requestAnimationFrame(() => {
-                                                    if (dateInputRef.current) {
-                                                        try {
-                                                            // @ts-ignore - showPicker is not in TypeScript types yet
-                                                            if (typeof dateInputRef.current.showPicker === 'function') {
-                                                                // @ts-ignore
-                                                                dateInputRef.current.showPicker();
-                                                            }
-                                                        } catch (error) {
-                                                            // showPicker failed, but click should still work
-                                                            console.log('showPicker not available, using native click');
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        style={{ zIndex: 10 }}
-                                        required
-                                    />
-                                    <div
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C3EAE7] pointer-events-none"
-                                        style={{ zIndex: 0 }}
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                <input
+                                    type="date"
+                                    id="request_date"
+                                    name="request_date"
+                                    value={formik.values.request_date}
+                                    onChange={(e) => {
+                                        formik.setFieldValue('request_date', e.target.value);
+                                    }}
+                                    onBlur={formik.handleBlur}
+                                    min={(() => {
+                                        const tomorrow = new Date();
+                                        tomorrow.setDate(tomorrow.getDate() + 1);
+                                        return tomorrow.toISOString().split('T')[0];
+                                    })()}
+                                    max={(() => {
+                                        const sixMonthsLater = new Date();
+                                        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+                                        return sixMonthsLater.toISOString().split('T')[0];
+                                    })()}
+                                    className={`w-full px-4 py-3 border-2 rounded-xl 
+                           focus:ring-2 focus:ring-[#C3EAE7]/30 
+                           transition-all duration-200 outline-none 
+                           hover:border-[#C3EAE7]/50 group-hover:shadow-md
+                           ${formik.touched.request_date && formik.errors.request_date
+                                            ? 'border-red-300 focus:border-red-400 bg-red-50'
+                                            : 'border-gray-200 focus:border-[#C3EAE7]'
+                                        }`}
+                                    required
+                                />
                                 {formik.touched.request_date && formik.errors.request_date && (
                                     <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                                         <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
