@@ -143,7 +143,8 @@ const WaitingList = () => {
 
         if (!result.isConfirmed) return;
 
-        setLoadingStates(prev => ({ ...prev, [requestId]: true }));
+        const acceptKey = `accept-${requestId}`;
+        setLoadingStates(prev => ({ ...prev, [acceptKey]: true }));
 
         try {
             await acceptAppointment({
@@ -192,7 +193,7 @@ const WaitingList = () => {
                 });
             }
         } finally {
-            setLoadingStates(prev => ({ ...prev, [requestId]: false }));
+            setLoadingStates(prev => ({ ...prev, [acceptKey]: false }));
         }
     };
 
@@ -212,7 +213,8 @@ const WaitingList = () => {
 
         if (!result.isConfirmed) return;
 
-        setLoadingStates(prev => ({ ...prev, [requestId]: true }));
+        const ignoreKey = `ignore-${requestId}`;
+        setLoadingStates(prev => ({ ...prev, [ignoreKey]: true }));
 
         try {
             await ignoreAppointment({
@@ -238,7 +240,7 @@ const WaitingList = () => {
                 confirmButtonColor: '#EF4444'
             });
         } finally {
-            setLoadingStates(prev => ({ ...prev, [requestId]: false }));
+            setLoadingStates(prev => ({ ...prev, [ignoreKey]: false }));
         }
     };
 
@@ -1122,10 +1124,10 @@ const WaitingList = () => {
                                                             <div className="flex flex-col space-y-2">
                                                                 <button
                                                                     onClick={() => handleAccept(req.request_id)}
-                                                                    disabled={loadingStates[req.request_id]}
+                                                                    disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
                                                                     className="flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
                                                                 >
-                                                                    {loadingStates[req.request_id] ? (
+                                                                    {loadingStates[`accept-${req.request_id}`] ? (
                                                                         <>
                                                                             <FaSpinner className="animate-spin mr-2" />
                                                                             Processing...
@@ -1133,16 +1135,16 @@ const WaitingList = () => {
                                                                     ) : (
                                                                         <>
                                                                             <FaCheck className="mr-2" />
-                                                                            Accept
+                                                                            Apply
                                                                         </>
                                                                     )}
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleIgnore(req.request_id)}
-                                                                    disabled={loadingStates[req.request_id]}
+                                                                    disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
                                                                     className="flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
                                                                 >
-                                                                    {loadingStates[req.request_id] ? (
+                                                                    {loadingStates[`ignore-${req.request_id}`] ? (
                                                                         <>
                                                                             <FaSpinner className="animate-spin mr-2" />
                                                                             Processing...
@@ -1224,10 +1226,10 @@ const WaitingList = () => {
                                                     <div className="flex flex-col space-y-2 mt-3">
                                                         <button
                                                             onClick={() => handleAccept(req.request_id)}
-                                                            disabled={loadingStates[req.request_id]}
+                                                            disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
                                                             className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
                                                         >
-                                                            {loadingStates[req.request_id] ? (
+                                                            {loadingStates[`accept-${req.request_id}`] ? (
                                                                 <>
                                                                     <FaSpinner className="animate-spin mr-2" />
                                                                     Processing...
@@ -1235,16 +1237,16 @@ const WaitingList = () => {
                                                             ) : (
                                                                 <>
                                                                     <FaCheck className="mr-2" />
-                                                                    Accept
+                                                                    Apply
                                                                 </>
                                                             )}
                                                         </button>
                                                         <button
                                                             onClick={() => handleIgnore(req.request_id)}
-                                                            disabled={loadingStates[req.request_id]}
+                                                            disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
                                                             className="w-full flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
                                                         >
-                                                            {loadingStates[req.request_id] ? (
+                                                            {loadingStates[`ignore-${req.request_id}`] ? (
                                                                 <>
                                                                     <FaSpinner className="animate-spin mr-2" />
                                                                     Processing...

@@ -107,15 +107,16 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const [cancelBooking] = useCancelBookingMutation();
 
   const allBookings = bookingsResponse?.data || [];
-  const upcomingBookings = allBookings.filter((booking: Booking) => !booking.is_past);
+  // For locum, show all bookings (past and upcoming). For practice/branch, show only upcoming.
+  const displayBookings = userType === 'locum' ? allBookings : allBookings.filter((booking: Booking) => !booking.is_past);
   
-  const branchStrings = upcomingBookings
+  const branchStrings = displayBookings
     .filter((booking: Booking) => booking.branch)
     .map((booking: Booking) => JSON.stringify({ id: booking.branch!.id, name: booking.branch!.name }));
   const uniqueBranchStrings = Array.from(new Set<string>(branchStrings));
   const branches = uniqueBranchStrings.map((item) => JSON.parse(item) as { id: string; name: string });
 
-  let filteredBookings = upcomingBookings.filter((booking: Booking) => {
+  let filteredBookings = displayBookings.filter((booking: Booking) => {
     if (selectedBranch !== 'all' && booking.branch?.id !== selectedBranch) {
       return false;
     }
@@ -571,7 +572,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           
           <div className="mt-3 text-sm text-gray-600">
             Showing {bookings.length} of {sortedBookings.length} bookings
-            {sortedBookings.length !== upcomingBookings.length && ` (${upcomingBookings.length} total)`}
+            {sortedBookings.length !== displayBookings.length && ` (${displayBookings.length} total)`}
           </div>
         </div>
       )}
@@ -582,8 +583,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           <h3 className="text-xl font-semibold text-gray-500 mb-2">No Bookings Found</h3>
           <p className="text-gray-400">
             {sortedBookings.length === 0 
-              ? upcomingBookings.length === 0
-                ? 'You don\'t have any upcoming bookings yet.'
+              ? displayBookings.length === 0
+                ? 'You don\'t have any bookings yet.'
                 : 'No bookings match your current filters.'
               : 'No bookings on this page.'}
           </p>
@@ -880,7 +881,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             {/* Stats */}
             <div className="text-sm text-gray-600">
               Showing {startIndex + 1}-{Math.min(endIndex, sortedBookings.length)} of {sortedBookings.length} bookings
-              {sortedBookings.length !== upcomingBookings.length && ` (filtered from ${upcomingBookings.length})`}
+              {sortedBookings.length !== displayBookings.length && ` (filtered from ${displayBookings.length})`}
               <span className="mx-2">|</span>
               Confirmed: {sortedBookings.filter((b: Booking) => b.status === 'CONFIRMED').length}
               <span className="mx-2">|</span>

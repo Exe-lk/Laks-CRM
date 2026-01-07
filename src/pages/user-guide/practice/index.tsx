@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Logo from "../../../../public/assests/Laks Dent Logo.png";
 import NavBar from '../../components/navBarPracticeUser/index';
-import { practiceGuideData, sections } from './data';
+import { practiceGuideData, sections } from '@/data/user-guide/practice';
 import UserGuideSidebar from '@/components/UserGuideSidebar';
 
 const PracticeUserGuide = () => {
