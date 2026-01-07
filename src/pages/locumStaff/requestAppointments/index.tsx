@@ -249,7 +249,7 @@ const LocumStaffRequestList = () => {
                                                     ) : (
                                                         <>
                                                             <FaCheck className="mr-2" />
-                                                            Accept
+                                                            Apply
                                                         </>
                                                     )}
                                                 </button>
