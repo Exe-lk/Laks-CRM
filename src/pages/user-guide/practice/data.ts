@@ -150,7 +150,30 @@ export const practiceGuideData = {
   'dashboard': {
     title: 'Dashboard Overview',
     steps: [],
-    importantNotes: []
+    content: [
+      {
+        title: 'Welcome to Your Dashboard',
+        paragraphs: [
+          'Your dashboard is the central hub for managing your practice operations. Here you can view all your appointments, manage staff, and access important information at a glance.',
+          'The dashboard provides a comprehensive overview of your practice activities, including upcoming appointments, active staff members, and recent notifications.'
+        ],
+        images: [] // Optional: add image paths here if needed
+      },
+      {
+        title: 'Key Features',
+        paragraphs: [
+          'View all your scheduled appointments in one place',
+          'Monitor staff availability and assignments',
+          'Access quick actions for common tasks',
+          'Review important notifications and updates'
+        ],
+        images: []
+      }
+    ],
+    importantNotes: [
+      'The dashboard updates in real-time to reflect the latest changes',
+      'You can customize the dashboard view to show the information most relevant to you'
+    ]
   },
 
   'appointments': {

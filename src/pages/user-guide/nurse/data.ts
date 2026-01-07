@@ -147,21 +147,119 @@ export const nurseGuideData = {
   },
 
   // ADD OTHER SECTION CONTENT HERE
-  'dashboard': {
-    title: 'Dashboard Overview',
-    steps: [],
-    importantNotes: []
+  'forgot-password': {
+    title: 'Forgot Password',
+    steps: [
+      {
+        number: 1,
+        title: "Click on Forgot Password",
+        description: "Click on Forgot Password on the login page",
+        instructions: [
+          "Click on 'Forgot Password' on the login page",
+          "You will be redirected to the forgot password page",
+          "Enter your registered email address",
+          "Click on 'Reset Password' to reset your password",
+          "You will receive an email with a link to reset your password",
+          "Click on the link in the email to reset your password",
+        ],
+        images: ["/images/22.png","/images/23.png", "/images/24.png"]
+      },{
+        number: 2,
+        title: "Reset Password",
+        description: "Reset your password",
+        instructions: [
+          "Click the Reset Password link in the email you received.",
+          "You will be redirected to the Reset Password page.",
+          "Enter your new password in the first field.",
+          "Re-enter the same password in the Confirm Password field",
+          "Click Update Password to save your new password",
+          "You will be redirected to the login page",
+          "Enter your new password",
+          "Click on 'Login' to access your account",
+        ],
+        images: ["/images/26.png","/images/27.png"]
+      }
+
+    ],
+    importantNotes: [
+      "The password reset link is valid for a limited time only. If it expires, you will need to request a new one."
+    ]
   },
 
-  'appointments': {
-    title: 'Finding and Applying for Appointments',
+  'home-dashboard': {
+    title: 'Home (Dashboard Overview)',
     steps: [],
+    content: [
+      {
+        title: 'Overview', // Optional section title
+        paragraphs: [
+          'Once you successfully log in, you will be redirected to the Home page. This dashboard provides a quick overview of your bookings, activity, and account status.',
+        ],
+        images: ["/images/28.png"] // Optional: add image paths like ["/images/profile1.png"]
+      },
+      {
+        title: 'User Account & Tools',
+        paragraphs: [
+          '1.Profile Icon - Allows you to view account details and log out',
+          '2. Notifications - Keeps you informed about important updates related to your account and bookings.',
+          '3. Calendar – View your bookings in a calendar format, including upcoming, confirmed, and past appointments for easy scheduling and tracking.',
+          '4. User Guide - Provides step-by-step instructions to help you navigate and use the system effectively.',
+          '5. Log Out – Securely sign out of your account and return to the login page.',
+        ],
+        images: ["/images/29.png"]
+      },
+      {
+        title: 'Navigation Bar',
+        paragraphs: [
+          '1. Home – Displays an overview of your bookings, activity, and account status.',
+          '2. Document Upload – Upload required documents related to your profile.',
+          '3. Appointment Requests – View and manage incoming booking requests from clinics.',
+          '4. Past Appointments – View details of your completed bookings.',
+          '5. My Bookings – View all current, upcoming, and confirmed bookings.',
+          '6. Timesheet – Record and manage timesheets for started and completed bookings.',
+          '7. Payment – Add and manage your card details and view payment-related information.',
+
+        ],
+        images: ["/images/30.png"]
+      },
+      {
+        title: 'Booking Overview',
+        paragraphs: [
+          '1. Total – Total number of bookings',
+          '2. Confirmed – Approved and confirmed bookings',
+          '3. Cancelled – Cancelled bookings',
+          '4. Past – Completed bookings',
+
+        ],
+        images: ["/images/32.png"]
+      },
+      {
+        title: 'Booking Statistics',
+        paragraphs: [
+          '1. Total Bookings – All bookings made',
+          '2. Future & Ongoing Bookings – Upcoming and active bookings',
+          '3. Cancelled Bookings – Bookings that were cancelled',
+        ],
+        images: ["/images/31.png"]
+      },
+    ],
     importantNotes: []
   },
 
   'profile': {
-    title: 'Profile Management',
+    title: 'Profile Man',
     steps: [],
+    // Example: Use 'content' field for guide sections without steps
+    // content: [
+    //   {
+    //     title: 'Overview', // Optional section title
+    //     paragraphs: [
+    //       'Your profile contains important information about your professional background.',
+    //       'Keep your profile updated to increase your chances of being selected for appointments.'
+    //     ],
+    //     images: [] // Optional: add image paths like ["/images/profile1.png"]
+    //   }
+    // ],
     importantNotes: []
   },
 
@@ -180,8 +278,8 @@ export const nurseGuideData = {
 
 export const sections = [
   { id: 'login-registration', title: 'Login and Registration' },
-  { id: 'dashboard', title: 'Dashboard Overview' },
-  { id: 'appointments', title: 'Finding and Applying for Appointments' },
+  { id: 'forgot-password', title: 'Forgot Password' },
+  { id: 'home-dashboard', title: 'Home (Dashboard Overview)' },
   { id: 'profile', title: 'Profile Management' },
   { id: 'settings', title: 'Settings and Preferences' },
   { id: 'troubleshooting', title: 'Troubleshooting' },
