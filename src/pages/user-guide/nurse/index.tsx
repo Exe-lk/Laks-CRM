@@ -12,7 +12,7 @@ const NurseUserGuide = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentContent = nurseGuideData[selectedSection as keyof typeof nurseGuideData];
-  const hasSteps = currentContent?.steps && currentContent.steps.length > 0;
+  const hasSteps = currentContent && 'steps' in currentContent && Array.isArray(currentContent.steps) && currentContent.steps.length > 0;
   const hasContent = currentContent && 'content' in currentContent && Array.isArray((currentContent as any).content) && (currentContent as any).content.length > 0;
 
   return (
@@ -140,12 +140,63 @@ const NurseUserGuide = () => {
                       )}
                       
                       {section.paragraphs && section.paragraphs.length > 0 && (
-                        <div className="space-y-4 mb-6">
-                          {section.paragraphs.map((paragraph: string, pIdx: number) => (
-                            <p key={pIdx} className="text-gray-700 text-base sm:text-lg leading-relaxed">
-                              {paragraph}
-                            </p>
-                          ))}
+                        <div className="space-y-3 mb-6">
+                          {section.paragraphs.map((paragraph: string, pIdx: number) => {
+                            // Handle empty paragraphs as spacing
+                            if (!paragraph.trim()) {
+                              return <div key={pIdx} className="h-2" />;
+                            }
+                            
+                            // Handle bullet points - render as list items
+                            if (paragraph.trim().startsWith('•')) {
+                              const content = paragraph.trim().substring(1).trim();
+                              const parts = content.split(/(\*\*.*?\*\*)/g);
+                              return (
+                                <div key={pIdx} className="flex items-start pl-4">
+                                  <span className="text-gray-700 mr-2 mt-1">•</span>
+                                  <span className="text-gray-700 text-base sm:text-lg leading-relaxed flex-1">
+                                    {parts.map((part, partIdx) => {
+                                      if (part.startsWith('**') && part.endsWith('**')) {
+                                        return <strong key={partIdx} className="font-semibold text-black">{part.slice(2, -2)}</strong>;
+                                      }
+                                      return <span key={partIdx}>{part}</span>;
+                                    })}
+                                  </span>
+                                </div>
+                              );
+                            }
+                            
+                            // Handle checkmark lines
+                            if (paragraph.includes('✓')) {
+                              const parts = paragraph.split(/(\*\*.*?\*\*)/g);
+                              return (
+                                <div key={pIdx} className="flex items-start text-gray-700 text-base sm:text-lg leading-relaxed">
+                                  <span className="text-green-600 mr-2 mt-1">✓</span>
+                                  <span className="flex-1">
+                                    {parts.map((part, partIdx) => {
+                                      if (part.startsWith('**') && part.endsWith('**')) {
+                                        return <strong key={partIdx} className="font-semibold text-black">{part.slice(2, -2)}</strong>;
+                                      }
+                                      return <span key={partIdx}>{part.replace('✓', '').trim()}</span>;
+                                    })}
+                                  </span>
+                                </div>
+                              );
+                            }
+                            
+                            // Regular paragraph with markdown-style bold text
+                            const parts = paragraph.split(/(\*\*.*?\*\*)/g);
+                            return (
+                              <p key={pIdx} className="text-gray-700 text-base sm:text-lg leading-relaxed">
+                                {parts.map((part, partIdx) => {
+                                  if (part.startsWith('**') && part.endsWith('**')) {
+                                    return <strong key={partIdx} className="font-semibold text-black">{part.slice(2, -2)}</strong>;
+                                  }
+                                  return <span key={partIdx}>{part}</span>;
+                                })}
+                              </p>
+                            );
+                          })}
                         </div>
                       )}
                       
