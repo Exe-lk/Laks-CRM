@@ -296,7 +296,7 @@ const BranchNavBar = () => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
                 User Guide
@@ -344,7 +344,7 @@ const BranchNavBar = () => {
                 <FaCalendarAlt className="text-xl" />
               </button>
               <button
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black mr-2"
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black mr-2"
                 onClick={handleUserGuideClick}
                 aria-label="User Guide"
                 title="User Guide"
@@ -360,9 +360,10 @@ const BranchNavBar = () => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
+                <span className="text-sm font-medium hidden sm:inline">Help</span>
               </button>
               <button
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"
@@ -582,7 +583,7 @@ const BranchNavBar = () => {
                           <FaCalendarAlt className="text-xl" />
                         </button>
                         <button
-                          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black"
+                          className="flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-gray-200 hover:bg-[#C3EAE7] transition text-black hover:text-black"
                           onClick={() => { handleUserGuideClick(); closeMobileMenu(); }}
                           aria-label="User Guide"
                           title="User Guide"
@@ -598,9 +599,10 @@ const BranchNavBar = () => {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="M12 6l-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5l2-2h7a2 2 0 002-2V8a2 2 0 00-2-2h-7z"
+                              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
+                          <span className="text-sm font-medium">Help</span>
                         </button>
                         <button
                           className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 hover:bg-red-100 transition text-red-600 hover:text-red-800"

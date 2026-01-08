@@ -1068,6 +1068,24 @@ const WaitingList = () => {
                                     </div>
                                 </div>
                             </div>
+                            {!isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
+                                <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
+                                    <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <div className="flex flex-col">
+                                        <p className="text-sm font-semibold text-red-700">
+                                            Please add payment details first
+                                        </p>
+                                        <button
+                                            onClick={() => router.push('/locumStaff/payment')}
+                                            className="text-xs text-red-600 underline hover:text-red-800 text-left mt-1"
+                                        >
+                                            Click here to add payment card
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
                                 <div className="hidden md:block overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
