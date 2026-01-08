@@ -9,6 +9,7 @@ import UserGuideSidebar from '@/components/UserGuideSidebar';
 const NurseUserGuide = () => {
   const router = useRouter();
   const [selectedSection, setSelectedSection] = useState('login-registration');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentContent = nurseGuideData[selectedSection as keyof typeof nurseGuideData];
   const hasSteps = currentContent?.steps && currentContent.steps.length > 0;
@@ -18,16 +19,48 @@ const NurseUserGuide = () => {
     <div className="min-h-screen bg-white flex flex-col">
       <NavBar />
       
-      <div className="pt-36 pb-16 flex flex-1">
+      <div className="pt-20 lg:pt-36 pb-16 flex flex-1 relative">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className={`fixed top-24 left-3 sm:left-4 z-40 lg:hidden bg-[#C3EAE7] hover:bg-[#A9DBD9] text-black p-2.5 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg ${
+            isSidebarOpen ? 'hidden' : 'flex items-center justify-center'
+          }`}
+          aria-label="Open sidebar"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
         {/* Left Sidebar */}
         <UserGuideSidebar
           sections={sections}
           selectedSection={selectedSection}
           onSectionSelect={setSelectedSection}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
 
         {/* Right Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 ml-64">
+        <div 
+          className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 lg:ml-64 pt-12 lg:pt-0"
+          onClick={() => {
+            if (isSidebarOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
+              setIsSidebarOpen(false);
+            }
+          }}
+        >
           <div className="max-w-7xl mx-auto">
             {/* Content */}
             <div className="bg-white rounded-xl shadow-lg p-8 sm:p-12 mb-8">
@@ -68,16 +101,16 @@ const NurseUserGuide = () => {
                         )}
                         
                         {step.images && step.images.length > 0 && (
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 gap-8">
                             {step.images.map((imagePath, imgIdx) => (
-                              <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-3">
-                                <div className="relative w-full bg-white flex items-center justify-center">
+                              <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4">
+                                <div className="relative w-full bg-white flex items-center justify-center min-h-[400px]">
                                   <Image
                                     src={imagePath}
                                     alt={`Step ${step.number} - Image ${imgIdx + 1}`}
-                                    width={1200}
-                                    height={900}
-                                    className="w-full h-auto object-contain max-w-full"
+                                    width={1600}
+                                    height={1200}
+                                    className="w-full h-auto object-contain"
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
                                       target.style.display = 'none';
@@ -117,16 +150,16 @@ const NurseUserGuide = () => {
                       )}
                       
                       {section.images && section.images.length > 0 && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <div className="grid grid-cols-1 gap-8 mt-6">
                           {section.images.map((imagePath: string, imgIdx: number) => (
-                            <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-3">
-                              <div className="relative w-full bg-white flex items-center justify-center">
+                            <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4">
+                              <div className="relative w-full bg-white flex items-center justify-center min-h-[400px]">
                                 <Image
                                   src={imagePath}
                                   alt={section.title ? `${section.title} - Image ${imgIdx + 1}` : `Image ${imgIdx + 1}`}
-                                  width={1200}
-                                  height={900}
-                                  className="w-full h-auto object-contain max-w-full"
+                                  width={1600}
+                                  height={1200}
+                                  className="w-full h-auto object-contain"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';
