@@ -44,6 +44,29 @@ export const createBaseQueryWithReauth = (baseUrl: string): BaseQueryFn<
       } else {
         console.error('❌ Token refresh failed, redirecting to login...');
         if (typeof window !== 'undefined') {
+          // Get user type from profile before clearing session storage
+          let loginRoute = '/';
+          const profileStr = localStorage.getItem('profile');
+          
+          if (profileStr) {
+            try {
+              const profile = JSON.parse(profileStr);
+              
+              // Determine login route based on profile structure
+              if (profile.userType === 'branch') {
+                loginRoute = '/branch/login';
+              } else if (profile.emailAddress) {
+                // Locum profiles have emailAddress field
+                loginRoute = '/locumStaff/login';
+              } else if (profile.email) {
+                // Practice profiles have email field (not emailAddress)
+                loginRoute = '/practiceUser/practiceLogin';
+              }
+            } catch (error) {
+              console.error('Error parsing profile:', error);
+            }
+          }
+
           stopTokenRefreshMonitor();
           
           localStorage.removeItem('token');
@@ -54,7 +77,7 @@ export const createBaseQueryWithReauth = (baseUrl: string): BaseQueryFn<
           localStorage.removeItem('branchId');
           localStorage.removeItem('sessionExpiry');
           
-          window.location.href = '/';
+          window.location.href = loginRoute;
         }
       }
     }

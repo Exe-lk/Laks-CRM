@@ -55,7 +55,7 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        if (selectedDate <= today) {
+        if (selectedDate < today) {
             errors.request_date = 'Cannot select a past date';
         }
 
@@ -565,9 +565,8 @@ const CreateAppointmentPage = () => {
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     min={(() => {
-                                        const tomorrow = new Date();
-                                        tomorrow.setDate(tomorrow.getDate() + 1);
-                                        return tomorrow.toISOString().split('T')[0];
+                                        const today = new Date();
+                                        return today.toISOString().split('T')[0];
                                     })()}
                                     max={(() => {
                                         const sixMonthsLater = new Date();

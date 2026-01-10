@@ -32,6 +32,29 @@ export default function ProtectedRoute({
       isHandlingExpiry.current = true;
 
       const handleExpiry = async () => {
+        // Get user type from profile before clearing session storage
+        let loginRoute = "/";
+        const profileStr = window.localStorage.getItem("profile");
+        
+        if (profileStr) {
+          try {
+            const profile = JSON.parse(profileStr);
+            
+            // Determine login route based on profile structure
+            if (profile.userType === "branch") {
+              loginRoute = "/branch/login";
+            } else if (profile.emailAddress) {
+              // Locum profiles have emailAddress field
+              loginRoute = "/locumStaff/login";
+            } else if (profile.email) {
+              // Practice profiles have email field (not emailAddress)
+              loginRoute = "/practiceUser/practiceLogin";
+            }
+          } catch (error) {
+            console.error("Error parsing profile:", error);
+          }
+        }
+
         clearSessionStorage();
         await Swal.fire({
           title: "Session Closed",
@@ -40,7 +63,7 @@ export default function ProtectedRoute({
           confirmButtonText: "OK",
           confirmButtonColor: "#C3EAE7",
         });
-        router.replace("/");
+        router.replace(loginRoute);
         isHandlingExpiry.current = false;
       };
 
