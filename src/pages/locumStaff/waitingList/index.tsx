@@ -524,122 +524,157 @@ const WaitingList = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-32">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#C3EAE7]/10 pt-32">
             <NavBar />
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-8 max-w-7xl">
                 <div className="mb-8">
-                     <div className="text-center mb-8 pt-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold text-black mb-2 bg-gradient-to-r from-black to-gray-700 bg-clip-text">
-            Appointment Requests
-          </h1>
-            <p className="text-gray-600">
-                        {activeTab === 'request-appoitment'
-                            ? 'Appointments confirmed by practices waiting for your response'
-                            : activeTab === 'pending-requests'
-                                ? 'Your application history for dental appointments'
-                                : 'Appointments confirmed by practices waiting for your response'
-                        }
-                    </p>
-          <div className="flex justify-center gap-2 mt-4">
-            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-        </div>
-
-                    <div className="mt-6 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-1 bg-gray-100 p-1 rounded-lg sm:max-w-3xl">
-                        <button
-                            type="button"
-                            onClick={() => handleTabClick('request-appoitment')}
-                            disabled={tabButtonLoading['request-appoitment']}
-                            aria-busy={tabButtonLoading['request-appoitment']}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'request-appoitment'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                                } ${tabButtonLoading['request-appoitment'] ? 'cursor-wait' : ''}`}
-                        >
-                            {tabButtonLoading['request-appoitment'] ? (
-                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
-                            ) : (
-                                <FaHistory className="mr-1 sm:mr-2" />
-                            )}
-                            <span className="whitespace-nowrap">
-                                {tabButtonLoading['request-appoitment']
-                                    ? tabButtonLoadingLabels['request-appoitment']
-                                    : tabButtonLabels['request-appoitment']}
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleTabClick('pending-requests')}
-                            disabled={tabButtonLoading['pending-requests']}
-                            aria-busy={tabButtonLoading['pending-requests']}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'pending-requests'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                                } ${tabButtonLoading['pending-requests'] ? 'cursor-wait' : ''}`}
-                        >
-                            {tabButtonLoading['pending-requests'] ? (
-                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
-                            ) : (
-                                <FaHistory className="mr-1 sm:mr-2" />
-                            )}
-                            <span className="whitespace-nowrap">
-                                {tabButtonLoading['pending-requests']
-                                    ? tabButtonLoadingLabels['pending-requests']
-                                    : tabButtonLabels['pending-requests']}
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleTabClick('pending-confirmations')}
-                            disabled={tabButtonLoading['pending-confirmations']}
-                            aria-busy={tabButtonLoading['pending-confirmations']}
-                            className={`flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 ${activeTab === 'pending-confirmations'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                                } ${tabButtonLoading['pending-confirmations'] ? 'cursor-wait' : ''}`}
-                        >
-                            {tabButtonLoading['pending-confirmations'] ? (
-                                <FaSpinner className="animate-spin mr-1 sm:mr-2" />
-                            ) : (
-                                <FaExclamationTriangle className="mr-1 sm:mr-2" />
-                            )}
-                            <span className="whitespace-nowrap">
-                                {tabButtonLoading['pending-confirmations']
-                                    ? tabButtonLoadingLabels['pending-confirmations']
-                                    : tabButtonLabels['pending-confirmations']}
-                            </span>
-                        </button>
+                    {/* Modern Header Section */}
+                    <div className="text-center mb-10 pt-8">
+                        <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                            {activeTab === 'request-appoitment'
+                                ? 'Browse and apply for available dental appointments in your area'
+                                : activeTab === 'pending-requests'
+                                    ? 'Track your submitted applications and their status'
+                                    : 'Review and respond to appointment confirmations from practices'
+                            }
+                        </p>
+                        <div className="flex justify-center gap-2 mt-6">
+                            <div className="w-3 h-3 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] rounded-full animate-pulse shadow-lg"></div>
+                            <div className="w-3 h-3 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-3 h-3 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
                     </div>
 
-                    <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-center">
+                    {/* Modern Tab Navigation */}
+                    <div className="mt-8 mb-8">
+                        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 max-w-4xl mx-auto">
+                            <button
+                                type="button"
+                                onClick={() => handleTabClick('request-appoitment')}
+                                disabled={tabButtonLoading['request-appoitment']}
+                                aria-busy={tabButtonLoading['request-appoitment']}
+                                className={`group relative flex items-center justify-center px-6 py-4 text-sm font-bold rounded-2xl transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 overflow-hidden ${
+                                    activeTab === 'request-appoitment'
+                                        ? 'bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] text-black shadow-xl scale-105'
+                                        : 'bg-white text-gray-600 hover:text-black hover:shadow-lg border-2 border-gray-200 hover:border-[#C3EAE7]'
+                                } ${tabButtonLoading['request-appoitment'] ? 'cursor-wait' : ''}`}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                {tabButtonLoading['request-appoitment'] ? (
+                                    <FaSpinner className="animate-spin mr-2 text-lg" />
+                                ) : (
+                                    <FaHistory className="mr-2 text-lg" />
+                                )}
+                                <span className="relative z-10 whitespace-nowrap">
+                                    {tabButtonLoading['request-appoitment']
+                                        ? 'Loading...'
+                                        : 'Available Requests'}
+                                </span>
+                                {activeTab === 'request-appoitment' && requests.length > 0 && (
+                                    <span className="ml-2 px-2.5 py-0.5 bg-black text-white text-xs font-bold rounded-full">
+                                        {requests.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleTabClick('pending-requests')}
+                                disabled={tabButtonLoading['pending-requests']}
+                                aria-busy={tabButtonLoading['pending-requests']}
+                                className={`group relative flex items-center justify-center px-6 py-4 text-sm font-bold rounded-2xl transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 overflow-hidden ${
+                                    activeTab === 'pending-requests'
+                                        ? 'bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] text-black shadow-xl scale-105'
+                                        : 'bg-white text-gray-600 hover:text-black hover:shadow-lg border-2 border-gray-200 hover:border-[#C3EAE7]'
+                                } ${tabButtonLoading['pending-requests'] ? 'cursor-wait' : ''}`}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                {tabButtonLoading['pending-requests'] ? (
+                                    <FaSpinner className="animate-spin mr-2 text-lg" />
+                                ) : (
+                                    <FaClock className="mr-2 text-lg" />
+                                )}
+                                <span className="relative z-10 whitespace-nowrap">
+                                    {tabButtonLoading['pending-requests']
+                                        ? 'Loading...'
+                                        : 'My Applications'}
+                                </span>
+                                {activeTab === 'pending-requests' && filteredApplicationHistory.length > 0 && (
+                                    <span className="ml-2 px-2.5 py-0.5 bg-black text-white text-xs font-bold rounded-full">
+                                        {filteredApplicationHistory.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleTabClick('pending-confirmations')}
+                                disabled={tabButtonLoading['pending-confirmations']}
+                                aria-busy={tabButtonLoading['pending-confirmations']}
+                                className={`group relative flex items-center justify-center px-6 py-4 text-sm font-bold rounded-2xl transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 overflow-hidden ${
+                                    activeTab === 'pending-confirmations'
+                                        ? 'bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] text-black shadow-xl scale-105'
+                                        : 'bg-white text-gray-600 hover:text-black hover:shadow-lg border-2 border-gray-200 hover:border-[#C3EAE7]'
+                                } ${tabButtonLoading['pending-confirmations'] ? 'cursor-wait' : ''}`}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                {tabButtonLoading['pending-confirmations'] ? (
+                                    <FaSpinner className="animate-spin mr-2 text-lg" />
+                                ) : (
+                                    <FaExclamationTriangle className="mr-2 text-lg" />
+                                )}
+                                <span className="relative z-10 whitespace-nowrap">
+                                    {tabButtonLoading['pending-confirmations']
+                                        ? 'Loading...'
+                                        : 'Confirmations'}
+                                </span>
+                                {activeTab === 'pending-confirmations' && pendingConfirmations.length > 0 && (
+                                    <span className="ml-2 px-2.5 py-0.5 bg-black text-white text-xs font-bold rounded-full animate-pulse">
+                                        {pendingConfirmations.length}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats Card */}
+                    <div className="mt-6 bg-gradient-to-r from-white to-[#C3EAE7]/20 border-2 border-[#C3EAE7]/30 rounded-2xl p-5 shadow-lg backdrop-blur-sm max-w-2xl mx-auto">
+                        <div className="flex items-center justify-center">
                             {activeTab === 'pending-confirmations' ? (
                                 <>
-                                    <FaClock className="text-blue-600 mr-2" />
-                                    <span className="text-blue-800 font-medium">
-                                        You have {pendingConfirmations.length} pending confirmation{pendingConfirmations.length !== 1 ? 's' : ''}
-                                    </span>
+                                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl mr-4 shadow-md">
+                                        <FaClock className="text-white text-xl" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 font-medium">Awaiting Your Response</p>
+                                        <p className="text-2xl font-black text-gray-800">
+                                            {pendingConfirmations.length} Confirmation{pendingConfirmations.length !== 1 ? 's' : ''}
+                                        </p>
+                                    </div>
                                 </>
                             ) : activeTab === 'request-appoitment' ? (
                                 <>
-                                    <FaHistory className="text-blue-600 mr-2" />
-                                    <span className="text-blue-800 font-medium">
-                                        {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
-                                    </span>
+                                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-[#C3EAE7] to-[#9DD4D0] rounded-xl mr-4 shadow-md">
+                                        <FaHistory className="text-black text-xl" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 font-medium">Available Opportunities</p>
+                                        <p className="text-2xl font-black text-gray-800">
+                                            {requests.length} Appointment{requests.length !== 1 ? 's' : ''}
+                                        </p>
+                                    </div>
                                 </>
                             ) : (
                                 <>
-                                    <FaHistory className="text-blue-600 mr-2" />
-                                    <span className="text-blue-800 font-medium">
-                                        {filteredApplicationHistory.length} pending application{filteredApplicationHistory.length !== 1 ? 's' : ''} with applied status
-                                    </span>
+                                    <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl mr-4 shadow-md">
+                                        <FaClock className="text-white text-xl" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 font-medium">Pending Applications</p>
+                                        <p className="text-2xl font-black text-gray-800">
+                                            {filteredApplicationHistory.length} Application{filteredApplicationHistory.length !== 1 ? 's' : ''}
+                                        </p>
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -659,197 +694,451 @@ const WaitingList = () => {
 
                 {activeTab === 'pending-confirmations' ? (
                     pendingConfirmations.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                            <FaClock className="mx-auto text-gray-400 text-6xl mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Pending Confirmations</h3>
-                            <p className="text-gray-500">
-                                You don't have any appointments waiting for confirmation at the moment.
+                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl p-12 text-center border-2 border-gray-100">
+                            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6">
+                                <FaClock className="text-gray-400 text-5xl" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">No Pending Confirmations</h3>
+                            <p className="text-gray-600 text-lg max-w-md mx-auto">
+                                You're all caught up! No appointments are waiting for your confirmation at the moment.
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Practice Details
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Appointment
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {pendingConfirmations.map((confirmation) => {
-                                            const isLoading = loadingStates[confirmation.confirmation_id];
+                        <div className="grid grid-cols-1 gap-6">
+                            {pendingConfirmations.map((confirmation) => {
+                                const isLoading = loadingStates[confirmation.confirmation_id];
 
-                                            return (
-                                                <tr
-                                                    key={confirmation.confirmation_id}
-                                                    className="hover:bg-gray-50"
-                                                >
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex flex-col">
-                                                            <div className="text-sm font-medium text-gray-900">
-                                                                {confirmation.practice.name}
-                                                            </div>
-                                                            {confirmation.branch && (
-                                                                <div className="text-sm font-medium text-blue-600 mt-1">
-                                                                    Branch: {confirmation.branch.name}
-                                                                </div>
-                                                            )}
-                                                            <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                                <FaPhoneAlt className="mr-1 text-gray-400" />
-                                                                {confirmation.practice.telephone}
-                                                            </div>
+                                return (
+                                    <div
+                                        key={confirmation.confirmation_id}
+                                        className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-[#C3EAE7] transform hover:-translate-y-1"
+                                    >
+                                        <div className="bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] px-6 py-4">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+                                                        <FaCalendarAlt className="text-[#5BA8A0] text-xl" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-black text-black">{confirmation.practice.name}</h3>
+                                                        {confirmation.branch && (
+                                                            <p className="text-sm font-semibold text-gray-700">
+                                                                Branch: {confirmation.branch.name}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span className="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold bg-yellow-400 text-black shadow-md animate-pulse">
+                                                    <FaClock className="mr-2" />
+                                                    Awaiting Response
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                                <div className="space-y-4">
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaCalendarAlt className="text-blue-600" />
                                                         </div>
-                                                    </td>
-
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex flex-col">
-                                                            <div className="text-sm font-medium text-gray-900 flex items-center">
-                                                                <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                        <div>
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date & Time</p>
+                                                            <p className="text-sm font-bold text-gray-900 mt-1">
                                                                 {formatDateTime(confirmation.appointment.date)}
-                                                            </div>
-                                                            <div className="text-sm text-gray-500 mt-1">
+                                                            </p>
+                                                            <p className="text-sm text-gray-600 mt-1">
                                                                 {confirmation.appointment.start_time} - {confirmation.appointment.end_time}
-                                                            </div>
-                                                            <div className="text-sm text-gray-500 mt-1">
-                                                                📍 {confirmation.appointment.location}
-                                                            </div>
-                                                            <div className="text-xs text-gray-400 mt-1">
-                                                                Confirmation #{confirmation.confirmation_number}
-                                                            </div>
+                                                            </p>
                                                         </div>
-                                                    </td>
+                                                    </div>
 
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                            <FaClock className="mr-1" />
-                                                            Pending Response
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        <div className="flex space-x-2">
-                                                            <button
-                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
-                                                                disabled={isLoading}
-                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                                                            >
-                                                                {isLoading ? (
-                                                                    <FaSpinner className="animate-spin mr-1" />
-                                                                ) : (
-                                                                    <FaCheck className="mr-1" />
-                                                                )}
-                                                                Accept
-                                                            </button>
-
-                                                            <button
-                                                                onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
-                                                                disabled={isLoading}
-                                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                                            >
-                                                                {isLoading ? (
-                                                                    <FaSpinner className="animate-spin mr-1" />
-                                                                ) : (
-                                                                    <FaTimes className="mr-1" />
-                                                                )}
-                                                                Reject
-                                                            </button>
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaMapMarkerAlt className="text-green-600" />
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                                        <div>
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</p>
+                                                            <p className="text-sm font-medium text-gray-900 mt-1">
+                                                                {confirmation.appointment.location}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaPhoneAlt className="text-purple-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact</p>
+                                                            <p className="text-sm font-medium text-gray-900 mt-1">
+                                                                {confirmation.practice.telephone}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-gray-600 font-bold text-xs">#</span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Confirmation ID</p>
+                                                            <p className="text-sm font-medium text-gray-900 mt-1">
+                                                                #{confirmation.confirmation_number}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100">
+                                                <button
+                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
+                                                    disabled={isLoading}
+                                                    className="flex-1 inline-flex items-center justify-center px-6 py-4 border-2 border-transparent text-base font-bold rounded-xl text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-400 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                                >
+                                                    {isLoading ? (
+                                                        <FaSpinner className="animate-spin mr-2 text-xl" />
+                                                    ) : (
+                                                        <FaCheck className="mr-2 text-xl" />
+                                                    )}
+                                                    Accept Appointment
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
+                                                    disabled={isLoading}
+                                                    className="flex-1 inline-flex items-center justify-center px-6 py-4 border-2 border-red-300 text-base font-bold rounded-xl text-red-600 bg-white hover:bg-red-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 focus:outline-none focus:ring-4 focus:ring-red-200 transition-all duration-200 shadow-md hover:shadow-lg"
+                                                >
+                                                    {isLoading ? (
+                                                        <FaSpinner className="animate-spin mr-2 text-xl" />
+                                                    ) : (
+                                                        <FaTimes className="mr-2 text-xl" />
+                                                    )}
+                                                    Decline
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )
+                ) : activeTab === 'pending-requests' ? (
+                    filteredApplicationHistory.length === 0 ? (
+                        <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl p-12 text-center border-2 border-gray-100">
+                            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6">
+                                <FaHistory className="text-gray-400 text-5xl" />
                             </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">No Pending Applications</h3>
+                            <p className="text-gray-600 text-lg max-w-md mx-auto">
+                                You haven't applied to any appointments yet. Check the Available Requests tab to find opportunities!
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6">
+                            {filteredApplicationHistory.map((application) => (
+                                <div
+                                    key={application.response_id}
+                                    className={`bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 ${
+                                        application.request.is_past ? 'border-gray-300 opacity-75' : 'border-gray-100 hover:border-[#C3EAE7]'
+                                    }`}
+                                >
+                                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 px-6 py-4">
+                                        <div className="flex items-center justify-between flex-wrap gap-3">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+                                                    <FaCalendarAlt className="text-blue-600 text-xl" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black text-black">{application.request.practice.name}</h3>
+                                                    {application.request.branch && (
+                                                        <p className="text-sm font-semibold text-gray-700">
+                                                            Branch: {application.request.branch.name}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold shadow-md ${
+                                                    application.status === 'ACCEPTED'
+                                                        ? 'bg-green-400 text-black'
+                                                        : 'bg-red-400 text-white'
+                                                }`}>
+                                                    {application.request.status_label}
+                                                </span>
+                                                {application.request.is_past && (
+                                                    <span className="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold bg-gray-400 text-white shadow-md">
+                                                        Past Event
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div className="md:hidden">
-                                {pendingConfirmations.map((confirmation) => {
-                                    const isLoading = loadingStates[confirmation.confirmation_id];
+                                    <div className="p-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="flex items-start space-x-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <FaCalendarAlt className="text-blue-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Appointment</p>
+                                                    <p className="text-sm font-bold text-gray-900 mt-1">
+                                                        {formatDateTime(application.request.request_date)}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        {application.request.request_start_time} - {application.request.request_end_time}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-start space-x-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <FaMapMarkerAlt className="text-green-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</p>
+                                                    <p className="text-sm font-medium text-gray-900 mt-1">
+                                                        {application.request.location}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Role: {application.request.required_role}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-start space-x-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <FaClock className="text-purple-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Applied On</p>
+                                                    <p className="text-sm font-medium text-gray-900 mt-1">
+                                                        {formatDateTime(application.responded_at)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1 flex items-center">
+                                                        <FaPhoneAlt className="mr-1" />
+                                                        {application.request.practice.telephone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
+                ) : (
+                    <div className="space-y-6">
+                        {/* Filters and Actions Bar */}
+                        <div className="bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] rounded-3xl shadow-xl p-6 border-2 border-[#C3EAE7]">
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-black text-black mb-2">Browse Opportunities</h2>
+                                    <p className="text-gray-800 font-medium">
+                                        {requests.length} appointment{requests.length !== 1 ? 's' : ''} match your criteria
+                                        {distanceFilter !== 999999 && (
+                                            <span className="ml-2 px-3 py-1 bg-black text-white text-xs font-bold rounded-full">
+                                                ≤ {distanceFilter} km
+                                            </span>
+                                        )}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                                    <div className="flex items-center space-x-3 bg-white rounded-xl px-4 py-3 shadow-md">
+                                        <FaMapMarkerAlt className="text-[#5BA8A0] text-lg" />
+                                        <select
+                                            id="distance-filter"
+                                            value={distanceFilter}
+                                            onChange={(e) => setDistanceFilter(Number(e.target.value))}
+                                            className="flex-1 sm:flex-none font-bold text-sm focus:outline-none bg-transparent cursor-pointer"
+                                        >
+                                            <option value={15}>Within 15 km</option>
+                                            <option value={40}>Within 40 km</option>
+                                            <option value={80}>Within 80 km</option>
+                                            <option value={160}>Within 160 km</option>
+                                            <option value={999999}>All distances</option>
+                                        </select>
+                                    </div>
+                                    <button
+                                        onClick={() => refetch()}
+                                        className="flex items-center justify-center px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl font-bold transform hover:scale-105"
+                                    >
+                                        <FaHistory className="mr-2" />
+                                        Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Payment Card Warning */}
+                        {!isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
+                            <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-2xl p-5 shadow-lg">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-lg font-black text-red-900 mb-1">Payment Card Required</h4>
+                                        <p className="text-sm text-red-700 mb-3">
+                                            You need to add payment details before applying for appointments.
+                                        </p>
+                                        <button
+                                            onClick={() => router.push('/locumStaff/payment')}
+                                            className="inline-flex items-center px-5 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-md hover:shadow-lg"
+                                        >
+                                            Add Payment Card
+                                            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Appointments Grid */}
+                        {requests.length > 0 ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {requests.map((req) => {
+                                    const acceptKey = `accept-${req.request_id}`;
+                                    const ignoreKey = `ignore-${req.request_id}`;
+                                    const isAccepting = loadingStates[acceptKey];
+                                    const isIgnoring = loadingStates[ignoreKey];
+                                    const isLoading = isAccepting || isIgnoring;
 
                                     return (
                                         <div
-                                            key={confirmation.confirmation_id}
-                                            className="p-4 border-b border-gray-200"
+                                            key={req.request_id}
+                                            className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-[#C3EAE7] transform hover:-translate-y-1"
                                         >
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                                                        {confirmation.practice.name}
-                                                    </h3>
-                                                    {confirmation.branch && (
-                                                        <div className="text-sm font-medium text-blue-600 mb-1">
-                                                            Branch: {confirmation.branch.name}
+                                            {/* Card Header */}
+                                            <div className="bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] px-6 py-4">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="flex items-center space-x-3 flex-1">
+                                                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                                                            <svg className="w-6 h-6 text-[#5BA8A0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                            </svg>
                                                         </div>
+                                                        <div className="min-w-0">
+                                                            <h3 className="text-lg font-black text-black truncate">{req.practice.name}</h3>
+                                                            {req.branch && (
+                                                                <p className="text-sm font-semibold text-gray-700 truncate">
+                                                                    {req.branch.name}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {req.is_urgent && (
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-red-500 text-white shadow-md animate-pulse flex-shrink-0">
+                                                            <FaExclamationTriangle className="mr-1" />
+                                                            URGENT
+                                                        </span>
                                                     )}
-                                                    <div className="text-sm text-gray-500 flex items-center">
-                                                        <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                        {confirmation.practice.location}
+                                                </div>
+                                            </div>
+
+                                            {/* Card Body */}
+                                            <div className="p-6 space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaCalendarAlt className="text-blue-600" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</p>
+                                                            <p className="text-sm font-bold text-gray-900 mt-1">
+                                                                {formatDate(req.request_date)}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-sm text-gray-500 flex items-center">
-                                                        <FaPhoneAlt className="mr-1 text-gray-400" />
-                                                        {confirmation.practice.telephone}
+
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaClock className="text-purple-600" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Time</p>
+                                                            <p className="text-sm font-bold text-gray-900 mt-1">
+                                                                {formatTime(req.request_start_time)}
+                                                            </p>
+                                                            <p className="text-xs text-gray-600">
+                                                                to {formatTime(req.request_end_time)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <FaMapMarkerAlt className="text-green-600" />
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</p>
+                                                            <p className="text-sm font-medium text-gray-900 mt-1 truncate" title={req.location}>
+                                                                {req.location}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-start space-x-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Distance</p>
+                                                            <p className="text-sm font-bold text-gray-900 mt-1">
+                                                                {req.distance !== null ? (
+                                                                    <span>{req.distance} km away</span>
+                                                                ) : (
+                                                                    <span className="text-gray-400">N/A</span>
+                                                                )}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div>
-                                                    <div className="text-sm font-medium text-gray-900 flex items-center">
-                                                        <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                        {formatDateTime(confirmation.appointment.date)}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 mt-1">
-                                                        {confirmation.appointment.start_time} - {confirmation.appointment.end_time}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 mt-1">
-                                                        📍 {confirmation.appointment.location}
-                                                    </div>
-                                                    <div className="text-xs text-gray-400 mt-1">
-                                                        Confirmation #{confirmation.confirmation_number}
-                                                    </div>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <FaPhoneAlt className="text-gray-400 text-sm" />
+                                                    <p className="text-sm text-gray-600 font-medium">{req.practice.telephone}</p>
                                                 </div>
 
-                                                <div>
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                        <FaClock className="mr-1" />
-                                                        Pending Response
-                                                    </span>
-                                                </div>
-
-                                                <div className="flex flex-col space-y-2 pt-2">
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-3 pt-4 border-t-2 border-gray-100">
                                                     <button
-                                                        onClick={() => handleConfirmation(confirmation.confirmation_id, 'CONFIRM', confirmation)}
+                                                        onClick={() => handleAccept(req.request_id)}
                                                         disabled={isLoading}
-                                                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                                                        className="flex-1 inline-flex items-center justify-center px-5 py-3.5 border-2 border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                                                     >
-                                                        {isLoading ? (
-                                                            <FaSpinner className="animate-spin mr-1" />
+                                                        {isAccepting ? (
+                                                            <>
+                                                                <FaSpinner className="animate-spin mr-2" />
+                                                                Applying...
+                                                            </>
                                                         ) : (
-                                                            <FaCheck className="mr-1" />
+                                                            <>
+                                                                <FaCheck className="mr-2" />
+                                                                Apply Now
+                                                            </>
                                                         )}
-                                                        Accept
                                                     </button>
 
                                                     <button
-                                                        onClick={() => handleConfirmation(confirmation.confirmation_id, 'REJECT', confirmation)}
+                                                        onClick={() => handleIgnore(req.request_id)}
                                                         disabled={isLoading}
-                                                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                                        className="inline-flex items-center justify-center px-5 py-3.5 border-2 border-gray-300 text-sm font-bold rounded-xl text-gray-600 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 shadow-md hover:shadow-lg"
                                                     >
-                                                        {isLoading ? (
-                                                            <FaSpinner className="animate-spin mr-1" />
+                                                        {isIgnoring ? (
+                                                            <FaSpinner className="animate-spin" />
                                                         ) : (
-                                                            <FaTimes className="mr-1" />
+                                                            <FaEyeSlash />
                                                         )}
-                                                        Reject
                                                     </button>
                                                 </div>
                                             </div>
@@ -857,443 +1146,26 @@ const WaitingList = () => {
                                     );
                                 })}
                             </div>
-                        </div>
-                    )
-                ) : activeTab === 'pending-requests' ? (
-                    filteredApplicationHistory.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                            <FaHistory className="mx-auto text-gray-400 text-6xl mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-600 mb-2">No Pending Applications</h3>
-                            <p className="text-gray-500">
-                                You don't have any pending applications with "applied" status.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Practice Details
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Appointment
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Applied Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {filteredApplicationHistory.map((application) => (
-                                            <tr
-                                                key={application.response_id}
-                                                className={`hover:bg-gray-50 ${application.request.is_past ? 'bg-gray-50' : ''
-                                                    }`}
-                                            >
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {application.request.practice.name}
-                                                        </div>
-                                                        {application.request.branch && (
-                                                            <div className="text-sm font-medium text-blue-600 mt-1">
-                                                                Branch: {application.request.branch.name}
-                                                            </div>
-                                                        )}
-                                                        <div className="text-sm text-gray-500 flex items-center mt-1">
-                                                            <FaPhoneAlt className="mr-1 text-gray-400" />
-                                                            {application.request.practice.telephone}
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm font-medium text-gray-900 flex items-center">
-                                                            <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                            {formatDateTime(application.request.request_date)}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 mt-1">
-                                                            {application.request.request_start_time} - {application.request.request_end_time}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 mt-1">
-                                                            📍 {application.request.location}
-                                                        </div>
-                                                        <div className="text-xs text-gray-400 mt-1">
-                                                            Role: {application.request.required_role}
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">
-                                                        {formatDateTime(application.responded_at)}
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-col">
-                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.status === 'ACCEPTED'
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-red-100 text-red-800'
-                                                            }`}>
-                                                            {application.request.status_label}
-                                                        </span>
-                                                        {application.request.is_past && (
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-1">
-                                                                Past Event
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="md:hidden">
-                                {filteredApplicationHistory.map((application) => (
-                                    <div
-                                        key={application.response_id}
-                                        className={`p-4 border-b border-gray-200 ${application.request.is_past ? 'bg-gray-50' : ''}`}
-                                    >
-                                        <div className="space-y-3">
-                                            <div>
-                                                <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                                                    {application.request.practice.name}
-                                                </h3>
-                                                {application.request.branch && (
-                                                    <div className="text-sm font-medium text-blue-600 mb-1">
-                                                        Branch: {application.request.branch.name}
-                                                    </div>
-                                                )}
-                                                <div className="text-sm text-gray-500 flex items-center">
-                                                    <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                    {application.request.practice.location}
-                                                </div>
-                                                <div className="text-sm text-gray-500 flex items-center">
-                                                    <FaPhoneAlt className="mr-1 text-gray-400" />
-                                                    {application.request.practice.telephone}
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-900 flex items-center">
-                                                    <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                    {formatDateTime(application.request.request_date)}
-                                                </div>
-                                                <div className="text-sm text-gray-500 mt-1">
-                                                    {application.request.request_start_time} - {application.request.request_end_time}
-                                                </div>
-                                                <div className="text-sm text-gray-500 mt-1">
-                                                    📍 {application.request.location}
-                                                </div>
-                                                <div className="text-xs text-gray-400 mt-1">
-                                                    Role: {application.request.required_role}
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="text-xs font-medium text-gray-500 uppercase">Applied Date</div>
-                                                <div className="text-sm text-gray-900">
-                                                    {formatDateTime(application.responded_at)}
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.status === 'ACCEPTED'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {application.request.status_label}
-                                                </span>
-                                                {application.request.is_past && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 ml-2">
-                                                        Past Event
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )
-                ) : (
-                    <><div className="text-center mb-8 pt-12 px-4">
-                    </div><div className="w-full px-2 sm:px-6 md:px-12 mb-12">
-                            <div className="bg-[#C3EAE7] px-2 sm:px-4 py-4 sm:py-6 w-full rounded-none mb-4">
-                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                                    <div>
-                                        <h2 className="text-xl sm:text-2xl font-bold text-black">Available Requests</h2>
-                                        <p className="text-gray-700 mt-1 text-sm sm:text-base">
-                                            {requests.length} appointment{requests.length !== 1 ? 's' : ''} available for your role
-                                            {distanceFilter !== 999999 && (
-                                                <span className="text-sm text-gray-500 ml-1">
-                                                    (within {distanceFilter} km)
-                                                </span>
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-                                        <div className="flex items-center space-x-2">
-                                            <label htmlFor="distance-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                                Distance:
-                                            </label>
-                                            <select
-                                                id="distance-filter"
-                                                value={distanceFilter}
-                                                onChange={(e) => setDistanceFilter(Number(e.target.value))}
-                                                className="flex-1 sm:flex-none px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value={15}>Within 15 km</option>
-                                                <option value={40}>Within 40 km</option>
-                                                <option value={80}>Within 80 km</option>
-                                                <option value={160}>Within 160 km</option>
-                                                <option value={999999}>All distances</option>
-                                            </select>
-                                        </div>
-                                        <button
-                                            onClick={() => refetch()}
-                                            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm sm:text-base"
-                                        >
-                                            Refresh
-                                        </button>
-                                    </div>
+                        ) : (
+                            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl p-16 text-center border-2 border-gray-100">
+                                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6">
+                                    <FaClock className="text-gray-400 text-5xl" />
                                 </div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-3">No Appointments Available</h3>
+                                <p className="text-gray-600 text-lg max-w-md mx-auto mb-6">
+                                    There are no appointments matching your current filter criteria. Try adjusting the distance filter or check back later!
+                                </p>
+                                <button
+                                    onClick={() => refetch()}
+                                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#C3EAE7] to-[#9DD4D0] text-black font-bold rounded-xl hover:shadow-lg transition-all"
+                                >
+                                    <FaHistory className="mr-2" />
+                                    Refresh List
+                                </button>
                             </div>
-                            {!isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
-                                <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
-                                    <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <div className="flex flex-col">
-                                        <p className="text-sm font-semibold text-red-700">
-                                            Please add payment details first
-                                        </p>
-                                        <button
-                                            onClick={() => router.push('/locumStaff/payment')}
-                                            className="text-xs text-red-600 underline hover:text-red-800 text-left mt-1"
-                                        >
-                                            Click here to add payment card
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-                                        <thead className="bg-[#C3EAE7]/20">
-                                            <tr>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Practice</th>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Request Date</th>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Start Time</th>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">End Time</th>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Location</th>
-                                                <th className="px-4 sm:px-6 py-3 text-left font-bold text-black uppercase tracking-wider">Distance</th>
-                                                <th className="px-4 sm:px-6 py-3 text-center font-bold text-black uppercase tracking-wider">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-100">
-                                            {requests.length > 0 ? (
-                                                requests.map((req) => (
-                                                    <tr key={req.request_id} className="hover:bg-[#C3EAE7]/10 transition-all">
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                                            <div>
-                                                                <div className="text-gray-900 font-medium">{req.practice.name}</div>
-                                                                {req.branch && (
-                                                                    <div className="text-blue-600 font-medium text-sm">Branch: {req.branch.name}</div>
-                                                                )}
-                                                                <div className="text-gray-500 text-sm">{req.practice.telephone}</div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                                                            <div className="flex items-center">
-                                                                {req.is_urgent && <FaExclamationTriangle className="text-red-500 mr-2" />}
-                                                                {formatDate(req.request_date)}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                                                            {formatTime(req.request_start_time)}
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                                                            {formatTime(req.request_end_time)}
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                                                            {req.location}
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                                                            {req.distance !== null ? (
-                                                                <span className="flex items-center">
-                                                                    <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                                    {req.distance} km
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-gray-400 text-sm">N/A</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="px-4 sm:px-6 py-4 text-center">
-                                                            <div className="flex flex-col space-y-2">
-                                                                <button
-                                                                    onClick={() => handleAccept(req.request_id)}
-                                                                    disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
-                                                                    className="flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
-                                                                >
-                                                                    {loadingStates[`accept-${req.request_id}`] ? (
-                                                                        <>
-                                                                            <FaSpinner className="animate-spin mr-2" />
-                                                                            Processing...
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <FaCheck className="mr-2" />
-                                                                            Apply
-                                                                        </>
-                                                                    )}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleIgnore(req.request_id)}
-                                                                    disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
-                                                                    className="flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg shadow-md transition-all text-sm sm:text-base mx-auto min-w-[100px]"
-                                                                >
-                                                                    {loadingStates[`ignore-${req.request_id}`] ? (
-                                                                        <>
-                                                                            <FaSpinner className="animate-spin mr-2" />
-                                                                            Processing...
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <FaEyeSlash className="mr-2" />
-                                                                            Ignore
-                                                                        </>
-                                                                    )}
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={7} className="text-center text-gray-500 py-8">
-                                                        <div className="flex flex-col items-center">
-                                                            <FaClock className="text-4xl mb-4 text-gray-300" />
-                                                            <p className="text-lg font-medium">No available appointments</p>
-                                                            <p className="text-sm">Check back later for new opportunities</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="md:hidden">
-                                    {requests.length > 0 ? (
-                                        requests.map((req) => (
-                                            <div key={req.request_id} className="p-4 border-b border-gray-200 hover:bg-[#C3EAE7]/10 transition-all">
-                                                <div className="space-y-3">
-                                                    <div>
-                                                        <h3 className="text-base font-semibold text-gray-900">{req.practice.name}</h3>
-                                                        {req.branch && (
-                                                            <div className="text-blue-600 font-medium text-sm mt-1">Branch: {req.branch.name}</div>
-                                                        )}
-                                                        <div className="text-gray-500 text-sm mt-1">{req.practice.telephone}</div>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                                        <div>
-                                                            <div className="text-xs font-medium text-gray-500 uppercase">Request Date</div>
-                                                            <div className="text-gray-700 flex items-center mt-1">
-                                                                {req.is_urgent && <FaExclamationTriangle className="text-red-500 mr-1 text-xs" />}
-                                                                {formatDate(req.request_date)}
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-xs font-medium text-gray-500 uppercase">Distance</div>
-                                                            <div className="text-gray-700 mt-1">
-                                                                {req.distance !== null ? (
-                                                                    <span className="flex items-center">
-                                                                        <FaMapMarkerAlt className="mr-1 text-gray-400" />
-                                                                        {req.distance} km
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-gray-400">N/A</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="text-xs font-medium text-gray-500 uppercase">Time</div>
-                                                        <div className="text-gray-700 text-sm mt-1">
-                                                            {formatTime(req.request_start_time)} - {formatTime(req.request_end_time)}
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="text-xs font-medium text-gray-500 uppercase">Location</div>
-                                                        <div className="text-gray-700 text-sm mt-1">{req.location}</div>
-                                                    </div>
-
-                                                    <div className="flex flex-col space-y-2 mt-3">
-                                                        <button
-                                                            onClick={() => handleAccept(req.request_id)}
-                                                            disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
-                                                            className="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
-                                                        >
-                                                            {loadingStates[`accept-${req.request_id}`] ? (
-                                                                <>
-                                                                    <FaSpinner className="animate-spin mr-2" />
-                                                                    Processing...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <FaCheck className="mr-2" />
-                                                                    Apply
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleIgnore(req.request_id)}
-                                                            disabled={loadingStates[`accept-${req.request_id}`] || loadingStates[`ignore-${req.request_id}`]}
-                                                            className="w-full flex items-center justify-center bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg shadow-md transition-all"
-                                                        >
-                                                            {loadingStates[`ignore-${req.request_id}`] ? (
-                                                                <>
-                                                                    <FaSpinner className="animate-spin mr-2" />
-                                                                    Processing...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <FaEyeSlash className="mr-2" />
-                                                                    Ignore
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center text-gray-500 py-8">
-                                            <div className="flex flex-col items-center">
-                                                <FaClock className="text-4xl mb-4 text-gray-300" />
-                                                <p className="text-lg font-medium">No available appointments</p>
-                                                <p className="text-sm">Check back later for new opportunities</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div></>
-                )
-                }
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
