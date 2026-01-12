@@ -1,9 +1,43 @@
 import { createClient } from '@supabase/supabase-js';
+import { clearSessionStorage } from './sessionManager';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Logs out the user by clearing session storage and redirecting to appropriate login page
+ */
+function logoutUser(): void {
+  if (typeof window === 'undefined') return;
+
+  // Get user type from profile before clearing session storage
+  let loginRoute = '/';
+  const profileStr = localStorage.getItem('profile');
+  
+  if (profileStr) {
+    try {
+      const profile = JSON.parse(profileStr);
+      
+      // Determine login route based on profile structure
+      if (profile.userType === 'branch') {
+        loginRoute = '/branch/login';
+      } else if (profile.emailAddress) {
+        // Locum profiles have emailAddress field
+        loginRoute = '/locumStaff/login';
+      } else if (profile.email) {
+        // Practice profiles have email field (not emailAddress)
+        loginRoute = '/practiceUser/practiceLogin';
+      }
+    } catch (error) {
+      console.error('Error parsing profile:', error);
+    }
+  }
+
+  clearSessionStorage();
+  window.location.href = loginRoute;
+}
 
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
@@ -29,6 +63,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   
   if (!refreshToken) {
     console.error('No refresh token available');
+    logoutUser();
     return null;
   }
 
@@ -52,6 +87,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     if (error) {
       console.error('❌ Token refresh error:', error);
       isRefreshing = false;
+      logoutUser();
       return null;
     }
 
@@ -77,10 +113,12 @@ export async function refreshAccessToken(): Promise<string | null> {
     }
 
     isRefreshing = false;
+    logoutUser();
     return null;
   } catch (error) {
     console.error('❌ Token refresh failed:', error);
     isRefreshing = false;
+    logoutUser();
     return null;
   }
 }
@@ -126,12 +164,17 @@ export async function getValidToken(): Promise<string | null> {
   const currentToken = localStorage.getItem('token');
   
   if (!currentToken) {
+    logoutUser();
     return null;
   }
 
   if (shouldRefreshToken()) {
     const newToken = await refreshAccessToken();
-    return newToken || currentToken;
+    if (!newToken) {
+      // Refresh failed, user will be logged out by refreshAccessToken
+      return null;
+    }
+    return newToken;
   }
 
   return currentToken;

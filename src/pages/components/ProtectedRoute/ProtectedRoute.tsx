@@ -27,48 +27,59 @@ export default function ProtectedRoute({
       return;
     }
 
-    if (hasSessionExpired()) {
+    const handleExpiry = async () => {
       if (isHandlingExpiry.current) return;
       isHandlingExpiry.current = true;
 
-      const handleExpiry = async () => {
-        // Get user type from profile before clearing session storage
-        let loginRoute = "/";
-        const profileStr = window.localStorage.getItem("profile");
-        
-        if (profileStr) {
-          try {
-            const profile = JSON.parse(profileStr);
-            
-            // Determine login route based on profile structure
-            if (profile.userType === "branch") {
-              loginRoute = "/branch/login";
-            } else if (profile.emailAddress) {
-              // Locum profiles have emailAddress field
-              loginRoute = "/locumStaff/login";
-            } else if (profile.email) {
-              // Practice profiles have email field (not emailAddress)
-              loginRoute = "/practiceUser/practiceLogin";
-            }
-          } catch (error) {
-            console.error("Error parsing profile:", error);
+      // Get user type from profile before clearing session storage
+      let loginRoute = "/";
+      const profileStr = window.localStorage.getItem("profile");
+      
+      if (profileStr) {
+        try {
+          const profile = JSON.parse(profileStr);
+          
+          // Determine login route based on profile structure
+          if (profile.userType === "branch") {
+            loginRoute = "/branch/login";
+          } else if (profile.emailAddress) {
+            // Locum profiles have emailAddress field
+            loginRoute = "/locumStaff/login";
+          } else if (profile.email) {
+            // Practice profiles have email field (not emailAddress)
+            loginRoute = "/practiceUser/practiceLogin";
           }
+        } catch (error) {
+          console.error("Error parsing profile:", error);
         }
+      }
 
-        clearSessionStorage();
-        await Swal.fire({
-          title: "Session Closed",
-          text: "Your session has expired after 24 hours. Please sign in again to continue.",
-          icon: "info",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#C3EAE7",
-        });
-        router.replace(loginRoute);
-        isHandlingExpiry.current = false;
-      };
+      clearSessionStorage();
+      await Swal.fire({
+        title: "Session Closed",
+        text: "Your session has expired after 24 hours. Please sign in again to continue.",
+        icon: "info",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#C3EAE7",
+      });
+      router.replace(loginRoute);
+      isHandlingExpiry.current = false;
+    };
 
+    // Check immediately on mount/route change
+    if (hasSessionExpired()) {
       void handleExpiry();
+      return;
     }
+
+    // Set up periodic check every 30 seconds
+    const intervalId = setInterval(() => {
+      if (hasSessionExpired()) {
+        void handleExpiry();
+      }
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, [router, router.pathname]);
 
   return <>{children}</>;
