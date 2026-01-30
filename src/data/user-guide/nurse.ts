@@ -580,7 +580,7 @@ export const nurseGuideData = {
         paragraphs: [
           'The **Timesheet** tab is where you record your actual worked hours to ensure correct payment. It provides a weekly overview of your dental appointments, allowing you to access specific days and mark your attendance.'
         ],
-        images: ['/images/timesheet-overview.png']
+        images: ['/images/57.jpeg']
       },
       {
         title: '1. Recording Your Shift Times',
@@ -594,7 +594,7 @@ export const nurseGuideData = {
           '',
           'Click on any unlocked booking to begin time tracking.'
         ],
-        images: ['/images/booking-details-popup.png']
+        images: ['/images/58.jpeg']
       },
       {
         title: 'Time Tracking Interface',
@@ -609,7 +609,7 @@ export const nurseGuideData = {
           '• Clicking **Reset** clears the previously entered time, allowing you to enter a new one if a mistake was made.',
           '• This applies to all tracking fields: Start Time, End Time, Break Start, and Break End.'
         ],
-        images: ['/images/time-tracking-interface.png']
+        images: ['/images/59.jpeg']
       },
       {
         title: '2. Hours Calculations',
@@ -624,7 +624,7 @@ export const nurseGuideData = {
           '',
           'You can preview your **Estimated Total Hours** and **Estimated Pay** before submitting.'
         ],
-        images: ['/images/hours-preview.png']
+        images: ['/images/60.jpeg']
       },
       {
         title: '3. Collecting Signatures and Submitting',
@@ -639,7 +639,7 @@ export const nurseGuideData = {
           '',
           'After drawing your signature, click **"Submit Timesheet"** to proceed.'
         ],
-        images: ['/images/submit-timesheet-form.png']
+        images: ['/images/62.png','/images/61.jpeg']
       },
       {
         title: 'Manager Verification',
@@ -652,7 +652,7 @@ export const nurseGuideData = {
           '• If both manager signature and ID are provided, the timesheet will be automatically approved and locked',
           '• Signatures will be saved as images'
         ],
-        images: ['/images/manager-signature-form.png']
+        images: ['/images/63']
       },
       {
         title: 'Final Submission',
@@ -662,7 +662,7 @@ export const nurseGuideData = {
           '**Status Updates:**',
           'After submission, your booking will show a **"COMPLETED"** status with a checkmark in My Bookings.'
         ],
-        images: ['/images/timesheet-submitted-success.png']
+        images: ['/images/64.png']
       }
     ],
     importantNotes: [
@@ -695,7 +695,7 @@ export const nurseGuideData = {
           '**Step 2: Access Share Menu**',
           'Tap the Share icon at the bottom of the browser, then click "More" if necessary to see all actions.'
         ],
-        images: ['/images/pwa-share-icon.png']
+        images: ['/images/65.jpeg','/images/66.jpeg']
       },
       {
         title: 'Add to Home Screen',
@@ -712,7 +712,7 @@ export const nurseGuideData = {
           '**Step 6: Locate the App**',
           'The Laks Dent icon will now appear on your home screen like a standard app.'
         ],
-        images: ['/images/add-to-home-screen-dialog.png']
+        images: ['/images/68.jpeg','/images/69.jpeg']
       },
       {
         title: 'Important',
@@ -738,7 +738,7 @@ export const nurseGuideData = {
           '',
           '**Booking Alerts:** Receive immediate updates when a practice confirms your application.'
         ],
-        images: ['/images/booking-alert-notification.png']
+        images: ['/images/70.jpeg']
       }
     ],
     importantNotes: [
@@ -751,11 +751,7 @@ export const nurseGuideData = {
     ]
   },
 
-  'troubleshooting': {
-    title: 'Troubleshooting',
-    steps: [],
-    importantNotes: []
-  }
+
 };
 
 export const sections = [
