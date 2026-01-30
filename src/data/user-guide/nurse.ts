@@ -11,7 +11,7 @@ export const nurseGuideData = {
           "Click on 'Register' in the top navigation menu",
           "Select 'Locum Staff' as your registration type"
         ],
-        images: ["/images/1.png", "/images/2.png"]
+        images: ["/images/1.jpeg", "/images/2.jpeg"]
       },
       {
         number: 2,
@@ -24,7 +24,7 @@ export const nurseGuideData = {
           "Location: Click the map icon to select your location on the map, then confirm",
           "Address: Enter your complete address including street, city, and postal code"
         ],
-        images: ["/images/3.png", "/images/4.png","/images/5.png", "/images/6.png"]
+        images: ["/images/3.jpeg", "/images/4.png"]
       },
       {
         number: 3,
@@ -113,26 +113,30 @@ export const nurseGuideData = {
       {
         number: 9,
         title: "Email Verification",
-        description: "Verify your email address",
+        description: "Verify your email address to complete registration",
         instructions: [
-          "Check your email inbox for a verification email",
-          "Click on the verification link in the email",
-          "You will be redirected to the verification page",
-          "Once verified, you can log in to your account",
-          "Note: You must verify your email before you can log in"
+          "1. Check your email inbox for a message from 'Laks Dent Agency' with the subject 'Confirm Your Signup'",
+          "2. Click the 'Confirm your mail' button inside the email",
+          "   Note: If the confirmation button does not work, you may use the alternative confirmation link provided in the email",
+          "3. You will be redirected to the Home page",
+          "4. Tap the hamburger menu icon (three horizontal lines) in the top right corner of the screen, click Login",
+          "5. Select 'Locum Staff' when prompted with 'Do you want to login as a...'",
+          "6. You will then be redirected to the Login page, where you must enter your email address and password",
+          "   Before signing in, make sure to tick the 'I'm not a robot' checkbox to verify you are human",
+          "   Once completed, click Sign In to access your account"
         ],
-        images: ["/images/16.jpeg", "/images/17.jpeg"]
+        images: ["/images/16.jpeg"]
       },
       {
         number: 10,
-        title: "Login to Your Account",
-        description: "Access your account after verification",
+        title: "Admin Approval",
+        description: "Wait for admin approval to access your account",
         instructions: [
-          "Navigate to the login page",
-          "Enter your registered email address",
-          "Enter your password",
-          "Click 'Login' to access your dashboard",
-          "You can now start browsing and applying for appointments"
+          "Important:",
+          "Once your account is created successfully and you have confirmed your email, your account will still need to be approved by the admin before you can log in",
+          "Your account is awaiting approval from the administrator",
+          "You will see a 'Pending Approval' message after attempting to sign in",
+          "Once approved, you will be able to log in and start browsing and applying for appointments"
         ],
         images: ["/images/21.png"]
       }
@@ -142,6 +146,7 @@ export const nurseGuideData = {
       "Make sure your email address is correct as you will need it for verification",
       "Your password must meet all security requirements for account protection",
       "After registration, check your email and verify your account before logging in",
+      "Once your account is created successfully and you have confirmed your email, your account will still need to be approved by the admin before you can log in",
       "If you encounter any issues during registration, contact support for assistance"
     ]
   },
@@ -162,7 +167,7 @@ export const nurseGuideData = {
           "You will receive an email with a link to reset your password",
           "Click on the link in the email to reset your password",
         ],
-        images: ["/images/22.png","/images/23.png", "/images/24.png"]
+        images: ["/images/22.png", "/images/23.png"]
       },{
         number: 2,
         title: "Reset Password",
@@ -177,7 +182,7 @@ export const nurseGuideData = {
           "Enter your new password",
           "Click on 'Login' to access your account",
         ],
-        images: ["/images/26.png","/images/27.png"]
+        images: ["/images/26.png"]
       }
 
     ],
@@ -275,7 +280,7 @@ export const nurseGuideData = {
           '',
           '**Supported file formats:** PDF, JPG, JPEG, PNG'
         ],
-        images: ['/images/35.png',]
+        images: ['/images/39.jpeg',]
       },
       {
         title: 'Terms and Conditions:',
@@ -323,70 +328,426 @@ export const nurseGuideData = {
 
   'appointment-requests': {
     title: 'Appointment Requests',
-    steps: [
+    content: [
       {
-        number: 1,
-        title: "Appointment Requests Overview",
-        description: "The Appointment Requests tab is your central hub for finding and securing new shifts. It is divided into three primary sub-sections: Request Appointment (Finding Jobs), Pending Requests (Tracking Your Applications), and Pending Confirmations (Finalizing Your Shift).",
-        instructions: [
-          "Request Appointment (Finding Jobs): This is where you browse for available work",
-          "Available Requests: Under this sub-tab, you will see a list of jobs available for your role",
-          "Pending Requests: Track your applications while waiting for practice review",
-          "Pending Confirmations: Finalize your shift after practice acceptance"
+        title: 'Overview',
+        paragraphs: [
+          'The **Appointment Requests** tab is your central hub for finding and securing new shifts. It is divided into three primary sub-sections:',
+          '1. Request Appointment (Finding Jobs)',
+          '  • **Available Requests:** Under this sub-tab, you will see a list of jobs available for your role'
         ],
-        images: ["/images/38.png"]
+        images: ['/images/46.jpeg']
       },
       {
-        number: 2,
-        title: "Request Appointment - Finding Jobs",
-        description: "Browse and apply for available appointment requests that match your role and preferences",
-        instructions: [
-          "Filtering: Use the Distance dropdown to filter jobs (e.g., 'Within 80 km') and click Refresh",
-          "Viewing Available Jobs: The table displays available appointments with columns: PRACTICE, REQUEST DATE, START TIME, END TIME, LOCATION, DISTANCE, and ACTION",
-          "Each row shows practice details, appointment date and time, location, and distance from you",
-          "To apply for an appointment:",
-          "  1. View the Practice, Start/End Times, and Location",
-          "  2. Click the green Accept button",
-          "  3. A 'Confirm Application' pop-up will appear. Click Yes, Apply to send your request to the practice"
-        ],
-        images: ["/images/39.png", "/images/40.png", "/images/41.png"]
+        title: '1. Request Appointment (Finding Jobs)',
+        paragraphs: [
+          'Browse and apply for available appointment requests that match your role and preferences.'
+        ]
       },
       {
-        number: 3,
-        title: "Pending Requests - Tracking Your Applications",
-        description: "Once you apply, the job moves here while you wait for the practice to review your profile",
-        instructions: [
-          "Status Alert: You will see a blue banner indicating how many applications are currently pending",
-          "Applied Status: The job will show a status of 'Applied' in green. At this stage, you are waiting for the dental practice to 'Confirm' you for the shift",
-          "Viewing Your Applications: The table shows: PRACTICE DETAILS, APPOINTMENT (date, time range, location), APPLIED DATE, and STATUS",
-          "You can track when you applied and see the current status of each application"
+        title: 'Filtering',
+        paragraphs: [
+          'Use the Distance dropdown to filter jobs (e.g., "Within 80 km") and click Refresh.'
         ],
-        images: ["/images/42.png"]
+        images: ['/images/47.jpeg']
       },
       {
-        number: 4,
-        title: "Pending Confirmations - Finalizing Your Shift",
-        description: "If the practice accepts your application, the job moves to this final step. You are not fully booked until you confirm here",
-        instructions: [
-          "Final Acceptance:",
-          "  1. Click the green Accept button next to the appointment",
-          "  2. A 'Confirm Appointment' pop-up will ask: 'Are you sure you want to accept this appointment?'",
-          "  3. Click Yes, Accept",
-          "Confirmation:",
-          "  • A Success! pop-up will appear once the booking is finalized",
-          "  • The appointment will be moved to your 'My Bookings' section",
-          "  • The pending confirmations count will update accordingly"
+        title: 'Applying',
+        paragraphs: [
+          '1. View the Practice, Start/End Times, and Location.',
+          '2. Click the green **Apply** button. (Appointments whose start time is near are marked as Urgent in red)',
+          '3. A "Confirm Application" pop-up will appear. Click **Yes, Apply**.'
         ],
-        images: ["/images/43.png", "/images/44.png", "/images/45.png"]
+        images: ['/images/confirm-application-popup.png']
+      },
+      {
+        title: 'Successful Application',
+        paragraphs: [
+          'After receiving the successful application message, your request is sent to the dental practice for review.'
+        ],
+        images: ['/images/successful-application-message.png']
+      },
+      {
+        title: 'Ignoring',
+        paragraphs: [
+          '1. Find the eye icon with a diagonal line (the "dash") next to the "Apply" button on an available shift.',
+          '2. A pop-up window titled "Ignore Appointment" will appear, asking: "Are you sure you want to ignore this appointment?"',
+          '3. Tap the red **Yes, Ignore** button.',
+          '',
+          '**Important:** Once ignored, you won\'t see that specific shift in your available requests anymore.'
+        ],
+        images: ['/images/48.jpeg']
+      },
+      {
+        title: '2. My Applications (Tracking Your Applications)',
+        paragraphs: [
+          'Once you apply, the job moves here while you wait for the practice to review your profile.',
+          '',
+          '**Status Alert:** You will see a banner indicating how many applications are currently pending.',
+          '',
+          '**Applied Status:** The job will show a status of **Applied** in green. At this stage, you are waiting for the dental practice to "Confirm" you for the shift.'
+        ],
+        images: ['/images/49.jpeg']
+      },
+      {
+        title: '3. Confirmations (Finalizing Your Shift)',
+        paragraphs: [
+          'If the practice accepts your application, the job moves to this final step. You are not fully booked until you confirm here.',
+          '',
+          '**Final Acceptance:**',
+          '1. Click the green **Accept** button next to the appointment.',
+          '2. A "**Confirm Appointment**" pop-up will ask: "Are you sure you want to accept this appointment?"',
+          '3. Click **Yes, Accept**.',
+          '',
+          '**Confirmation:**',
+          'A **Success!** pop-up will appear once the booking is finalized.'
+        ],
+        images: ['/images/50.jpeg','/images/56.jpeg']
+      },
+      {
+        title: 'Declining a Selected Appointment',
+        paragraphs: [
+          'If you are no longer able to work a shift that a practice has offered you, you must decline it so they can find another professional.',
+          '',
+          '1. Click the **Decline** button on the appointment card.',
+          '2. A "Reject Appointment" pop-up will appear. You must enter a rejection reason in the provided text box (e.g., "Schedule conflict").',
+          '3. Tap the red **Reject** button to finalize your decision.',
+          '4. A "Success!" message will confirm: "Selection rejected, Practice can select another user".'
+        ],
+        images: ['/images/51.jpeg', '/images/54.jpeg','/images/53.jpeg']
       }
     ],
     importantNotes: [
-      "You must have a payment card added before you can apply for appointments",
-      "Use the Distance filter to find jobs within your preferred travel distance",
-      "Always review practice details, location, and time before accepting",
-      "Once you apply, you cannot cancel until the practice responds",
-      "You must confirm in 'Pending Confirmations' to finalize your booking",
-      "Check back regularly for new available requests"
+      'You must have a payment card added before you can apply for appointments',
+      'Use the Distance filter to find jobs within your preferred travel distance',
+      'Always review practice details, location, and time before accepting',
+      'Once you apply, you cannot cancel until the practice responds',
+      'You must confirm in "Confirmations" to finalize your booking',
+      'If you ignore an appointment, you won\'t see it in your available requests anymore',
+      'Check back regularly for new available requests'
+    ]
+  },
+
+  'essential-payment-setup': {
+    title: 'Essential Payment Setup',
+    content: [
+      {
+        title: 'Payment Requirement',
+        paragraphs: [
+          'You cannot apply for any appointments until a valid payment method is added to your account.'
+        ],
+        images: ['/images/41.jpeg']
+      },
+      {
+        title: 'Payment Alert',
+        paragraphs: [
+          'If your payment details are missing, a red dot will appear next to the Payment tab in the hamburger menu as a reminder.'
+        ],
+        images: ['/images/40.jpeg']
+      },
+      {
+        title: 'Application Block',
+        paragraphs: [
+          'If you attempt to tap "Apply Now" on a shift without a card on file, a "Payment Card Required" pop-up will appear.'
+        ],
+        images: ['/images/40.jpeg']
+      },
+      {
+        title: 'Direct Access',
+        paragraphs: [
+          'You can click the red "Add Payment Card" button directly on an appointment listing if you have not yet added your details.'
+        ],
+        images: ['/images/42.jpeg']
+      },
+      {
+        title: 'Adding a Card',
+        paragraphs: [
+          '1. Tap "Yes, Add Payment Card" from the alert or go to the Payment tab.',
+          '2. Enter the **Card Holder Name** and **Card Details (Number, MM/YY, and CVC)**.',
+          '3. Check "Set as default payment method" and tap "Add Card".',
+          '4. Wait for the "Adding Card..." secure processing to finish.',
+          '5. A "Success!" message will confirm your payment method is ready.'
+        ],
+        images: ['/images/43.jpeg', '/images/44.jpeg']
+      }
+    ],
+    importantNotes: [
+      'You must add a valid payment method before applying for any appointments',
+      'The red dot indicator on the Payment tab will remind you to add your payment details',
+      'You can add a payment card directly from the appointment listing or from the Payment tab',
+      'All payment information is securely processed',
+      'You can set your preferred card as the default payment method'
+    ]
+  },
+
+  'my-bookings': {
+    title: 'My Bookings',
+    content: [
+      {
+        title: 'Overview',
+        paragraphs: [
+          'Once a booking is finalized, it moves to the **My Bookings** tab. This is your official work diary.'
+        ]
+      },
+      {
+        title: '1. Viewing Your Shifts',
+        paragraphs: [
+          'In this section, you can see a high-level overview of your confirmed jobs:',
+          '',
+          '**Status:** Confirmed shifts are marked with a green "CONFIRMED" badge.',
+          '',
+          '**Time Until:** This column shows how long you have until the shift starts (e.g., "Started/Past").',
+          '',
+          '**Practice Details:** You can now see the practice name and their direct Contact Number (e.g., 0711388446) in case you need to call them regarding your arrival.'
+        ],
+        images: ['/images/49.jpeg']
+      },
+      {
+        title: 'Filters',
+        paragraphs: [
+          'To efficiently manage a busy schedule, you can use the **Show Filters** button to customize your view. These filters allow you to organize your bookings based on their current status:',
+          '',
+          '**Search:** Find specific shifts by searching for a practice name or location.',
+          '',
+          '**Status:** Filter for shifts that are **Completed**, **Pending**, or **Cancelled**.',
+          '',
+          '**Date Range:** Use the **Start Date** and **End Date** fields to view shifts from a specific week or month.',
+          '',
+          '**Toggle Visibility:**',
+          'Click **Hide Filters** at any time to collapse the menu and return to your full booking list.'
+        ],
+      },
+      {
+        title: '2. The Cancellation Policy',
+        paragraphs: [
+          'Laks Dent has specific rules regarding cancellations to ensure practices aren\'t left without staff. According to your "Booking Information" panel:',
+          '',
+          '| Cancellation Timing | Penalty / Rule |',
+          '|---------------------|----------------|',
+          '| Over 48 hours notice | No penalty. |',
+          '| Within 48 hours | Penalty equal to **3 hours pay.** |',
+          '| Within 24 hours | Penalty equal to **6 hours pay.** |',
+          '| Once job has started | Cannot be cancelled. |',
+          '',
+          '**How to Cancel:** If you must cancel, click the red **Cancel** button.'
+        ]
+      },
+      {
+        title: 'How to Cancel',
+        paragraphs: [
+          'If you must cancel, click the red Cancel button.',
+          '',
+          'When you click the red Cancel button, a "Cancel Booking" window appears.',
+          '',
+          '1. Look for the text box labeled "Please provide a reason for cancellation (required)".',
+          '2. Type your reason (e.g., "Illness," "Emergency," or "Transport Issues").',
+          '3. Only after entering text will the Yes, Cancel Booking button become active to complete the process.',
+          '',
+          'You will see a green "Booking Cancelled" success message.'
+        ],
+        images: ['/images/55.jpeg',]
+      },
+      {
+        title: 'Viewing Cancellation Details',
+        paragraphs: [
+          'Once a booking is cancelled, you can view the specific financial breakdown:',
+          '',
+          '**View/Hide Details:** Click the **View Penalty** button on the cancelled shift to expand the details, or **Hide Penalty** to collapse them.',
+          '',
+          '**Detailed Breakdown:** The system displays the **Hourly Rate** (e.g., £1.00/hr), the **Penalty Hours** (e.g., 6 hours), and the total **Penalty Amount** (e.g., £6.00).',
+          '',
+          '**Audit Trail:** The details include exactly who cancelled the shift, the precise time of cancellation, and the reason you provided.',
+          '',
+          '**Pending Status:** All penalties initially show a "**PENDING**" status until they are reviewed by an administrator.'
+        ],
+      }
+    ],
+    importantNotes: [
+      'My Bookings is your official work diary for all confirmed shifts',
+      'Always check practice contact details before your shift',
+      'Cancellation penalties apply based on timing - cancel as early as possible to avoid fees',
+      'You cannot cancel a booking once the job has started',
+      'All cancellation penalties are reviewed by an administrator before being finalized',
+      'Use filters to efficiently manage and find specific bookings in your schedule'
+    ]
+  },
+
+  'timesheet-submission': {
+    title: 'Timesheet Submission',
+    content: [
+      {
+        title: 'Overview',
+        paragraphs: [
+          'The **Timesheet** tab is where you record your actual worked hours to ensure correct payment. It provides a weekly overview of your dental appointments, allowing you to access specific days and mark your attendance.'
+        ],
+        images: ['/images/timesheet-overview.png']
+      },
+      {
+        title: '1. Recording Your Shift Times',
+        paragraphs: [
+          'In the **Weekly Calendar**, each day in the calendar lists the number of bookings associated with that specific date. Click on a specific day in the calendar to view the detailed appointment list for that date.',
+          '',
+          'Each shift in the list shows its status, such as **CONFIRMED** or **Completed**.',
+          '',
+          '**Important:**',
+          'Bookings remain locked until 30 minutes before their scheduled start time. Once you are within this window you can select the booking and fill in your timesheet with your actual work hours.',
+          '',
+          'Click on any unlocked booking to begin time tracking.'
+        ],
+        images: ['/images/booking-details-popup.png']
+      },
+      {
+        title: 'Time Tracking Interface',
+        paragraphs: [
+          'Use the **"Time Tracking"** interface to set your **Start Time** and **End Time**. You can click the **"Now"** button to use the current time or manually adjust and click **"Set"**.',
+          '',
+          '**Hours Calculation:**',
+          'Total hours = End time - Start time. If both lunch break times are entered, the lunch duration will be deducted. If only one lunch time is entered, it will be ignored.',
+          '',
+          '**Button Functionality:**',
+          '• Once a time has been entered and "Set," the button\'s function automatically changes to **Reset**.',
+          '• Clicking **Reset** clears the previously entered time, allowing you to enter a new one if a mistake was made.',
+          '• This applies to all tracking fields: Start Time, End Time, Break Start, and Break End.'
+        ],
+        images: ['/images/time-tracking-interface.png']
+      },
+      {
+        title: '2. Hours Calculations',
+        paragraphs: [
+          'The platform automatically calculates your total hours based on your entries:',
+          '',
+          '**Deduction Rule:** The total hours worked is calculated as (End Time - Start Time).',
+          '',
+          '**Lunch Breaks:** If you enter both a **Break Start** and **Break End** time, the duration of that lunch break is automatically deducted from your total hours.',
+          '',
+          '**Single Entries:** If you only enter one lunch break time (either start or end), it will be ignored in the final calculation.',
+          '',
+          'You can preview your **Estimated Total Hours** and **Estimated Pay** before submitting.'
+        ],
+        images: ['/images/hours-preview.png']
+      },
+      {
+        title: '3. Collecting Signatures and Submitting',
+        paragraphs: [
+          'Once times are recorded, you must finalize the times through the **"Submit"** button.',
+          '',
+          '**Signatures Required:** You must provide your own **Staff Signature** by drawing in the designated box.',
+          '',
+          'The timesheet summary will display:',
+          '• **Date** of the shift',
+          '• **Start Time** and **End Time** you recorded',
+          '',
+          'After drawing your signature, click **"Submit Timesheet"** to proceed.'
+        ],
+        images: ['/images/submit-timesheet-form.png']
+      },
+      {
+        title: 'Manager Verification',
+        paragraphs: [
+          'The practice manager must also provide their **Manager Signature**, enter their **Manager ID**, and give you a **Rating (1-5)** and optional **Remark**.',
+          '',
+          '**Important Information:**',
+          '• Each job has its own separate timesheet',
+          '• By signing, you confirm that the time entries for this job are accurate',
+          '• If both manager signature and ID are provided, the timesheet will be automatically approved and locked',
+          '• Signatures will be saved as images'
+        ],
+        images: ['/images/manager-signature-form.png']
+      },
+      {
+        title: 'Final Submission',
+        paragraphs: [
+          'Click **"Submit Timesheet"**. A success message will appear once the files are uploaded and the timesheet is submitted successfully.',
+          '',
+          '**Status Updates:**',
+          'After submission, your booking will show a **"COMPLETED"** status with a checkmark in My Bookings.'
+        ],
+        images: ['/images/timesheet-submitted-success.png']
+      }
+    ],
+    importantNotes: [
+      'Timesheet tab is where you record actual worked hours for correct payment',
+      'Bookings remain locked until 30 minutes before their scheduled start time',
+      'You must provide both Start Time and End Time to calculate total hours',
+      'Lunch breaks are only deducted if both Break Start and Break End times are entered',
+      'Staff signature is required before submission',
+      'Manager signature and ID are required for automatic approval',
+      'Each job has its own separate timesheet',
+      'Once submitted and approved, the booking status changes to COMPLETED'
+    ]
+  },
+
+  'enabling-push-notifications': {
+    title: 'Enabling Push Notifications',
+    content: [
+      {
+        title: 'Overview',
+        paragraphs: [
+          'Because Laks Dent is a Progressive Web App (PWA), you must "install" it to your device to receive alerts.'
+        ]
+      },
+      {
+        title: 'For iOS (iPhone/iPad)',
+        paragraphs: [
+          '**Step 1: Open Safari**',
+          'Navigate to the Laks Dent website at https://www.laksdentagency.co.uk/.',
+          '',
+          '**Step 2: Access Share Menu**',
+          'Tap the Share icon at the bottom of the browser, then click "More" if necessary to see all actions.'
+        ],
+        images: ['/images/pwa-share-icon.png']
+      },
+      {
+        title: 'Add to Home Screen',
+        paragraphs: [
+          '**Step 3: Select "Add to Home Screen"**',
+          'From the Share menu, scroll down and select **"Add to Home Screen"**.',
+          '',
+          '**Step 4: Confirm Installation**',
+          'Ensure "Open as Web App" is toggled on and tap **"Add"** to place the Laks Dent icon on your device\'s home screen.',
+          '',
+          '**Step 5: Grant Permission**',
+          'Open the newly installed app from your home screen; a prompt will appear asking to "Allow" notifications—select **Allow**.',
+          '',
+          '**Step 6: Locate the App**',
+          'The Laks Dent icon will now appear on your home screen like a standard app.'
+        ],
+        images: ['/images/add-to-home-screen-dialog.png']
+      },
+      {
+        title: 'Important',
+        paragraphs: [
+          'Your device must be running **iOS 16.4 or later** for PWA notification features to be supported.'
+        ]
+      },
+      {
+        title: 'For Android',
+        paragraphs: [
+          '**Step 1:** Open the site in Chrome and tap the **three dots** in the top right.',
+          '',
+          '**Step 2:** Select **"Install App"** or **"Add to Home Screen"**.',
+          '',
+          '**Step 3:** Accept the permission prompt when the app asks to send notifications.'
+        ],
+        images: ['/images/android-install-app.png']
+      },
+      {
+        title: 'What Notifications Will You Receive?',
+        paragraphs: [
+          'The system uses real-time alerts to ensure a smooth workflow between Staff and Practices:',
+          '',
+          '**Booking Alerts:** Receive immediate updates when a practice confirms your application.'
+        ],
+        images: ['/images/booking-alert-notification.png']
+      }
+    ],
+    importantNotes: [
+      'Laks Dent is a Progressive Web App (PWA) that must be installed to receive notifications',
+      'iOS devices must be running iOS 16.4 or later for PWA notification support',
+      'You must grant notification permissions when prompted after installation',
+      'The app icon will appear on your home screen like a standard app',
+      'Notifications provide real-time updates about booking confirmations and other important events',
+      'Make sure to allow notifications when the app first requests permission'
     ]
   },
 
@@ -403,6 +764,10 @@ export const sections = [
   { id: 'home-dashboard', title: 'Home (Dashboard Overview)' },
   { id: 'document-upload', title: 'Document Upload' },
   { id: 'appointment-requests', title: 'Appointment Requests' },
+  { id: 'essential-payment-setup', title: 'Essential Payment Setup' },
+  { id: 'my-bookings', title: 'My Bookings' },
+  { id: 'timesheet-submission', title: 'Timesheet Submission' },
+  { id: 'enabling-push-notifications', title: 'Enabling Push Notifications' },
   { id: 'troubleshooting', title: 'Troubleshooting' },
 ];
 
