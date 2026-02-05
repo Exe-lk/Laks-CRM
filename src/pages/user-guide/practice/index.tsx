@@ -12,7 +12,7 @@ const PracticeUserGuide = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentContent = practiceGuideData[selectedSection as keyof typeof practiceGuideData];
-  const hasSteps = currentContent?.steps && currentContent.steps.length > 0;
+  const hasSteps = currentContent && 'steps' in currentContent && Array.isArray(currentContent.steps) && currentContent.steps.length > 0;
   const hasContent = currentContent && 'content' in currentContent && Array.isArray((currentContent as any).content) && (currentContent as any).content.length > 0;
 
   return (
@@ -63,29 +63,6 @@ const PracticeUserGuide = () => {
         >
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="p-8 sm:p-12 mb-12">
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-6">
-                  <Image 
-                    src={Logo} 
-                    alt="Laks Dent Logo" 
-                    width={200} 
-                    height={120}
-                    className="object-contain"
-                  />
-                </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">
-                  Practice User Guide
-                </h1>
-                <p className="text-lg sm:text-xl text-gray-700 max-w-3xl mb-6">
-                  A PLATFORM TO CONNECT DENTAL PRACTICES WITH LOCUM STAFFS
-                </p>
-                <p className="text-base sm:text-lg text-gray-600 max-w-4xl">
-                  This manual provides step-by-step instructions for dental practices to register and manage locum staff on the platform. 
-                  The registration process allows dental practices to connect with qualified locum professionals.
-                </p>
-              </div>
-            </div>
 
             {/* Content */}
             <div className="bg-white rounded-xl shadow-lg p-8 sm:p-12 mb-8">
@@ -93,8 +70,8 @@ const PracticeUserGuide = () => {
                 {currentContent?.title}
               </h2>
               
-              {hasSteps ? (
-                currentContent.steps.map((step, index) => (
+              {hasSteps && 'steps' in currentContent ? (
+                currentContent.steps.map((step: { number: number; title: string; description?: string; instructions?: string[]; images?: string[] }, index: number) => (
                   <div key={step.number} className={`mb-16 ${index !== currentContent.steps.length - 1 ? 'border-b-2 border-gray-200 pb-16' : ''}`}>
                     <div className="flex flex-col lg:flex-row items-start gap-6">
                       <div className="flex-shrink-0">
@@ -118,7 +95,7 @@ const PracticeUserGuide = () => {
                           <div className="bg-gray-50 rounded-lg p-6 mb-6">
                             <h4 className="font-semibold text-black mb-3">Instructions:</h4>
                             <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm sm:text-base">
-                              {step.instructions.map((instruction, idx) => (
+                              {step.instructions.map((instruction: string, idx: number) => (
                                 <li key={idx} className="leading-relaxed">{instruction}</li>
                               ))}
                             </ol>
@@ -126,16 +103,16 @@ const PracticeUserGuide = () => {
                         )}
                         
                         {step.images && step.images.length > 0 && (
-                          <div className="grid grid-cols-1 gap-8">
-                            {step.images.map((imagePath, imgIdx) => (
-                              <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4 md:max-w-2xl md:mx-auto">
-                                <div className="relative w-full bg-white flex items-center justify-center min-h-[400px] md:min-h-[300px]">
+                          <div className="grid grid-cols-1 gap-6">
+                            {step.images.map((imagePath: string, imgIdx: number) => (
+                              <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-2 sm:p-3 md:p-4 w-full md:max-w-2xl md:mx-auto">
+                                <div className="relative w-full bg-white flex items-center justify-center">
                                   <Image
                                     src={imagePath}
                                     alt={`Step ${step.number} - Image ${imgIdx + 1}`}
                                     width={1600}
                                     height={1200}
-                                    className="w-full h-auto object-contain md:max-w-full"
+                                    className="w-full h-auto object-contain"
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
                                       target.style.display = 'none';
@@ -175,16 +152,16 @@ const PracticeUserGuide = () => {
                       )}
                       
                       {section.images && section.images.length > 0 && (
-                        <div className="grid grid-cols-1 gap-8 mt-6">
+                        <div className="grid grid-cols-1 gap-6 mt-6">
                           {section.images.map((imagePath: string, imgIdx: number) => (
-                            <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4 md:max-w-2xl md:mx-auto">
-                              <div className="relative w-full bg-white flex items-center justify-center min-h-[400px] md:min-h-[300px]">
+                            <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-2 sm:p-3 md:p-4 w-full md:max-w-2xl md:mx-auto">
+                              <div className="relative w-full bg-white flex items-center justify-center">
                                 <Image
                                   src={imagePath}
                                   alt={section.title ? `${section.title} - Image ${imgIdx + 1}` : `Image ${imgIdx + 1}`}
                                   width={1600}
                                   height={1200}
-                                  className="w-full h-auto object-contain md:max-w-full"
+                                  className="w-full h-auto object-contain"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';

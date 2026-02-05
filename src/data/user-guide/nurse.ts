@@ -639,7 +639,7 @@ export const nurseGuideData = {
           '',
           'After drawing your signature, click **"Submit Timesheet"** to proceed.'
         ],
-        images: ['/images/62.png','/images/61.jpeg']
+        images: ['/images/62.jpeg','/images/61.jpeg']
       },
       {
         title: 'Manager Verification',
@@ -652,7 +652,7 @@ export const nurseGuideData = {
           '• If both manager signature and ID are provided, the timesheet will be automatically approved and locked',
           '• Signatures will be saved as images'
         ],
-        images: ['/images/63']
+        images: ['/images/63.jpeg']
       },
       {
         title: 'Final Submission',
@@ -662,7 +662,7 @@ export const nurseGuideData = {
           '**Status Updates:**',
           'After submission, your booking will show a **"COMPLETED"** status with a checkmark in My Bookings.'
         ],
-        images: ['/images/64.png']
+        images: ['/images/64.jpeg']
       }
     ],
     importantNotes: [
@@ -729,7 +729,6 @@ export const nurseGuideData = {
           '',
           '**Step 3:** Accept the permission prompt when the app asks to send notifications.'
         ],
-        images: ['/images/android-install-app.png']
       },
       {
         title: 'What Notifications Will You Receive?',
