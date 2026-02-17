@@ -310,7 +310,7 @@ export const practiceGuideData = {
           '',
           '**Contact Us:**',
           '  • **Office Address:** 61 Griffiths Road, Wimbledon, London, England, SW19 1ST',
-          '  • **Phone Number:** 074 9071 4868',
+          '  • **Phone Number:** +44 7490 714868',
           '  • **Email:** info@locumlux.co.uk',
           '',
           '**Follow Us:**',

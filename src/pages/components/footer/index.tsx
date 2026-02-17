@@ -229,8 +229,8 @@ export default function Footer() {
                 <div className="bg-pink-100 p-2 rounded-full group-hover:bg-pink-200 transition-colors">
                   <MdPhoneAndroid className="text-pink-500 text-lg" />
                 </div>
-                <a href="tel:07490714868" className="text-gray-700 hover:text-pink-600 transition-colors font-medium">
-                074 9071 4868
+                <a href="tel:+447490714868" className="text-gray-700 hover:text-pink-600 transition-colors font-medium">
+                +44 7490 714868
                 </a>
               </div>
 
