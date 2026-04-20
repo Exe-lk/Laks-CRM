@@ -103,7 +103,7 @@ export default function ReviewSlider() {
             What Our <span className="bg-gradient-to-r from-[#4FD1C5] to-[#C3EAE7] bg-clip-text text-transparent">Clients Say</span>
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Real feedback from healthcare professionals using LocumLux
+            Real feedback from healthcare professionals using Laks Dent
           </p>
         </div>
 

@@ -85,7 +85,7 @@ const PaymentPage = () => {
             </svg>
             <div className="flex flex-col">
               <p className="text-sm font-semibold text-red-700">
-                Please add payment details first
+                Add Bank details to receive your Payments
               </p>
               <button
                 onClick={() => setIsAddCardModalOpen(true)}

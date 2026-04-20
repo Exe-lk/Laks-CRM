@@ -131,7 +131,7 @@ const DentalNurses = () => {
                 Dental Nurses
               </h2>
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
-                Use LocumLux Network to find Dental Practices.
+                Use Laks Dent Network to find Dental Practices.
               </p>
               <div className="max-w-7xl mx-auto px-4 mt-12">
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
@@ -197,7 +197,7 @@ const DentalNurses = () => {
                 They're done by a team of people. Let's work together and build up your profile for better Pay ((£))
               </h2>
               <h2 className="text-3xl lg:text-4xl text-black text-center mt-12">
-                WHY LOCUMLUX?
+                WHY LAKS DENT?
               </h2>
               <p className="text-base lg:text-xl text-gray-700 text-center max-w-2xl mx-auto mt-4">
                 Our agency supplies fully qualified and experienced Locum Dental Nurses and Hygienists to Greater London.
