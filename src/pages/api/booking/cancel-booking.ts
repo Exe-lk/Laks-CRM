@@ -56,7 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           practice: { 
             select: { 
               id: true,
-              name: true 
+              name: true,
+              practiceType: true
             } 
           },
           branch: { 
@@ -155,9 +156,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return {
         booking: cancelledBooking,
-        penalty: penaltyData
+        penalty: penaltyData,
+        practice: booking.practice
       };
     });
+
+    // Corporate practices: penalties are handled manually, but they should still be notified
+    // when a last-minute cancellation results in a penalty record.
+    if (
+      result.penalty &&
+      result.practice?.practiceType === 'Corporate' &&
+      (user_type === 'practice' || user_type === 'branch')
+    ) {
+      try {
+        await prisma.notification.create({
+          data: {
+            practiceId: result.practice.id,
+            message: `Last-minute cancellation recorded. A penalty of £${result.penalty.penaltyAmount.toFixed(2)} has been logged and will be handled manually by admin.`,
+            status: 'UNREAD',
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to create corporate cancellation notification:', notifyError);
+      }
+    }
 
     const responseMessage = result.penalty 
       ? `Booking cancelled successfully. A penalty of £${result.penalty.penaltyAmount.toFixed(2)} has been recorded and is pending admin review.`

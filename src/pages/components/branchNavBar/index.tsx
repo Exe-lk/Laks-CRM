@@ -435,13 +435,15 @@ const BranchNavBar = () => {
               >
                 My Bookings
               </li>
-              <li
-                className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/payment') ? 'bg-white text-black' : ''
-                  }`}
-                onClick={() => router.push('/branch/payment')}
-              >
-                Payment
-              </li>
+              {profile?.practiceType !== 'Corporate' && (
+                <li
+                  className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/payment') ? 'bg-white text-black' : ''
+                    }`}
+                  onClick={() => router.push('/branch/payment')}
+                >
+                  Payment
+                </li>
+              )}
             </>
           )}
           {
@@ -536,13 +538,15 @@ const BranchNavBar = () => {
                     >
                       My Bookings
                     </li>
-                    <li
-                      className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/payment') ? 'bg-white text-black' : ''
-                        }`}
-                      onClick={() => { router.push('/branch/payment'); closeMobileMenu(); }}
-                    >
-                      Payment
-                    </li>
+                    {profile?.practiceType !== 'Corporate' && (
+                      <li
+                        className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/payment') ? 'bg-white text-black' : ''
+                          }`}
+                        onClick={() => { router.push('/branch/payment'); closeMobileMenu(); }}
+                      >
+                        Payment
+                      </li>
+                    )}
                     <li className="flex flex-col items-center space-y-3">
                       {profile?.name && profile?.practiceName && (
                         <div className="text-center w-full py-2 px-3 bg-white rounded-lg">
