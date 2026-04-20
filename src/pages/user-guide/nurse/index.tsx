@@ -101,16 +101,22 @@ const NurseUserGuide = () => {
                         )}
                         
                         {step.images && step.images.length > 0 && (
-                          <div className="grid grid-cols-1 gap-8">
+                          <div className="grid grid-cols-1 gap-6">
                             {step.images.map((imagePath, imgIdx) => (
-                              <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4 md:max-w-2xl md:mx-auto">
-                                <div className="relative w-full bg-white flex items-center justify-center min-h-[400px] md:min-h-[300px]">
+                              <div key={imgIdx} className="w-full flex justify-center">
+                                <div className="relative w-full flex items-center justify-center">
                                   <Image
                                     src={imagePath}
                                     alt={`Step ${step.number} - Image ${imgIdx + 1}`}
                                     width={1600}
                                     height={1200}
-                                    className="w-full h-auto object-contain md:max-w-full"
+                                    className="w-full h-auto object-contain rounded-lg"
+                                    style={{ 
+                                      maxWidth: 'min(100%, 1200px)',
+                                      maxHeight: '85vh',
+                                      width: 'auto',
+                                      height: 'auto'
+                                    }}
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
                                       target.style.display = 'none';
@@ -201,16 +207,22 @@ const NurseUserGuide = () => {
                       )}
                       
                       {section.images && section.images.length > 0 && (
-                        <div className="grid grid-cols-1 gap-8 mt-6">
+                        <div className="grid grid-cols-1 gap-6 mt-6">
                           {section.images.map((imagePath: string, imgIdx: number) => (
-                            <div key={imgIdx} className="bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md hover:shadow-lg transition-shadow p-4 md:max-w-2xl md:mx-auto">
-                              <div className="relative w-full bg-white flex items-center justify-center min-h-[400px] md:min-h-[300px]">
+                            <div key={imgIdx} className="w-full flex justify-center">
+                              <div className="relative w-full flex items-center justify-center">
                                 <Image
                                   src={imagePath}
                                   alt={section.title ? `${section.title} - Image ${imgIdx + 1}` : `Image ${imgIdx + 1}`}
                                   width={1600}
                                   height={1200}
-                                  className="w-full h-auto object-contain md:max-w-full"
+                                  className="w-full h-auto object-contain rounded-lg"
+                                  style={{ 
+                                    maxWidth: 'min(100%, 1200px)',
+                                    maxHeight: '85vh',
+                                    width: 'auto',
+                                    height: 'auto'
+                                  }}
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = 'none';

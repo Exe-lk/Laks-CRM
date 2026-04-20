@@ -21,7 +21,7 @@ const DentalPractices = () => {
                 Dental Practices
               </h2>
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
-                Dental Practices - Use LocumLux Search Engine to find your appropriate Locum Nurse in the vicinity.
+                Dental Practices - Use Laks Dent Search Engine to find your appropriate Locum Nurse in the vicinity.
               </p>
               <div className="max-w-7xl mx-auto px-4 mt-12">
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">

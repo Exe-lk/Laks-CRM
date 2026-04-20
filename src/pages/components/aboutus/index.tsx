@@ -12,7 +12,7 @@ const AboutUs = () => {
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-4 lg:mb-6">
               <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4">
-                About LOCUMLUX
+                About LAKS DENT
               </h2>
               <p className="text-lg lg:text-xl text-gray-700 max-w-2xl mx-auto">
                 Our objective is to provide you a luxury and quality cost effective service.
@@ -31,74 +31,55 @@ const AboutUs = () => {
                 Introduction
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                LocumLux is a leading dental locum staffing company that specialises in matching dental professionals with dental practices demand. Our
-                sister company Lux Dent Agency was founded in 2017 and the experienced staffs have brainstormed that idea since 2018, however, 2 –
-                IT companies took away our monies without completing the project.
-                We didn't give up and we came back with even better ideas and latest technologies to accomplish that project.
+                Laks Dent Agency is a leading dental locum staffing company specialising in matching qualified dental professionals with the staffing needs of dental practices. Our sister company, Lux Dent Agency, was established in 2017, and the concept for this platform was developed by our experienced team in 2018. Although two IT companies failed to complete the project despite significant financial investment, we remained determined and resilient. Rather than giving up, we returned with stronger ideas and embraced the latest technologies to bring our vision to life.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Company Overview
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                LocumLux in providing temporary staffing solutions for dental practices facing staffing shortages due to reasons such as maternity leave, illness, or
-                vacation. Their network includes dentists, dental hygienists, dental assistants, and administrative staff,
-                ensuring that practices can maintain seamless operations even during staffing transitions.
+                Laks Dent Agency provides temporary staffing solutions for dental practices experiencing staff shortages due to maternity leave, illness, annual leave, or other unforeseen circumstances. Our network includes dentists, dental hygienists, dental nurses, and administrative professionals, enabling practices to maintain continuity and efficiency during periods of transition.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 History and Background
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                We founded LocumLux with the vision of creating a reliable and efficient platform to matchtalented locum dental professionals
-                with practices in need of temporary support. Drawing on our own experiences in the locum dental field, We recognised the challenges
-                practices faced when searching for temporary staff and sought to address this gap in the market.
+                Laks Dent Agency was founded with the vision of creating a dependable and efficient platform that connects skilled locum dental professionals with practices requiring temporary support. Drawing upon our own experience within the dental locum sector, we recognised the difficulties practices often encounter when seeking suitably qualified temporary staff at short notice. Our aim was to address this gap by delivering a practical, professional, and reliable solution.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Industry Analysis
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                The dental industry faces unique staffing challenges, with practices often struggling to find qualified professionals to fill temporary positions
-                at short notice. LocumLux addresses this need by offering a streamlined platform that connects practices with pre-screened,
-                experienced dental professionals, reducing the time and effort involved in the hiring process.
+                The dental industry faces distinctive staffing challenges, particularly when practices are required to secure qualified professionals within limited timeframes. Laks Dent Agency addresses this growing demand through a streamlined platform that connects practices with experienced, pre-screened dental professionals. This significantly reduces the time, uncertainty, and administrative burden typically associated with temporary recruitment.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Services Offered
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                LocumLux offers a range of services to both dental practices and dental professionals. For practices, We provide access to a diverse pool of temporary
-                staff, tailored to meet specific staffing requirements. For dental professionals, LocumLux offers flexible opportunities to work in various practice
-                settings, allowing them to gain valuable experience and expand their professional network.
+                Laks Dent Agency provides a comprehensive range of services for both dental practices and dental professionals. For practices, we offer access to a broad and diverse pool of temporary staff, tailored to meet specific operational and clinical requirements. For dental professionals, we provide flexible opportunities to work across a variety of practice environments, enabling them to broaden their experience, enhance their skills, and expand their professional networks.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Quality Assurance
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                LocumLux prioritises quality assurance and ensures that all dental professionals in their network undergo rigorous screening and credentialing processes.
-                This includes verifying licenses, certifications, and professional references to guarantee that only
-                the most qualified candidates are presented to practices.
+                At Laks Dent Agency, quality assurance is of paramount importance. Every dental professional within our network undergoes a thorough screening and credential verification process. This includes the confirmation of licences, certifications, and professional references, ensuring that only suitably qualified and competent candidates are introduced to practices.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Client Testimonials
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                "LocumLux" has been a lifesaver for our practice! Whenever we need temporary staff, they always come through with reliable professionals who
-                fit seamlessly into our team. Their attention to detail and commitment to
-                customer service are unparalleled." - Dr. Shray Patel at Perfect Smile Parsons Green.
+                Laks Dent Agency delivers reliable staffing solutions to both independent dental practices and corporate organisations, supporting the full spectrum of general and specialist dentistry. Our professionals are carefully selected to ensure a smooth integration into each practice, while our strong focus on quality, precision, and client service sets us apart in the sector. As a reference, we provide services to: Perfect Smile, Together Dental, Dental Beauty, The Dental Lounge Wimbledon and many more.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Future Outlook
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                As the demand for temporary staffing solutions continues to grow in the dental industry, LocumLux is poised for expansion. With a focus on innovation
-                and customer satisfaction, the company
-                plans to enhance its platform with advanced features and tools to further streamline the staffing process for practices and professionals alike.
+                As demand for temporary staffing solutions continues to rise across the dental sector, Laks Dent Agency is strategically positioned for sustained growth and development. With a firm commitment to innovation, service quality, and cost-effectiveness, the company aims to establish itself as one of the most efficient and competitively priced agencies in the UK, creating lasting value for both dental practices and locum nurses.
               </p>
               <h2 className="text-xl lg:text-2xl font-semibold text-black mb-4 mt-6">
                 Conclusion
               </h2>
               <p className="text-base lg:text-xl text-gray-700">
-                Smile Staffing Solutions is committed to providing exceptional temporary staffing solutions that meet the
-                unique needs of dental practices and professionals. With a dedication to quality, reliability, and customer service,
-                Smile Staffing Solutions is shaping the future of temporary staffing in the dental industry.
+                Laks Dent Agency is committed to delivering exceptional temporary staffing solutions tailored to the unique needs of dental practices and dental professionals. Through our dedication to quality, reliability, and outstanding customer service, we are helping to shape the future of temporary staffing within the dental industry
               </p>
             </div>
           </div>

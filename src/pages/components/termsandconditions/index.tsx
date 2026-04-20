@@ -367,7 +367,7 @@ const TermsAndConditions = () => {
                                         <p className="text-black mb-2"><strong>Address:</strong> 61 Griffiths Road, Wimbledon, SW19 1ST</p>
                                         <p className="text-black mb-2"><strong>Email:</strong> <a href="mailto:info@laksdentagency.co.uk" className="text-blue-600 hover:text-blue-800 underline">info@laksdentagency.co.uk</a></p>
                                         <p className="text-black mb-2"><strong>Website:</strong> <a href="http://www.laksdentagency.co.uk" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">www.laksdentagency.co.uk</a></p>
-                                        <p className="text-black"><strong>Tel:</strong> <a href="tel:07490714868" className="text-blue-600 hover:text-blue-800 underline">074 9071 4868</a></p>
+                                        <p className="text-black"><strong>Tel:</strong> <a href="tel:+447490714868" className="text-blue-600 hover:text-blue-800 underline">+44 7490 714868</a></p>
                                     </div>
                                 </section>
 
