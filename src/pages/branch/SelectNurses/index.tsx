@@ -6,7 +6,6 @@ import { FiPlus, FiAlertTriangle } from "react-icons/fi";
 import Swal from 'sweetalert2';
 import { useFormik } from 'formik';
 import { useCreateAppointmentRequestMutation, useGetPracticeRequestsQuery, useGetBranchRequestsQuery } from '../../../redux/slices/appointmentPracticeSlice';
-import { useCheckBranchHasPaymentMethodsQuery } from '../../../redux/slices/cardPracticerUserBranchSlice';
 import { useRouter } from 'next/router';
 
 interface Profile {
@@ -163,14 +162,6 @@ const CreateAppointmentPage = () => {
     const [createAppointmentRequest, { isLoading: isCreatingAppointment }] = useCreateAppointmentRequestMutation();
 
     const {
-        data: cardStatusData,
-        isLoading: isLoadingCardStatus
-    } = useCheckBranchHasPaymentMethodsQuery(profile?.id || '', {
-        skip: !profile?.id
-    });
-    console.log(cardStatusData)
-
-    const {
         data: practiceRequestsData,
         isLoading: isLoadingRequests,
         refetch: refetchRequests
@@ -304,28 +295,8 @@ const CreateAppointmentPage = () => {
         });
     }, [formik.isValid, formik.errors, formik.values, formik.touched]);
 
-    const isCorporatePractice = profile?.practiceType === 'Corporate';
 
     const openAppointmentModal = async () => {
-        // Check if branch has payment methods before allowing appointment creation
-        if (!isCorporatePractice && cardStatusData && !cardStatusData.hasCards) {
-            const result = await Swal.fire({
-                title: 'Payment Method Required',
-                text: 'You need to add a payment method before creating appointments. Would you like to add one now?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Add Payment Method',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#C3EAE7',
-                cancelButtonColor: '#6B7280',
-            });
-
-            if (result.isConfirmed) {
-                router.push('/branch/payment');
-            }
-            return;
-        }
-
         if (profile?.id) {
             const hasLocation = profile.location && profile.location.trim();
             const hasAddress = profile.address && profile.address.trim();
@@ -379,26 +350,6 @@ const CreateAppointmentPage = () => {
                 confirmButtonColor: '#C3EAE7',
             });
             return;
-        }
-
-        if (!isCorporatePractice && cardStatusData && !cardStatusData.hasCards) {
-            const result = await Swal.fire({
-                title: 'Payment Method Required',
-                text: 'You need to add a payment method before creating appointments. Would you like to add one now?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Add Payment Method',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#C3EAE7',
-                cancelButtonColor: '#6B7280',
-            });
-
-            if (result.isConfirmed) {
-                router.push('/branch/payment');
-                return;
-            } else {
-                return;
-            }
         }
 
         try {
@@ -501,35 +452,11 @@ const CreateAppointmentPage = () => {
                             <div className="flex flex-col items-center">
                                 <button
                                     onClick={openAppointmentModal}
-                                    disabled={isLoadingCardStatus || (!isCorporatePractice && !cardStatusData?.hasCards)}
-                                    className={`flex items-center gap-2 px-8 py-4 font-bold rounded-xl 
-                                         transition-all duration-200 shadow-lg
-                                         ${isLoadingCardStatus || (!isCorporatePractice && !cardStatusData?.hasCards)
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105'
-                                        }`}
+                                    className="flex items-center gap-2 px-8 py-4 font-bold rounded-xl bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105 transition-all duration-200 shadow-lg"
                                 >
                                     <FiPlus className="text-xl" />
-                                    {isLoadingCardStatus ? 'Loading...' : 'Create New Appointment'}
+                                    Create New Appointment
                                 </button>
-                                {!isCorporatePractice && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
-                                    <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
-                                        <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <div className="flex flex-col">
-                                            <p className="text-sm font-semibold text-red-700">
-                                                Add Bank details to receive your Payments
-                                            </p>
-                                            <button
-                                                onClick={() => router.push('/branch/payment')}
-                                                className="text-xs text-red-600 underline hover:text-red-800 text-left mt-1"
-                                            >
-                                                Click here to add payment method
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
