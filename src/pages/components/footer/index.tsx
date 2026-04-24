@@ -238,8 +238,8 @@ export default function Footer() {
                 <div className="bg-blue-100 p-2 rounded-full group-hover:bg-blue-200 transition-colors">
                   <MdEmail className="text-blue-500 text-lg" />
                 </div>
-                <a href="mailto:info@locumlux.co.uk" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                info@locumlux.co.uk
+                <a href="mailto:info@laksdentagency.co.uk" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+                info@laksdentagency.co.uk
                 </a>
               </div>
             </div>
