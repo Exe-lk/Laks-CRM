@@ -147,30 +147,39 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="py-16 lg:py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
+        {/* Quote banner */}
+        <section className="py-12 lg:py-16 bg-white">
+          <div className="max-w-4xl mx-auto px-8">
+            <div className="border-l-4 border-gray-300 pl-6">
+              <p className="text-xl lg:text-2xl font-semibold text-gray-800 leading-relaxed">
+                <span className="text-3xl text-gray-400 font-serif leading-none mr-2">"</span>
+                With five years of expertise, we have developed an affordable, efficient platform designed to serve both Practices and Locums
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Clock image + description */}
+        <section className="py-12 lg:py-16 bg-white">
+          <div className="max-w-5xl mx-auto px-8">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-              <div className="space-y-4">
-                <div className="relative w-full max-w-md mx-auto lg:mx-0">
+              <div className="space-y-3">
+                <div className="relative w-full max-w-sm mx-auto lg:mx-0">
                   <Image
                     src={image5}
                     alt="Clock showing time"
                     width={500}
                     height={350}
-                    className="w-full h-auto object-cover rounded-lg"
+                    className="w-full h-auto object-cover"
                   />
                 </div>
+                <p className="text-sm text-gray-600">Laks Dent – My Grandma took 50secs to register.</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="space-y-5">
-                  <div>
-                    <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-2">Company Overview</h3>
-                    <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
-                      Laks Dent Agency provides temporary staffing solutions for dental practices experiencing staff shortages due to maternity leave, illness, annual leave, or other unforeseen circumstances. Our network includes dentists, dental hygienists, dental nurses, and administrative professionals, enabling practices to maintain continuity and efficiency during periods of transition.
-                    </p>
-                  </div>
-                </div>
+              <div className="flex items-start pt-4">
+                <p className="text-base lg:text-lg text-gray-800 leading-relaxed">
+                Laks Dent has created a rapid and user-friendly step-by-step system, allowing users to register in under a minute and complete each selected step in less than a minute.
+                </p>
               </div>
             </div>
           </div>
