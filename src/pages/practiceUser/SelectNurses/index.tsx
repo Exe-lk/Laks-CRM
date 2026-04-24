@@ -253,10 +253,10 @@ const CreateAppointmentPage = () => {
         });
     }, [formik.isValid, formik.errors, formik.values, formik.touched]);
 
-    const isCorporatePractice = profile?.practiceType === 'Corporate';
+    const isIndividualPractice = profile?.practiceType === 'Individual';
 
     const openAppointmentModal = async () => {
-        if (!isCorporatePractice && cardStatusData && !cardStatusData.hasCards) {
+        if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
                 text: 'You need to add a payment card before creating appointments. Would you like to add one now?',
@@ -313,7 +313,7 @@ const CreateAppointmentPage = () => {
     };
 
     const handleFormSubmit = async (values: typeof formik.values) => {
-        if (!isCorporatePractice && cardStatusData && !cardStatusData.hasCards) {
+        if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
                 text: 'You need to add a payment card before creating appointments. Would you like to add one now?',
@@ -404,25 +404,25 @@ const CreateAppointmentPage = () => {
                         <div className="flex flex-col items-center">
                             <button
                                 onClick={openAppointmentModal}
-                                disabled={isLoadingCardStatus || (!isCorporatePractice && !cardStatusData?.hasCards)}
+                                disabled={isIndividualPractice && isLoadingCardStatus}
                                 className={`flex items-center gap-2 px-8 py-4 font-bold rounded-xl 
                                          transition-all duration-200 shadow-lg
-                                         ${isLoadingCardStatus || (!isCorporatePractice && !cardStatusData?.hasCards)
+                                         ${isIndividualPractice && isLoadingCardStatus
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105'
                                     }`}
                             >
                                 <FiPlus className="text-xl" />
-                                {isLoadingCardStatus ? 'Loading...' : 'Create New Appointment'}
+                                {isIndividualPractice && isLoadingCardStatus ? 'Loading...' : 'Create New Appointment'}
                             </button>
-                            {!isCorporatePractice && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
+                            {isIndividualPractice && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
                                 <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
                                     <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                     <div className="flex flex-col">
                                         <p className="text-sm font-semibold text-red-700">
-                                            Add Bank details to receive your Payments
+                                            Add a payment card to create appointments
                                         </p>
                                         <button
                                             onClick={() => router.push('/practiceUser/payment')}
