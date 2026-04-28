@@ -69,7 +69,7 @@ const LocumStaffRequestList = () => {
         }
         
         const result = await Swal.fire({
-            title: 'Confirm Application',
+            title: 'Confirm Job',
             text: 'Are you sure you want to apply for this appointment?',
             icon: 'question',
             showCancelButton: true,
