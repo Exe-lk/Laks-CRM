@@ -354,7 +354,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                         </div>
                         {typeof applicant.locumProfile.hourlyPayRate === 'number' && applicant.locumProfile.hourlyPayRate !== undefined && (
                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                            Hourly Pay Rate:{' '}
+                            Agency Rate:{' '}
                             <span className="font-medium text-green-700">
                               £{applicant.locumProfile.hourlyPayRate.toFixed(2)}/hour
                             </span>
