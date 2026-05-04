@@ -406,7 +406,7 @@ const NavBar = () => {
                   }`}
                 onClick={() => router.push('/locumStaff/myBookings')}
               >
-                My Bookings
+                My Booking
               </li>
               <li
                 className={`hover:text-blue-600 text-base cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/locumStaff/timesheet') ? 'bg-white text-black' : ''
@@ -531,7 +531,7 @@ const NavBar = () => {
                         }`}
                       onClick={() => { router.push('/locumStaff/myBookings'); closeMobileMenu(); }}
                     >
-                      My Bookings
+                      My Booking
                     </li>
                     <li
                       className={`hover:text-blue-600  text-sm cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/locumStaff/timesheet') ? 'bg-white text-black' : ''

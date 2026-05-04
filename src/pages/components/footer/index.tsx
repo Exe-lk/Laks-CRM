@@ -110,12 +110,12 @@ export default function Footer() {
             <div className="flex flex-col items-start">
               <img
                 src={imageLogo.src}
-                alt="Locum Lux Logo"
+                alt="Laks dent logo"
                 className="w-28 lg:w-32 mb-3 hover:scale-105 transition-transform duration-300"
               />
               <div className="text-sm lg:text-base text-gray-700 leading-relaxed">
                 <p className="mb-1">
-                  <span className="font-semibold text-gray-800">Locumlux</span> is a trading name & owned by
+                  <span className="font-semibold text-gray-800">Laks dent</span> is a trading name & owned by
                   <span className="font-bold text-gray-900 block mt-1">LUX DENT AGENCY LIMITED</span>
                 </p>
                 <div className="space-y-1 mt-2 text-sm">
@@ -295,7 +295,7 @@ export default function Footer() {
               </a>
             </div>
             <p className="text-gray-600 font-medium">
-              © {new Date().getFullYear()} <span className="text-gray-800">Locum Lux</span>. All rights reserved.
+              © {new Date().getFullYear()} <span className="text-gray-800">Laks dent</span>. All rights reserved.
             </p>
           </div>
         </div>
