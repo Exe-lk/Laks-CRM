@@ -107,8 +107,8 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   const [cancelBooking] = useCancelBookingMutation();
 
   const allBookings = bookingsResponse?.data || [];
-  // For locum, show all bookings (past and upcoming). For practice/branch, show only upcoming.
-  const displayBookings = userType === 'locum' ? allBookings : allBookings.filter((booking: Booking) => !booking.is_past);
+  // Show past and upcoming for all roles so practices/branches can see history, not only future shifts.
+  const displayBookings = allBookings;
   
   const branchStrings = displayBookings
     .filter((booking: Booking) => booking.branch)
@@ -311,6 +311,27 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  const getShiftDurationHours = (startTime: string, endTime: string): number => {
+    const toMinutes = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+    };
+    const start = toMinutes(startTime);
+    const end = toMinutes(endTime);
+    let diff = end - start;
+    if (diff <= 0) diff += 24 * 60;
+    return diff / 60;
+  };
+
+  /** Estimated shift cost for the practice: shift length × locum agency hourly rate (when available). */
+  const getBookingEstimatedTotal = (booking: Booking): number | null => {
+    const rate = booking.locumProfile?.hourlyPayRate;
+    if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) return null;
+    const hours = getShiftDurationHours(booking.booking_start_time, booking.booking_end_time);
+    if (!Number.isFinite(hours) || hours <= 0) return null;
+    return hours * rate;
   };
 
   const getStatusIcon = (status: string) => {
@@ -650,6 +671,15 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         <FiClock className="text-[#C3EAE7]" />
                         {formatTime(booking.booking_start_time)} - {formatTime(booking.booking_end_time)}
                       </div>
+                      {userType !== 'locum' && (() => {
+                        const est = getBookingEstimatedTotal(booking);
+                        if (est == null) return null;
+                        return (
+                          <div className="text-xs font-medium text-emerald-800 mt-1.5" title="Shift length × agency rate (estimate before extras)">
+                            Est. total £{est.toFixed(2)}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </td>
                   {hasBranches && (
