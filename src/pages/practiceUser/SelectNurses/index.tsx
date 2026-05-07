@@ -110,10 +110,10 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         } else {
             const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
             if (diffMinutes < 30) {
-                errors.request_end_time = 'Appointment must be at least 30 minutes long';
+                errors.request_end_time = 'Booking must be at least 30 minutes long';
             }
             if (diffMinutes > 720) {
-                errors.request_end_time = 'Appointment cannot exceed 12 hours';
+                errors.request_end_time = 'Booking cannot exceed 12 hours';
             }
         }
     }
@@ -259,7 +259,7 @@ const CreateAppointmentPage = () => {
         if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
-                text: 'You need to add a payment card before creating appointments. Would you like to add one now?',
+                text: 'You need to add a payment card before creating bookings. Would you like to add one now?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, Add Payment Card',
@@ -316,7 +316,7 @@ const CreateAppointmentPage = () => {
         if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
-                text: 'You need to add a payment card before creating appointments. Would you like to add one now?',
+                text: 'You need to add a payment card before creating bookings. Would you like to add one now?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, Add Payment Card',
@@ -342,7 +342,7 @@ const CreateAppointmentPage = () => {
                 submissionValues.branch_id = '';
             }
 
-            console.log('Submitting appointment request with values:', {
+            console.log('Submitting booking request with values:', {
                 practice_id: submissionValues.practice_id,
                 request_date: submissionValues.request_date,
                 request_start_time: submissionValues.request_start_time,
@@ -357,18 +357,18 @@ const CreateAppointmentPage = () => {
 
             Swal.fire({
                 icon: 'success',
-                title: 'Appointment Created!',
-                text: result.message || 'Appointment request has been created successfully.',
+                title: 'Booking Created!',
+                text: result.message || 'Booking request has been created successfully.',
                 confirmButtonColor: '#C3EAE7',
             });
             closeAppointmentModal();
             refetchRequests();
         } catch (error: any) {
-            console.error("Error creating appointment:", error);
+            console.error("Error creating booking:", error);
             Swal.fire({
                 icon: 'error',
                 title: 'Failed',
-                text: error.data?.error || error.message || 'Failed to create appointment. Please try again.',
+                text: error.data?.error || error.message || 'Failed to create booking. Please try again.',
                 confirmButtonColor: '#C3EAE7',
             });
         }
@@ -390,9 +390,9 @@ const CreateAppointmentPage = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />
                         </svg>
                     </div>
-                    <h1 className="text-4xl font-bold text-black mb-2">Create Appointment Request</h1>
+                    <h1 className="text-4xl font-bold text-black mb-2">Create Booking Request</h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Schedule your appointment by filling out the form below with all required details.
+                        Schedule your booking by filling out the form below with all required details.
                     </p>
                     <div className="flex justify-center gap-2 mt-4">
                         <div className="w-2 h-2 bg-[#C3EAE7] rounded-full animate-pulse"></div>
@@ -413,7 +413,7 @@ const CreateAppointmentPage = () => {
                                     }`}
                             >
                                 <FiPlus className="text-xl" />
-                                {isIndividualPractice && isLoadingCardStatus ? 'Loading...' : 'Create New Appointment'}
+                                {isIndividualPractice && isLoadingCardStatus ? 'Loading...' : 'Create New Booking'}
                             </button>
                             {isIndividualPractice && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
                                 <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
@@ -422,7 +422,7 @@ const CreateAppointmentPage = () => {
                                     </svg>
                                     <div className="flex flex-col">
                                         <p className="text-sm font-semibold text-red-700">
-                                            Add a payment card to create appointments
+                                            Add a payment card to create bookings
                                         </p>
                                         <button
                                             onClick={() => router.push('/practiceUser/payment')}
@@ -451,7 +451,7 @@ const CreateAppointmentPage = () => {
             {isAppointmentModalOpen && (
                 <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-black text-center">Create Appointment Request</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-black text-center">Create Booking Request</h2>
 
                         <form onSubmit={formik.handleSubmit} className="space-y-4">
 

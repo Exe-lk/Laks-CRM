@@ -111,16 +111,16 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
       <div className="px-6 py-4 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] border-b">
         <div className="flex items-center gap-3">
           <FiCalendar className="text-2xl text-gray-700" />
-          <h2 className="text-2xl font-bold text-gray-800">Your Appointment Requests</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Your Booking Requests</h2>
         </div>
-        <p className="text-gray-600 mt-1">Manage and track your appointment requests</p>
+        <p className="text-gray-600 mt-1">Manage and track your booking requests</p>
       </div>
 
       {requests.length === 0 ? (
         <div className="p-12 text-center">
           <FiCalendar className="text-6xl text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-500 mb-2">No Appointments Found</h3>
-          <p className="text-gray-400">You haven't created any appointment requests yet.</p>
+          <h3 className="text-xl font-semibold text-gray-500 mb-2">No Bookings Found</h3>
+          <p className="text-gray-400">You haven't created any booking requests yet.</p>
         </div>
       ) : (
         <>

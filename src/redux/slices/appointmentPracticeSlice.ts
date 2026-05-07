@@ -146,6 +146,7 @@ export interface JobDetails {
     name: string;
     location: string;
     address: string;
+    hourlyPayRate?: number;
   };
   branch?: {
     id: string;

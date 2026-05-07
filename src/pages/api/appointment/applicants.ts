@@ -32,7 +32,8 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                 select:{
                     name:true,
                     location:true,
-                    address:true
+                    address:true,
+                    hourlyPayRate:true
                 }
             },
             branch:{

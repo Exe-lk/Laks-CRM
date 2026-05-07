@@ -57,7 +57,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             select: { 
               id: true,
               name: true,
-              practiceType: true
+              practiceType: true,
+              hourlyPayRate: true
             } 
           },
           branch: { 
@@ -95,11 +96,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       let penaltyData = null;
       
-      // Check if penalty should be applied (penalty_amount > 0 means there's a penalty)
+      // Check if penalty should be applied
       if (penalty_amount && penalty_amount > 0) {
         let chargedLocumId: string | null = null;
         let chargedPracticeId: string | null = null;
         let cancelledPartyType: string;
+        let effectiveHourlyRate = 0;
+        const parsedPenaltyHours = Number(penalty_hours) || 0;
 
         if (user_type === 'locum') {
           // Locum is cancelling - locum gets charged
@@ -108,13 +111,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
           chargedLocumId = booking.locum_id;
           cancelledPartyType = 'locum';
+          effectiveHourlyRate = booking.locumProfile?.hourlyPayRate || 0;
         } else {
           // Practice or Branch is cancelling - practice gets charged
           chargedPracticeId = booking.practice_id;
           cancelledPartyType = 'practice';
+          effectiveHourlyRate = booking.practice?.hourlyPayRate || 0;
         }
 
-        // Create penalty record with frontend-calculated values
+        // Always persist penalty with the effective charged party rate.
+        const resolvedHourlyRate = effectiveHourlyRate > 0 ? effectiveHourlyRate : (Number(hourly_rate) || 0);
+        const resolvedPenaltyAmount = parsedPenaltyHours > 0
+          ? parsedPenaltyHours * resolvedHourlyRate
+          : (Number(penalty_amount) || 0);
+
         penaltyData = await tx.cancellationPenalty.create({
           data: {
             bookingId: booking_id,
@@ -125,9 +135,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             appointmentStartTime: bookingDateTime,
             cancellationTime: now,
             hoursBeforeAppointment: hours_until_booking,
-            penaltyHours: penalty_hours,
-            hourlyRate: hourly_rate,
-            penaltyAmount: penalty_amount,
+            penaltyHours: parsedPenaltyHours,
+            hourlyRate: resolvedHourlyRate,
+            penaltyAmount: resolvedPenaltyAmount,
             status: 'PENDING',
             reason: cancellation_reason || `Cancelled by ${user_type}`
           }

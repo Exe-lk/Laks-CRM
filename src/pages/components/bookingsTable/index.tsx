@@ -16,6 +16,7 @@ interface Practice {
   telephone: string;
   location: string;
   address: string;
+  hourlyPayRate?: number;
 }
 
 interface Branch {
@@ -216,8 +217,13 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     let penaltyAmount = 0;
     let penaltyMessage = '';
 
-    if (hoursUntilBooking <= 48 && booking.locumProfile?.hourlyPayRate) {
-      const hourlyRate = booking.locumProfile.hourlyPayRate;
+    const penaltyRate =
+      userType === 'locum'
+        ? booking.locumProfile?.hourlyPayRate
+        : booking.practice?.hourlyPayRate;
+
+    if (hoursUntilBooking <= 48 && penaltyRate) {
+      const hourlyRate = penaltyRate;
       
       if (hoursUntilBooking <= 24) {
         penaltyHours = 6;
@@ -263,7 +269,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
           hours_until_booking: hoursUntilBooking,
           penalty_hours: penaltyHours,
           penalty_amount: penaltyAmount,
-          hourly_rate: booking.locumProfile?.hourlyPayRate || 0
+          hourly_rate: userType === 'locum'
+            ? (booking.locumProfile?.hourlyPayRate || 0)
+            : (booking.practice?.hourlyPayRate || 0)
         };
         
         console.log('Cancel request data:', cancelData);
@@ -325,9 +333,11 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     return diff / 60;
   };
 
-  /** Estimated shift cost for the practice: shift length × locum agency hourly rate (when available). */
+  /** Estimated shift cost: shift length × applicable hourly rate. */
   const getBookingEstimatedTotal = (booking: Booking): number | null => {
-    const rate = booking.locumProfile?.hourlyPayRate;
+    const rate = userType === 'locum'
+      ? booking.locumProfile?.hourlyPayRate
+      : booking.practice?.hourlyPayRate;
     if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) return null;
     const hours = getShiftDurationHours(booking.booking_start_time, booking.booking_end_time);
     if (!Number.isFinite(hours) || hours <= 0) return null;

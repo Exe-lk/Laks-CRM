@@ -113,10 +113,10 @@ const validateAppointmentForm = (values: FormValues, practiceType?: string) => {
         } else {
             const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
             if (diffMinutes < 30) {
-                errors.request_end_time = 'Appointment must be at least 30 minutes long';
+                errors.request_end_time = 'Booking must be at least 30 minutes long';
             }
             if (diffMinutes > 720) {
-                errors.request_end_time = 'Appointment cannot exceed 12 hours';
+                errors.request_end_time = 'Booking cannot exceed 12 hours';
             }
         }
     }
@@ -346,31 +346,31 @@ const CreateAppointmentPage = () => {
             Swal.fire({
                 icon: 'error',
                 title: 'Access Denied',
-                text: 'Only branch users can create appointments.',
+                text: 'Only branch users can create bookings.',
                 confirmButtonColor: '#C3EAE7',
             });
             return;
         }
 
         try {
-            console.log('Submitting appointment request with values:', values);
+            console.log('Submitting booking request with values:', values);
 
             const result = await createAppointmentRequest(values).unwrap();
 
             Swal.fire({
                 icon: 'success',
-                title: 'Appointment Created!',
-                text: result.message || 'Appointment request has been created successfully.',
+                title: 'Booking Created!',
+                text: result.message || 'Booking request has been created successfully.',
                 confirmButtonColor: '#C3EAE7',
             });
             closeAppointmentModal();
             refetchRequests();
         } catch (error: any) {
-            console.error("Error creating appointment:", error);
+            console.error("Error creating booking:", error);
             Swal.fire({
                 icon: 'error',
                 title: 'Failed',
-                text: error.data?.error || error.message || 'Failed to create appointment. Please try again.',
+                text: error.data?.error || error.message || 'Failed to create booking. Please try again.',
                 confirmButtonColor: '#C3EAE7',
             });
         }
@@ -391,7 +391,7 @@ const CreateAppointmentPage = () => {
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
                     <p className="text-gray-600 mb-6">
-                        Practice users cannot create appointments directly. Only branch users can create appointments for their specific locations.
+                        Practice users cannot create bookings directly. Only branch users can create bookings for their specific locations.
                     </p>
                     <div className="space-y-3">
                         <button
@@ -434,11 +434,11 @@ const CreateAppointmentPage = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3M3 11h18M5 19h14" />
                         </svg>
                     </div>
-                    <h1 className="text-4xl font-bold text-black mb-2">Create Appointment Request</h1>
+                    <h1 className="text-4xl font-bold text-black mb-2">Create Booking Request</h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                         {isBranchUser
-                            ? `Schedule appointments for ${profile.name} branch.`
-                            : 'Schedule your appointment by filling out the form below with all required details.'
+                            ? `Schedule bookings for ${profile.name} branch.`
+                            : 'Schedule your booking by filling out the form below with all required details.'
                         }
                     </p>
                     <div className="flex justify-center gap-2 mt-4">
@@ -455,7 +455,7 @@ const CreateAppointmentPage = () => {
                                     className="flex items-center gap-2 px-8 py-4 font-bold rounded-xl bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105 transition-all duration-200 shadow-lg"
                                 >
                                     <FiPlus className="text-xl" />
-                                    Create New Appointment
+                                    Create New Booking
                                 </button>
                             </div>
                         </div>
@@ -476,7 +476,7 @@ const CreateAppointmentPage = () => {
             {isAppointmentModalOpen && (
                 <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-black text-center">Create Appointment Request</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-black text-center">Create Booking Request</h2>
 
                         <form onSubmit={formik.handleSubmit} className="space-y-4">
 

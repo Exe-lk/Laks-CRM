@@ -337,7 +337,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   name: true,
                   email: true,
                   location: true,
-                  paymentMode: true
+                  paymentMode: true,
+                  hourlyPayRate: true
                 }
               },
               branch: {
@@ -412,7 +413,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(`[STEP 4.4] Checking if payment should be charged for job ${job.id}`);
         console.log(`[STEP 4.4.1] Job totalPay: ${job.totalPay}, is > 0: ${job.totalPay && job.totalPay > 0}`);
 
-        if (job.totalPay && job.totalPay > 0) {
+        const chargeHourlyRate =
+          typeof job.practice.hourlyPayRate === 'number' && job.practice.hourlyPayRate > 0
+            ? job.practice.hourlyPayRate
+            : (job.hourlyRate || 0);
+        const chargeAmount = (job.totalHours || 0) * chargeHourlyRate;
+
+        if (chargeAmount > 0) {
           console.log(`[STEP 4.5] Job has totalPay > 0, checking payment mode`);
           console.log(`[STEP 4.5.1] Branch ID: ${job.branchId}, Branch payment mode: ${job.branch?.paymentMode}`);
           console.log(`[STEP 4.5.2] Practice payment mode: ${job.practice?.paymentMode}`);
@@ -462,13 +469,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           shouldCharge,
           chargeEntity,
           hasStripeCustomer: !!stripeCustomer,
-          totalPay: job.totalPay
+          chargeAmount
         });
 
-        if (shouldCharge && stripeCustomer && job.totalPay !== null) {
+        if (shouldCharge && stripeCustomer && chargeAmount > 0) {
           console.log(`[STEP 5] Attempting to charge payment for job ${job.id}`);
           console.log(`[STEP 5.1] Payment details:`, {
-            amount: Math.round((job.totalPay || 0) * 100),
+            amount: Math.round(chargeAmount * 100),
             currency: 'gbp',
             customerId: stripeCustomer.stripeCustomerId,
             chargeEntity,
@@ -532,7 +539,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.log(`[STEP 5.2.1] Using payment method: ${defaultPaymentMethodId}`);
             
             const paymentPayload: any = {
-              amount: Math.round((job.totalPay || 0) * 100),
+              amount: Math.round(chargeAmount * 100),
               currency: 'gbp',
               description: `Booking ${job.booking.bookingUniqueid} - ${updatedTimesheet.locumProfile.fullName}${job.branch ? ` (${job.branch.name})` : ''} - ${chargeEntity}`,
               metadata: {
@@ -544,7 +551,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 branch_id: job.branchId || null,
                 branch_name: job.branch?.name || null,
                 total_hours: job.totalHours,
-                hourly_rate: job.hourlyRate,
+                hourly_rate: chargeHourlyRate,
                 charged_entity: chargeEntity
               },
               customer_id: stripeCustomer.stripeCustomerId,
@@ -587,7 +594,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   bookingId: job.bookingId,
                   timesheetJobId: job.id,
                   practiceId: job.practiceId,
-                  amount: job.totalPay || 0,
+                  amount: chargeAmount,
                   currency: 'gbp',
                   stripeChargeId: chargeId || paymentIntentId,
                   stripePaymentIntent: paymentIntentId,
@@ -597,7 +604,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   chargedBy: user.id, // Locum user who submitted
                   metadata: {
                     total_hours: job.totalHours,
-                    hourly_rate: job.hourlyRate,
+                    hourly_rate: chargeHourlyRate,
                     booking_uniqueid: job.booking.bookingUniqueid,
                     locum_name: updatedTimesheet.locumProfile.fullName,
                     branch_id: job.branchId || null,
@@ -628,9 +635,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 recipientEmail: recipientEmail,
                 recipientName: recipientName,
                 jobDetails: {
-                  totalPay: job.totalPay,
+                  totalPay: chargeAmount,
                   totalHours: job.totalHours,
-                  hourlyRate: job.hourlyRate,
+                  hourlyRate: chargeHourlyRate,
                   bookingUniqueid: job.booking.bookingUniqueid,
                   locumName: updatedTimesheet.locumProfile.fullName,
                   chargedEntity: chargeEntity
@@ -649,14 +656,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   bookingId: job.bookingId,
                   timesheetJobId: job.id,
                   practiceId: job.practiceId,
-                  amount: job.totalPay || 0,
+                  amount: chargeAmount,
                   currency: 'gbp',
                   paymentStatus: 'FAILED',
                   paymentMethod: 'AUTO',
                   errorMessage: paymentData.error || 'Payment failed',
                   metadata: {
                     total_hours: job.totalHours,
-                    hourly_rate: job.hourlyRate,
+                    hourly_rate: chargeHourlyRate,
                     booking_uniqueid: job.booking.bookingUniqueid,
                     locum_name: updatedTimesheet.locumProfile.fullName,
                     branch_id: job.branchId || null,
@@ -678,14 +685,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 bookingId: job.bookingId,
                 timesheetJobId: job.id,
                 practiceId: job.practiceId,
-                amount: job.totalPay || 0,
+                amount: chargeAmount,
                 currency: 'gbp',
                 paymentStatus: 'FAILED',
                 paymentMethod: 'AUTO',
                 errorMessage: paymentError.message || 'Payment error',
                 metadata: {
                   total_hours: job.totalHours,
-                  hourly_rate: job.hourlyRate,
+                  hourly_rate: chargeHourlyRate,
                   booking_uniqueid: job.booking.bookingUniqueid,
                   locum_name: updatedTimesheet.locumProfile.fullName,
                   branch_id: job.branchId || null,
@@ -712,14 +719,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               bookingId: job.bookingId,
               timesheetJobId: job.id,
               practiceId: job.practiceId,
-              amount: job.totalPay || 0,
+              amount: chargeAmount,
               currency: 'gbp',
               paymentStatus: 'FAILED',
               paymentMethod: 'AUTO',
               errorMessage: `No Stripe customer for ${chargeEntity}`,
               metadata: {
                 total_hours: job.totalHours,
-                hourly_rate: job.hourlyRate,
+                hourly_rate: chargeHourlyRate,
                 booking_uniqueid: job.booking.bookingUniqueid,
                 locum_name: updatedTimesheet.locumProfile.fullName,
                 branch_id: job.branchId || null,
@@ -734,7 +741,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.log(`[STEP 10] Payment skipped for job ${job.id} - conditions not met:`, {
             shouldCharge,
             hasStripeCustomer: !!stripeCustomer,
-            totalPay: job.totalPay
+            chargeAmount
           });
         }
         

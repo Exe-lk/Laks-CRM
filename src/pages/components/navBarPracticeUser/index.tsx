@@ -439,7 +439,7 @@ const NavBar = () => {
                       }`}
                     onClick={() => router.push('/practiceUser/SelectNurses')}
                   >
-                    Appointments
+                    New Booking
                   </li>
                   <li
                     className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-white text-black' : ''
@@ -574,7 +574,7 @@ const NavBar = () => {
                             }`}
                           onClick={() => { router.push('/practiceUser/SelectNurses'); closeMobileMenu(); }}
                         >
-                          Appointments
+                          New Booking
                         </li>
                         <li
                           className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/practiceUser/myBookings') ? 'bg-white text-black' : ''
