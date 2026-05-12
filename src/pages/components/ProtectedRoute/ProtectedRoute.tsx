@@ -4,9 +4,32 @@ import Swal from "sweetalert2";
 import {
   clearSessionStorage,
   hasSessionExpired,
+  setSessionExpiry,
 } from "@/utils/sessionManager";
 
-const publicRoutes = ["/","/components/aboutus", "/components/dentalpractices", "/components/dentalnurses", "/components/hygienist", "/components/accounting", "/components/contactus", "/locumStaff/login", "/locumStaff/register","/practiceUser/practiceRegister","/practiceUser/practiceLogin","/branch/login","/resetPassword","/forgetPassword","/components/termsandconditions","/user-guide","/user-guide/nurse","/user-guide/practice"];
+const publicRoutes = [
+  "/",
+  "/components/aboutus",
+  "/components/dentalpractices",
+  "/components/dentalnurses",
+  "/components/hygienist",
+  "/components/accounting",
+  "/components/contactus",
+  "/locumStaff/login",
+  "/locumStaff/register",
+  "/locumStaff/verifyEmail",
+  "/practiceUser/practiceRegister",
+  "/practiceUser/practiceLogin",
+  "/practiceUser/verifyEmail",
+  "/branch/login",
+  "/branch/verifyEmail",
+  "/resetPassword",
+  "/forgetPassword",
+  "/components/termsandconditions",
+  "/user-guide",
+  "/user-guide/nurse",
+  "/user-guide/practice",
+];
 
 export default function ProtectedRoute({
   children,
@@ -25,6 +48,11 @@ export default function ProtectedRoute({
     if (!token) {
       router.replace("/");
       return;
+    }
+
+    // Logged in but no expiry timestamp yet — start the app session clock
+    if (!window.localStorage.getItem("sessionExpiry")) {
+      setSessionExpiry();
     }
 
     const handleExpiry = async () => {

@@ -69,9 +69,12 @@ export default async function handler(
       });
     }
 
-    return res.status(500).json({
-      error: error,
-      
-    });
+    const message =
+      typeof error?.message === "string"
+        ? error.message
+        : error != null
+          ? String(error)
+          : "Unknown error";
+    return res.status(500).json({ error: message });
   }
 }

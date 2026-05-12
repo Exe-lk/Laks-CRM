@@ -253,10 +253,11 @@ const CreateAppointmentPage = () => {
         });
     }, [formik.isValid, formik.errors, formik.values, formik.touched]);
 
-    const isIndividualPractice = profile?.practiceType === 'Individual';
+    /** Non-corporate practice accounts (Private / legacy Individual) pay per shift; require a card on file. */
+    const requiresPracticeCard = profile?.practiceType !== 'Corporate';
 
     const openAppointmentModal = async () => {
-        if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
+        if (requiresPracticeCard && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
                 text: 'You need to add a payment card before creating bookings. Would you like to add one now?',
@@ -313,7 +314,7 @@ const CreateAppointmentPage = () => {
     };
 
     const handleFormSubmit = async (values: typeof formik.values) => {
-        if (isIndividualPractice && cardStatusData && !cardStatusData.hasCards) {
+        if (requiresPracticeCard && cardStatusData && !cardStatusData.hasCards) {
             const result = await Swal.fire({
                 title: 'Payment Card Required',
                 text: 'You need to add a payment card before creating bookings. Would you like to add one now?',
@@ -404,18 +405,18 @@ const CreateAppointmentPage = () => {
                         <div className="flex flex-col items-center">
                             <button
                                 onClick={openAppointmentModal}
-                                disabled={isIndividualPractice && isLoadingCardStatus}
+                                disabled={requiresPracticeCard && isLoadingCardStatus}
                                 className={`flex items-center gap-2 px-8 py-4 font-bold rounded-xl 
                                          transition-all duration-200 shadow-lg
-                                         ${isIndividualPractice && isLoadingCardStatus
+                                         ${requiresPracticeCard && isLoadingCardStatus
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-[#C3EAE7] text-black hover:bg-[#A9DBD9] hover:shadow-xl transform hover:scale-105'
                                     }`}
                             >
                                 <FiPlus className="text-xl" />
-                                {isIndividualPractice && isLoadingCardStatus ? 'Loading...' : 'Create New Booking'}
+                                {requiresPracticeCard && isLoadingCardStatus ? 'Loading...' : 'Create New Booking'}
                             </button>
-                            {isIndividualPractice && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
+                            {requiresPracticeCard && !isLoadingCardStatus && cardStatusData && !cardStatusData.hasCards && (
                                 <div className="mt-4 flex items-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg shadow-md">
                                     <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.918 16c-.77 1.333.192 3 1.732 3z" />

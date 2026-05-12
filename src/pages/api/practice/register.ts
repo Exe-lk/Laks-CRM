@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue, getSpecialityDisplayName } from "@/lib/enums";
@@ -25,7 +26,7 @@ export default async function handler(
         const {
               dob,
               email,
-              GDCnumber,
+              GDCnumber: rawGdc,
               name,
               telephone,
               address,
@@ -33,6 +34,11 @@ export default async function handler(
               password,
               practiceType = "Private"
         } = req.body;
+
+        const GDCnumber =
+          rawGdc != null && String(rawGdc).trim() !== ""
+            ? String(rawGdc).trim()
+            : "N/A";
 
         if (
           !name ||
@@ -107,24 +113,39 @@ export default async function handler(
           status: 200,
         });
 
-      case "PUT":
-        const { id, ...updateData } = req.body;
+      case "PUT": {
+        const { id, hourlyPayRate, ...updateData } = req.body;
 
         if (!id) {
           return res.status(400).json({ error: "Profile ID is required" });
         }
 
-        const updatedProfile = await prisma.practice.update({
+        await prisma.practice.update({
           where: { id },
           data: {
             ...updateData,
-            dob : updateData.dob 
+            dob: updateData.dob
               ? new Date(updateData.dob)
               : undefined,
           },
         });
 
+        if (hourlyPayRate !== undefined) {
+          const rate =
+            hourlyPayRate === null || hourlyPayRate === ""
+              ? null
+              : Number(hourlyPayRate);
+          await prisma.$executeRaw(
+            Prisma.sql`UPDATE "practices" SET "hourlyPayRate" = ${rate} WHERE "id" = ${id}`
+          );
+        }
+
+        const updatedProfile = await prisma.practice.findUnique({
+          where: { id },
+        });
+
         return res.status(200).json(updatedProfile);
+      }
 
       case "DELETE":
         const profileId = req.query.id as string;
@@ -166,8 +187,14 @@ export default async function handler(
       });
     }
 
+    const message =
+      typeof error?.message === "string"
+        ? error.message
+        : error != null
+          ? String(error)
+          : "Unknown error";
     return res.status(500).json({
-      error: error,
+      error: message,
     });
   }
 }
