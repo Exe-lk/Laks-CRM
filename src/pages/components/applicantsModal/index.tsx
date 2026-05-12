@@ -135,7 +135,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
     try {
       const result = await Swal.fire({
         title: 'Confirm Selection',
-        text: `Are you sure you want to select ${applicantName} for this appointment?`,
+        text: `Are you sure you want to select ${applicantName} for this booking?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#C3EAE7',
@@ -169,7 +169,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
         
         await createNotification({
           locumId: locumId,
-          message: `You have been selected for the appointment from ${practiceName} on ${appointmentDate} at ${startTime} - ${endTime} at ${appointmentLocation}.`,
+          message: `You have been selected for the booking from ${practiceName} on ${appointmentDate} at ${startTime} - ${endTime} at ${appointmentLocation}.`,
           status: 'UNREAD',
         }).unwrap();
       }
@@ -261,7 +261,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
         <div className="px-6 py-4 bg-gradient-to-r from-[#C3EAE7] to-[#A9DBD9] border-b flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">Applicants for Appointment</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Applicants for Booking</h2>
             {jobDetails && (
               <p className="text-gray-600 mt-1">
                 {formatDate(jobDetails.request_date)} • {formatTime(jobDetails.request_start_time)} - {formatTime(jobDetails.request_end_time)} • {jobDetails.location}
@@ -286,7 +286,7 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
             <div className="text-center py-12">
               <FiUser className="text-6xl text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-500 mb-2">No Applicants Yet</h3>
-              <p className="text-gray-400">No locums have applied for this appointment yet.</p>
+              <p className="text-gray-400">No locums have applied for this booking yet.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -352,11 +352,11 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                           <FiClock className="text-[#C3EAE7]" />
                           Applied: {formatResponseTime(applicant.responded_at)}
                         </div>
-                        {typeof applicant.locumProfile.hourlyPayRate === 'number' && applicant.locumProfile.hourlyPayRate !== undefined && (
+                        {typeof jobDetails?.practice?.hourlyPayRate === 'number' && (
                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                            Agency Rate:{' '}
+                            Practice Rate:{' '}
                             <span className="font-medium text-green-700">
-                              £{applicant.locumProfile.hourlyPayRate.toFixed(2)}/hour
+                              £{jobDetails.practice.hourlyPayRate.toFixed(2)}/hour
                             </span>
                           </div>
                         )}

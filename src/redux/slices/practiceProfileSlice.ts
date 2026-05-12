@@ -1,5 +1,17 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+/** Client: always same origin (avoids Failed to fetch from bad/missing NEXT_PUBLIC_SITE_URL). Server: env or relative. */
+function practiceApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/`;
+  }
+  const env = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
+  if (env && env !== 'undefined') {
+    return `${env}/api/`;
+  }
+  return '/api/';
+}
+
 export interface PracticeProfile {
   id?: string;
   name: string;
@@ -45,7 +57,7 @@ export interface ErrorResponse {
 export const PracticeProfileApiSlice = createApi({
   reducerPath: 'PracticeProfileApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/`,
+    baseUrl: practiceApiBaseUrl(),
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;

@@ -43,9 +43,14 @@ export const clearSessionStorage = (): void => {
   }
 };
 
+/**
+ * True only when we have an explicit expiry time in the past.
+ * Missing expiry is NOT "expired" — otherwise any stale `token` without `sessionExpiry`
+ * (or first load after storage changes) incorrectly shows "Session Closed" on every protected page.
+ */
 export const hasSessionExpired = (): boolean => {
   const expiry = getSessionExpiry();
-  if (!expiry) return true;
+  if (!expiry) return false;
   return Date.now() >= expiry;
 };
 

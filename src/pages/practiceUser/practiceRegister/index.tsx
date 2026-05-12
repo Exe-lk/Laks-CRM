@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import Swal from 'sweetalert2';
 import { GoogleMapModal } from '../../../components/GoogleMapModal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import { useAddPracticeProfileMutation, type RegistrationResponse, type ErrorResponse } from '../../../redux/slices/practiceProfileSlice';
+import { useAddPracticeProfileMutation } from '../../../redux/slices/practiceProfileSlice';
 import { useRouter } from "next/router";
 import ReCaptcha, { ReCaptchaRef } from '../../../components/ReCaptcha';
 
@@ -31,7 +31,7 @@ const initialValues = {
     address: '',
     location: '',
     gdcRegistration: '',
-    practiceType: 'Select your practice type'
+    practiceType: ''
 };
 
 const PracticeRegisterForm = () => {
@@ -69,6 +69,9 @@ const PracticeRegisterForm = () => {
                 errors.telephone = 'Contact number must be exactly 10 digits (after +44)';
             }
 
+            if (!values.gdcRegistration) {
+                errors.gdcRegistration = 'Please select whether you have GDC registration';
+            }
             if (values.gdcRegistration === 'yes') {
                 if (!values.GDCnumber) {
                     errors.GDCnumber = 'GDC registration number is required';
@@ -109,7 +112,9 @@ const PracticeRegisterForm = () => {
             if (!values.address) errors.address = 'Address is required';
             if (!values.confirmPassword) errors.confirmPassword = 'Please confirm your password';
             else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
-            if (!values.practiceType) errors.practiceType = 'Practice type is required';
+            if (values.practiceType !== 'Private' && values.practiceType !== 'Corporate') {
+                errors.practiceType = 'Please select Individual or Corporate practice type';
+            }
             if (!values.location) errors.location = 'Location is required';
             return errors;
         },
@@ -133,7 +138,10 @@ const PracticeRegisterForm = () => {
                 const submitValues = {
                     name: values.name,
                     telephone: values.telephone,
-                    GDCnumber: values.GDCnumber,
+                    GDCnumber:
+                        values.gdcRegistration === 'yes' && values.GDCnumber
+                            ? values.GDCnumber
+                            : 'N/A',
                     dob,
                     email: values.email,
                     password: values.password,
@@ -141,46 +149,33 @@ const PracticeRegisterForm = () => {
                     location: values.location,
                     practiceType: values.practiceType,
                 };
-                const response = await addLocumProfile(submitValues);
-                console.log('Registration response:', response);
+                await addLocumProfile(submitValues).unwrap();
 
-                if (response.data && response.data.status === 200) {
-                    Swal.fire({
-                        title: 'Registration completed successfully! Please check your email to verify your account before logging in.',
-                        icon: 'success',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#C3EAE7'
-                    });
-                    formik.resetForm();
-                    recaptchaRef.current?.reset();
-                    setRecaptchaToken(null);
-                    router.push('/');
-                } else if (response.error) {
-                    const errorMessage = 'data' in response.error
-                        ? (response.error.data as ErrorResponse).error
-                        : 'An unexpected error occurred';
-
-                    Swal.fire({
-                        title: 'Registration failed!',
-                        text: `Registration failed: ${errorMessage}`,
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#C3EAE7'
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Registration failed!',
-                        text: 'An unexpected error occurred',
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#C3EAE7'
-                    });
-                }
+                Swal.fire({
+                    title: 'Registration completed successfully! Please check your email to verify your account before logging in.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#C3EAE7'
+                });
+                formik.resetForm();
+                recaptchaRef.current?.reset();
+                setRecaptchaToken(null);
+                router.push('/');
             } catch (error: any) {
                 console.error('Registration failed:', error);
+                const apiMsg =
+                    error?.data?.error ??
+                    error?.data?.message ??
+                    (typeof error?.error === 'string' ? error.error : null);
+                const errorMessage =
+                    typeof apiMsg === 'string'
+                        ? apiMsg
+                        : typeof error?.message === 'string'
+                          ? error.message
+                          : 'An unexpected error occurred';
                 Swal.fire({
                     title: 'Registration failed!',
-                    text: `Registration failed: ${error.message}`,
+                    text: `Registration failed: ${errorMessage}`,
                     icon: 'error',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#C3EAE7'

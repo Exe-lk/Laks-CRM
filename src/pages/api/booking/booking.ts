@@ -59,7 +59,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             name: true,
             telephone: true,
             location: true,
-            address: true
+            address: true,
+            hourlyPayRate: true
           }
         },
         branch: {

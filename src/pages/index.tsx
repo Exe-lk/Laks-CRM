@@ -15,74 +15,110 @@ const Home = () => {
   const [isHandlingAuth, setIsHandlingAuth] = useState(false);
 
   useEffect(() => {
-    // Handle Supabase authentication redirects from root URL
+    // Handle Supabase auth landing on root: PKCE ?code= or hash tokens.
+    // Important: use full page navigation with hash preserved — router.push drops the hash.
     const handleAuthRedirect = async () => {
       if (isHandlingAuth) return;
-      
-      // Check if there are hash fragments in the URL (Supabase auth tokens)
-      if (typeof window !== 'undefined' && window.location.hash) {
-        const hash = window.location.hash;
-        // Check if it's a Supabase auth hash (contains access_token, type, etc.)
-        if (hash.includes('access_token') || hash.includes('type=signup') || hash.includes('type=recovery')) {
-          setIsHandlingAuth(true);
-          
-          try {
-            // Wait for Supabase to process the hash
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Get the session
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (session && session.user) {
-              const email = session.user.email;
-              
-              if (email) {
-                // Determine which verify email page to redirect to based on email domain or user type
-                // We'll check the database to see if it's a locum, practice, or branch
-                try {
-                  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/api/auth/check-user-type?email=${encodeURIComponent(email)}`);
-                  
-                  if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.userType === 'locum') {
-                      // Redirect to verify email page (hash will be processed there)
-                      router.push('/locumStaff/verifyEmail');
-                      return;
-                    } else if (data.userType === 'practice') {
-                      router.push('/practiceUser/verifyEmail');
-                      return;
-                    } else if (data.userType === 'branch') {
-                      router.push('/branch/verifyEmail');
-                      return;
-                    }
-                  }
-                } catch (err) {
-                  console.error('Error checking user type:', err);
-                }
-                
-                // If we can't determine, clean the URL and let user navigate manually
-                window.history.replaceState(null, '', '/');
+      if (typeof window === 'undefined' || !router.isReady) return;
+
+      const { code } = router.query;
+      const hash = window.location.hash;
+
+      const isAuthHash =
+        hash &&
+        (hash.includes('access_token') ||
+          hash.includes('type=signup') ||
+          hash.includes('type=recovery') ||
+          hash.includes('type=email'));
+
+      if (typeof code === 'string' && code.length > 0) {
+        setIsHandlingAuth(true);
+        try {
+          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+          if (exErr) {
+            console.error('Auth code exchange failed:', exErr);
+            window.history.replaceState(null, '', '/');
+            return;
+          }
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          const email = session?.user?.email;
+          if (email) {
+            const response = await fetch(
+              `${window.location.origin}/api/auth/check-user-type?email=${encodeURIComponent(email)}`
+            );
+            if (response.ok) {
+              const data = await response.json();
+              const path =
+                data.userType === 'locum'
+                  ? '/locumStaff/verifyEmail'
+                  : data.userType === 'practice'
+                    ? '/practiceUser/verifyEmail'
+                    : data.userType === 'branch'
+                      ? '/branch/verifyEmail'
+                      : null;
+              if (path) {
+                window.location.replace(path);
+                return;
               }
             }
-            
-            // If we can't determine the user type, clean the URL anyway
-            window.history.replaceState(null, '', '/');
-          } catch (error) {
-            console.error('Error handling auth redirect:', error);
-            // Clean the URL on error
-            window.history.replaceState(null, '', '/');
-          } finally {
-            setIsHandlingAuth(false);
           }
+          window.history.replaceState(null, '', '/');
+        } catch (e) {
+          console.error('Error handling auth code on home:', e);
+          window.history.replaceState(null, '', '/');
+        } finally {
+          setIsHandlingAuth(false);
+        }
+        return;
+      }
+
+      if (isAuthHash) {
+        setIsHandlingAuth(true);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session?.user?.email) {
+            const email = session.user.email;
+            try {
+              const response = await fetch(
+                `${window.location.origin}/api/auth/check-user-type?email=${encodeURIComponent(email)}`
+              );
+              if (response.ok) {
+                const data = await response.json();
+                const path =
+                  data.userType === 'locum'
+                    ? '/locumStaff/verifyEmail'
+                    : data.userType === 'practice'
+                      ? '/practiceUser/verifyEmail'
+                      : data.userType === 'branch'
+                        ? '/branch/verifyEmail'
+                        : null;
+                if (path) {
+                  window.location.replace(path + hash);
+                  return;
+                }
+              }
+            } catch (err) {
+              console.error('Error checking user type:', err);
+            }
+          }
+          window.history.replaceState(null, '', '/');
+        } catch (error) {
+          console.error('Error handling auth redirect:', error);
+          window.history.replaceState(null, '', '/');
+        } finally {
+          setIsHandlingAuth(false);
         }
       }
     };
 
-    if (router.isReady) {
-      handleAuthRedirect();
-    }
-  }, [router, isHandlingAuth]);
+    void handleAuthRedirect();
+  }, [router.isReady, router.query, isHandlingAuth, router]);
 
   return (
     <>

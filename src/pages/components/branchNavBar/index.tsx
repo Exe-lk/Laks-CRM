@@ -426,7 +426,7 @@ const BranchNavBar = () => {
                   }`}
                 onClick={() => router.push('/branch/SelectNurses')}
               >
-                Appointments
+                New Booking
               </li>
               <li
                 className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-1 rounded-full ${isActivePage('/branch/myBookings') ? 'bg-white text-black' : ''
@@ -529,7 +529,7 @@ const BranchNavBar = () => {
                         }`}
                       onClick={() => { router.push('/branch/SelectNurses'); closeMobileMenu(); }}
                     >
-                      Appointments
+                      New Booking
                     </li>
                     <li
                       className={`hover:text-blue-600 cursor-pointer transition-colors px-3 py-2 rounded-full ${isActivePage('/branch/myBookings') ? 'bg-white text-black' : ''

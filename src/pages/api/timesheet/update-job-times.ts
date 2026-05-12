@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma';
 import { supabase } from '@/lib/supabase';
+import { roundBillableHours } from '@/lib/billableHours';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
@@ -116,15 +117,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else {
         totalHours = workDuration;
       }
-      
-      // Calculate total pay
-      const totalPay = totalHours * (updatedJob.hourlyRate || 0);
+
+      const roundedHours = roundBillableHours(totalHours);
+      const totalPay = Math.round(roundedHours * (updatedJob.hourlyRate || 0) * 100) / 100;
       
       // Update job with calculated hours and pay
       await prisma.timesheetJob.update({
         where: { id: timesheetJobId },
         data: { 
-          totalHours: Math.max(0, totalHours),
+          totalHours: roundedHours,
           totalPay: totalPay
         }
       });
