@@ -45,14 +45,14 @@ export default function VerifyEmail() {
             token_hash: tokenHash,
             type: otpType as 'signup' | 'email' | 'recovery',
           });
-          if (verifyError) {
-            setStatus('error');
+            if (verifyError) {
+              setStatus('error');
             setMessage(
               verifyError.message ||
                 'This verification link has expired or is invalid. Please request a new verification email or try logging in.'
             );
             setTimeout(() => router.push('/practiceUser/practiceLogin'), 4000);
-            return;
+              return;
           }
         }
 
@@ -62,7 +62,7 @@ export default function VerifyEmail() {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
-
+        
         if (sessionError) {
           setStatus('error');
           setMessage('Verification failed. Please try again.');
@@ -77,18 +77,18 @@ export default function VerifyEmail() {
         }
 
         if (!session) {
-          setStatus('error');
+            setStatus('error');
           setMessage(
             'This verification link has expired or is invalid. Please request a new verification email or try logging in.'
           );
           setTimeout(() => router.push('/practiceUser/practiceLogin'), 4000);
-          return;
-        }
-
+            return;
+          }
+          
         const { data: userData, error: userError } = await supabase.auth.getUser();
 
         if (userError || !userData.user?.email) {
-          setStatus('error');
+              setStatus('error');
           setMessage(
             'Could not retrieve user information. Please try logging in.'
           );
@@ -99,8 +99,8 @@ export default function VerifyEmail() {
         const user = userData.user;
         const userEmail = user.email;
         if (!userEmail) {
-          setStatus('error');
-          setMessage('Could not retrieve email address. Please try logging in.');
+            setStatus('error');
+            setMessage('Could not retrieve email address. Please try logging in.');
           setTimeout(() => router.push('/practiceUser/practiceLogin'), 4000);
           return;
         }
@@ -159,19 +159,19 @@ export default function VerifyEmail() {
             Email Verification
           </h2>
           <p className="mt-2 text-sm text-gray-600">{message}</p>
-
+          
           {status === 'verifying' && (
             <div className="mt-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             </div>
           )}
-
+          
           {status === 'success' && (
             <div className="mt-4 text-green-600">
               ✓ Verification successful! Redirecting...
             </div>
           )}
-
+          
           {status === 'error' && (
             <div className="mt-4">
               <div className="text-red-600">✗ {message}</div>

@@ -34,6 +34,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         practice_id: practice_id as string
       },
       include: {
+        practice: {
+          select: {
+            hourlyPayRate: true
+          }
+        },
         branch: {
           select: {
             id: true,
@@ -70,7 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           include: {
             chosenLocum: {
               select: {
-                fullName: true
+                fullName: true,
+                hourlyPayRate: true
               }
             }
           }
@@ -126,6 +132,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           locum_name: response.locumProfile.fullName,
           responded_at: response.responded_at
         })),
+        practice_hourly_pay_rate:
+          request.practice?.hourlyPayRate != null
+            ? Number(request.practice.hourlyPayRate)
+            : null,
+        chosen_locum_hourly_pay_rate:
+          latestConfirmation?.chosenLocum?.hourlyPayRate != null
+            ? Number(latestConfirmation.chosenLocum.hourlyPayRate)
+            : null,
         current_selection: latestConfirmation ? {
           confirmation_id: latestConfirmation.confirmation_id,
           chosen_locum: latestConfirmation.chosenLocum.fullName,

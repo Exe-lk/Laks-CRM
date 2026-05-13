@@ -19,8 +19,10 @@ export default async function handler(
       email,
       password,
       practiceId,
-      status = "verify"
     } = req.body;
+
+    /** New branches always await platform admin activation (Laks-CRM-Admin). */
+    const branchStatus = "pending approval";
 
     console.log('Branch creation request data:', {
       name,
@@ -30,7 +32,7 @@ export default async function handler(
       email: email ? `"${email}"` : 'undefined',
       password: password ? '[REDACTED]' : 'undefined',
       practiceId,
-      status
+      status: branchStatus,
     });
 
     if (!name || !address || !location || !email || !password || !practiceId) {
@@ -91,71 +93,72 @@ export default async function handler(
       });
     }
 
-    // Create authentication user in Supabase
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-    console.log('Attempting Supabase auth signup with:', {
-      email: email.trim(),
-      siteUrl,
-      redirectTo: `${siteUrl}/branch/verifyEmail`
-    });
-
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: password,
-      options: {
-        emailRedirectTo: `${siteUrl}/branch/verifyEmail`,
-      },
-    });
+    // Create auth user without sending "Confirm signup" email; email is confirmed server-side.
+    const { data: createdAuth, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: email.trim(),
+        password: password,
+        email_confirm: true,
+      });
 
     if (authError) {
-      console.log('Supabase auth error:', authError);
-      
-      // Handle specific Supabase error cases
-      if (authError.message.includes('already registered')) {
+      console.log("Supabase admin createUser error:", authError);
+
+      const msg = authError.message || "";
+      if (
+        msg.toLowerCase().includes("already been registered") ||
+        msg.toLowerCase().includes("already registered") ||
+        msg.toLowerCase().includes("duplicate")
+      ) {
         return res.status(400).json({
-          error: "Email address is already registered. Please use a different email.",
+          error:
+            "Email address is already registered. Please use a different email.",
         });
       }
-      
-      if (authError.message.includes('invalid email')) {
+
+      if (msg.toLowerCase().includes("invalid email")) {
         return res.status(400).json({
           error: "Invalid email format. Please check the email address.",
         });
       }
-      
-      if (authError.message.includes('weak password')) {
+
+      if (msg.toLowerCase().includes("password")) {
         return res.status(400).json({
           error: "Password is too weak. Please use a stronger password.",
         });
       }
-      
+
       return res.status(400).json({
         error: `Authentication error: ${authError.message}`,
       });
     }
 
-    console.log('Supabase auth success:', { userId: authData.user?.id });
+    const authUser = createdAuth?.user;
+    console.log("Supabase auth user created:", { userId: authUser?.id });
 
-    const newBranch = await prisma.branch.create({
-      data: {
-        name,
-        address,
-        location,
-        telephone: telephone || null,
-        email: email.trim(),
-        // password: password, // Temporarily removed due to schema sync issue
-        practiceId,
-        status,
-      },
-      // include: {
-      //   practice: {
-      //     select: {
-      //       id: true,
-      //       name: true,
-      //     }
-      //   }
-      // }
-    });
+    let newBranch;
+    try {
+      newBranch = await prisma.branch.create({
+        data: {
+          name,
+          address,
+          location,
+          telephone: telephone || null,
+          email: email.trim(),
+          practiceId,
+          status: branchStatus,
+        },
+      });
+    } catch (prismaErr) {
+      if (authUser?.id) {
+        try {
+          await supabase.auth.admin.deleteUser(authUser.id);
+        } catch (delErr) {
+          console.error("Failed to roll back auth user after branch DB error:", delErr);
+        }
+      }
+      throw prismaErr;
+    }
 
     // Create a profile object for the branch
     const branchProfile = {
@@ -175,8 +178,9 @@ export default async function handler(
     return res.status(201).json({
       branch: newBranch,
       profile: branchProfile,
-      authUser: authData.user,
-      message: "Branch created successfully",
+      authUser,
+      message:
+        "Branch created successfully. It is pending activation by an administrator.",
     });
 
   } catch (error: any) {

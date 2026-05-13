@@ -99,23 +99,13 @@ const BranchLoginPage = () => {
                             break;
 
                         case 'verify':
-                            await Swal.fire({
-                                title: 'Email Verification Required',
-                                text: 'Please verify your email. Check your emails',
-                                icon: 'warning',
-                                confirmButtonText: 'Check Email',
-                                confirmButtonColor: '#C3EAE7',
-                                iconColor: '#FFA500'
-                            });
-                            break;
-
                         case 'pending':
                         case 'pending approval':
                             await Swal.fire({
-                                title: 'Pending Admin Approval',
-                                text: 'Need admin verification',
+                                title: 'Awaiting activation',
+                                text: data.error || 'This branch is awaiting activation by an administrator before you can sign in.',
                                 icon: 'info',
-                                confirmButtonText: 'Understood',
+                                confirmButtonText: 'OK',
                                 confirmButtonColor: '#C3EAE7',
                                 iconColor: '#3B82F6'
                             });

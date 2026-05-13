@@ -82,6 +82,8 @@ export interface PracticeRequest {
     locum_name: string;
     responded_at: string;
   }>;
+  practice_hourly_pay_rate?: number | null;
+  chosen_locum_hourly_pay_rate?: number | null;
   current_selection: {
     confirmation_id: string;
     chosen_locum: string;
@@ -125,7 +127,6 @@ export interface Applicant {
     contactNumber: string;
     emailAddress: string;
     employeeType: string;
-    hourlyPayRate?: number;
     averageRating?: number;
     specialties: Array<{
       speciality: string;
@@ -146,7 +147,6 @@ export interface JobDetails {
     name: string;
     location: string;
     address: string;
-    hourlyPayRate?: number;
   };
   branch?: {
     id: string;

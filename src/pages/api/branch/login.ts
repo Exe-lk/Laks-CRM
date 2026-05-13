@@ -70,15 +70,11 @@ export default async function handler(
         });
 
       case "verify":
-        return res.status(403).json({
-          error: "Please verify your email. Check your emails",
-          status: "verify",
-        });
-
       case "pending":
       case "pending approval":
         return res.status(403).json({
-          error: "Need admin verification",
+          error:
+            "This branch is awaiting activation by an administrator before you can sign in.",
           status: "pending",
         });
 

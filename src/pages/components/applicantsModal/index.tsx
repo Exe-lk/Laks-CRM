@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiX, FiUser, FiMapPin, FiPhone, FiMail, FiClock, FiCheck, FiLoader } from 'react-icons/fi';
 import Swal from 'sweetalert2';
-import { useGetApplicantsQuery, useSelectApplicantMutation, Applicant, JobDetails } from '@/redux/slices/appointmentPracticeSlice';
+import { useGetApplicantsQuery, useSelectApplicantMutation, Applicant } from '@/redux/slices/appointmentPracticeSlice';
 import { useCreateNotificationMutation } from '@/redux/slices/notificationSlice';
 
 interface ApplicantsModalProps {
@@ -352,14 +352,6 @@ const ApplicantsModal: React.FC<ApplicantsModalProps> = ({
                           <FiClock className="text-[#C3EAE7]" />
                           Applied: {formatResponseTime(applicant.responded_at)}
                         </div>
-                        {typeof jobDetails?.practice?.hourlyPayRate === 'number' && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            Practice Rate:{' '}
-                            <span className="font-medium text-green-700">
-                              £{jobDetails.practice.hourlyPayRate.toFixed(2)}/hour
-                            </span>
-                          </div>
-                        )}
                         <div className="flex items-center gap-2 text-sm text-gray-600 col-span-1 md:col-span-2">
                           <FiMapPin className="text-green-500" />
                           <span className="font-medium text-green-600">{getDistanceText(applicant)}</span>
