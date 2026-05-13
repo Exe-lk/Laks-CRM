@@ -89,6 +89,11 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
     });
   };
 
+  const formatHourlyRate = (rate: number | null | undefined) => {
+    if (rate == null || !Number.isFinite(rate)) return null;
+    return `£${rate.toFixed(2)}/hr`;
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -155,15 +160,38 @@ const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                 {requests.map((request) => (
                   <tr key={request.request_id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                          <FiCalendar className="text-[#C3EAE7]" />
-                          {formatDate(request.request_date)}
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                            <FiCalendar className="text-[#C3EAE7] shrink-0" />
+                            {formatDate(request.request_date)}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <FiClock className="text-[#C3EAE7] shrink-0" />
+                            {formatTime(request.request_start_time)} - {formatTime(request.request_end_time)}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                          <FiClock className="text-[#C3EAE7]" />
-                          {formatTime(request.request_start_time)} - {formatTime(request.request_end_time)}
-                        </div>
+                        {(formatHourlyRate(request.practice_hourly_pay_rate) ||
+                          formatHourlyRate(request.chosen_locum_hourly_pay_rate)) && (
+                          <div className="text-right text-xs text-gray-600 shrink-0 space-y-0.5">
+                            {formatHourlyRate(request.practice_hourly_pay_rate) && (
+                              <div>
+                                <span className="text-gray-500">Practice rate</span>{' '}
+                                <span className="font-semibold text-gray-900">
+                                  {formatHourlyRate(request.practice_hourly_pay_rate)}
+                                </span>
+                              </div>
+                            )}
+                            {formatHourlyRate(request.chosen_locum_hourly_pay_rate) && (
+                              <div>
+                                <span className="text-gray-500">His rate</span>{' '}
+                                <span className="font-semibold text-gray-900">
+                                  {formatHourlyRate(request.chosen_locum_hourly_pay_rate)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">

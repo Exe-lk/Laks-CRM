@@ -32,8 +32,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                 select:{
                     name:true,
                     location:true,
-                    address:true,
-                    hourlyPayRate:true
+                    address:true
                 }
             },
             branch:{
@@ -79,7 +78,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
                     contactNumber:true,
                     emailAddress:true,
                     employeeType:true,
-                    hourlyPayRate:true,
                     averageRating:true,
                     specialties:{
                         select:{

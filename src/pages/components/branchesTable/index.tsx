@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FiEdit2, FiTrash2, FiMapPin, FiPhone, FiMail, FiHome, FiCheck } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiMapPin, FiPhone, FiMail, FiHome } from 'react-icons/fi';
 import Swal from 'sweetalert2';
-import { Branch, updateBranch, deleteBranch } from '../../../redux/slices/branchPracticeSlice';
+import { Branch, deleteBranch } from '../../../redux/slices/branchPracticeSlice';
+import { getBranchAddressLines, isLikelyLatLngPair } from '../../../utils/branchAddressDisplay';
 import { AppDispatch } from '../../../redux/store';
 import { useDispatch } from 'react-redux';
 
@@ -20,58 +21,6 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [approvingId, setApprovingId] = useState<string | null>(null);
-
-  const handleApproveBranch = async (branch: Branch) => {
-    const result = await Swal.fire({
-      title: 'Approve Branch',
-      html: `
-        <div class="text-left">
-          <p class="mb-3">Are you sure you want to approve this branch?</p>
-          <div class="bg-gray-50 p-3 rounded-lg">
-            <p class="font-semibold text-gray-800">${branch.name}</p>
-            <p class="text-sm text-gray-600">${branch.address}</p>
-          </div>
-          <p class="mt-3 text-green-600 text-sm">The branch will be activated and ready for use.</p>
-        </div>
-      `,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Approve',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#10B981',
-      cancelButtonColor: '#6B7280',
-      reverseButtons: true
-    });
-
-    if (result.isConfirmed) {
-      try {
-        setApprovingId(branch.id);
-        await dispatch(updateBranch({
-          id: branch.id,
-          status: 'active'
-        })).unwrap();
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Branch Approved',
-          text: 'The branch has been successfully approved and is now active.',
-          confirmButtonColor: '#C3EAE7',
-        });
-        
-        onBranchUpdated();
-      } catch (error: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Approval Failed',
-          text: error.message || 'Failed to approve branch. Please try again.',
-          confirmButtonColor: '#C3EAE7',
-        });
-      } finally {
-        setApprovingId(null);
-      }
-    }
-  };
 
   const handleDeleteBranch = async (branch: Branch) => {
     const result = await Swal.fire({
@@ -82,7 +31,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
           <div class="bg-gray-50 p-3 rounded-lg">
             <p class="font-semibold text-gray-800">${branch.name}</p>
             <p class="text-sm text-gray-600">${branch.address}</p>
-            <p class="text-sm text-gray-600">${branch.location}</p>
+            ${branch.location && !isLikelyLatLngPair(branch.location) ? `<p class="text-sm text-gray-600">${branch.location}</p>` : ''}
           </div>
           <p class="mt-3 text-red-600 text-sm">This action cannot be undone.</p>
         </div>
@@ -186,7 +135,9 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {branches.map((branch) => (
+            {branches.map((branch) => {
+              const addressLines = getBranchAddressLines(branch.address, branch.location);
+              return (
               <tr key={branch.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="space-y-1">
@@ -197,8 +148,15 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                     <div className="flex items-start gap-2 text-sm text-gray-600">
                       <FiMapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p>{branch.address}</p>
-                        <p className="text-gray-500">{branch.location}</p>
+                        {addressLines.length === 0 ? (
+                          <p className="text-gray-400 italic">Address not set</p>
+                        ) : (
+                          addressLines.map((line, i) => (
+                            <p key={i} className={i > 0 ? 'text-gray-500' : undefined}>
+                              {line}
+                            </p>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
@@ -261,20 +219,6 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    {(branch.status === 'pending approval' || branch.status === 'verify') && (
-                      <button
-                        onClick={() => handleApproveBranch(branch)}
-                        disabled={approvingId === branch.id}
-                        className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Approve Branch"
-                      >
-                        {approvingId === branch.id ? (
-                          <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <FiCheck className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
                     <button
                       onClick={() => onEditBranch(branch)}
                       className="p-2 text-gray-400 hover:text-[#C3EAE7] hover:bg-[#C3EAE7]/10 rounded-lg transition-colors"
@@ -297,7 +241,8 @@ const BranchesTable: React.FC<BranchesTableProps> = ({
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>

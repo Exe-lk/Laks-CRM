@@ -93,7 +93,7 @@ const BranchesPage = () => {
         Swal.fire({
           icon: 'success',
           title: 'Branch Created!',
-          text: 'The branch has been created successfully.',
+          text: 'The branch will appear as pending until Laks Dent admin activates it in the admin portal, the branch can then sign in.',
           confirmButtonColor: '#C3EAE7',
         });
       }
@@ -217,7 +217,7 @@ const BranchesPage = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending/Verify</p>
+                  <p className="text-sm font-medium text-gray-600">Pending admin</p>
                   <p className="text-2xl font-bold text-yellow-600">
                     {branches.filter(branch => branch.status === 'pending approval' || branch.status === 'verify').length}
                   </p>
@@ -261,11 +261,10 @@ const BranchesPage = () => {
             </h3>
             <div className="text-blue-800 space-y-2">
               <p>• <strong>Create branches</strong> to manage multiple locations for your practice.</p>
-              <p>• <strong>Email Verification:</strong> New branches must verify their email before admin approval.</p>
-              <p>• <strong>Active branches</strong> are fully approved and available for appointment scheduling.</p>
-              <p>• <strong>Pending approval branches</strong> have verified their email and await admin approval.</p>
-              <p>• <strong>Admin Approval:</strong> Click the checkmark icon to approve pending branches.</p>
-              <p>• <strong>Contact information</strong> helps locums and patients reach the specific branch.</p>
+              <p>• <strong>Admin activation:</strong> New branches are created without a signup confirmation email. Laks Dent admin must activate the branch before its login can be used.</p>
+              <p>• <strong>Active branches</strong> are approved by admin and available for appointment scheduling.</p>
+              <p>• <strong>Pending branches</strong> await admin activation in the admin portal (same process as practice approvals).</p>
+              <p>• <strong>Contact information</strong> helps locums reach the specific branch.</p>
             </div>
           </div>
         </div>
