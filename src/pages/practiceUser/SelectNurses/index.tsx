@@ -14,6 +14,7 @@ interface Profile {
     address?: string;
     location?: string;
     practiceType?: string;
+    hourlyPayRate?: number | null;
 }
 
 interface Branch {
@@ -439,6 +440,12 @@ const CreateAppointmentPage = () => {
                 </div>
 
                 <div className="w-full mx-auto px-2 sm:px-4 md:px-8 py-8">
+                    {profile?.hourlyPayRate != null && Number.isFinite(Number(profile.hourlyPayRate)) && (
+                        <div className="mb-6 rounded-lg border border-[#A9DBD9] bg-gradient-to-r from-[#E8F7F5] to-[#D4F0EC] px-4 py-3 text-sm text-gray-800 shadow-sm">
+                            <span className="font-semibold text-gray-900">Agreed practice rate:</span>{' '}
+                            £{Number(profile.hourlyPayRate).toFixed(2)}/hour
+                        </div>
+                    )}
                     <AppointmentsTable
                         requests={practiceRequestsData?.data?.requests || []}
                         loading={isLoadingRequests}
