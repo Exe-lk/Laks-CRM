@@ -46,6 +46,7 @@ export default async function handler(
             name: true,
             email: true,
             telephone: true,
+            hourlyPayRate: true,
           }
         }
       }
@@ -105,6 +106,7 @@ export default async function handler(
       telephone: branch.telephone,
       practiceId: branch.practiceId,
       practiceName: branch.practice?.name || "Unknown Practice",
+      hourlyPayRate: branch.practice?.hourlyPayRate ?? null,
       practiceType: "Branch",
       status: branch.status,
       userType: "branch",
