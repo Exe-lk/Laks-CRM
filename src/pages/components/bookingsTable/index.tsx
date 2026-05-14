@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FiCalendar, FiClock, FiMapPin, FiUser, FiX, FiAlertCircle, FiCheck, FiPhone, FiMail, FiSearch, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { useGetBookingsQuery, useCancelBookingMutation } from '../../../redux/slices/bookingPracticeSlice';
+import { getBookingLocationDisplay, getBranchAddressLines } from '../../../utils/branchAddressDisplay';
 
 interface LocumProfile {
   fullName: string;
@@ -167,8 +168,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     
     dateA.setHours(hoursA, minutesA, 0, 0);
     dateB.setHours(hoursB, minutesB, 0, 0);
-    
-    return dateA.getTime() - dateB.getTime();
+
+    // Newest / soonest first
+    return dateB.getTime() - dateA.getTime();
   });
   
   const totalPages = Math.ceil(sortedBookings.length / pageSize);
@@ -258,9 +260,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
       try {
         setCancellingBooking(booking.id);
 
-        const token = localStorage.getItem('token');
-        console.log('Token before cancel request:', token);
-        
         const cancelData = {
           booking_id: booking.id,
           user_id: userId,
@@ -273,8 +272,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
             ? (booking.locumProfile?.hourlyPayRate || 0)
             : (booking.practice?.hourlyPayRate || 0)
         };
-        
-        console.log('Cancel request data:', cancelData);
 
         const result = await cancelBooking(cancelData).unwrap();
 
@@ -342,6 +339,36 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
     const hours = getShiftDurationHours(booking.booking_start_time, booking.booking_end_time);
     if (!Number.isFinite(hours) || hours <= 0) return null;
     return hours * rate;
+  };
+
+  const formatEstimatePounds = (amount: number): string => {
+    const r = Math.round(amount * 10) / 10;
+    if (!Number.isFinite(r)) return '£0';
+    const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+    return `£${s}`;
+  };
+
+  const getCancellationActorLabel = (booking: Booking): string => {
+    const raw = (
+      booking.cancel_by ||
+      booking.cancellationPenalties?.[0]?.cancelledBy ||
+      ''
+    )
+      .toLowerCase()
+      .trim();
+    if (!raw) return 'Unknown';
+    switch (raw) {
+      case 'admin':
+        return 'Administrator';
+      case 'locum':
+        return 'Locum';
+      case 'practice':
+        return 'Practice';
+      case 'branch':
+        return 'Branch';
+      default:
+        return raw.charAt(0).toUpperCase() + raw.slice(1);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -433,7 +460,9 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
   };
 
   const getCancelledByText = (cancelledBy: string) => {
-    switch (cancelledBy) {
+    switch ((cancelledBy || '').toLowerCase()) {
+      case 'admin':
+        return 'Administrator';
       case 'locum':
         return 'Locum Staff';
       case 'practice':
@@ -686,7 +715,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         if (est == null) return null;
                         return (
                           <div className="text-xs font-medium text-emerald-800 mt-1.5" title="Shift length × agency rate (estimate before extras)">
-                            Est. total £{est.toFixed(2)}
+                            Est. total {formatEstimatePounds(est)}
                           </div>
                         );
                       })()}
@@ -698,9 +727,15 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                         {booking.branch ? (
                           <div>
                             <div className="font-medium text-blue-600">{booking.branch.name}</div>
-                            {booking.branch.location && (
-                              <div className="text-xs text-gray-500">{booking.branch.location}</div>
-                            )}
+                            {(() => {
+                              const bl = getBranchAddressLines(
+                                booking.branch.address,
+                                booking.branch.location
+                              );
+                              return bl.length > 0 ? (
+                                <div className="text-xs text-gray-500">{bl.join(', ')}</div>
+                              ) : null;
+                            })()}
                           </div>
                         ) : (
                           <span className="text-gray-400 text-xs">No branch assigned</span>
@@ -712,7 +747,13 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     <div className="flex items-center gap-2 text-sm text-gray-900">
                       <FiMapPin className="text-[#C3EAE7]" />
                       <div>
-                        <div className="font-medium">{booking.location}</div>
+                        <div className="font-medium">
+                          {getBookingLocationDisplay({
+                            bookingLocation: booking.location,
+                            branch: booking.branch,
+                            practice: booking.practice,
+                          })}
+                        </div>
                         {userType === 'locum' && booking.practice?.address && (
                           <div className="text-xs text-gray-500">{booking.practice.address}</div>
                         )}
@@ -769,9 +810,16 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
-                      {getStatusIcon(booking.status)}
-                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    <div className="space-y-1">
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                        {getStatusIcon(booking.status)}
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </div>
+                      {booking.status.toLowerCase() === 'cancelled' && (
+                        <div className="text-xs text-red-700 font-medium">
+                          Cancelled by {getCancellationActorLabel(booking)}
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -810,10 +858,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({
                                 }
                                 return false;
                               });
-
-                              console.log('User Type:', userType, 'User ID:', userId);
-                              console.log('All penalties for booking:', booking.cancellationPenalties);
-                              console.log('Filtered penalties for current user:', userPenalties);
 
                               return userPenalties.length > 0 ? (
                                 <button

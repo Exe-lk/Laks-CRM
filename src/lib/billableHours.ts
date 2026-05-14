@@ -7,7 +7,12 @@ export function roundBillableHours(hours: number): number {
   return Math.round(hours * 1000) / 1000;
 }
 
+/** Display hours with at most one decimal (e.g. 0.5, not 0.500). */
 export function formatBillableHoursDisplay(hours: number | null | undefined): string {
   const h = roundBillableHours(hours ?? 0);
-  return h.toFixed(3);
+  const roundedTenth = Math.round(h * 10) / 10;
+  if (!Number.isFinite(roundedTenth) || roundedTenth <= 0) return '0';
+  return Number.isInteger(roundedTenth)
+    ? String(roundedTenth)
+    : roundedTenth.toFixed(1);
 }
