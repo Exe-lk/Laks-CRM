@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import { FaFacebookF, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 import { MdEmail, MdPhoneAndroid, MdLocationOn } from "react-icons/md";
 import imageLogo from "../../../../public/assests/logo background remove.png"
 
@@ -248,14 +248,15 @@ export default function Footer() {
               <h4 className="font-bold text-base mb-2 text-gray-900">FOLLOW US</h4>
               <div className="flex space-x-4">
                 {[
-                  { Icon: FaFacebookF, color: 'hover:bg-blue-600', bg: 'bg-blue-500' },
-                  { Icon: FaTwitter, color: 'hover:bg-sky-500', bg: 'bg-sky-400' },
-                  { Icon: FaLinkedinIn, color: 'hover:bg-blue-700', bg: 'bg-blue-600' },
-                  { Icon: FaInstagram, color: 'hover:bg-pink-600', bg: 'bg-pink-500' }
-                ].map(({ Icon, color, bg }, index) => (
+                  { Icon: FaFacebookF, color: 'hover:bg-blue-600', bg: 'bg-blue-500', href: 'https://www.facebook.com/profile.php?id=61589349407272&locale=en_GB' },
+                  { Icon: FaLinkedinIn, color: 'hover:bg-blue-700', bg: 'bg-blue-600', href: 'https://www.linkedin.com/company/laks-dent/' },
+                  { Icon: FaInstagram, color: 'hover:bg-pink-600', bg: 'bg-pink-500', href: 'https://www.instagram.com/laksdent?igsh=MXI1MDhidjN0aWQxbw%3D%3D&utm_source=qr' }
+                ].map(({ Icon, color, bg, href }, index) => (
                   <a
                     key={index}
-                    href="#"
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`${bg} ${color} text-white p-2 rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg transform`}
                   >
                     <Icon className="text-base" />
