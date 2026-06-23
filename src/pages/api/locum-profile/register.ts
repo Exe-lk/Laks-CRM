@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue,getSpecialityDisplayName } from "@/lib/enums";
+import { notifyUserRegistrationApproved } from "@/lib/registrationNotificationEmails";
 
 export default async function handler(
   req: NextApiRequest,
@@ -157,11 +158,19 @@ export default async function handler(
           status: 200,
         });
 
-      case "PUT":
+      case "PUT": {
         const { id, ...updateData } = req.body;
 
         if (!id) {
           return res.status(400).json({ error: "Profile ID is required" });
+        }
+
+        const existingProfile = await prisma.locumProfile.findUnique({
+          where: { id },
+        });
+
+        if (!existingProfile) {
+          return res.status(404).json({ error: "Profile not found" });
         }
 
         const updatedProfile = await prisma.locumProfile.update({
@@ -174,7 +183,29 @@ export default async function handler(
           },
         });
 
+        if (
+          updateData.status === "accept" &&
+          existingProfile.status !== "accept"
+        ) {
+          const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(
+            /\/$/,
+            ""
+          );
+          void notifyUserRegistrationApproved({
+            userType: "locum",
+            name: updatedProfile.fullName,
+            email: updatedProfile.emailAddress,
+            loginUrl: `${siteUrl}/locumStaff/login`,
+          }).catch((err) =>
+            console.error(
+              "[locum-profile/register] Approval notification failed:",
+              err
+            )
+          );
+        }
+
         return res.status(200).json(updatedProfile);
+      }
 
       case "DELETE":
         const profileId = req.query.id as string;

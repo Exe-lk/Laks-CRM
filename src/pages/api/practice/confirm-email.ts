@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
+import { notifyAdminNewRegistration } from "@/lib/registrationNotificationEmails";
 
 
 export default async function handler(
@@ -32,6 +33,15 @@ export default async function handler(
             message: "Email already verified",
           });
         }
+
+        void notifyAdminNewRegistration({
+          userType: "practice",
+          name: existingProfile.name,
+          email: existingProfile.email,
+          roleOrPracticeType: existingProfile.practiceType,
+        }).catch((err) =>
+          console.error("[practice/confirm-email] Admin notification failed:", err)
+        );
 
         // Update the status
         const updatedProfile = await prisma.practice.update({

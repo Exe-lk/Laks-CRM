@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue, getSpecialityDisplayName } from "@/lib/enums";
+import { notifyUserRegistrationApproved } from "@/lib/registrationNotificationEmails";
 
 
 export default async function handler(
@@ -120,6 +121,14 @@ export default async function handler(
           return res.status(400).json({ error: "Profile ID is required" });
         }
 
+        const existingProfile = await prisma.practice.findUnique({
+          where: { id },
+        });
+
+        if (!existingProfile) {
+          return res.status(404).json({ error: "Profile not found" });
+        }
+
         await prisma.practice.update({
           where: { id },
           data: {
@@ -143,6 +152,25 @@ export default async function handler(
         const updatedProfile = await prisma.practice.findUnique({
           where: { id },
         });
+
+        if (
+          updateData.status === "accept" &&
+          existingProfile.status !== "accept" &&
+          updatedProfile
+        ) {
+          const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(
+            /\/$/,
+            ""
+          );
+          void notifyUserRegistrationApproved({
+            userType: "practice",
+            name: updatedProfile.name,
+            email: updatedProfile.email,
+            loginUrl: `${siteUrl}/practiceUser/practiceLogin`,
+          }).catch((err) =>
+            console.error("[practice/register] Approval notification failed:", err)
+          );
+        }
 
         return res.status(200).json(updatedProfile);
       }

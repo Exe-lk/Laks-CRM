@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
+import { notifyAdminNewRegistration } from "@/lib/registrationNotificationEmails";
 
 
 
@@ -33,6 +34,15 @@ export default async function handler(
             message: "Email already verified",
           });
         }
+
+        void notifyAdminNewRegistration({
+          userType: "locum",
+          name: existingProfile.fullName,
+          email: existingProfile.emailAddress,
+          roleOrPracticeType: existingProfile.employeeType,
+        }).catch((err) =>
+          console.error("[locum-profile/confirm-email] Admin notification failed:", err)
+        );
 
         // Update the status
         const updatedProfile = await prisma.locumProfile.update({
