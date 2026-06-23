@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue, getSpecialityDisplayName } from "@/lib/enums";
-import { notifyUserRegistrationApproved } from "@/lib/registrationNotificationEmails";
+import { notifyUserRegistrationApproved, sendRegistrationEmailSafely } from "@/lib/registrationNotificationEmails";
 
 
 export default async function handler(
@@ -162,13 +162,13 @@ export default async function handler(
             /\/$/,
             ""
           );
-          void notifyUserRegistrationApproved({
-            userType: "practice",
-            name: updatedProfile.name,
-            email: updatedProfile.email,
-            loginUrl: `${siteUrl}/practiceUser/practiceLogin`,
-          }).catch((err) =>
-            console.error("[practice/register] Approval notification failed:", err)
+          await sendRegistrationEmailSafely("practice/register", () =>
+            notifyUserRegistrationApproved({
+              userType: "practice",
+              name: updatedProfile.name,
+              email: updatedProfile.email,
+              loginUrl: `${siteUrl}/practiceUser/practiceLogin`,
+            })
           );
         }
 
