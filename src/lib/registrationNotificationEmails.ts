@@ -5,6 +5,20 @@ const ADMIN_EMAIL =
 
 type UserType = "practice" | "locum";
 
+export async function sendRegistrationEmailSafely(
+  label: string,
+  send: () => Promise<boolean>
+): Promise<void> {
+  try {
+    const sent = await send();
+    if (!sent) {
+      console.error(`[${label}] Email was not sent`);
+    }
+  } catch (error) {
+    console.error(`[${label}] Email notification failed:`, error);
+  }
+}
+
 function formatTimestamp(date: Date = new Date()): string {
   return date.toLocaleString("en-GB", {
     weekday: "long",
