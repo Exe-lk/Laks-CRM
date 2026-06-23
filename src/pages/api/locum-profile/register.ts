@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
 import { getSpecialityValue,getSpecialityDisplayName } from "@/lib/enums";
-import { notifyUserRegistrationApproved } from "@/lib/registrationNotificationEmails";
+import { notifyUserRegistrationApproved, sendRegistrationEmailSafely } from "@/lib/registrationNotificationEmails";
 
 export default async function handler(
   req: NextApiRequest,
@@ -191,16 +191,15 @@ export default async function handler(
             /\/$/,
             ""
           );
-          void notifyUserRegistrationApproved({
-            userType: "locum",
-            name: updatedProfile.fullName,
-            email: updatedProfile.emailAddress,
-            loginUrl: `${siteUrl}/locumStaff/login`,
-          }).catch((err) =>
-            console.error(
-              "[locum-profile/register] Approval notification failed:",
-              err
-            )
+          await sendRegistrationEmailSafely(
+            "locum-profile/register",
+            () =>
+              notifyUserRegistrationApproved({
+                userType: "locum",
+                name: updatedProfile.fullName,
+                email: updatedProfile.emailAddress,
+                loginUrl: `${siteUrl}/locumStaff/login`,
+              })
           );
         }
 

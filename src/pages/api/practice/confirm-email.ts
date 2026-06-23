@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
-import { notifyAdminNewRegistration } from "@/lib/registrationNotificationEmails";
+import { notifyAdminNewRegistration, sendRegistrationEmailSafely } from "@/lib/registrationNotificationEmails";
 
 
 export default async function handler(
@@ -34,13 +34,13 @@ export default async function handler(
           });
         }
 
-        void notifyAdminNewRegistration({
-          userType: "practice",
-          name: existingProfile.name,
-          email: existingProfile.email,
-          roleOrPracticeType: existingProfile.practiceType,
-        }).catch((err) =>
-          console.error("[practice/confirm-email] Admin notification failed:", err)
+        await sendRegistrationEmailSafely("practice/confirm-email", () =>
+          notifyAdminNewRegistration({
+            userType: "practice",
+            name: existingProfile.name,
+            email: existingProfile.email,
+            roleOrPracticeType: existingProfile.practiceType,
+          })
         );
 
         // Update the status
