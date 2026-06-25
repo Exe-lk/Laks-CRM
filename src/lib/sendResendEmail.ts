@@ -23,6 +23,10 @@ export async function sendResendEmail(
     return false;
   }
 
+  console.log(
+    `[sendResendEmail] Sending to=${payload.to} subject="${payload.subject}"`
+  );
+
   try {
     const resend = new Resend(apiKey);
     const { data, error } = await resend.emails.send({
@@ -34,7 +38,10 @@ export async function sendResendEmail(
     });
 
     if (error) {
-      console.error("[sendResendEmail] Resend error:", error);
+      console.error(
+        "[sendResendEmail] Resend error:",
+        error.message ?? error
+      );
       return false;
     }
 
