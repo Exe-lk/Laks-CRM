@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
-import { notifyAdminNewRegistration, sendRegistrationEmailSafely } from "@/lib/registrationNotificationEmails";
-
-
+import {
+  getAdminNotificationEmail,
+  notifyAdminNewRegistration,
+  sendRegistrationEmailSafely,
+} from "@/lib/registrationNotificationEmails";
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,56 +12,69 @@ export default async function handler(
 ) {
   try {
     switch (req.method) {
-      
-      case "PUT":
+      case "PUT": {
         const { email, status } = req.body;
 
         if (!email || !status) {
           return res.status(400).json({ error: "Email and status are required" });
         }
 
-        // First, check if the profile exists
-        const existingProfile = await prisma.locumProfile.findUnique({
-          where: { emailAddress: email },
+        const normalizedEmail = String(email).trim().toLowerCase();
+
+        const existingProfile = await prisma.locumProfile.findFirst({
+          where: {
+            emailAddress: {
+              equals: normalizedEmail,
+              mode: "insensitive",
+            },
+          },
         });
 
         if (!existingProfile) {
           return res.status(404).json({ error: "Profile not found" });
         }
 
-        // If already verified, return success (idempotent)
-        if (existingProfile.status === status || existingProfile.status === 'verify') {
+        if (
+          existingProfile.status === status ||
+          existingProfile.status === "verify"
+        ) {
+          console.log(
+            "[locum-profile/confirm-email] Admin notification skipped: already verified"
+          );
           return res.status(200).json({
             ...existingProfile,
             message: "Email already verified",
           });
         }
 
-        await sendRegistrationEmailSafely("locum-profile/confirm-email", () =>
-          notifyAdminNewRegistration({
-            userType: "locum",
-            name: existingProfile.fullName,
-            email: existingProfile.emailAddress,
-            roleOrPracticeType: existingProfile.employeeType,
-          })
-        );
+        if (status === "verify" && existingProfile.status === "pending") {
+          const adminEmail = getAdminNotificationEmail();
+          console.log(
+            `[locum-profile/confirm-email] Sending admin notification to ${adminEmail}`
+          );
+          await sendRegistrationEmailSafely("locum-profile/confirm-email", () =>
+            notifyAdminNewRegistration({
+              userType: "locum",
+              name: existingProfile.fullName,
+              email: existingProfile.emailAddress,
+              roleOrPracticeType: existingProfile.employeeType,
+            })
+          );
+        }
 
-        // Update the status
         const updatedProfile = await prisma.locumProfile.update({
-          where: { emailAddress: email },
+          where: { id: existingProfile.id },
           data: { status },
         });
 
         return res.status(200).json(updatedProfile);
+      }
 
-     
       default:
         res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error: any) {
-   
-
     if (error.code === "P2002") {
       return res.status(400).json({
         error: "Email address or mobile number already exists",
@@ -82,7 +97,6 @@ export default async function handler(
 
     return res.status(500).json({
       error: error,
-      
     });
   }
 }
