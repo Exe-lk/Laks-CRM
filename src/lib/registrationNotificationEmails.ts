@@ -1,7 +1,12 @@
 import { sendResendEmail } from "./sendResendEmail";
 
-const ADMIN_EMAIL =
-  process.env.ADMIN_NOTIFICATION_EMAIL ?? "info@laksdentagency.co.uk";
+const DEFAULT_ADMIN_EMAIL = "info@laksdentagency.co.uk";
+
+export function getAdminNotificationEmail(): string {
+  const raw = process.env.ADMIN_NOTIFICATION_EMAIL?.trim() ?? "";
+  const unquoted = raw.replace(/^["']|["']$/g, "");
+  return unquoted || DEFAULT_ADMIN_EMAIL;
+}
 
 type UserType = "practice" | "locum";
 
@@ -107,7 +112,7 @@ export async function notifyAdminNewRegistration(params: {
   `;
 
   return sendResendEmail({
-    to: ADMIN_EMAIL,
+    to: getAdminNotificationEmail(),
     subject,
     text,
     html,
