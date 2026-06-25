@@ -1,4 +1,4 @@
-import { sendTransactionalEmail } from "./sendTransactionalEmail";
+import { sendResendEmail } from "./sendResendEmail";
 
 const ADMIN_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL ?? "info@laksdentagency.co.uk";
@@ -106,7 +106,7 @@ export async function notifyAdminNewRegistration(params: {
     </html>
   `;
 
-  return sendTransactionalEmail({
+  return sendResendEmail({
     to: ADMIN_EMAIL,
     subject,
     text,
@@ -171,7 +171,7 @@ export async function notifyUserRegistrationApproved(params: {
     </html>
   `;
 
-  return sendTransactionalEmail({
+  return sendResendEmail({
     to: params.email,
     subject,
     text,

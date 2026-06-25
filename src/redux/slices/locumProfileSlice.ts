@@ -1,5 +1,17 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+/** Client: same origin (avoids Failed to fetch from bad/missing NEXT_PUBLIC_SITE_URL). Server: env or relative. */
+function locumApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/`;
+  }
+  const env = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
+  if (env && env !== 'undefined') {
+    return `${env}/api/`;
+  }
+  return '/api/';
+}
+
 export interface Specialty {
   id?: string;
   locumId?: string;
@@ -55,7 +67,7 @@ export interface ErrorResponse {
 export const locumProfileApiSlice = createApi({
   reducerPath: 'locumProfileApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/`,
+    baseUrl: locumApiBaseUrl(),
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
       return headers;
