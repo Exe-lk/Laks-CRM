@@ -16,27 +16,41 @@ export default async function handler(
       return res.status(400).json({ error: "Email is required" });
     }
 
-    // Check if it's a locum
-    const locum = await prisma.locumProfile.findUnique({
-      where: { emailAddress: email },
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const locum = await prisma.locumProfile.findFirst({
+      where: {
+        emailAddress: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (locum) {
       return res.status(200).json({ userType: "locum" });
     }
 
-    // Check if it's a practice
-    const practice = await prisma.practice.findUnique({
-      where: { email: email },
+    const practice = await prisma.practice.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (practice) {
       return res.status(200).json({ userType: "practice" });
     }
 
-    // Check if it's a branch
     const branch = await prisma.branch.findFirst({
-      where: { email: email },
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (branch) {
@@ -44,9 +58,8 @@ export default async function handler(
     }
 
     return res.status(404).json({ error: "User not found" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error checking user type:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
