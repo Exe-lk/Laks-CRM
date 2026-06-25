@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../../lib/supabaseclient';
+import { parseAuthParamsFromUrl } from '../../../lib/emailVerification';
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying');
@@ -32,13 +33,13 @@ export default function VerifyEmail() {
         
         // If no session, check for token in URL query params or hash
         if (!session && !sessionError) {
-          const { token_hash, type } = router.query;
+          const { tokenHash, otpType } = parseAuthParamsFromUrl(router.query);
           
           // If we have a token in query params, try to verify it
-          if (token_hash && typeof token_hash === 'string') {
-            const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-              token_hash: token_hash,
-              type: (type as any) || 'signup',
+          if (tokenHash) {
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+              token_hash: tokenHash,
+              type: otpType,
             });
             
             if (verifyError) {
@@ -85,7 +86,7 @@ export default function VerifyEmail() {
             // Check if email is confirmed (either just now or previously)
             if (user?.user?.email_confirmed_at) {
               try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/branch/confirm-email`, {
+                const response = await fetch(`${window.location.origin}/api/branch/confirm-email`, {
                   method: 'PUT',
                   headers: {
                     'Content-Type': 'application/json',
@@ -230,4 +231,3 @@ export default function VerifyEmail() {
     </div>
   );
 }
-

@@ -1,83 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../../lib/supabaseclient';
-import { useVerifyStatusMutation } from '../../../redux/slices/locumProfileSlice';
+import {
+  cleanVerificationUrl,
+  confirmProfileEmail,
+  establishSupabaseSession,
+} from '../../../lib/emailVerification';
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('Verifying your email...');
   const router = useRouter();
-  const [updateStatus] = useVerifyStatusMutation();
-  const [verificationFinished, setVerificationFinished] = useState(false);
+  const [hasProcessed, setHasProcessed] = useState(false);
 
   useEffect(() => {
-    if (!router.isReady || verificationFinished) return;
+    if (!router.isReady || hasProcessed) return;
 
     const handleEmailVerification = async () => {
       try {
-        const code =
-          typeof router.query.code === 'string' ? router.query.code : null;
-        if (code) {
-          const { error: exchangeError } =
-            await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) {
-            setStatus('error');
-            setMessage(
-              exchangeError.message ||
-                'This verification link has expired or is invalid. Please request a new verification email or try logging in.'
-            );
-            setTimeout(() => router.push('/locumStaff/login'), 4000);
-            return;
-          }
-          window.history.replaceState(null, '', '/locumStaff/verifyEmail');
-        }
-
-        const tokenHash =
-          typeof router.query.token_hash === 'string'
-            ? router.query.token_hash
-            : null;
-        const otpType =
-          typeof router.query.type === 'string' ? router.query.type : 'signup';
-        if (tokenHash) {
-          const { error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: otpType as 'signup' | 'email' | 'recovery',
-          });
-          if (verifyError) {
-            setStatus('error');
-            setMessage(
-              verifyError.message ||
-                'This verification link has expired or is invalid. Please request a new verification email or try logging in.'
-            );
-            setTimeout(() => router.push('/locumStaff/login'), 4000);
-            return;
-          }
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        let {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          setStatus('error');
-          setMessage('Verification failed. Please try again.');
-          setTimeout(() => router.push('/locumStaff/login'), 4000);
-          return;
-        }
-
-        if (!session && typeof window !== 'undefined' && window.location.hash) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          const retry = await supabase.auth.getSession();
-          session = retry.data.session;
-        }
+        const session = await establishSupabaseSession(router.query);
 
         if (!session) {
           setStatus('error');
           setMessage(
             'This verification link has expired or is invalid. Please request a new verification email or try logging in.'
           );
+          setHasProcessed(true);
           setTimeout(() => router.push('/locumStaff/login'), 4000);
           return;
         }
@@ -89,6 +37,7 @@ export default function VerifyEmail() {
           setMessage(
             'Could not retrieve user information. Please try logging in.'
           );
+          setHasProcessed(true);
           setTimeout(() => router.push('/locumStaff/login'), 4000);
           return;
         }
@@ -98,6 +47,7 @@ export default function VerifyEmail() {
         if (!userEmail) {
           setStatus('error');
           setMessage('Could not retrieve email address. Please try logging in.');
+          setHasProcessed(true);
           setTimeout(() => router.push('/locumStaff/login'), 4000);
           return;
         }
@@ -107,45 +57,40 @@ export default function VerifyEmail() {
           setMessage(
             'Email verification is still pending. Please use the latest link from your email.'
           );
+          setHasProcessed(true);
           setTimeout(() => router.push('/locumStaff/login'), 4000);
           return;
         }
 
         try {
-          await updateStatus({
+          const result = await confirmProfileEmail({
+            apiPath: '/api/locum-profile/confirm-email',
             email: userEmail,
             status: 'verify',
-          }).unwrap();
+          });
+          if (!result.ok) {
+            console.error('Locum DB status update error:', result.data);
+          }
         } catch (updateError) {
           console.error('Locum DB status update error:', updateError);
         }
 
         setStatus('success');
         setMessage('Email verified successfully!');
-        if (typeof window !== 'undefined') {
-          window.history.replaceState(null, '', '/locumStaff/verifyEmail');
-        }
+        setHasProcessed(true);
+        cleanVerificationUrl('/locumStaff/verifyEmail');
         setTimeout(() => router.push('/locumStaff/login'), 2000);
       } catch (error) {
         console.error('Verification error:', error);
         setStatus('error');
         setMessage('An error occurred during verification. Please try logging in.');
+        setHasProcessed(true);
         setTimeout(() => router.push('/locumStaff/login'), 4000);
-      } finally {
-        setVerificationFinished(true);
       }
     };
 
     void handleEmailVerification();
-  }, [
-    router,
-    router.isReady,
-    router.query.code,
-    router.query.token_hash,
-    router.query.type,
-    updateStatus,
-    verificationFinished,
-  ]);
+  }, [router.isReady, hasProcessed, router.query]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
