@@ -67,7 +67,8 @@ export default function VerifyEmail() {
 
           if (result.adminNotificationSent === false) {
             console.warn(
-              'Practice profile verified but admin notification email was not sent'
+              'Practice profile verified but admin notification email was not sent',
+              result.adminNotificationError ?? result.data
             );
           }
         } catch (updateError) {
