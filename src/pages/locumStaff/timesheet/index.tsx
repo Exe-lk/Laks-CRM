@@ -1584,16 +1584,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       return;
     }
 
-    const hasManagerSignature = !!(managerSignatureRef.current && !managerSignatureRef.current.isEmpty());
-    const hasManagerId = managerId.trim().length > 0;
-
-    if (hasManagerSignature && !hasManagerId) {
-      setError('Manager ID is required when providing a manager signature');
-      return;
-    }
-
-    if (hasManagerId && !hasManagerSignature) {
-      setError('Manager signature is required when providing a Manager ID');
+    if (!managerSignatureRef.current || managerSignatureRef.current.isEmpty()) {
+      setError('Manager signature is required');
       return;
     }
 
@@ -1610,24 +1602,18 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
 
-      let managerSignatureUrl: string | undefined;
-      if (hasManagerSignature && hasManagerId) {
-        const managerSignatureDataUrl = managerSignatureRef.current!.toDataURL();
-        managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
-      }
+      const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
+      const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
 
       const submitBody: Record<string, unknown> = {
         timesheetId,
         timesheetJobIds: [timesheetJobId],
         staffSignature: staffSignatureUrl,
+        managerSignature: managerSignatureUrl,
         rating,
         remark,
+        ...(managerId.trim() && { managerId: managerId.trim() }),
       };
-
-      if (managerSignatureUrl && hasManagerId) {
-        submitBody.managerSignature = managerSignatureUrl;
-        submitBody.managerId = managerId.trim();
-      }
 
       const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/submit-timesheet`, {
         method: 'POST',
@@ -1742,7 +1728,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                Manager Signature <span className="text-gray-400 text-[10px] sm:text-xs"></span>
+                Manager Signature <span className="text-red-500">*</span>
               </label>
               <button
                 onClick={clearManagerSignature}
@@ -1766,7 +1752,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
 
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-              Manager ID <span className="text-gray-400 text-[10px] sm:text-xs"></span>
+              Manager ID <span className="text-gray-400 text-[10px] sm:text-xs">(optional)</span>
             </label>
             <input
               type="text"
@@ -1823,7 +1809,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             <ul className="mt-2 space-y-1 text-blue-700">
               <li>• <span className="font-medium">Each job has its own separate timesheet</span></li>
               <li>• By signing, you confirm that the time entries for this job are accurate</li>
-              <li>• <span className="font-medium">If both manager signature and ID are provided</span>, the timesheet will be automatically approved and locked</li>
+              <li>• <span className="font-medium">Manager signature is required</span> before submission</li>
+              <li>• If a <span className="font-medium">Manager ID is also provided</span>, the timesheet will be automatically approved and locked</li>
               <li>• Signatures will be saved as images</li>
             </ul>
           </div>
