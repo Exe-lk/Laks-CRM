@@ -1,4 +1,8 @@
-import { sendResendEmail } from "./sendResendEmail";
+import {
+  isResendConfigured,
+  sendResendEmail,
+  type ResendSendResult,
+} from "./sendResendEmail";
 
 const DEFAULT_ADMIN_EMAIL = "info@laksdentagency.co.uk";
 
@@ -8,23 +12,30 @@ export function getAdminNotificationEmail(): string {
   return unquoted || DEFAULT_ADMIN_EMAIL;
 }
 
+export type RegistrationEmailResult = {
+  sent: boolean;
+  error?: string;
+  messageId?: string | null;
+};
+
 type UserType = "practice" | "locum";
 
 export async function sendRegistrationEmailSafely(
   label: string,
-  send: () => Promise<boolean>
-): Promise<boolean> {
+  send: () => Promise<ResendSendResult>
+): Promise<RegistrationEmailResult> {
   try {
-    const sent = await send();
-    if (!sent) {
-      console.error(`[${label}] Email was not sent`);
-      return false;
+    const result = await send();
+    if (!result.ok) {
+      console.error(`[${label}] Email was not sent: ${result.error}`);
+      return { sent: false, error: result.error };
     }
     console.log(`[${label}] Email notification sent successfully`);
-    return true;
+    return { sent: true, messageId: result.messageId };
   } catch (error) {
-    console.error(`[${label}] Email notification failed:`, error);
-    return false;
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[${label}] Email notification failed:`, message);
+    return { sent: false, error: message };
   }
 }
 
@@ -49,7 +60,7 @@ export async function notifyAdminNewRegistration(params: {
   email: string;
   roleOrPracticeType: string;
   registeredAt?: Date;
-}): Promise<boolean> {
+}): Promise<ResendSendResult> {
   const label = userTypeLabel(params.userType);
   const typeField =
     params.userType === "practice" ? "Practice type" : "Job type";
@@ -128,7 +139,7 @@ export async function notifyUserRegistrationApproved(params: {
   name: string;
   email: string;
   loginUrl: string;
-}): Promise<boolean> {
+}): Promise<ResendSendResult> {
   const label = userTypeLabel(params.userType);
 
   const subject = "Your Laks Dent Agency registration has been approved";
@@ -187,3 +198,5 @@ export async function notifyUserRegistrationApproved(params: {
     html,
   });
 }
+
+export { isResendConfigured };
