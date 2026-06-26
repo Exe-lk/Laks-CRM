@@ -34,10 +34,7 @@ export default async function handler(
           return res.status(404).json({ error: "Profile not found" });
         }
 
-        if (
-          existingProfile.status === status ||
-          existingProfile.status === "verify"
-        ) {
+        if (existingProfile.status === "verify") {
           console.log(
             "[practice/confirm-email] Admin notification skipped: already verified"
           );
@@ -47,18 +44,25 @@ export default async function handler(
           });
         }
 
-        if (status === "verify" && existingProfile.status === "pending") {
+        const isFirstVerification =
+          status === "verify" && existingProfile.status !== "verify";
+
+        let adminNotificationSent = false;
+
+        if (isFirstVerification) {
           const adminEmail = getAdminNotificationEmail();
           console.log(
             `[practice/confirm-email] Sending admin notification to ${adminEmail}`
           );
-          await sendRegistrationEmailSafely("practice/confirm-email", () =>
-            notifyAdminNewRegistration({
-              userType: "practice",
-              name: existingProfile.name,
-              email: existingProfile.email,
-              roleOrPracticeType: existingProfile.practiceType,
-            })
+          adminNotificationSent = await sendRegistrationEmailSafely(
+            "practice/confirm-email",
+            () =>
+              notifyAdminNewRegistration({
+                userType: "practice",
+                name: existingProfile.name,
+                email: existingProfile.email,
+                roleOrPracticeType: existingProfile.practiceType,
+              })
           );
         }
 
@@ -67,7 +71,10 @@ export default async function handler(
           data: { status },
         });
 
-        return res.status(200).json(updatedProfile);
+        return res.status(200).json({
+          ...updatedProfile,
+          adminNotificationSent,
+        });
       }
 
       default:
