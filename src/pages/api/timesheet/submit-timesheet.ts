@@ -183,13 +183,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
     }
 
-    const { timesheetId, staffSignature, rating, remark } = req.body;
+    const {
+      timesheetId,
+      staffSignature,
+      rating,
+      remark,
+      managerSignature,
+      managerId,
+      timesheetJobIds,
+    } = req.body;
 
     if (!timesheetId || !staffSignature) {
       return res.status(400).json({ 
         error: "timesheetId and staffSignature are required" 
       });
     }
+
+    const hasManagerSignature = !!managerSignature;
+    const hasManagerId = typeof managerId === 'string' && managerId.trim().length > 0;
+    if (hasManagerSignature !== hasManagerId) {
+      return res.status(400).json({
+        error: "Both managerSignature and managerId are required together",
+      });
+    }
+    const hasManagerApproval = hasManagerSignature && hasManagerId;
 
     // Get the timesheet with jobs
     const timesheet = await prisma.timesheet.findUnique({
@@ -216,8 +233,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Filter for only DRAFT jobs (jobs that can be submitted)
     // This allows submitting individual jobs even if other jobs are already submitted
-    const draftJobs = timesheet.timesheetJobs.filter(job => job.status === 'DRAFT');
+    let draftJobs = timesheet.timesheetJobs.filter(job => job.status === 'DRAFT');
     const alreadySubmittedJobs = timesheet.timesheetJobs.filter(job => job.status !== 'DRAFT');
+
+    if (timesheetJobIds && Array.isArray(timesheetJobIds) && timesheetJobIds.length > 0) {
+      const unknownJobIds = timesheetJobIds.filter(
+        (id: string) => !timesheet.timesheetJobs.some((job) => job.id === id)
+      );
+      if (unknownJobIds.length > 0) {
+        return res.status(400).json({
+          error: "One or more timesheetJobIds do not belong to this timesheet",
+          invalidJobIds: unknownJobIds,
+        });
+      }
+
+      const notDraftJobIds = timesheetJobIds.filter((id: string) => {
+        const job = timesheet.timesheetJobs.find((j) => j.id === id);
+        return job && job.status !== 'DRAFT';
+      });
+      if (notDraftJobIds.length > 0) {
+        return res.status(400).json({
+          error: "One or more jobs are not in DRAFT status",
+          invalidJobIds: notDraftJobIds,
+        });
+      }
+
+      draftJobs = draftJobs.filter((job) => timesheetJobIds.includes(job.id));
+    }
     
     if (alreadySubmittedJobs.length > 0) {
       console.log('Some jobs are already submitted, will skip them:', alreadySubmittedJobs.map(j => ({ id: j.id, status: j.status })));
@@ -272,11 +314,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Calculated totals:', { totalHours, totalPay });
 
-    // Validate that total hours is greater than 0
-    if (totalHours <= 0) {
-      console.log('Total hours validation failed:', { 
-        totalHours,
-        jobs: timesheet.timesheetJobs.map(j => ({
+    const submissionHours = draftJobs.reduce((sum, job) => sum + (job.totalHours || 0), 0);
+
+    // Validate that jobs being submitted have hours greater than 0
+    if (submissionHours <= 0) {
+      console.log('Submission hours validation failed:', { 
+        submissionHours,
+        jobs: draftJobs.map(j => ({
           id: j.id,
           totalHours: j.totalHours,
           startTime: j.startTime,
@@ -286,8 +330,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ 
         error: "Total hours must be greater than 0",
         details: "Please ensure all jobs have start time, end time, and calculated hours",
-        totalHours: totalHours,
-        jobsData: timesheet.timesheetJobs.map(j => ({
+        totalHours: submissionHours,
+        jobsData: draftJobs.map(j => ({
           jobId: j.id,
           totalHours: j.totalHours,
           hasStartTime: !!j.startTime,
@@ -302,21 +346,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('[STEP 1.1] Will update only DRAFT jobs:', draftJobIds);
     
     const result = await prisma.$transaction(async (tx) => {
-      // Update only the DRAFT jobs with locum signature, status, rating, and remark
-      console.log('[STEP 2] Updating DRAFT jobs with locum signature and SUBMITTED status');
+      // Update only the targeted DRAFT jobs with locum signature, optional manager approval, rating, and remark
+      console.log('[STEP 2] Updating DRAFT jobs with locum signature and status:', hasManagerApproval ? 'LOCKED' : 'SUBMITTED');
       const now = new Date();
         await tx.timesheetJob.updateMany({
           where: { 
-            timesheetId: timesheetId,
-            status: 'DRAFT' // Only update jobs that are in DRAFT status
+            id: { in: draftJobIds },
+            status: 'DRAFT',
           },
           data: {
           locumSignature: staffSignature,
           locumSignatureDate: now,
-          status: 'SUBMITTED',
+          status: hasManagerApproval ? 'LOCKED' : 'SUBMITTED',
           submittedAt: now,
           rating: rating || undefined,
-          remark: remark || undefined
+          remark: remark || undefined,
+          ...(hasManagerApproval && {
+            managerSignature,
+            managerSignatureDate: now,
+            managerId: String(managerId).trim(),
+          }),
         }
       });
       
@@ -830,7 +879,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       select: {
         id: true,
         status: true,
-        locumSignatureDate: true
+        locumSignatureDate: true,
+        managerSignature: true,
+        managerSignatureDate: true,
+        managerId: true,
       }
     });
 
@@ -859,7 +911,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         totalJobsInTimesheet: allJobs.length,
         newlySubmittedJobs: newlySubmittedJobs.length,
         alreadySubmittedJobs: allJobs.length - newlySubmittedJobs.length,
-        jobsStatus: allJobs.map(j => ({ jobId: j.id, status: j.status, signedAt: j.locumSignatureDate })),
+        jobsStatus: allJobs.map(j => ({
+          jobId: j.id,
+          status: j.status,
+          signedAt: j.locumSignatureDate,
+          hasManagerSignature: !!j.managerSignature,
+          managerSignatureDate: j.managerSignatureDate,
+          managerId: j.managerId,
+        })),
         newlySubmittedJobIds: newlySubmittedJobs.map(j => j.id),
         paymentResults: result.payments
       }
