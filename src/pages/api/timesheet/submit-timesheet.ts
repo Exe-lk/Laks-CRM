@@ -201,9 +201,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const hasManagerSignature = !!managerSignature;
     const hasManagerId = typeof managerId === 'string' && managerId.trim().length > 0;
-    if (hasManagerSignature !== hasManagerId) {
+    if (hasManagerId && !hasManagerSignature) {
       return res.status(400).json({
-        error: "Both managerSignature and managerId are required together",
+        error: "managerSignature is required when managerId is provided",
       });
     }
     const hasManagerApproval = hasManagerSignature && hasManagerId;
@@ -361,9 +361,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           submittedAt: now,
           rating: rating || undefined,
           remark: remark || undefined,
-          ...(hasManagerApproval && {
+          ...(hasManagerSignature && {
             managerSignature,
             managerSignatureDate: now,
+          }),
+          ...(hasManagerId && {
             managerId: String(managerId).trim(),
           }),
         }
