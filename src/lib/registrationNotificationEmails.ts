@@ -13,14 +13,18 @@ type UserType = "practice" | "locum";
 export async function sendRegistrationEmailSafely(
   label: string,
   send: () => Promise<boolean>
-): Promise<void> {
+): Promise<boolean> {
   try {
     const sent = await send();
     if (!sent) {
       console.error(`[${label}] Email was not sent`);
+      return false;
     }
+    console.log(`[${label}] Email notification sent successfully`);
+    return true;
   } catch (error) {
     console.error(`[${label}] Email notification failed:`, error);
+    return false;
   }
 }
 

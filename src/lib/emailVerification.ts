@@ -139,6 +139,20 @@ export interface ConfirmProfileEmailParams {
 export interface ConfirmProfileEmailResult {
   ok: boolean;
   data: unknown;
+  adminNotificationSent?: boolean;
+}
+
+function parseConfirmProfileResponse(data: unknown): {
+  adminNotificationSent?: boolean;
+} {
+  if (data && typeof data === "object" && "adminNotificationSent" in data) {
+    const sent = (data as { adminNotificationSent?: unknown })
+      .adminNotificationSent;
+    if (typeof sent === "boolean") {
+      return { adminNotificationSent: sent };
+    }
+  }
+  return {};
 }
 
 /**
@@ -164,7 +178,39 @@ export async function confirmProfileEmail(
     data = null;
   }
 
-  return { ok: response.ok, data };
+  const { adminNotificationSent } = parseConfirmProfileResponse(data);
+
+  return { ok: response.ok, data, adminNotificationSent };
+}
+
+/**
+ * Resolve the authenticated user's email after verification, with a short retry
+ * if email_confirmed_at is not yet populated.
+ */
+export async function resolveVerifiedUserEmail(
+  getUser: () => Promise<{
+    data: { user: { email?: string | null; email_confirmed_at?: string | null } | null };
+    error: { message: string } | null;
+  }>,
+  delayMs: (ms: number) => Promise<void>
+): Promise<string | null> {
+  const first = await getUser();
+  if (first.error || !first.data.user?.email) {
+    return null;
+  }
+
+  if (first.data.user.email_confirmed_at) {
+    return first.data.user.email;
+  }
+
+  await delayMs(500);
+
+  const retry = await getUser();
+  if (retry.error || !retry.data.user?.email) {
+    return null;
+  }
+
+  return retry.data.user.email;
 }
 
 /**
