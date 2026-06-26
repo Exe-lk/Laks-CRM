@@ -5,6 +5,7 @@ import {
   cleanVerificationUrl,
   confirmProfileEmail,
   establishSupabaseSession,
+  resolveVerifiedUserEmail,
 } from '../../../lib/emailVerification';
 
 export default function VerifyEmail() {
@@ -30,32 +31,15 @@ export default function VerifyEmail() {
           return;
         }
 
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const userEmail = await resolveVerifiedUserEmail(
+          () => supabase.auth.getUser(),
+          (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+        );
 
-        if (userError || !userData.user?.email) {
+        if (!userEmail) {
           setStatus('error');
           setMessage(
             'Could not retrieve user information. Please try logging in.'
-          );
-          setHasProcessed(true);
-          setTimeout(() => router.push('/locumStaff/login'), 4000);
-          return;
-        }
-
-        const user = userData.user;
-        const userEmail = user.email;
-        if (!userEmail) {
-          setStatus('error');
-          setMessage('Could not retrieve email address. Please try logging in.');
-          setHasProcessed(true);
-          setTimeout(() => router.push('/locumStaff/login'), 4000);
-          return;
-        }
-
-        if (!user.email_confirmed_at) {
-          setStatus('error');
-          setMessage(
-            'Email verification is still pending. Please use the latest link from your email.'
           );
           setHasProcessed(true);
           setTimeout(() => router.push('/locumStaff/login'), 4000);
@@ -68,11 +52,34 @@ export default function VerifyEmail() {
             email: userEmail,
             status: 'verify',
           });
+
           if (!result.ok) {
-            console.error('Locum DB status update error:', result.data);
+            console.error('Locum profile status update failed:', result.data);
+            setStatus('success');
+            setMessage(
+              'Email verified, but we could not update your profile status. Please contact support if login fails.'
+            );
+            setHasProcessed(true);
+            cleanVerificationUrl('/locumStaff/verifyEmail');
+            setTimeout(() => router.push('/locumStaff/login'), 4000);
+            return;
+          }
+
+          if (result.adminNotificationSent === false) {
+            console.warn(
+              'Locum profile verified but admin notification email was not sent'
+            );
           }
         } catch (updateError) {
           console.error('Locum DB status update error:', updateError);
+          setStatus('success');
+          setMessage(
+            'Email verified, but we could not update your profile status. Please contact support if login fails.'
+          );
+          setHasProcessed(true);
+          cleanVerificationUrl('/locumStaff/verifyEmail');
+          setTimeout(() => router.push('/locumStaff/login'), 4000);
+          return;
         }
 
         setStatus('success');
