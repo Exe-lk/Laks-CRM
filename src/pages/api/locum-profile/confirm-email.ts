@@ -2,9 +2,11 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
 import {
   getAdminNotificationEmail,
+  isResendConfigured,
   notifyAdminNewRegistration,
   sendRegistrationEmailSafely,
 } from "@/lib/registrationNotificationEmails";
+import { getResendFromAddress } from "@/lib/sendResendEmail";
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,14 +49,15 @@ export default async function handler(
         const isFirstVerification =
           status === "verify" && existingProfile.status !== "verify";
 
+        const adminRecipient = getAdminNotificationEmail();
         let adminNotificationSent = false;
+        let adminNotificationError: string | undefined;
 
         if (isFirstVerification) {
-          const adminEmail = getAdminNotificationEmail();
           console.log(
-            `[locum-profile/confirm-email] Sending admin notification to ${adminEmail}`
+            `[locum-profile/confirm-email] Sending admin notification to ${adminRecipient}`
           );
-          adminNotificationSent = await sendRegistrationEmailSafely(
+          const emailResult = await sendRegistrationEmailSafely(
             "locum-profile/confirm-email",
             () =>
               notifyAdminNewRegistration({
@@ -64,6 +67,8 @@ export default async function handler(
                 roleOrPracticeType: existingProfile.employeeType,
               })
           );
+          adminNotificationSent = emailResult.sent;
+          adminNotificationError = emailResult.error;
         }
 
         const updatedProfile = await prisma.locumProfile.update({
@@ -74,6 +79,12 @@ export default async function handler(
         return res.status(200).json({
           ...updatedProfile,
           adminNotificationSent,
+          adminRecipient,
+          resendConfigured: isResendConfigured(),
+          from: getResendFromAddress(),
+          ...(adminNotificationError
+            ? { adminNotificationError }
+            : {}),
         });
       }
 

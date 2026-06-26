@@ -140,19 +140,31 @@ export interface ConfirmProfileEmailResult {
   ok: boolean;
   data: unknown;
   adminNotificationSent?: boolean;
+  adminNotificationError?: string;
 }
 
 function parseConfirmProfileResponse(data: unknown): {
   adminNotificationSent?: boolean;
+  adminNotificationError?: string;
 } {
-  if (data && typeof data === "object" && "adminNotificationSent" in data) {
-    const sent = (data as { adminNotificationSent?: unknown })
-      .adminNotificationSent;
-    if (typeof sent === "boolean") {
-      return { adminNotificationSent: sent };
-    }
+  if (!data || typeof data !== "object") {
+    return {};
   }
-  return {};
+
+  const record = data as Record<string, unknown>;
+  const result: {
+    adminNotificationSent?: boolean;
+    adminNotificationError?: string;
+  } = {};
+
+  if (typeof record.adminNotificationSent === "boolean") {
+    result.adminNotificationSent = record.adminNotificationSent;
+  }
+  if (typeof record.adminNotificationError === "string") {
+    result.adminNotificationError = record.adminNotificationError;
+  }
+
+  return result;
 }
 
 /**
@@ -178,9 +190,10 @@ export async function confirmProfileEmail(
     data = null;
   }
 
-  const { adminNotificationSent } = parseConfirmProfileResponse(data);
+  const { adminNotificationSent, adminNotificationError } =
+    parseConfirmProfileResponse(data);
 
-  return { ok: response.ok, data, adminNotificationSent };
+  return { ok: response.ok, data, adminNotificationSent, adminNotificationError };
 }
 
 /**

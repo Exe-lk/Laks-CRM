@@ -12,57 +12,86 @@ export interface ResendEmailPayload {
   text?: string;
 }
 
+export type ResendSendResult =
+  | { ok: true; messageId: string | null }
+  | { ok: false; error: string };
+
 function isValidEmail(address: string): boolean {
   return EMAIL_REGEX.test(address);
 }
 
-function getFromAddress(): string {
-  return process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_FROM;
+export function isResendConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY?.trim());
+}
+
+export function getResendFromAddress(): string {
+  const fromEnv = process.env.RESEND_FROM_EMAIL?.trim();
+  if (fromEnv && !fromEnv.includes("resend.dev")) {
+    return fromEnv;
+  }
+  if (fromEnv?.includes("resend.dev")) {
+    console.warn(
+      "[sendResendEmail] Ignoring RESEND_FROM_EMAIL with resend.dev sandbox; using verified domain sender"
+    );
+  }
+  return DEFAULT_FROM;
+}
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  const visible = local.length <= 2 ? "*" : `${local.slice(0, 2)}***`;
+  return `${visible}@${domain}`;
 }
 
 export async function sendResendEmail(
   payload: ResendEmailPayload
-): Promise<boolean> {
+): Promise<ResendSendResult> {
   const to = payload.to?.trim();
   const subject = payload.subject?.trim();
+  const from = getResendFromAddress();
 
   if (!to || !subject) {
-    console.error("[sendResendEmail] Missing required fields: to, subject");
-    return false;
+    const error = "Missing required fields: to, subject";
+    console.error(`[sendResendEmail] ${error}`);
+    return { ok: false, error };
   }
 
   if (!isValidEmail(to)) {
-    console.error(`[sendResendEmail] Invalid recipient email address: ${to}`);
-    return false;
+    const error = `Invalid recipient email address: ${to}`;
+    console.error(`[sendResendEmail] ${error}`);
+    return { ok: false, error };
   }
 
   if (!payload.html?.trim() && !payload.text?.trim()) {
-    console.error("[sendResendEmail] Provide at least one of html or text content");
-    return false;
+    const error = "Provide at least one of html or text content";
+    console.error(`[sendResendEmail] ${error}`);
+    return { ok: false, error };
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
-    console.error("[sendResendEmail] Missing RESEND_API_KEY");
-    return false;
+    const error = "Missing RESEND_API_KEY";
+    console.error(`[sendResendEmail] ${error}`);
+    return { ok: false, error };
   }
 
   console.log(
-    `[sendResendEmail] Sending from=${getFromAddress()} to=${to} subject="${subject}"`
+    `[sendResendEmail] resendConfigured=true from=${from} to=${maskEmail(to)} subject="${subject}"`
   );
 
   try {
     const resend = new Resend(apiKey);
     const sendResult = payload.html?.trim()
       ? await resend.emails.send({
-          from: getFromAddress(),
+          from,
           to,
           subject,
           html: payload.html,
           ...(payload.text?.trim() ? { text: payload.text } : {}),
         })
       : await resend.emails.send({
-          from: getFromAddress(),
+          from,
           to,
           subject,
           text: payload.text!,
@@ -70,17 +99,18 @@ export async function sendResendEmail(
 
     if (sendResult.error) {
       const name = sendResult.error.name ? `${sendResult.error.name}: ` : "";
-      console.error(
-        "[sendResendEmail] Resend error:",
-        `${name}${sendResult.error.message}`
-      );
-      return false;
+      const error = `${name}${sendResult.error.message}`;
+      console.error("[sendResendEmail] Resend error:", error);
+      return { ok: false, error };
     }
 
-    console.log("[sendResendEmail] Email sent:", sendResult.data?.id);
-    return true;
+    const messageId = sendResult.data?.id ?? null;
+    console.log("[sendResendEmail] Email sent:", messageId);
+    return { ok: true, messageId };
   } catch (error) {
-    console.error("[sendResendEmail] Error:", error);
-    return false;
+    const message =
+      error instanceof Error ? error.message : String(error);
+    console.error("[sendResendEmail] Error:", message);
+    return { ok: false, error: message };
   }
 }
