@@ -1488,9 +1488,10 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
       </div>
 
-      {showSignatureModal && timesheetId && (
+      {showSignatureModal && timesheetId && timesheetJobId && (
         <SignatureModal
           timesheetId={timesheetId}
+          timesheetJobId={timesheetJobId}
           bookingDate={selectedDate}
           startTime={startTime}
           endTime={endTime}
@@ -1510,6 +1511,7 @@ const BookingsModal: React.FC<BookingsModalProps> = ({
 
 interface SignatureModalProps {
   timesheetId: string;
+  timesheetJobId: string;
   onClose: () => void;
   onSubmit: () => void;
   bookingDate?: string;
@@ -1521,6 +1523,7 @@ interface SignatureModalProps {
 
 const SignatureModal: React.FC<SignatureModalProps> = ({
   timesheetId,
+  timesheetJobId,
   onClose,
   onSubmit,
   bookingDate,
@@ -1581,6 +1584,19 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       return;
     }
 
+    const hasManagerSignature = !!(managerSignatureRef.current && !managerSignatureRef.current.isEmpty());
+    const hasManagerId = managerId.trim().length > 0;
+
+    if (hasManagerSignature && !hasManagerId) {
+      setError('Manager ID is required when providing a manager signature');
+      return;
+    }
+
+    if (hasManagerId && !hasManagerSignature) {
+      setError('Manager signature is required when providing a Manager ID');
+      return;
+    }
+
     if (isUploading) return;
 
     setIsLoading(true);
@@ -1592,8 +1608,26 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       const token = getAuthToken();
 
       const staffSignatureDataUrl = staffSignatureRef.current.toDataURL();
-
       const staffSignatureUrl = await uploadSignatureImage(staffSignatureDataUrl, 'staff');
+
+      let managerSignatureUrl: string | undefined;
+      if (hasManagerSignature && hasManagerId) {
+        const managerSignatureDataUrl = managerSignatureRef.current!.toDataURL();
+        managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
+      }
+
+      const submitBody: Record<string, unknown> = {
+        timesheetId,
+        timesheetJobIds: [timesheetJobId],
+        staffSignature: staffSignatureUrl,
+        rating,
+        remark,
+      };
+
+      if (managerSignatureUrl && hasManagerId) {
+        submitBody.managerSignature = managerSignatureUrl;
+        submitBody.managerId = managerId.trim();
+      }
 
       const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/submit-timesheet`, {
         method: 'POST',
@@ -1601,60 +1635,12 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          timesheetId: timesheetId,
-          staffSignature: staffSignatureUrl,
-          rating: rating,
-          remark: remark
-        })
+        body: JSON.stringify(submitBody),
       });
 
       if (!submitResponse.ok) {
         const errorData = await submitResponse.json();
         throw new Error(errorData.error || 'Failed to submit timesheet');
-      }
-
-      // Get the submitted job IDs from the response
-      const submitData = await submitResponse.json();
-      const newlySubmittedJobIds = submitData.data?.newlySubmittedJobIds || [];
-
-      // If manager signature is provided, approve each newly submitted job
-      if (managerSignatureRef.current && !managerSignatureRef.current.isEmpty() && managerId.trim() && newlySubmittedJobIds.length > 0) {
-        const managerSignatureDataUrl = managerSignatureRef.current.toDataURL();
-        const managerSignatureUrl = await uploadSignatureImage(managerSignatureDataUrl, 'manager');
-
-        // Approve each newly submitted job individually
-        console.log('Approving jobs with manager signature:', {
-          jobIds: newlySubmittedJobIds,
-          managerId: managerId,
-          managerSignatureUrl: managerSignatureUrl
-        });
-
-        for (const jobId of newlySubmittedJobIds) {
-          console.log(`Approving job ${jobId}...`);
-          const approveResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/timesheet/approve-timesheet`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              timesheetJobId: jobId,
-              managerSignature: managerSignatureUrl,
-              managerId: managerId,
-              action: 'approve'
-            })
-          });
-
-          if (!approveResponse.ok) {
-            const errorData = await approveResponse.json();
-            console.error(`Failed to add manager signature for job ${jobId}:`, errorData);
-            console.warn(`Manager approval failed but timesheet was submitted. Error: ${errorData.error || 'Unknown error'}`);
-          } else {
-            const approveData = await approveResponse.json();
-            console.log(`Successfully approved job ${jobId}:`, approveData);
-          }
-        }
       }
 
       await Swal.fire({
